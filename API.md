@@ -210,7 +210,7 @@ win.restore_window()
 
 ## 3. Built-in Themes & Styling
 
-`simplegui` includes 17 curated light and dark themes. Setting a theme instantly updates all controls, fonts, hover states, cards, and background colors.
+`simplegui` includes 17 curated light and dark themes with interactive hover palettes (`hover_color` and `surface_hover`). Setting a theme instantly updates all controls, fonts, hover states, cards, and background colors.
 
 ```v
 // Apply theme by name
@@ -224,22 +224,23 @@ themes := simplegui.list_themes()
 
 // Get Theme struct by alias
 theme := simplegui.get_theme('dark') // Accepts 'dark', 'nord', 'cyberpunk', 'github', etc.
+// Theme fields include: theme.background_color, theme.font_color, theme.accent_color, theme.hover_color, theme.surface_hover
 ```
 
 ### Themes Reference Table
 
-| Theme Name | Style Description | Background | Accent Color | Type |
-| :--- | :--- | :--- | :--- | :--- |
-| **`Apple Light`** | Default clean macOS light mode | `#ffffff` | `#007aff` | Light |
-| **`Apple Dark`** | Modern macOS dark mode | `#1c1c1e` | `#0a84ff` | Dark |
-| **`Nord`** | Cool arctic frost blue palette | `#2e3440` | `#88c0d0` | Dark |
-| **`Dracula`** | Classic vampire dark purple | `#282a36` | `#bd93f9` | Dark |
-| **`Cyberpunk`** | High-contrast neon dark vibe | `#0d0d15` | `#ff007f` | Dark |
-| **`Catppuccin Mocha`** | Smooth pastel dark theme | `#1e1e2e` | `#cba6f7` | Dark |
-| **`GitHub Dark`** | Official GitHub dark mode | `#0d1117` | `#58a6ff` | Dark |
-| **`GitHub Light`** | Official GitHub light mode | `#ffffff` | `#0969da` | Light |
-| **`Sonoma Emerald`** | Dark forest glass layout | `#0d1f18` | `#30d158` | Dark |
-| **`Ventura Amber`** | Warm sunset dark palette | `#211815` | `#ff9500` | Dark |
+| Theme Name | Style Description | Background | Accent Color | Hover Color | Type |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **`Apple Light`** | Default clean macOS light mode | `#ffffff` | `#007aff` | `#3395ff` | Light |
+| **`Apple Dark`** | Modern macOS dark mode | `#1c1c1e` | `#0a84ff` | `#409cff` | Dark |
+| **`Nord`** | Cool arctic frost blue palette | `#2e3440` | `#88c0d0` | `#81a1c1` | Dark |
+| **`Dracula`** | Classic vampire dark purple | `#282a36` | `#bd93f9` | `#ff79c6` | Dark |
+| **`Cyberpunk`** | High-contrast neon dark vibe | `#0d0d15` | `#ff007f` | `#7000ff` | Dark |
+| **`Catppuccin Mocha`** | Smooth pastel dark theme | `#1e1e2e` | `#cba6f7` | `#f5c2e7` | Dark |
+| **`GitHub Dark`** | Official GitHub dark mode | `#0d1117` | `#58a6ff` | `#79c0ff` | Dark |
+| **`GitHub Light`** | Official GitHub light mode | `#ffffff` | `#0969da` | `#218bff` | Light |
+| **`Sonoma Emerald`** | Dark forest glass layout | `#0d1f18` | `#30d158` | `#4ade80` | Dark |
+| **`Ventura Amber`** | Warm sunset dark palette | `#211815` | `#ff9500` | `#ffaa33` | Dark |
 
 ---
 

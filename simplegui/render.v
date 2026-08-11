@@ -16,6 +16,18 @@ pub fn (mut win SimpleWindow) render_ui() {
 	accent := parse_hex_color(win.theme.accent_color)
 	surface := if win.theme.is_dark { gg.rgb(40, 42, 54) } else { gg.rgb(240, 242, 245) }
 	border_c := if win.theme.is_dark { gg.rgb(70, 72, 85) } else { gg.rgb(210, 215, 220) }
+	hover_c := if win.theme.hover_color.len > 0 {
+		parse_hex_color(win.theme.hover_color)
+	} else {
+		accent
+	}
+	surface_hover := if win.theme.surface_hover.len > 0 {
+		parse_hex_color(win.theme.surface_hover)
+	} else if win.theme.is_dark {
+		gg.rgb(55, 58, 72)
+	} else {
+		gg.rgb(225, 230, 238)
+	}
 
 	win.gg_ctx.draw_rect_filled(0, 0, f32(win.width), f32(win.height), bg)
 
@@ -69,8 +81,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 					accent
 				}
 				if ctrl.is_hovered {
-					btn_bg = gg.rgb(u8(math.min(255, btn_bg.r + 25)), u8(math.min(255,
-						btn_bg.g + 25)), u8(math.min(255, btn_bg.b + 25)))
+					btn_bg = hover_c
 				}
 				if ctrl.is_pressed {
 					btn_bg = gg.rgb(u8(math.max(0, btn_bg.r - 30)), u8(math.max(0, btn_bg.g - 30)),
@@ -102,19 +113,15 @@ pub fn (mut win SimpleWindow) render_ui() {
 					surface
 				}
 				if ctrl.is_hovered {
-					ib_bg = accent
+					ib_bg = surface_hover
 				}
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
 					ib_bg)
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					border_c)
+					if ctrl.is_hovered { hover_c } else { border_c })
 
 				icon_c := if ctrl.is_hovered {
-					gg.Color{
-						r: 255
-						g: 255
-						b: 255
-					}
+					accent
 				} else {
 					fg
 				}
@@ -128,8 +135,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 				)
 			}
 			'input', 'password', 'search_field', 'pin_code', 'number', 'time_picker' {
-				in_bg := surface
-				b_c := if ctrl.is_focused { accent } else { border_c }
+				in_bg := if ctrl.is_hovered { surface_hover } else { surface }
+				b_c := if ctrl.is_focused { accent } else if ctrl.is_hovered { hover_c } else { border_c }
 
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
 					in_bg)
@@ -242,7 +249,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 
 				if ctrl.bool_value {
 					win.gg_ctx.draw_rounded_rect_filled(ctrl.x, box_y, box_size, box_size,
-						4.0, accent)
+						4.0, if ctrl.is_hovered { hover_c } else { accent })
 					white_c := gg.Color{
 						r: 255
 						g: 255
@@ -254,9 +261,9 @@ pub fn (mut win SimpleWindow) render_ui() {
 						white_c)
 				} else {
 					win.gg_ctx.draw_rounded_rect_filled(ctrl.x, box_y, box_size, box_size,
-						4.0, surface)
+						4.0, if ctrl.is_hovered { surface_hover } else { surface })
 					win.gg_ctx.draw_rounded_rect_empty(ctrl.x, box_y, box_size, box_size,
-						4.0, border_c)
+						4.0, if ctrl.is_hovered { hover_c } else { border_c })
 				}
 
 				win.gg_ctx.draw_text2(
@@ -282,12 +289,12 @@ pub fn (mut win SimpleWindow) render_ui() {
 
 				if ctrl.bool_value {
 					win.gg_ctx.draw_rounded_rect_filled(ctrl.x, sw_y, sw_w, sw_h, 11.0,
-						accent)
+						if ctrl.is_hovered { hover_c } else { accent })
 					win.gg_ctx.draw_rounded_rect_filled(ctrl.x + sw_w - knob_s - 2.0, knob_y,
 						knob_s, knob_s, 9.0, white_c)
 				} else {
 					win.gg_ctx.draw_rounded_rect_filled(ctrl.x, sw_y, sw_w, sw_h, 11.0,
-						border_c)
+						if ctrl.is_hovered { hover_c } else { border_c })
 					win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 2.0, knob_y,
 						knob_s, knob_s, 9.0, white_c)
 				}
@@ -304,18 +311,18 @@ pub fn (mut win SimpleWindow) render_ui() {
 				track_h := f32(6.0)
 				track_y := ctrl.y + (ctrl.h - track_h) / 2.0
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, track_y, ctrl.w, track_h,
-					3.0, border_c)
+					3.0, if ctrl.is_hovered { surface_hover } else { border_c })
 
 				pct := f32(ctrl.int_value) / 100.0
 				fill_w := ctrl.w * pct
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, track_y, fill_w, track_h,
-					3.0, accent)
+					3.0, if ctrl.is_hovered { hover_c } else { accent })
 
-				thumb_w := f32(14.0)
-				thumb_h := f32(14.0)
+				thumb_w := if ctrl.is_hovered { f32(16.0) } else { f32(14.0) }
+				thumb_h := if ctrl.is_hovered { f32(16.0) } else { f32(14.0) }
 				thumb_x := ctrl.x + fill_w - thumb_w / 2.0
 				thumb_y := ctrl.y + (ctrl.h - thumb_h) / 2.0
-				win.gg_ctx.draw_rounded_rect_filled(thumb_x, thumb_y, thumb_w, thumb_h, 4.0, accent)
+				win.gg_ctx.draw_rounded_rect_filled(thumb_x, thumb_y, thumb_w, thumb_h, 4.0, if ctrl.is_hovered { hover_c } else { accent })
 			}
 			'progress', 'gauge', 'radial_gauge', 'circular_progress' {
 				track_h := f32(10.0)
