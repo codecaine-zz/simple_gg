@@ -290,7 +290,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 				}
 
 				win.gg_ctx.draw_text2(
-					x:     int(ctrl.x + sw_w + 10)
+					x:     int(ctrl.x + sw_w + 12)
 					y:     int(ctrl.y + (ctrl.h - 16.0) / 2.0)
 					text:  ctrl.title
 					color: fg
