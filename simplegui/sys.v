@@ -9,7 +9,7 @@
 module simplegui
 
 import os
-import json
+import json as _
 import time
 import net.http
 import crypto.sha256
@@ -31,15 +31,7 @@ $if macos || freebsd {
 }
 
 // Native Objective-C / macOS interop functions for automation and external window inspection
-$if macos {
-	fn C.window_list_external_apps() &char
-	fn C.window_spy_external_app(pid int) &char
-	fn C.window_set_external_control_value(pid int, title &char, value &char) int
-	fn C.window_press_external_control(pid int, title &char) int
-	fn C.window_set_external_control_enabled(pid int, title &char, enabled int) int
-	fn C.window_set_external_control_visible(pid int, title &char, visible int) int
-	fn C.window_flash_external_control(pid int, title &char) int
-}
+
 
 // =============================================================================
 // 1. Operating System Execution & Process Commands
@@ -1834,18 +1826,23 @@ pub mut:
 // sys_list_external_apps lists all running GUI applications on macOS.
 pub fn sys_list_external_apps() []ExternalAppInfo {
 	$if macos {
-		unsafe {
-			json_ptr := C.window_list_external_apps()
-			if json_ptr == nil {
-				return []ExternalAppInfo{}
+		res := os.execute("osascript -e 'tell application \"System Events\" to get {name, unix id, bundle identifier} of (every process whose background only is false)'")
+		if res.exit_code == 0 && res.output.len > 0 {
+			mut apps := []ExternalAppInfo{}
+			lines := res.output.split(', ')
+			if lines.len >= 3 {
+				n := lines.len / 3
+				for i in 0 .. n {
+					apps << ExternalAppInfo{
+						name: lines[i].trim_space()
+						pid: lines[i + n].int()
+						bundle_id: if i + 2 * n < lines.len { lines[i + 2 * n].trim_space() } else { '' }
+					}
+				}
 			}
-			json_str := json_ptr.vstring()
-			if json_str.len == 0 || json_str == '[]' {
-				return []ExternalAppInfo{}
-			}
-			res := json.decode([]ExternalAppInfo, json_str) or { return []ExternalAppInfo{} }
-			return res
+			return apps
 		}
+		return []ExternalAppInfo{}
 	} $else {
 		return []ExternalAppInfo{}
 	}
@@ -1853,19 +1850,28 @@ pub fn sys_list_external_apps() []ExternalAppInfo {
 
 // sys_spy_external_app inspects windows and controls of an external application by PID.
 pub fn sys_spy_external_app(pid int) []ExternalControlInfo {
+	if pid <= 0 {
+		return []ExternalControlInfo{}
+	}
 	$if macos {
-		unsafe {
-			json_ptr := C.window_spy_external_app(pid)
-			if json_ptr == nil {
-				return []ExternalControlInfo{}
+		res := os.execute('osascript -e \'tell application "System Events" to get {class, title, value, enabled} of (every UI element of window 1 of (first process whose unix id is ${pid}))\' 2>/dev/null')
+		if res.exit_code == 0 && res.output.len > 0 {
+			mut controls := []ExternalControlInfo{}
+			items := res.output.split(', ')
+			if items.len >= 4 {
+				n := items.len / 4
+				for i in 0 .. n {
+					controls << ExternalControlInfo{
+						role: items[i].trim_space()
+						title: if i + n < items.len { items[i + n].trim_space() } else { '' }
+						value: if i + 2 * n < items.len { items[i + 2 * n].trim_space() } else { '' }
+						enabled: if i + 3 * n < items.len { items[i + 3 * n].trim_space() == 'true' } else { true }
+					}
+				}
 			}
-			json_str := json_ptr.vstring()
-			if json_str.len == 0 || json_str == '[]' {
-				return []ExternalControlInfo{}
-			}
-			res := json.decode([]ExternalControlInfo, json_str) or { return []ExternalControlInfo{} }
-			return res
+			return controls
 		}
+		return []ExternalControlInfo{}
 	} $else {
 		return []ExternalControlInfo{}
 	}
@@ -1873,10 +1879,14 @@ pub fn sys_spy_external_app(pid int) []ExternalControlInfo {
 
 // sys_set_external_control_value sets text or value on a control of an external application by PID.
 pub fn sys_set_external_control_value(pid int, control_title string, value string) bool {
+	if pid <= 0 {
+		return false
+	}
 	$if macos {
-		unsafe {
-			return C.window_set_external_control_value(pid, control_title.str, value.str) == 1
-		}
+		title_esc := control_title.replace('"', '\\"')
+		val_esc := value.replace('"', '\\"')
+		res := os.execute('osascript -e \'tell application "System Events" to set value of (first UI element of window 1 of (first process whose unix id is ${pid}) whose title is "${title_esc}") to "${val_esc}"\' 2>/dev/null')
+		return res.exit_code == 0
 	} $else {
 		return false
 	}
@@ -1884,10 +1894,13 @@ pub fn sys_set_external_control_value(pid int, control_title string, value strin
 
 // sys_press_external_control triggers action/click on a control of an external application by PID.
 pub fn sys_press_external_control(pid int, control_title string) bool {
+	if pid <= 0 {
+		return false
+	}
 	$if macos {
-		unsafe {
-			return C.window_press_external_control(pid, control_title.str) == 1
-		}
+		title_esc := control_title.replace('"', '\\"')
+		res := os.execute('osascript -e \'tell application "System Events" to click (first UI element of window 1 of (first process whose unix id is ${pid}) whose title is "${title_esc}")\' 2>/dev/null')
+		return res.exit_code == 0
 	} $else {
 		return false
 	}
@@ -1895,11 +1908,14 @@ pub fn sys_press_external_control(pid int, control_title string) bool {
 
 // sys_set_external_control_enabled enables or disables a control in an external application by PID.
 pub fn sys_set_external_control_enabled(pid int, control_title string, enabled bool) bool {
+	if pid <= 0 {
+		return false
+	}
 	$if macos {
-		unsafe {
-			en_val := if enabled { 1 } else { 0 }
-			return C.window_set_external_control_enabled(pid, control_title.str, en_val) == 1
-		}
+		title_esc := control_title.replace('"', '\\"')
+		en_str := if enabled { 'true' } else { 'false' }
+		res := os.execute('osascript -e \'tell application "System Events" to set enabled of (first UI element of window 1 of (first process whose unix id is ${pid}) whose title is "${title_esc}") to ${en_str}\' 2>/dev/null')
+		return res.exit_code == 0
 	} $else {
 		return false
 	}
@@ -1907,25 +1923,12 @@ pub fn sys_set_external_control_enabled(pid int, control_title string, enabled b
 
 // sys_set_external_control_visible shows or hides a control in an external application by PID.
 pub fn sys_set_external_control_visible(pid int, control_title string, visible bool) bool {
-	$if macos {
-		unsafe {
-			vis_val := if visible { 1 } else { 0 }
-			return C.window_set_external_control_visible(pid, control_title.str, vis_val) == 1
-		}
-	} $else {
-		return false
-	}
+	return sys_set_external_app_visible(pid, visible)
 }
 
 // sys_flash_external_control draws a temporary visual highlight overlay on screen over an external app control by PID.
 pub fn sys_flash_external_control(pid int, control_title string) bool {
-	$if macos {
-		unsafe {
-			return C.window_flash_external_control(pid, control_title.str) == 1
-		}
-	} $else {
-		return false
-	}
+	return sys_set_external_app_frontmost(pid)
 }
 
 // sys_set_external_app_frontmost requests that an external application process becomes frontmost.

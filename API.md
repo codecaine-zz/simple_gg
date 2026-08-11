@@ -29,6 +29,8 @@ Whether you are building a 5-minute utility tool, a multi-tab admin panel, or an
 16. [Interval Timers & Scheduled Callbacks](#16-interval-timers--scheduled-callbacks)
 17. [Modern UI & RAD UX Enhancements](#17-modern-ui--rad-ux-enhancements)
 18. [Data & Event Binding (`bind`)](#18-data--event-binding-bind)
+19. [Cross-Window Spy++ & External App Automation](#19-cross-window-spy--external-app-automation)
+20. [Type & Struct Reference Index](#20-type--struct-reference-index)
 
 ---
 
@@ -96,9 +98,46 @@ mut win := simplegui.new_simple_window('My Desktop App', 800, 600)
 mut win2 := simplegui.new_window('My Desktop App', 800, 600)
 ```
 
-### Window Dimensions & Width Sizing
+### Window Title & Subtitle
 
-You can adjust window width and height programmatically. Layout calculations update automatically when dimensions change.
+```v
+// Read or modify window title bar string
+win.set_title('Dashboard Manager v2.0')
+win.set_window_title('Dashboard Manager v2.0') // Alias syntax
+title_str := win.get_title()
+
+// Set secondary subtitle header
+win.set_subtitle('System Administrator Workspace')
+sub_str := win.get_subtitle()
+```
+
+### Control Inspection & Direct Pointer Access
+
+Lookup, verify, or retrieve pointer references to controls registered in the window:
+
+```v
+// Check if control name exists in window registry
+if win.has_control('input_email') {
+    println('Control registered!')
+}
+
+// List names of all controls registered in the window ([]string)
+all_names := win.list_controls()
+
+// Get kind identifier string (e.g. 'button', 'input', 'table')
+kind := win.get_control_kind('btn_save')
+
+// Panics with helpful error message if control is missing
+win.require_control('btn_save')
+
+// Retrieve mutable reference pointer !&Control (returns error if missing)
+mut ctrl_ptr := win.get_control_ptr('btn_save') or { return }
+
+// Retrieve mutable reference pointer &Control directly (panics if missing)
+mut ctrl := win.control('btn_save')
+```
+
+### Window Dimensions, Bounds & Geometry
 
 ```v
 // Set window width specifically
@@ -117,6 +156,15 @@ win.resize(1024, 768)
 w := win.get_width()
 h := win.get_height()
 w, h = win.get_size()
+
+// Set bounds (x, y, width, height)
+win.set_bounds(0, 0, 1024, 768)
+x, y, bw, bh := win.get_bounds()
+
+// Read window position coordinates
+pos_x := win.get_x()
+pos_y := win.get_y()
+px, py := win.get_position()
 ```
 
 ### Automatic Window Content Fitting (`fit_to_content`)
@@ -148,21 +196,60 @@ win.set_fixed_size(500, 400)
 // Minimum and maximum size constraints
 win.set_min_size(400, 300)
 win.set_max_size(1920, 1080)
+min_w, min_h := win.get_min_size() // or win.get_minimum_size()
+max_w, max_h := win.get_max_size() // or win.get_maximum_size()
 
 // Preset sizes: 'small' (400x300), 'medium' (640x480), 'large' (800x600),
-// 'hd' (1280x720), 'full_hd' (1920x1080), 'dialog' (420x220), 'settings' (600x500)
+// 'xlarge' (1024x768), 'hd' (1280x720), 'full_hd' (1920x1080), 'dialog' (420x220), 'settings' (550x400)
 win.set_size_preset('hd')
+// Alias: win.set_preset_size('hd')
 ```
 
-### Full Screen Control
+### Window Options & Platform Flags
+
+```v
+// Resizable flag
+win.set_resizable(true)
+is_resizable := win.get_resizable()
+
+// Minimizable flag
+win.set_minimizable(true)
+is_minimizable := win.get_minimizable()
+
+// Maximizable flag
+win.set_maximizable(true)
+is_maximizable := win.get_maximizable()
+
+// Closable flag
+win.set_closable(true)
+is_closable := win.get_closable()
+
+// Titlebar & Title Text Visibility
+win.set_titlebar_visible(true)
+is_tb_vis := win.is_titlebar_visible()
+win.set_title_visible(true)
+is_t_vis := win.is_title_visible() // or win.get_title_visible()
+
+// Window Drop Shadow
+win.set_has_shadow(true)
+has_shadow := win.get_has_shadow()
+```
+
+### Full Screen & Window State Inspection
 
 ```v
 win.set_fullscreen(true)     // Enable full screen window
 win.toggle_fullscreen()      // Toggle full screen state
 is_fs := win.is_fullscreen() // Returns true if currently full screen
+
+// Inspect active window states
+is_vis := win.is_visible()
+is_act := win.is_active()
+is_min := win.is_minimized()
+is_max := win.is_maximized()
 ```
 
-### RAD Preset Window Types
+### RAD Preset Window Types & Builder Helpers
 
 ```v
 // Create a centered non-resizable dialog window
@@ -173,40 +260,91 @@ mut splash := simplegui.new_simple_window('Splash', 500, 300).make_splash_screen
 
 // Create a slim floating utility panel
 mut panel := simplegui.new_simple_window('Panel', 300, 600).make_utility_panel()
+
+// Additional builder helpers
+win.make_frameless()
+win.make_always_on_top(true)
+win.make_modal()
+win.make_translucent(0.9)
 ```
 
-### Positioning, Alignment & Window Animations
+### Positioning, Alignment, Dock & Animations
 
 ```v
 // Center window on screen
 win.center_window()
+// Aliases: win.center(), win.recenter(), win.center_on_screen(), win.center_and_focus()
 
 // Align window on screen: 'top_left', 'top_right', 'bottom_left', 'bottom_right', 'center'
 win.align_window('top_right')
+// Alias: win.align('top_right')
 
-// Shake window animation (e.g. invalid login entry feedback)
+// Shake window animations (e.g. invalid login feedback)
 win.shake_window()
+win.shake_on_error()
+win.flash_and_shake()
 
 // Set opacity (0.0 to 1.0)
 win.set_opacity(0.95)
+op := win.get_opacity() // or win.get_alpha()
 
 // Make window movable by clicking anywhere on background
 win.set_movable_by_window_background(true)
+is_movable := win.get_movable_by_window_background()
 
 // Keep window stayed on top of other desktop windows
-win.set_always_on_top(true)
+win.set_always_on_top(true) // or win.set_topmost(true)
+is_top := win.get_always_on_top() // or win.is_topmost()
+
+// Dock & Attention requests
+win.attention()
+win.request_attention(true)
+win.bounce_dock(true)
+win.bounce_dock_icon(true)
 ```
 
-### Window Lifecycle
+### Mouse Cursor & Pointer Position API
+
+```v
+// Change mouse cursor icon ('arrow', 'hand', 'ibeam', 'pointer', 'crosshair')
+win.set_cursor('hand')
+cur := win.get_cursor()
+win.reset_cursor()
+
+// Push and pop temporary cursor stack states
+win.push_cursor('ibeam')
+win.pop_cursor()
+
+// Set custom cursor specifically for a target control
+win.set_control_cursor('btn_submit', 'pointer')
+
+// Query live mouse cursor screen location (x, y)
+mx, my := win.get_mouse_location()
+
+// Programmatically warp/move mouse cursor coordinates
+win.move_cursor_to(100, 200)
+```
+
+### Window Lifecycle & Actions
 
 ```v
 // Start window loop (blocks thread until window closes)
 win.run()
 
-// Programmatically close or hide window
-win.close_window()
-win.hide_window()
+// Programmatically minimize, maximize or restore window
+win.minimize()
+win.deminimize()
+win.maximize()
+win.zoom()
+win.restore()
 win.restore_window()
+
+// Programmatically close or hide window
+win.close()
+win.close_window()
+win.hide()
+win.hide_window()
+win.show()
 ```
 
 ---
@@ -221,6 +359,27 @@ win.set_theme('Synthwave 84')
 
 // Toggle between Apple Light and Apple Dark themes
 win.toggle_window_theme()
+win.set_dark_theme(true)
+is_dark := win.is_dark_theme()
+
+// Apply Theme struct directly
+custom_t := simplegui.Theme{
+    name: 'Custom Theme'
+    background_color: '#0f172a'
+    font_color: '#f8fafc'
+    accent_color: '#3b82f6'
+    hover_color: '#60a5fa'
+    surface_hover: '#1e293b'
+    is_dark: true
+}
+win.apply_theme(custom_t)
+
+// Set custom window background or font color overrides
+win.set_background_color('#1e1e2e')
+win.set_font_color('#f5c2e7')
+
+// Parse CSS hex color string to V `gg.Color` (RGB byte values)
+color := simplegui.parse_hex_color('#0a84ff') // or shorthand '#07f'
 
 // List all available theme names (34 built-in themes)
 themes := simplegui.list_themes()
@@ -268,7 +427,7 @@ theme := simplegui.get_theme('executive') // Accepts 'dark', 'nord', 'synthwave'
 
 Organize controls easily using rows, grids, flexboxes, tabbed panels, split views, and group cards.
 
-### 1. Horizontal Row (`begin_row` / `end_row`)
+### 1. Horizontal Row (`begin_row` / `end_row` / `row`)
 
 Arranges controls horizontally side-by-side:
 
@@ -278,6 +437,12 @@ win.add_button('btn_ok', 'OK')
 win.add_button('btn_cancel', 'Cancel')
 win.add_button('btn_help', 'Help')
 win.end_row()
+
+// Closure-based row helper:
+win.row('action_row', fn (mut win simplegui.SimpleWindow) {
+    win.add_button('btn_save', 'Save')
+    win.add_button('btn_delete', 'Delete')
+})
 ```
 
 ### 2. Grid Layout (`begin_grid` / `end_grid`)
@@ -305,7 +470,7 @@ win.add_button('f2', 'Flex Item 2')
 win.end_flex_box()
 ```
 
-### 4. Tabbed Container (`begin_tab_container` / `end_tab_container`)
+### 4. Tabbed Container (`begin_tab_container` / `end_tab_container` / `add_tabs`)
 
 Organizes complex interfaces into tabbed views:
 
@@ -331,6 +496,9 @@ win.add_label('lbl_info', 'SimpleGUI Framework v1.0.0')
 win.end_tab_page()
 
 win.end_tab_container()
+
+// Quick tab header addition helper:
+win.add_tabs('quick_tabs', ['Tab 1', 'Tab 2', 'Tab 3'])
 ```
 
 ### 5. Split Pane View (`begin_split_view` / `end_split_view`)
@@ -353,7 +521,7 @@ win.add_label('lbl_dash', 'Select an option from the left sidebar.')
 win.end_split_view()
 ```
 
-### 6. Group Box Card (`group` / `begin_group`)
+### 6. Group Box Card (`group` / `begin_group` / `add_group_box`)
 
 Wraps widgets in a visual card container with a header title:
 
@@ -362,9 +530,53 @@ win.group('grp_account', 'User Credentials', fn (mut win simplegui.SimpleWindow)
 	win.add_form_field('Username:', 'input_u', 'admin')
 	win.add_form_password('Password:', 'input_p', 'secret123')
 })
+
+// Direct group box container additions:
+win.begin_group('Settings')
+// ... add controls ...
+win.end_group()
+
+// Alternative group box helpers:
+win.add_group_box('grp_options', 'Preferences')
+win.add_group_box_with_options('grp_framed', 'Advanced Settings', true)
 ```
 
-### 7. Spacers & Separators
+### 7. Scroll View & Quick Action Rows
+
+```v
+// Scroll View container (height in pixels)
+win.add_scroll_view('scroll_panel', 300)
+
+// Quick action row dictionary helper (button title -> click callback)
+win.add_action_row({
+    'Save': fn (mut win simplegui.SimpleWindow) { win.toast('Saved!') }
+    'Cancel': fn (mut win simplegui.SimpleWindow) { win.toast('Cancelled!') }
+})
+
+// Quick fields row dictionary helper (field name -> initial text)
+win.add_fields_row({
+    'First Name': 'Ada'
+    'Last Name': 'Lovelace'
+})
+```
+
+### 8. Layout Padding, Spacing & Responsive Engine
+
+```v
+// Set window outer edge padding (pixels)
+win.set_padding(16)
+p := win.get_padding()
+
+// Set default vertical gap spacing between controls (pixels)
+win.set_spacing(10)
+s := win.get_spacing()
+
+// Enable or disable automatic responsive recalculations on window resize
+win.set_responsive_layout(true)
+is_resp := win.get_responsive_layout()
+```
+
+### 9. Spacers & Separators
 
 ```v
 win.add_spacer(20)     // Add 20px vertical blank space
@@ -387,10 +599,18 @@ win.add_caption('Caption text description...')
 win.add_divider('Optional Settings')
 ```
 
-### Buttons
+### Buttons & Actions
 
 ```v
 win.add_button('btn_run', '[Run] Start Processing')
+
+// Add action button with inline click callback
+win.add_action('btn_exec', 'Execute Task', fn (mut win simplegui.SimpleWindow) {
+	win.info('Executed', 'Task started')
+})
+
+// Add icon button (icon symbol + hover tooltip)
+win.add_icon_button('btn_refresh', '[R]', 'Refresh Dataset')
 
 win.on_click('btn_run', fn (mut win simplegui.SimpleWindow) {
 	win.info('Started', 'Processing job launched!')
@@ -403,6 +623,7 @@ win.on_click('btn_run', fn (mut win simplegui.SimpleWindow) {
 win.add_input('input_host', 'localhost')
 win.add_password('input_secret', 'my_pass_123')
 win.add_textarea('input_logs', 'Line 1: Started\nLine 2: Ready')
+win.add_search_field('sf_query', 'Filter results...')
 ```
 
 #### ✂️ Text Selection & Clipboard Shortcuts
@@ -448,26 +669,31 @@ win.on_enter('search_box', fn (mut win simplegui.SimpleWindow) {
 win.add_checkbox('chk_debug', 'Enable Verbose Logging', false)
 win.add_switch('sw_dark', 'Dark Theme Mode', true)
 win.add_toggle('tgl_auto', 'Auto Save', true)
+win.add_radio_group('radio_plan', ['Free', 'Pro', 'Enterprise'], 'Pro')
 ```
 
 ### Steppers & Sliders
 
 ```v
-win.add_number('num_count', 5)        // Up/Down integer stepper
-win.add_slider('slider_vol', 75)      // Range slider 0 to 100
-win.add_progress_bar('prog_bar', 65)  // Progress bar indicator
+win.add_number('num_count', 5)             // Up/Down integer stepper
+win.add_number_field('num_field', 10)      // Alias for add_number
+win.add_slider('slider_vol', 75)           // Range slider 0 to 100
+win.add_progress_bar('prog_bar', 65)       // Progress bar indicator
+win.add_progress_indicator('prog_ind', 40) // Progress indicator
+win.add_rating('star_rating', 4)           // 5-star rating control
 ```
 
-### Dropdowns & Segmented Controls
+### Dropdowns, Segmented & Mode Controls
 
 ```v
 win.add_dropdown('drop_role', ['Administrator', 'Developer', 'Guest'], 'Developer')
 win.add_segmented_control('seg_view', ['Grid View', 'List View', 'Map'], 'Grid View')
+win.add_mode_control('mode_select', 'Grid View')
 ```
 
-### Data Table
+### Data Table & Data Grid
 
-Supports header sorting, row selection, scrolling, and dynamic dataset updating:
+Supports header sorting, row selection, row addition/removal, scrolling, and dynamic dataset updating:
 
 ```v
 headers := ['ID', 'Full Name', 'Role', 'Status']
@@ -480,8 +706,18 @@ rows := [
 win.add_table('tbl_users', headers, rows)
 win.set_control_height('tbl_users', 200)
 
+// Data Grid (interactive table layout)
+win.add_grid('grid_users', headers, rows)
+
+// Append single row to table
+win.add_table_row('tbl_users', ['4', 'John von Neumann', 'Polymath', 'Active'])
+
+// Remove row at zero-based index
+win.remove_table_row('tbl_users', 2)
+
 // Programmatic sorting (Column 1 ascending)
 win.sort_table('tbl_users', 1, true)
+col_idx, is_asc := win.get_table_sort('tbl_users') // Read active sort column index and direction
 
 // Row selection event
 win.on_row_click('tbl_users', fn (mut win simplegui.SimpleWindow) {
@@ -502,6 +738,9 @@ win.add_line_chart('chart_sales', 'Monthly Revenue ($k)', [12.5, 18.2, 24.0, 31.
 // Bar Chart
 win.add_bar_chart('chart_visitors', 'Daily Visitors', ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], [120.0, 240.0, 180.0, 310.0, 450.0])
 
+// Generic Chart container (chart_type: 'line', 'bar', etc.)
+win.add_chart('chart_generic', 'line', 200)
+
 // Metric KPI Card
 win.add_metric_card('kpi_sales', 'Total Revenue', '$48,250', '+14.2%', 'vs last month')
 ```
@@ -509,7 +748,10 @@ win.add_metric_card('kpi_sales', 'Total Revenue', '$48,250', '+14.2%', 'vs last 
 ### Lists, ListBox & Multi-Select
 
 ```v
-// Single-Select ListBox
+// Standard ListBox
+win.add_list_box('list_items', ['Item A', 'Item B', 'Item C'])
+
+// Single-Select ListBox with initial selection
 win.add_list_box_with_selected('list_files', ['file1.txt', 'file2.csv', 'document.pdf'], 'file1.txt')
 selected_file := win.get_list_box_selected('list_files')
 selected_idx := win.get_list_box_index('list_files')
@@ -536,6 +778,7 @@ win.add_tree_view('tree_proj', [
 
 ```v
 win.add_breadcrumbs('nav_path', ['Home', 'Projects', 'SimpleGUI', 'Settings'])
+win.add_breadcrumb('nav_crumb', ['Home', 'Dashboard']) // Alias for add_breadcrumbs
 win.add_badge('badge_status', 'ONLINE', 'success')
 win.add_status_badge('badge_sys', 'Operational', 'active')
 win.add_avatar('user_avatar', 'AL', 'Ada Lovelace')
@@ -557,14 +800,18 @@ win.add_time_picker('input_time', '14:30')
 win.add_file_picker('input_file', 'Choose File:', '/tmp/document.pdf')
 win.add_color_picker('picker_color', 'Select Accent Color:', '#0a84ff')
 win.add_color_well('swatch_accent', '#0a84ff')
+
+// Open native OS platform file picker dialog directly
+picked_path := simplegui.open_native_file_dialog()
 ```
 
 ### Media, Canvas & Links
 
 ```v
+win.add_image('img_logo', '/path/to/logo.png')
 win.add_image_view('img_preview', 'Preview Image', 300, 200)
 win.add_canvas('canvas_draw', 400, 200)
-win.add_spinner('loading_spinner', 'Syncing data...')
+win.add_spinner('loading_spinner', true)
 win.add_link('link_docs', 'Open Official V Language Documentation', 'https://vlang.io')
 ```
 
@@ -572,15 +819,28 @@ win.add_link('link_docs', 'Open Official V Language Documentation', 'https://vla
 
 ```v
 win.add_tag_cloud('tags_cloud', ['Vlang', 'GUI', 'Desktop', 'CrossPlatform'])
+
+// Interactive Chip Group
 win.add_chip_group('chips_tags', ['Bug', 'Feature', 'Documentation'], ['Bug'])
+chips := win.get_chip_selected('chips_tags')
+win.set_chip_selected('chips_tags', ['Bug', 'Feature'])
+
 win.add_rich_text('rich_desc', '**Bold** and *italic* text formatting supported.')
 win.add_keyboard_shortcut('hk_save', 'Ctrl+S', 'Save Project')
 win.add_toolbar('main_tb', [
 	simplegui.ToolbarItem{ icon: '[New]', tooltip: 'New File', on_click: fn (mut win simplegui.SimpleWindow) {} },
 	simplegui.ToolbarItem{ icon: '[Save]', tooltip: 'Save File', on_click: fn (mut win simplegui.SimpleWindow) {} }
 ])
+
+// Menu Button
 win.add_menu_button('menu_actions', 'Actions v', ['Export PDF', 'Export CSV', 'Print'])
+chosen_menu := win.get_menu_selected('menu_actions')
+
+// Checklist
 win.add_checklist('chk_perms', ['Read', 'Write', 'Execute'], ['Read'])
+chk_items := win.get_checklist_selected('chk_perms')
+win.set_checklist_selected('chk_perms', ['Read', 'Write'])
+
 win.add_password_strength('pwd_meter', 'input_password')
 ```
 
@@ -692,10 +952,15 @@ Pairs a descriptive text label with an input widget in one line of code:
 
 ```v
 win.add_form_field('Full Name:', 'form_name', 'Ada Lovelace')
+win.add_form_textarea('Biography:', 'form_bio', 'Developer and mathematician.')
 win.add_form_password('Password:', 'form_pass', 'secret_key')
 win.add_form_search('Search Catalog:', 'form_search', '')
 win.add_form_dropdown('Country:', 'form_country', ['USA', 'Canada', 'UK'], 'USA')
+win.add_form_list_box('Options:', 'form_list', ['Option A', 'Option B'], 'Option A')
+win.add_form_multi_list_box('Tags:', 'form_multi_list', ['Tag 1', 'Tag 2'], ['Tag 1'])
+win.add_form_combobox('Category:', 'form_combo', ['Cat A', 'Cat B'], 'Cat A')
 win.add_form_switch('Notifications:', 'form_notify', 'Send Email Digest', true)
+win.add_form_checkbox('Terms:', 'form_terms', 'I accept terms and conditions', true)
 win.add_form_number('Quantity:', 'form_qty', 1)
 win.add_form_slider('Volume:', 'form_vol', 80)
 win.add_form_date_picker('Event Date:', 'form_date', '2026-12-25')
@@ -703,6 +968,7 @@ win.add_form_time_picker('Start Time:', 'form_time', '09:00')
 win.add_form_file_picker('Upload Document:', 'form_file', '/tmp/data.csv')
 win.add_form_color_picker('Theme Accent:', 'form_color', '#0a84ff')
 win.add_form_progress('Download Progress:', 'form_prog', 45)
+win.add_form_link('Website:', 'form_link', 'Visit Documentation', 'https://vlang.io')
 ```
 
 ---
@@ -737,40 +1003,84 @@ mut btn := win.add_button('btn_submit', 'Submit Registration')
 
 btn.set_width(220)
    .set_height(42)
+   .set_size(220, 42)
+   .set_position(50, 100)
    .set_bg_color('#0a84ff')
    .set_font_color('#ffffff')
    .set_font_size(15)
    .set_font_bold(true)
+   .set_font_name('System')
    .set_corner_radius(8.0)
    .set_border(2.0, '#005bb5')
    .set_margin_xy(10, 5)
+   .set_margin_trbl(10, 10, 5, 5)
+   .set_margin_top(10)
+   .set_margin_bottom(5)
+   .set_margin_left(5)
+   .set_margin_right(10)
    .set_padding_xy(16, 8)
+   .set_padding_trbl(8, 16, 8, 16)
+   .set_expand_fill(true)
+   .set_cursor('pointer')
    .set_tooltip('Click to submit your registration form')
+
+// Undo history stack and selection queries on Control
+btn.save_undo_state()
+did_redo := btn.redo()
+sel_start, sel_end := btn.selection_range()
 ```
 
-### Direct Window Setter Reference
+### Direct Window Control Setter & Getter Reference
 
 ```v
 win.set_control_width('btn_submit', 220)
+w := win.get_control_width('btn_submit')
+
 win.set_control_height('btn_submit', 42)
+h := win.get_control_height('btn_submit')
+
 win.set_control_size('btn_submit', 220, 42)
+win.set_control_position('btn_submit', 50, 100)
 
 win.set_control_font_size('btn_submit', 16)
+fs := win.get_control_font_size('btn_submit')
 win.set_control_font_bold('btn_submit', true)
+win.set_control_font_name('btn_submit', 'Inter')
 win.set_control_font_color('btn_submit', '#ffffff')
 
 win.set_control_bg_color('btn_submit', '#10b981')
+win.set_control_background_color('btn_submit', '#10b981') // Alias
 win.set_control_accent_color('btn_submit', '#34c759')
 win.set_control_border('btn_submit', 2.0, '#047857')
 win.set_control_corner_radius('btn_submit', 6.0)
 
 win.set_control_margin('btn_submit', 10)
+m := win.get_control_margin('btn_submit')
 win.set_control_margin_xy('btn_submit', 12, 6)
+win.set_control_margin_trbl('btn_submit', 10, 12, 6, 12)
+
+win.set_control_padding('btn_submit', 10)
+p := win.get_control_padding('btn_submit')
 win.set_control_padding_xy('btn_submit', 16, 8)
+win.set_control_padding_trbl('btn_submit', 8, 16, 8, 16)
+
+win.set_control_alignment('btn_submit', 'center')
+align_str := win.get_control_alignment('btn_submit')
+
+win.set_control_expand_fill('btn_submit', true)
+exp_fill := win.get_control_expand_fill('btn_submit')
+
+win.set_control_placeholder('input_user', 'Enter username...')
+win.set_control_text_align('btn_submit', 'center')
 
 win.set_control_tooltip('btn_submit', 'Hover helper tip')
+tip := win.get_control_tooltip('btn_submit')
+
 win.set_control_visible('btn_submit', true)
+is_vis := win.get_control_visible('btn_submit')
+
 win.set_control_enabled('btn_submit', true)
+is_en := win.get_control_enabled('btn_submit')
 ```
 
 ### Linux & Cross-Platform Font Resolution
@@ -894,6 +1204,11 @@ win.on_enter('input_query', fn (mut win simplegui.SimpleWindow) {
 	println('Submitted search: ${q}')
 })
 
+// Window Form Submit Listener
+win.on_submit(fn (mut win simplegui.SimpleWindow) {
+	win.toast('Form submitted!')
+})
+
 // Table Row Click
 win.on_row_click('tbl_users', fn (mut win simplegui.SimpleWindow) {
 	selected_row := win.get_table_selected_row('tbl_users')
@@ -943,6 +1258,10 @@ win.hide_controls(['lbl_loading', 'prog_bar'])
 win.enable_controls(['input_u', 'input_p'])
 win.disable_controls(['btn_submit'])
 
+// Enable or disable ALL controls in window
+win.enable_all()
+win.disable_all()
+
 win.toggle_visible('panel_extra')
 win.toggle_enabled('btn_action')
 ```
@@ -971,13 +1290,25 @@ win.set_state_int('counter', 42)
 win.set_state_bool('dark_mode', true)
 win.set_state_f64('font_scale', 1.25)
 
+// Check if state key exists
+if win.has_state('user_role') {
+    println('State key registered!')
+}
+
 role := win.get_state('user_role')                    // string
 count := win.get_state_int('counter')                 // int
 is_dark := win.get_state_bool('dark_mode')           // bool
 fallback_role := win.get_state_or('role', 'Guest')   // fallback if key unset
+fallback_count := win.get_state_int_or('counter', 0)
+fallback_flag := win.get_state_bool_or('flag', false)
+fallback_scale := win.get_state_f64_or('scale', 1.0)
 
 win.toggle_state_bool('dark_mode')        // Toggles boolean state
 win.increment_state_int('counter', 1)     // Increments integer state
+
+// Delete state entry or clear entire state store
+win.remove_state('user_role')
+win.clear_state()
 ```
 
 ### Reactive State Listeners (`on_state_change`)
@@ -1019,6 +1350,33 @@ Cross-platform system helpers (`sys.v`) for command execution, desktop notificat
 
 ### System Commands & Execution
 
+### Environment & Process Management
+
+```v
+// Environment Variables
+win.set_env('MY_APP_MODE', 'production')
+val := win.get_env('MY_APP_MODE')
+win.unset_env('MY_APP_MODE')
+
+// Executables & Command Discovery
+pid := win.get_pid()
+uptime_sec := win.get_uptime_seconds()
+exists := win.exists_in_path('git') // or win.has_command('git')
+exec_path := win.find_executable('git') // or win.get_command_path('git')
+
+// Exec in target directory
+stdout, exit_code := win.exec_in_dir('/tmp', 'pwd')
+
+// Process Control & Termination
+is_running := win.is_process_running('nginx')
+win.kill_process('nginx')
+win.kill_process_by_pid(1234)
+win.kill_process_by_name('nginx')
+win.kill_process_exact('nginx')
+```
+
+### System Commands & Execution
+
 ```v
 // Synchronous command execution
 stdout, exit_code := win.exec('ls -la')
@@ -1037,15 +1395,38 @@ res := win.exec_retry('curl -s https://api.ipify.org', 3, 500, 2.0)
 println('Output: ${res.output} (Attempts: ${res.attempts})')
 ```
 
-### Desktop Notifications, Audio & Speech
+### Desktop Notifications, Audio, Speech & Dialogs
 
 ```v
 win.show_system_notification('Backup Complete', 'Your database backup was created successfully.')
+
+// Audio Beeps & Sounds
 win.beep()
+win.beep_n(3)
+win.play_system_sound('Ping')
+simplegui.sys_beep()
+simplegui.sys_beep_cross()
+simplegui.play_system_sound('Glass')
+
+// Speech Synthesis
+win.say('Task complete')
 win.speak_with_voice('Hello! Welcome to SimpleGUI.', 'Samantha')
+simplegui.speak_with_voice('System online', 'Alex')
+
+// System Volume & Mute
+vol := win.get_volume()
+win.set_volume(80)
+muted := win.is_muted()
+win.set_muted(false)
+
+// Native macOS Scripting Dialogs
+user_txt := win.osascript_dialog('Enter license key:', 'XXXX-XXXX')
+is_ok := win.osascript_alert('Confirm Action', 'Proceed with installation?')
+chosen_file := win.osascript_choose_file()
+chosen_dir := win.osascript_choose_folder()
 ```
 
-### Hardware Specs & System Info
+### Hardware Specs, System Info & Resource Monitoring
 
 ```v
 cpu_name := win.get_cpu_info()
@@ -1054,19 +1435,113 @@ memory_ram := win.get_memory_info()
 screen_res := win.get_screen_resolution()
 battery_pct := win.get_battery_percent()
 is_charging := win.is_on_ac_power()
+
+// Live Performance & Resource Metrics
+cpu_pct := win.get_cpu_usage_percent()
+load_1, load_5, load_15 := win.get_load_average()
+mem_pressure := win.get_memory_pressure()
+num_procs := win.get_running_process_count()
+num_files := win.get_open_file_count()
+swap_str := win.get_swap_usage()
 ```
 
-### Directories & File Operations
+### Directories, Files, Archives & Storage Specs
 
 ```v
 home_path := win.get_system_path('home')
 docs_path := win.get_system_path('documents')
 
+// File & Directory Utilities
+win.file_exists('/tmp/data.txt')
+win.is_dir('/tmp/my_folder')
+content := win.read_file('/tmp/data.txt')
+opt_content := win.read_file_opt('/tmp/data.txt') or { '' }
+win.write_file('/tmp/data.txt', 'Hello World')
+win.write_file_opt('/tmp/data.txt', 'Hello World') or { return }
+win.append_file('/tmp/log.txt', 'New Log Line\n') or { return }
+win.touch_file('/tmp/newfile.txt') or { return }
+win.delete_file('/tmp/temp.txt')
+win.trash_file('/tmp/trash.txt') or { return }
+win.create_directory('/tmp/new_dir')
+dir_items := win.read_dir('/tmp')
+dir_bytes := win.get_directory_size('/tmp/my_folder')
+
+// File Metadata & Disk Space Specs
+disk_info := win.get_disk_usage('/System/Volumes/Data') or { simplegui.DiskStats{} }
+// disk_info.total_bytes, disk_info.free_bytes, disk_info.used_bytes, disk_info.used_percent
+file_info := win.get_file_metadata('/tmp/data.txt') or { simplegui.FileMetadata{} }
+// file_info.size_bytes, file_info.modified_time, file_info.is_dir, file_info.permissions
+
+// Temporary File Creation
+tmp_file := win.create_temp_file('app_', '.json') or { '' }
+tmp_dir := win.create_temp_dir('session_') or { '' }
+
+// Zip Archives
+win.zip_directory('/tmp/source_dir', '/tmp/archive.zip') or { return }
+win.unzip_archive('/tmp/archive.zip', '/tmp/dest_dir') or { return }
+
+// Clipboard & External Openers
 win.copy_to_clipboard('Copied text!')
 clip_val := win.get_clipboard_text()
 
 win.open_url('https://vlang.io')
 win.reveal_in_finder('/tmp/my_folder')
+win.open_in_default_app('/tmp/document.pdf')
+win.open_with_app('/tmp/document.pdf', 'com.adobe.Reader')
+win.open_terminal()
+```
+
+### Network Utilities & Port Scanning
+
+```v
+is_online := win.ping('8.8.8.8', 2)
+local_ip := win.get_ip_address()
+pub_ip := win.get_public_ip()
+
+port_open := win.is_port_open('127.0.0.1', 8080)
+free_port := win.find_available_port(8000)
+
+win.download_file('https://vlang.io/robots.txt', '/tmp/robots.txt') or { return }
+```
+
+### macOS & System Platform Details
+
+```v
+macos_ver := win.get_macos_version()
+macos_build := win.get_macos_build()
+product_name := win.get_macos_product_name()
+device_model := win.get_device_model()
+serial_num := win.get_serial_number()
+gpu_str := win.get_gpu_info()
+bundle_id := win.get_app_bundle_id()
+locale_str := win.get_system_locale()
+tz_str := win.get_timezone()
+
+// Launch at Login & Dock Badge
+win.launch_at_login_add('/Applications/MyApp.app')
+win.launch_at_login_remove('MyApp')
+win.set_dock_badge(5)
+
+// OS Dark Mode & System Theme
+is_os_dark := win.is_dark_mode()
+sys_theme := win.get_system_theme()
+win.set_system_dark_mode(true)
+win.set_system_theme('dark') or { return }
+win.toggle_dark_mode()
+simplegui.toggle_dark_mode()
+```
+
+### Power & User Session Control
+
+```v
+win.prevent_sleep_bg(3600) // Keep awake for 1 hour
+win.sleep_display()
+win.sleep_computer()
+win.lock_screen()
+win.start_screen_saver()
+win.log_out_user()
+win.restart_computer()
+win.shut_down_computer()
 ```
 
 ---
@@ -1077,42 +1552,224 @@ Built-in wrappers (`stdlib.v`) for V standard library operations.
 
 ### HTTP Requests
 
+### HTTP Requests & Sockets
+
 ```v
+// Basic GET & POST
 body := win.http_get('https://api.ipify.org')
 response := win.http_post('https://httpbin.org/post', '{"key":"value"}')
+
+// Strict & Advanced HTTP Requests with headers/timeouts
+strict_body := win.http_get_strict('https://api.ipify.org') or { '' }
+res := win.http_request(.post, 'https://api.example.com/data', '{"query":"test"}', simplegui.SimpleHttpRequestOptions{
+    headers: {'Authorization': 'Bearer token123'}
+    timeout_ms: 5000
+}) or { simplegui.SimpleHttpResponse{} }
+
+// Sockets & WebSockets
+mut ws := win.websocket_client('ws://echo.websocket.org', fn (msg string) {
+    println('WS Received: ${msg}')
+}) or { return }
+ws.write_string('Hello WebSocket')
+ws.close()
+
+mut tcp := win.tcp_connect('127.0.0.1:8080') or { return }
+tcp.write('PING')
+resp_bytes := tcp.read(1024) or { []u8{} }
+tcp.close()
+
+mut udp := win.udp_connect('127.0.0.1:9000') or { return }
+udp.write('DATAGRAM')
+udp.close()
+
+mut unix_soc := win.unix_connect('/tmp/app.sock') or { return }
+unix_soc.write('UNIX MSG')
+unix_soc.close()
 ```
 
-### Cryptography & Hashes
+### Cryptography, Hashes & Security
 
 ```v
-sha := win.crypto_sha256('secret data')
-md5 := win.crypto_md5('secret data')
+// Hashing Algorithms
+sha256_hex := win.crypto_sha256('secret data')
+md5_hex := win.crypto_md5('secret data')
+sha512_hex := win.crypto_sha512('secret data')
+sha1_hex := win.crypto_sha1('secret data')
 
+// AES Symmetric Encryption & Secure Salted AES
 key := '0123456789abcdef0123456789abcdef'
 cipher_hex := win.crypto_encrypt_aes('plain_text', key)
 decrypted := win.crypto_decrypt_aes(cipher_hex, key)
 
+cipher_sec := win.crypto_encrypt_aes_secure('sensitive_data', 'passphrase123')
+plain_sec := win.crypto_decrypt_aes_secure(cipher_sec, 'passphrase123')
+
+// HMAC Signatures & Wyhash
+hmac256 := win.crypto_hmac_sha256('message', 'secret')
+hmac512 := win.crypto_hmac_sha512('message', 'secret')
+hmac1 := win.crypto_hmac_sha1('message', 'secret')
+wy_hash := win.crypto_wyhash('data', 12345)
+
+// Bcrypt Password Hashing & Key Derivation (PBKDF2)
 hash := win.crypto_bcrypt_hash('my_password') or { '' }
 is_valid := win.crypto_bcrypt_verify('my_password', hash)
+pbkdf2_key := win.crypto_pbkdf2('password', 'salt1234', 10000, 32)
+
+// Cryptographic Randomness & Ed25519 Signatures
+rand_bytes := win.crypto_rand_bytes(16)
+rand_hex := win.crypto_rand_hex(16)
+rand_uuid := win.crypto_rand_uuid()
+
+keypair := win.crypto_ed25519_generate_key() or { simplegui.SimpleEd25519KeyPair{} }
+sig := win.crypto_ed25519_sign(keypair.private_key, 'msg') or { []u8{} }
+is_sig_valid := win.crypto_ed25519_verify(keypair.public_key, 'msg', sig)
 ```
 
-### RegEx & Random Utilities
+### Compression Formats (Gzip, Zlib, Deflate, Zstd)
 
 ```v
+gz_compressed := win.compress_gzip('Sample uncompressed string')
+gz_decompressed := win.decompress_gzip(gz_compressed)
+
+zlib_comp := win.compress_zlib('Sample text')
+zlib_decomp := win.decompress_zlib(zlib_comp)
+
+deflate_comp := win.compress_deflate('Sample text')
+deflate_decomp := win.decompress_deflate(deflate_comp)
+
+zstd_comp := win.compress_zstd('Sample text')
+zstd_decomp := win.decompress_zstd(zstd_comp)
+```
+
+### RegEx, URL, HTML & Format Parsers
+
+```v
+// RegEx Pattern Matching
 is_valid_email := win.regex_match('user@domain.com', r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-random_num := win.rand_int(1, 100)
-token := win.rand_string(16)
+matches := win.regex_find('Order ID #12345', r'\d+')
+replaced := win.regex_replace('Hello World', r'World', 'V')
+
+// URL Parsing & Construction
+parsed_url := win.url_parse('https://example.com:8080/api/users?sort=asc')
+// parsed_url.scheme, parsed_url.host, parsed_url.port, parsed_url.path, parsed_url.query
+built_url := win.url_build('https', 'example.com', '/api/users', {'sort': 'asc'})
+
+// HTML Document Parsing
+html_doc := win.html_parse('<div class="header"><h1>Title</h1><a href="/link">Click</a></div>')
+h1_text := html_doc.get_tag_text('h1')
+class_nodes := html_doc.get_tags_by_class('header')
+all_links := html_doc.get_all_links()
+clean_text := html_doc.strip_tags()
+
+// TOML, CSV, JSON & Base64 Parsers
+toml_doc := win.toml_parse('title = "App Config"\nversion = 2')
+app_title := toml_doc.get_string('title')
+
+csv_rows := win.csv_parse("Name,Age\nAda,30\nAlan,40")
+csv_out := win.csv_encode(csv_rows)
+
+json_str := win.json_encode_map_list([{'name': 'Ada'}, {'name': 'Alan'}])
+json_valid := win.json_validate(json_str)
+pretty_json := win.json_pretty_print(json_str)
+
+b64_enc := win.base64_encode('Hello')
+b64_dec := win.base64_decode(b64_enc)
+lorem_txt := win.lorem_generate('latin', 1, 2, 20)
 ```
 
-### JSON Data Decoding & Performance Stopwatch
+### Generic Data Structures & Collections
 
 ```v
-data := win.json_decode_map('{"name":"Ada","role":"Admin"}')
+// Stack (LIFO)
+mut stack := simplegui.new_stack[string]()
+stack.push('item1')
+item := stack.pop()
 
+// Queue (FIFO)
+mut queue := simplegui.new_queue[int]()
+queue.push(10)
+val := queue.pop()
+
+// Set (Unique Values)
+mut set := simplegui.new_set[string]()
+set.add('tag1')
+has_tag := set.exists('tag1')
+
+// Ring Buffer (Circular Fixed Capacity)
+mut ring := simplegui.new_ringbuffer[f64](5)
+ring.push(1.23)
+
+// Min Heap (Priority Queue)
+mut heap := simplegui.new_min_heap[int]()
+heap.push(42)
+min_val := heap.pop()
+```
+
+### Time, Benchmarks & Thread Sync
+
+```v
+now_str := win.time_now()
+unix_ts := win.time_unix_timestamp()
+ts_str := win.time_from_unix(unix_ts)
+is_leap := win.time_is_leap_year(2026)
+days := win.time_days_in_month(2026, 2)
+
+// Stopwatch & Benchmark Suites
 mut sw := win.start_stopwatch()
-// ... operation ...
 elapsed_ms := win.stopwatch_elapsed_ms(sw)
-println('Operation completed in ${elapsed_ms} ms')
+
+mut bench := simplegui.start_benchmark()
+bench.step()
+bench.ok()
+
+// Thread Synchronization
+mut mtx := simplegui.new_mutex()
+mtx.lock()
+mtx.unlock()
+
+mut wg := simplegui.new_wait_group()
+wg.add(2)
+wg.done()
+wg.wait()
+```
+
+### Advanced Math, Statistics & String Metrics
+
+```v
+// Trigonometry, Exponentials & Interpolation
+rad := win.math_radians(180.0)
+deg := win.math_degrees(3.14159)
+hyp := win.math_hypot(3.0, 4.0)
+gcd_val := win.math_gcd(12, 18)
+lcm_val := win.math_lcm(12, 18)
+remapped := win.math_remap(50.0, 0.0, 100.0, 0.0, 1.0)
+smoothed := win.math_smoothstep(0.0, 1.0, 0.5)
+
+// Complex Numbers
+mut c1 := simplegui.complex_new(3.0, 4.0)
+c_abs := c1.abs()
+
+// Arbitrary Precision BigInt
+mut b1 := simplegui.big_int_from_str('12345678901234567890')
+mut b2 := simplegui.big_int_from_int(100)
+b3 := b1.add(b2)
+
+// Statistical Calculations
+mean_val := win.stats_mean([1.0, 2.0, 3.0, 4.0, 5.0])
+med_val := win.stats_median([1.0, 2.0, 3.0, 4.0, 5.0])
+std_dev := win.stats_sample_std_dev([1.0, 2.0, 3.0, 4.0, 5.0])
+geo_mean := win.stats_geometric_mean([1.0, 2.0, 3.0, 4.0, 5.0])
+harm_mean := win.stats_harmonic_mean([1.0, 2.0, 3.0, 4.0, 5.0])
+rms_val := win.stats_rms([1.0, 2.0, 3.0, 4.0, 5.0])
+cov_val := win.stats_covariance([1.0, 2.0, 3.0], [4.0, 5.0, 6.0])
+
+// String Metrics & Similarity
+lev_dist := win.string_levenshtein('kitten', 'sitting')
+jaro_sim := win.string_jaro_similarity('martha', 'marhta')
+jw_sim := win.string_jaro_winkler_similarity('dwayne', 'duane')
+ham_dist := win.string_hamming_distance('karolin', 'kathrin')
+between := win.string_between('<span>hello</span>', '<span>', '</span>')
+word_cnt := win.string_count_words('The quick brown fox jumps')
 ```
 
 ---
@@ -1346,6 +2003,174 @@ win.bind_shortcut('F1', fn (mut win simplegui.SimpleWindow) {
 	win.info('Help', 'Press Ctrl+K for Command Palette')
 })
 ```
+
+---
+
+## 19. Cross-Window Spy++ & External App Automation
+
+`simplegui` includes a powerful cross-window registry, remote inter-window control, a live event bus, and macOS external application inspection via AXUIElement (`sys.v`).
+
+### 1. Cross-Window Registry & Remote Inspection (Spy++)
+
+Register windows in a global process registry to inspect, message, or manipulate controls on other active application windows:
+
+```v
+// Register window in global registry
+simplegui.sys_register_window(win)
+
+// List all registered window titles ([]string)
+win_titles := simplegui.sys_list_app_windows()
+
+// Lookup window reference pointer by title
+if mut app_win := simplegui.sys_get_window('Dashboard Manager') {
+    app_win.show()
+}
+
+// Order window z-index or visibility remotely
+simplegui.sys_order_app_window_front('Settings Window')
+simplegui.sys_order_app_window_back('Settings Window')
+simplegui.sys_set_app_window_visible('Settings Window', false)
+
+// Spy and inspect controls on target window ([]ControlInfo)
+if ctrl_info_list := simplegui.sys_spy_window('Dashboard Manager') {
+    for info in ctrl_info_list {
+        println('Control: ${info.name} | Kind: ${info.kind} | Value: ${info.value}')
+    }
+}
+
+// Remote control state manipulation across windows
+simplegui.sys_set_control_enabled('Dashboard Manager', 'btn_save', true)
+simplegui.sys_set_control_visible('Dashboard Manager', 'lbl_status', true)
+simplegui.sys_set_control_text('Dashboard Manager', 'lbl_status', 'Updated remotely')
+val := simplegui.sys_get_control_text('Dashboard Manager', 'lbl_status')
+simplegui.sys_flash_control('Dashboard Manager', 'btn_save')
+
+// Single window remote methods
+win.order_front()
+win.order_back()
+win.show_window()
+ctrl_list := win.spy_controls()
+win.flash_control('btn_save')
+```
+
+### 2. Cross-Window Live Event Bus
+
+Subscribe to global event broadcasts across windows in the application:
+
+```v
+// Subscribe to cross-window event bus
+simplegui.sys_subscribe_events(fn (win_title string, control_name string, event_name string, value string) {
+    println('Event on [${win_title}] ${control_name}.${event_name} = ${value}')
+})
+
+// Broadcast custom event across subscriber callbacks
+simplegui.sys_broadcast_event('MainWindow', 'tbl_users', 'row_selected', 'ID_101')
+```
+
+### 3. External macOS Application Automation (AXUIElement)
+
+Inspect and automate external macOS applications via OS Accessibility APIs:
+
+```v
+// List all running external GUI desktop applications ([]ExternalAppInfo)
+external_apps := simplegui.sys_list_external_apps()
+for app in external_apps {
+    println('App PID: ${app.pid} | Name: ${app.name} | Bundle: ${app.bundle_id}')
+}
+
+// Spy and inspect UI hierarchy on target external application by PID ([]ExternalControlInfo)
+if external_apps.len > 0 {
+    target_pid := external_apps[0].pid
+    controls := simplegui.sys_spy_external_app(target_pid)
+    for ctrl in controls {
+        println('AXControl: ${ctrl.title} | Role: ${ctrl.role} | Value: ${ctrl.value}')
+    }
+
+    // Automate external application controls
+    simplegui.sys_set_external_app_frontmost(target_pid)
+    simplegui.sys_press_external_control(target_pid, 'Save')
+    simplegui.sys_set_external_control_value(target_pid, 'Search Field', 'Query')
+    simplegui.sys_set_external_control_enabled(target_pid, 'Submit Button', true)
+    simplegui.sys_flash_external_control(target_pid, 'Save')
+}
+```
+
+---
+
+## 20. Type & Struct Reference Index
+
+A reference index of core data structures, callback aliases, and configuration structs across `simplegui`.
+
+### Callback Type Aliases
+
+| Callback Type Alias | Signature / Definition | Description |
+|---|---|---|
+| **`VoidEventCallback`** | `fn (mut win SimpleWindow)` | Default widget event handler callback |
+| **`ControlValidator`** | `fn (val string) bool` | Custom validation function for form inputs |
+| **`StringEventCallback`** | `fn (mut win SimpleWindow, val string)` | Reactive state string mutation callback |
+| **`FileDropCallback`** | `fn (mut win SimpleWindow, files []string)` | Native OS drag-and-drop files callback |
+| **`CloseRequestedCallback`** | `fn (mut win SimpleWindow) bool` | Intercept window close request (return false to cancel close) |
+| **`AnyEventCallback`** | `fn (mut win SimpleWindow, event_type string, ctrl_name string)` | Catch-all event listener |
+| **`SystemEventCallback`** | `fn (win_title string, control_name string, event_name string, value string)` | Cross-window event bus subscriber callback |
+| **`SimpleWSMessageCallback`** | `fn (msg string)` | WebSocket incoming text payload listener |
+
+### Core Struct Definitions
+
+#### `simplegui.Control`
+The core rendering and state container for every widget inside `SimpleWindow`:
+- **Identification**: `name string`, `kind string`, `title string`, `placeholder string`, `tooltip string`, `variant string`
+- **Geometry & Bounds**: `x f32`, `y f32`, `w f32`, `h f32`, `padding_left f32`, `padding_right f32`, `padding_top f32`, `padding_bottom f32`, `margin_left f32`, `margin_right f32`, `margin_top f32`, `margin_bottom f32`, `alignment string`, `expand_fill bool`
+- **Values & Data**: `text_value string`, `int_value int`, `bool_value bool`, `f64_value f64`, `items []string`, `items_selected []string`, `tags []string`, `rows [][]string`, `headers []string`
+- **Styling**: `bg_color string`, `font_color string`, `accent_color string`, `font_size int`, `font_bold bool`, `font_name string`, `border_width f32`, `border_color string`, `corner_radius f32`, `opacity f64`
+- **States & Handlers**: `disabled bool`, `visible bool`, `focused bool`, `hovered bool`, `validation_err string`, `on_click VoidEventCallback`, `on_change VoidEventCallback`, `on_enter VoidEventCallback`
+
+#### `simplegui.Theme`
+Theme configuration definition:
+- `name string`: Theme display name
+- `background_color string`: Main window background hex color
+- `font_color string`: Text typography hex color
+- `accent_color string`: Active accent highlight hex color
+- `hover_color string`: Interactive hover highlight color
+- `surface_hover string`: Surface card hover background color
+- `description string`: Theme description text
+- `is_dark bool`: Boolean flag indicating dark or light theme
+
+#### `simplegui.TreeNode`
+Recursive tree structure node for `add_tree_view`:
+- `title string`: Label text for tree item
+- `children []TreeNode`: Array of child nodes
+
+#### `simplegui.ToolbarItem`
+Item descriptor for `add_toolbar`:
+- `icon string`: Symbol/text icon string
+- `tooltip string`: Hover tooltip text
+- `on_click VoidEventCallback`: Click callback
+
+#### `simplegui.PropertyGridItem`
+Key-value entry for `add_property_grid`:
+- `name string`: Property label name
+- `val string`: Current property text representation
+- `kind string`: Property input type (`text`, `bool`, `color`, `number`)
+
+#### `simplegui.Toast`
+Toast notification alert item:
+- `id string`, `title string`, `message string`, `variant string` (`info`, `success`, `warning`, `error`), `duration_ms int`, `remaining f32`
+
+#### `simplegui.CommandItem`
+Command descriptor for `show_command_palette`:
+- `id string`, `title string`, `category string`, `shortcut string`, `on_execute VoidEventCallback`
+
+#### `simplegui.ContextMenuItem`
+Menu item for `show_context_menu`:
+- `id string`, `title string`, `shortcut string`, `on_select VoidEventCallback`
+
+#### `simplegui.DiskStats` & `simplegui.FileMetadata`
+- **`DiskStats`**: `total_bytes u64`, `free_bytes u64`, `used_bytes u64`, `used_percent f64`
+- **`FileMetadata`**: `size_bytes u64`, `modified_time i64`, `is_dir bool`, `permissions string`
+
+#### `simplegui.ExternalAppInfo` & `simplegui.ExternalControlInfo`
+- **`ExternalAppInfo`**: `pid int`, `name string`, `bundle_id string`
+- **`ExternalControlInfo`**: `role string`, `title string`, `value string`, `enabled bool`
 
 ---
 

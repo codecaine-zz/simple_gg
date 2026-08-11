@@ -85,6 +85,9 @@ This directory contains beginner-friendly, well-commented examples demonstrating
 | **[`16_interval_timers.v`](16_interval_timers.v)**                     | Interval timers & timeouts       | Recurring timers (`set_interval`), one-shot delays (`set_timeout`), clock polling, auto-incrementing progress, and timer control APIs.                    | ![Snapshot 16](../snapshots/ex16.png)  |
 | **[`17_data_and_event_binding.v`](17_data_and_event_binding.v)**       | Two-way data & event binding     | Control-to-state binding (`bind_state`), fluent event aliases (`bind_click`), keyboard key & shortcut binding (`bind_key`, `bind_shortcut`).               | ![Snapshot 17](../snapshots/ex17.png)  |
 | **[`18_custom_font_loading.v`](18_custom_font_loading.v)**             | Custom font & typography        | Platform font resolution (`simplegui.resolve_window_font_path`), custom TTF/OTF setting (`win.set_font_path`), macOS/Linux font discovery & env overrides. | ![Snapshot 18](../snapshots/ex18.png)  |
+| **[`19_cross_window_spy_and_automation.v`](19_cross_window_spy_and_automation.v)** | Cross-Window Spy++ & Automation | Global window registry (`sys_register_window`), control inspection (`sys_spy_window`), live event bus, external macOS app scanning. | N/A |
+| **[`20_stdlib_data_structures_math_and_sockets.v`](20_stdlib_data_structures_math_and_sockets.v)** | Collections, Math & Sockets | Generic Stack, Queue, Set, MinHeap, BigInt, Complex math, string distance metrics (Levenshtein, Jaro-Winkler), thread sync (Mutex/WaitGroup). | N/A |
+| **[`21_extended_os_system_calls.v`](21_extended_os_system_calls.v)**     | Extended OS & Hardware Subsystem | Live CPU & Memory pressure metrics, environment variables, system audio beeps, speech synthesis, temp files & zip archives. | N/A |
 
 ---
 
@@ -135,4 +138,13 @@ v run examples/14_rad_controls_showcase.v
 
 # Run Interval Timers & Timeouts Showcase Demo
 v run examples/16_interval_timers.v
+
+# Run Cross-Window Spy++ & Automation Demo
+v run examples/19_cross_window_spy_and_automation.v
+
+# Run Stdlib Collections & Math Demo
+v run examples/20_stdlib_data_structures_math_and_sockets.v
+
+# Run Extended OS & Hardware Subsystem Demo
+v run examples/21_extended_os_system_calls.v
 ```
