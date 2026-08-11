@@ -459,12 +459,19 @@ win.add_bar_chart('chart_visitors', 'Daily Visitors', ['Mon', 'Tue', 'Wed', 'Thu
 win.add_metric_card('kpi_sales', 'Total Revenue', '$48,250', '+14.2%', 'vs last month')
 ```
 
-### Lists & Trees
+### Lists, ListBox & Multi-Select
 
 ```v
-// List Box
-win.add_list_box('list_files', ['file1.txt', 'file2.csv', 'document.pdf'], 0)
+// Single-Select ListBox
+win.add_list_box_with_selected('list_files', ['file1.txt', 'file2.csv', 'document.pdf'], 'file1.txt')
 selected_file := win.get_list_box_selected('list_files')
+selected_idx := win.get_list_box_index('list_files')
+win.set_list_box_selected('list_files', 'file2.csv')
+
+// Multi-Select ListBox
+win.add_multi_list_box('list_tags', ['macOS', 'Linux', 'Windows', 'WebAssembly'], ['macOS', 'Linux'])
+selected_tags := win.get_multi_list_box_selected('list_tags')
+win.set_multi_list_box_selected('list_tags', ['macOS', 'Windows'])
 
 // Tree View
 win.add_tree_view('tree_proj', [
@@ -588,6 +595,35 @@ win.show_command_palette([
 	}
 ])
 win.hide_command_palette()
+
+// 🎯 Auto-Complete ComboBox (editable input paired with quick option dropdown)
+win.add_combobox('my_combo', ['Option A', 'Option B', 'Option C'], 'Option A')
+combo_val := win.get_combobox_selected('my_combo')
+win.set_combobox_selected('my_combo', 'Option B')
+
+// 🔄 Dual Transfer List (side-by-side list transfer box with Move Right/Left buttons)
+win.add_transfer_list('my_transfer', ['Item 1', 'Item 2', 'Item 3'], ['Item 4'])
+avail := win.get_transfer_list_available('my_transfer')
+chosen := win.get_transfer_list_selected('my_transfer')
+
+// 🎨 Color Palette Swatch Grid (swatch selection grid)
+win.add_color_palette('my_pal', ['#3b82f6', '#10b981', '#ef4444', '#f59e0b', '#8b5cf6'], '#3b82f6')
+color := win.get_color_selected('my_pal')
+win.set_color_selected('my_pal', '#10b981')
+
+// 📏 Discrete Step Slider (snaps to discrete tick marks)
+win.add_step_slider('my_step_slider', 4, 50.0) // 4 steps, initial value 50%
+step_val := win.get_step_slider_value('my_step_slider')
+win.set_step_slider_value('my_step_slider', 75.0)
+
+// 💻 Console Output Log Viewer (dark terminal output log with color-coded logs)
+win.add_console_view('app_console', ['[OK] Application started', '[INFO] Database connected'])
+win.append_console_log('app_console', '[WARN] Low memory warning')
+win.clear_console_log('app_console')
+
+// 📌 Bottom Status Bar (anchored bottom status bar with badge)
+win.add_status_bar('app_status', 'Status: Ready | Port: 8080', 'ONLINE')
+win.set_status_bar_text('app_status', 'Status: Connected')
 
 // 📍 Context Menu Flyout (right-click popup flyout menu)
 win.show_context_menu(x, y, [

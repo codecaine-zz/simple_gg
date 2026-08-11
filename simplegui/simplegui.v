@@ -1004,6 +1004,223 @@ pub fn (mut win SimpleWindow) add_list_box(name string, items []string) &SimpleW
 	return win
 }
 
+pub fn (mut win SimpleWindow) add_list_box_with_selected(name string, items []string, selected string) &SimpleWindow {
+	sel_idx := items.index(selected)
+	win.add_control(Control{
+		name:       name
+		kind:       'list_box'
+		items:      items
+		text_value: selected
+		int_value:  if sel_idx >= 0 { sel_idx } else { 0 }
+		h:          120
+	})
+	return win
+}
+
+pub fn (win &SimpleWindow) get_list_box_selected(name string) string {
+	if ctrl := win.control_map[name] {
+		return ctrl.text_value
+	}
+	return ''
+}
+
+pub fn (win &SimpleWindow) get_list_box_index(name string) int {
+	if ctrl := win.control_map[name] {
+		return ctrl.int_value
+	}
+	return 0
+}
+
+pub fn (mut win SimpleWindow) set_list_box_selected(name string, selected string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.text_value = selected
+		sel_idx := ctrl.items.index(selected)
+		if sel_idx >= 0 {
+			ctrl.int_value = sel_idx
+		}
+	}
+	return win
+}
+
+pub fn (mut win SimpleWindow) set_list_box_index(name string, index int) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		if index >= 0 && index < ctrl.items.len {
+			ctrl.int_value = index
+			ctrl.text_value = ctrl.items[index]
+		}
+	}
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_multi_list_box(name string, items []string, selected []string) &SimpleWindow {
+	win.add_control(Control{
+		name:           name
+		kind:           'multi_list_box'
+		items:          items
+		items_selected: selected
+		h:              140
+	})
+	return win
+}
+
+pub fn (win &SimpleWindow) get_multi_list_box_selected(name string) []string {
+	if ctrl := win.control_map[name] {
+		return ctrl.items_selected
+	}
+	return []string{}
+}
+
+pub fn (mut win SimpleWindow) set_multi_list_box_selected(name string, selected []string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.items_selected = selected
+	}
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_combobox(name string, items []string, selected string) &SimpleWindow {
+	win.add_control(Control{
+		name:       name
+		kind:       'combobox'
+		items:      items
+		text_value: selected
+		h:          32
+	})
+	return win
+}
+
+pub fn (win &SimpleWindow) get_combobox_selected(name string) string {
+	if ctrl := win.control_map[name] {
+		return ctrl.text_value
+	}
+	return ''
+}
+
+pub fn (mut win SimpleWindow) set_combobox_selected(name string, selected string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.text_value = selected
+	}
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_color_palette(name string, hex_colors []string, selected string) &SimpleWindow {
+	win.add_control(Control{
+		name:       name
+		kind:       'color_palette'
+		items:      hex_colors
+		text_value: selected
+		h:          40
+	})
+	return win
+}
+
+pub fn (win &SimpleWindow) get_color_selected(name string) string {
+	if ctrl := win.control_map[name] {
+		return ctrl.text_value
+	}
+	return ''
+}
+
+pub fn (mut win SimpleWindow) set_color_selected(name string, hex_color string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.text_value = hex_color
+	}
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_status_bar(name string, status_text string, badge string) &SimpleWindow {
+	win.add_control(Control{
+		name:        name
+		kind:        'status_bar'
+		text_value:  status_text
+		placeholder: badge
+		h:           26
+	})
+	return win
+}
+
+pub fn (mut win SimpleWindow) set_status_bar_text(name string, status_text string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.text_value = status_text
+	}
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_step_slider(name string, steps int, value f64) &SimpleWindow {
+	win.add_control(Control{
+		name:      name
+		kind:      'step_slider'
+		int_value: steps
+		f64_value: value
+		h:         34
+	})
+	return win
+}
+
+pub fn (win &SimpleWindow) get_step_slider_value(name string) f64 {
+	if ctrl := win.control_map[name] {
+		return ctrl.f64_value
+	}
+	return 0.0
+}
+
+pub fn (mut win SimpleWindow) set_step_slider_value(name string, value f64) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.f64_value = value
+	}
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_transfer_list(name string, available []string, selected []string) &SimpleWindow {
+	win.add_control(Control{
+		name:           name
+		kind:           'transfer_list'
+		items:          available
+		items_selected: selected
+		h:              130
+		w:              340
+	})
+	return win
+}
+
+pub fn (win &SimpleWindow) get_transfer_list_selected(name string) []string {
+	if ctrl := win.control_map[name] {
+		return ctrl.items_selected
+	}
+	return []string{}
+}
+
+pub fn (win &SimpleWindow) get_transfer_list_available(name string) []string {
+	if ctrl := win.control_map[name] {
+		return ctrl.items
+	}
+	return []string{}
+}
+
+pub fn (mut win SimpleWindow) add_console_view(name string, initial_logs []string) &SimpleWindow {
+	win.add_control(Control{
+		name:  name
+		kind:  'console_view'
+		items: initial_logs
+		h:     140
+		w:     340
+	})
+	return win
+}
+
+pub fn (mut win SimpleWindow) append_console_log(name string, log_msg string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.items << log_msg
+	}
+	return win
+}
+
+pub fn (mut win SimpleWindow) clear_console_log(name string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.items.clear()
+	}
+	return win
+}
+
 pub fn (mut win SimpleWindow) add_image(name string, file_path string) &SimpleWindow {
 	win.add_control(Control{ name: name, kind: 'image', text_value: file_path, h: 100 })
 	return win
@@ -1598,6 +1815,29 @@ pub fn (mut win SimpleWindow) add_form_dropdown(label string, name string, items
 	win.begin_row(win.gen_id('form_row'))
 	win.add_label(lbl_id, label)
 	win.add_dropdown(name, items, selected)
+	win.end_row()
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_form_list_box(label string, name string, items []string, selected string) &SimpleWindow {
+	lbl_id := win.gen_id('lbl')
+	win.add_label(lbl_id, label)
+	win.add_list_box_with_selected(name, items, selected)
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_form_multi_list_box(label string, name string, items []string, selected []string) &SimpleWindow {
+	lbl_id := win.gen_id('lbl')
+	win.add_label(lbl_id, label)
+	win.add_multi_list_box(name, items, selected)
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_form_combobox(label string, name string, items []string, selected string) &SimpleWindow {
+	lbl_id := win.gen_id('lbl')
+	win.begin_row(win.gen_id('form_row'))
+	win.add_label(lbl_id, label)
+	win.add_combobox(name, items, selected)
 	win.end_row()
 	return win
 }

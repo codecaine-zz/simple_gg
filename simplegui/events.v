@@ -344,6 +344,136 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 									ctrl.on_change(mut win)
 								}
 							}
+						} else if ctrl.kind == 'list_box' {
+							rel_y := win.mouse_y - (ctrl.y + 4.0)
+							idx := int(rel_y / 24.0)
+							if idx >= 0 && idx < ctrl.items.len {
+								ctrl.int_value = idx
+								ctrl.text_value = ctrl.items[idx]
+								if ctrl.on_change != unsafe { nil } {
+									ctrl.on_change(mut win)
+								}
+								if ctrl.on_click != unsafe { nil } {
+									ctrl.on_click(mut win)
+								}
+							}
+						} else if ctrl.kind == 'multi_list_box' {
+							rel_y := win.mouse_y - (ctrl.y + 4.0)
+							idx := int(rel_y / 24.0)
+							if idx >= 0 && idx < ctrl.items.len {
+								item := ctrl.items[idx]
+								if item in ctrl.items_selected {
+									ctrl.items_selected = ctrl.items_selected.filter(it != item)
+								} else {
+									ctrl.items_selected << item
+								}
+								if ctrl.on_change != unsafe { nil } {
+									ctrl.on_change(mut win)
+								}
+							}
+						} else if ctrl.kind == 'combobox' {
+							hdr_h := f32(32.0)
+							if win.mouse_y <= ctrl.y + hdr_h {
+								ctrl.is_expanded = !ctrl.is_expanded
+								ctrl.h = if ctrl.is_expanded {
+									hdr_h + f32(math.min(150, ctrl.items.len * 26 + 8))
+								} else {
+									hdr_h
+								}
+							} else if ctrl.is_expanded {
+								rel_y := win.mouse_y - (ctrl.y + hdr_h + 4.0)
+								idx := int(rel_y / 26.0)
+								if idx >= 0 && idx < ctrl.items.len {
+									ctrl.text_value = ctrl.items[idx]
+									ctrl.is_expanded = false
+									ctrl.h = hdr_h
+									if ctrl.on_change != unsafe { nil } {
+										ctrl.on_change(mut win)
+									}
+								}
+							}
+						} else if ctrl.kind == 'color_palette' {
+							mut px := ctrl.x + 6.0
+							mut py := ctrl.y + 6.0
+							swatch_s := f32(24.0)
+							for item in ctrl.items {
+								if win.mouse_x >= px && win.mouse_x <= px + swatch_s && win.mouse_y >= py && win.mouse_y <= py + swatch_s {
+									ctrl.text_value = item
+									if ctrl.on_change != unsafe { nil } {
+										ctrl.on_change(mut win)
+									}
+									break
+								}
+								px += swatch_s + 6.0
+								if px + swatch_s > ctrl.x + ctrl.w {
+									px = ctrl.x + 6.0
+									py += swatch_s + 6.0
+								}
+							}
+						} else if ctrl.kind == 'step_slider' {
+							rel_x := math.max(0.0, math.min(ctrl.w, win.mouse_x - ctrl.x))
+							pct := rel_x / ctrl.w
+							step_cnt := if ctrl.int_value > 0 { ctrl.int_value } else { 4 }
+							snapped_step := math.round(pct * f64(step_cnt))
+							ctrl.f64_value = snapped_step * (100.0 / f64(step_cnt))
+							if ctrl.on_change != unsafe { nil } {
+								ctrl.on_change(mut win)
+							}
+						} else if ctrl.kind == 'transfer_list' {
+							box_w := (ctrl.w - 60.0) / 2.0
+							btn_x := ctrl.x + box_w + 10.0
+							if win.mouse_x >= btn_x && win.mouse_x <= btn_x + 40.0 {
+								rel_y := win.mouse_y - ctrl.y
+								if rel_y >= 10.0 && rel_y <= 38.0 {
+									if ctrl.items.len > 0 {
+										item := ctrl.items[0]
+										ctrl.items = ctrl.items.filter(it != item)
+										ctrl.items_selected << item
+										if ctrl.on_change != unsafe { nil } {
+											ctrl.on_change(mut win)
+										}
+									}
+								} else if rel_y >= 44.0 && rel_y <= 72.0 {
+									if ctrl.items_selected.len > 0 {
+										item := ctrl.items_selected[0]
+										ctrl.items_selected = ctrl.items_selected.filter(it != item)
+										ctrl.items << item
+										if ctrl.on_change != unsafe { nil } {
+											ctrl.on_change(mut win)
+										}
+									}
+								} else if rel_y >= 78.0 && rel_y <= 106.0 {
+									for item in ctrl.items {
+										ctrl.items_selected << item
+									}
+									ctrl.items.clear()
+									if ctrl.on_change != unsafe { nil } {
+										ctrl.on_change(mut win)
+									}
+								}
+							} else if win.mouse_x >= ctrl.x && win.mouse_x <= ctrl.x + box_w {
+								rel_y := win.mouse_y - (ctrl.y + 24.0)
+								idx := int(rel_y / 24.0)
+								if idx >= 0 && idx < ctrl.items.len {
+									item := ctrl.items[idx]
+									ctrl.items = ctrl.items.filter(it != item)
+									ctrl.items_selected << item
+									if ctrl.on_change != unsafe { nil } {
+										ctrl.on_change(mut win)
+									}
+								}
+							} else if win.mouse_x >= ctrl.x + box_w + 60.0 && win.mouse_x <= ctrl.x + ctrl.w {
+								rel_y := win.mouse_y - (ctrl.y + 24.0)
+								idx := int(rel_y / 24.0)
+								if idx >= 0 && idx < ctrl.items_selected.len {
+									item := ctrl.items_selected[idx]
+									ctrl.items_selected = ctrl.items_selected.filter(it != item)
+									ctrl.items << item
+									if ctrl.on_change != unsafe { nil } {
+										ctrl.on_change(mut win)
+									}
+								}
+							}
 						} else if ctrl.kind == 'checklist' {
 							rel_y := win.mouse_y - (ctrl.y + 6.0)
 							idx := int(rel_y / 24.0)

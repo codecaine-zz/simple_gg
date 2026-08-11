@@ -596,7 +596,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 					}
 					is_sel := item == ctrl.text_value || idx == ctrl.int_value
 					if is_sel {
-						win.gg_ctx.draw_rect_filled(ctrl.x + 2, item_y, ctrl.w - 4, 22.0,
+						win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 3, item_y, ctrl.w - 6, 22.0, 4.0,
 							accent)
 					}
 					item_c := if is_sel {
@@ -608,12 +608,49 @@ pub fn (mut win SimpleWindow) render_ui() {
 					} else {
 						fg
 					}
+					prefix := if is_sel { '▸ ' } else { '  ' }
 					win.gg_ctx.draw_text2(
-						x:     int(ctrl.x + 10)
-						y:     int(item_y + 2)
-						text:  item
+						x:     int(ctrl.x + 8)
+						y:     int(item_y + 3)
+						text:  prefix + item
 						color: item_c
-						size:  13
+						size:  12
+					)
+					item_y += 24.0
+				}
+			}
+			'multi_list_box' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
+					surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
+					border_c)
+
+				mut item_y := ctrl.y + 4.0
+				for _, item in ctrl.items {
+					if item_y + 22.0 > ctrl.y + ctrl.h {
+						break
+					}
+					is_sel := item in ctrl.items_selected
+					if is_sel {
+						win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 3, item_y, ctrl.w - 6, 22.0, 4.0,
+							accent)
+					}
+					item_c := if is_sel {
+						gg.Color{
+							r: 255
+							g: 255
+							b: 255
+						}
+					} else {
+						fg
+					}
+					check_mark := if is_sel { '[✓] ' } else { '[  ] ' }
+					win.gg_ctx.draw_text2(
+						x:     int(ctrl.x + 8)
+						y:     int(item_y + 3)
+						text:  check_mark + item
+						color: item_c
+						size:  12
 					)
 					item_y += 24.0
 				}
@@ -1462,16 +1499,119 @@ pub fn (mut win SimpleWindow) render_ui() {
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 44, ctrl.y + 4, btn_w, 28.0, 4.0, accent)
 				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 38), y: int(ctrl.y + 9), text: 'Next >', color: gg.Color{r: 255, g: 255, b: 255}, size: 11)
 			}
-			'split_view' {
+			'combobox' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, 32.0, 6.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, 32.0, 6.0, border_c)
+				val_str := if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.placeholder }
+				win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(ctrl.y + 8), text: val_str, color: fg, size: 12)
+				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 20), y: int(ctrl.y + 8), text: '▼', color: accent, size: 10)
+
+				if ctrl.is_expanded {
+					pop_h := f32(math.min(150, ctrl.items.len * 26 + 8))
+					pop_y := ctrl.y + 34.0
+					win.gg_ctx.draw_rounded_rect_filled(ctrl.x, pop_y, ctrl.w, pop_h, 6.0, surface)
+					win.gg_ctx.draw_rounded_rect_empty(ctrl.x, pop_y, ctrl.w, pop_h, 6.0, accent)
+					mut opt_y := pop_y + 4.0
+					for item in ctrl.items {
+						if opt_y + 24.0 > pop_y + pop_h { break }
+						is_sel := item == ctrl.text_value
+						if is_sel {
+							win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 2, opt_y, ctrl.w - 4, 22.0, 4.0, accent)
+						}
+						win.gg_ctx.draw_text2(x: int(ctrl.x + 8), y: int(opt_y + 3), text: item, color: if is_sel { gg.Color{r: 255, g: 255, b: 255} } else { fg }, size: 12)
+						opt_y += 26.0
+					}
+				}
+			}
+			'status_bar' {
+				bar_h := if ctrl.h > 0 { ctrl.h } else { 26.0 }
+				win.gg_ctx.draw_rect_filled(ctrl.x, ctrl.y, ctrl.w, bar_h, surface)
+				win.gg_ctx.draw_line(ctrl.x, ctrl.y, ctrl.x + ctrl.w, ctrl.y, border_c)
+				status_txt := if ctrl.text_value.len > 0 { ctrl.text_value } else { 'Ready' }
+				win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(ctrl.y + 5), text: status_txt, color: fg, size: 11)
+				if ctrl.placeholder.len > 0 {
+					win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 90, ctrl.y + 3, 80.0, 20.0, 4.0, accent)
+					win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 82), y: int(ctrl.y + 5), text: ctrl.placeholder, color: gg.Color{r: 255, g: 255, b: 255}, size: 10)
+				}
+			}
+			'step_slider' {
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
 				
-				div_x := ctrl.x + ctrl.w * ctrl.split_ratio
-				win.gg_ctx.draw_line(div_x, ctrl.y, div_x, ctrl.y + ctrl.h, accent)
-				win.gg_ctx.draw_rounded_rect_filled(div_x - 4.0, ctrl.y + ctrl.h / 2.0 - 15.0, 8.0, 30.0, 3.0, accent)
+				track_y := ctrl.y + ctrl.h / 2.0
+				track_w := ctrl.w - 30.0
+				track_x := ctrl.x + 15.0
+				win.gg_ctx.draw_line(track_x, track_y, track_x + track_w, track_y, border_c)
+
+				steps := if ctrl.int_value > 0 { ctrl.int_value } else { 4 }
+				for i in 0 .. (steps + 1) {
+					tx := track_x + f32(i) * (track_w / f32(steps))
+					win.gg_ctx.draw_line(tx, track_y - 4, tx, track_y + 4, accent)
+				}
+
+				pct := f32(ctrl.f64_value / 100.0)
+				knob_x := track_x + pct * track_w
+				win.gg_ctx.draw_line(track_x, track_y, knob_x, track_y, accent)
+				win.gg_ctx.draw_rounded_rect_filled(knob_x - 6.0, track_y - 6.0, 12.0, 12.0, 6.0, accent)
+				val_txt := '${int(ctrl.f64_value)}%'
+				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 30), y: int(ctrl.y + 6), text: val_txt, color: fg, size: 10)
+			}
+			'transfer_list' {
+				box_w := (ctrl.w - 60.0) / 2.0
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, box_w, ctrl.h, 6.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, box_w, ctrl.h, 6.0, border_c)
+				win.gg_ctx.draw_text2(x: int(ctrl.x + 8), y: int(ctrl.y + 6), text: 'Available (${ctrl.items.len})', color: accent, size: 11)
+				win.gg_ctx.draw_line(ctrl.x, ctrl.y + 22, ctrl.x + box_w, ctrl.y + 22, border_c)
+				mut ly := ctrl.y + 26.0
+				for item in ctrl.items {
+					if ly + 22.0 > ctrl.y + ctrl.h { break }
+					win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(ly + 2), text: item, color: fg, size: 11)
+					ly += 24.0
+				}
+
+				btn_x := ctrl.x + box_w + 10.0
+				win.gg_ctx.draw_rounded_rect_filled(btn_x, ctrl.y + 10, 40.0, 28.0, 4.0, accent)
+				win.gg_ctx.draw_text2(x: int(btn_x + 15), y: int(ctrl.y + 16), text: '>', color: gg.Color{r: 255, g: 255, b: 255}, size: 14)
+
+				win.gg_ctx.draw_rounded_rect_filled(btn_x, ctrl.y + 44, 40.0, 28.0, 4.0, accent)
+				win.gg_ctx.draw_text2(x: int(btn_x + 15), y: int(ctrl.y + 50), text: '<', color: gg.Color{r: 255, g: 255, b: 255}, size: 14)
+
+				win.gg_ctx.draw_rounded_rect_filled(btn_x, ctrl.y + 78, 40.0, 28.0, 4.0, accent)
+				win.gg_ctx.draw_text2(x: int(btn_x + 12), y: int(ctrl.y + 84), text: '>>', color: gg.Color{r: 255, g: 255, b: 255}, size: 12)
+
+				rx := ctrl.x + box_w + 60.0
+				win.gg_ctx.draw_rounded_rect_filled(rx, ctrl.y, box_w, ctrl.h, 6.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(rx, ctrl.y, box_w, ctrl.h, 6.0, border_c)
+				win.gg_ctx.draw_text2(x: int(rx + 8), y: int(ctrl.y + 6), text: 'Selected (${ctrl.items_selected.len})', color: accent, size: 11)
+				win.gg_ctx.draw_line(rx, ctrl.y + 22, rx + box_w, ctrl.y + 22, border_c)
+				mut ry := ctrl.y + 26.0
+				for item in ctrl.items_selected {
+					if ry + 22.0 > ctrl.y + ctrl.h { break }
+					win.gg_ctx.draw_text2(x: int(rx + 10), y: int(ry + 2), text: item, color: fg, size: 11)
+					ry += 24.0
+				}
+			}
+			'console_view' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, gg.rgb(20, 22, 30))
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
+				win.gg_ctx.draw_rect_filled(ctrl.x, ctrl.y, ctrl.w, 22.0, gg.rgb(32, 35, 48))
+				win.gg_ctx.draw_text2(x: int(ctrl.x + 8), y: int(ctrl.y + 4), text: 'Console Output Log', color: fg, size: 11)
 				
-				win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(ctrl.y + 10), text: 'Pane A (Left)', color: fg, size: 12)
-				win.gg_ctx.draw_text2(x: int(div_x + 10), y: int(ctrl.y + 10), text: 'Pane B (Right)', color: fg, size: 12)
+				mut log_y := ctrl.y + 26.0
+				for idx, line in ctrl.items {
+					if log_y + 20.0 > ctrl.y + ctrl.h { break }
+					line_c := if line.contains('[ERR]') {
+						gg.rgb(248, 113, 113)
+					} else if line.contains('[WARN]') {
+						gg.rgb(251, 191, 36)
+					} else if line.contains('[OK]') || line.contains('[SUCCESS]') {
+						gg.rgb(52, 211, 153)
+					} else {
+						gg.rgb(209, 213, 219)
+					}
+					win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(log_y), text: '${idx + 1:2d} | ${line}', color: line_c, size: 11)
+					log_y += 20.0
+				}
 			}
 			else {}
 		}
