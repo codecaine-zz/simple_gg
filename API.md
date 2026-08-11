@@ -210,20 +210,20 @@ win.restore_window()
 
 ## 3. Built-in Themes & Styling
 
-`simplegui` includes 17 curated light and dark themes with interactive hover palettes (`hover_color` and `surface_hover`). Setting a theme instantly updates all controls, fonts, hover states, cards, and background colors.
+`simplegui` includes 34 curated light and dark themes across macOS, Futuristic/Sci-Fi, Business/Corporate, and Developer categories with interactive hover palettes (`hover_color` and `surface_hover`). Setting a theme instantly updates all controls, fonts, hover states, cards, and background colors.
 
 ```v
 // Apply theme by name
-win.set_theme('Nord')
+win.set_theme('Synthwave 84')
 
 // Toggle between Apple Light and Apple Dark themes
 win.toggle_window_theme()
 
-// List all available theme names
+// List all available theme names (34 built-in themes)
 themes := simplegui.list_themes()
 
 // Get Theme struct by alias
-theme := simplegui.get_theme('dark') // Accepts 'dark', 'nord', 'cyberpunk', 'github', etc.
+theme := simplegui.get_theme('executive') // Accepts 'dark', 'nord', 'synthwave', 'corporate', 'matrix', etc.
 // Theme fields include: theme.background_color, theme.font_color, theme.accent_color, theme.hover_color, theme.surface_hover
 ```
 
@@ -233,6 +233,23 @@ theme := simplegui.get_theme('dark') // Accepts 'dark', 'nord', 'cyberpunk', 'gi
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **`Apple Light`** | Default clean macOS light mode | `#ffffff` | `#007aff` | `#3395ff` | Light |
 | **`Apple Dark`** | Modern macOS dark mode | `#1c1c1e` | `#0a84ff` | `#409cff` | Dark |
+| **`Synthwave 84`** | Retro 80s synthwave neon twilight | `#261535` | `#ff7edb` | `#36f9f6` | Dark |
+| **`Neon Matrix`** | Digital phosphor green cyber terminal | `#05100a` | `#39ff14` | `#00ffaa` | Dark |
+| **`Holodeck Cyan`** | Futuristic glowing holographic cyan | `#050b14` | `#00f0ff` | `#70f3ff` | Dark |
+| **`Sci-Fi HUD Orange`** | Tactical amber cockpit HUD | `#121316` | `#ff6600` | `#ffcc00` | Dark |
+| **`Quantum Violet`** | Quantum glow electric purple dark | `#110926` | `#9d4edd` | `#c77dff` | Dark |
+| **`Corporate Navy`** | Enterprise corporate navy light mode | `#f8fafc` | `#1e40af` | `#2563eb` | Light |
+| **`Executive Slate`** | Dark executive slate dashboard | `#1e293b` | `#3b82f6` | `#60a5fa` | Dark |
+| **`Financial Gold`** | Fintech luxury gold & dark bronze | `#181614` | `#d97706` | `#f59e0b` | Dark |
+| **`Enterprise Light`** | Clean modern SaaS admin panel | `#f3f4f6` | `#0d9488` | `#14b8a6` | Light |
+| **`Modern Minimalist`** | Stark high-contrast monochrome | `#ffffff` | `#18181b` | `#3f3f46` | Light |
+| **`Pro Charcoal`** | Sleek pro charcoal SaaS dark mode | `#18181b` | `#6366f1` | `#818cf8` | Dark |
+| **`Tokyo Night`** | Iconic Tokyo neon night IDE theme | `#1a1b26` | `#7aa2f7` | `#bb9af7` | Dark |
+| **`One Dark Pro`** | Atom One Dark editor palette | `#282c34` | `#61afef` | `#c678dd` | Dark |
+| **`Gruvbox Dark`** | Retro warm orange/green developer theme | `#282828` | `#fabd2f` | `#fe8019` | Dark |
+| **`Monokai Pro`** | Classic Monokai vivid dark palette | `#2d2a2e` | `#ff6188` | `#ffd866` | Dark |
+| **`Rosé Pine`** | Natural rose gold & purple theme | `#191724` | `#ebbcba` | `#c4a7e7` | Dark |
+| **`Coffee Roast`** | Warm cozy espresso dark mode | `#1c1613` | `#d97706` | `#f59e0b` | Dark |
 | **`Nord`** | Cool arctic frost blue palette | `#2e3440` | `#88c0d0` | `#81a1c1` | Dark |
 | **`Dracula`** | Classic vampire dark purple | `#282a36` | `#bd93f9` | `#ff79c6` | Dark |
 | **`Cyberpunk`** | High-contrast neon dark vibe | `#0d0d15` | `#ff007f` | `#7000ff` | Dark |

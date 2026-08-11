@@ -8,19 +8,8 @@ fn main() {
 	win.set_theme('Catppuccin Mocha')
 	win.add_heading('Theme Gallery')
 
-	win.add_form_dropdown('Theme:', 'theme_picker', [
-		'Apple Dark',
-		'Apple Light',
-		'Catppuccin Mocha',
-		'Cyberpunk',
-		'Nord',
-		'Dracula',
-		'GitHub Dark',
-		'GitHub Light',
-		'Solarized Dark',
-		'Navy Blue',
-		'Forest Green',
-	], 'Catppuccin Mocha')
+	all_themes := simplegui.list_themes()
+	win.add_form_dropdown('Theme:', 'theme_picker', all_themes, 'Catppuccin Mocha')
 
 	win.on_change('theme_picker', fn (mut win simplegui.SimpleWindow) {
 		selected_theme := win.get_text('theme_picker')

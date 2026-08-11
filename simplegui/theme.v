@@ -54,6 +54,23 @@ pub fn list_themes() []string {
 		'Nord',
 		'Dracula',
 		'Cyberpunk',
+		'Synthwave 84',
+		'Neon Matrix',
+		'Holodeck Cyan',
+		'Sci-Fi HUD Orange',
+		'Quantum Violet',
+		'Corporate Navy',
+		'Executive Slate',
+		'Financial Gold',
+		'Enterprise Light',
+		'Modern Minimalist',
+		'Pro Charcoal',
+		'Tokyo Night',
+		'One Dark Pro',
+		'Gruvbox Dark',
+		'Monokai Pro',
+		'Rosé Pine',
+		'Coffee Roast',
 		'Solarized Light',
 		'Solarized Dark',
 		'GitHub Dark',
@@ -64,7 +81,7 @@ pub fn list_themes() []string {
 }
 
 pub fn get_theme(theme_name string) Theme {
-	normalized := theme_name.to_lower().replace(' ', '').replace('_', '').replace('-', '')
+	normalized := theme_name.to_lower().replace(' ', '').replace('_', '').replace('-', '').replace('é', 'e')
 	return match normalized {
 		'appledark', 'dark' {
 			Theme{
@@ -183,6 +200,210 @@ pub fn get_theme(theme_name string) Theme {
 				hover_color: '#7000ff'
 				surface_hover: '#1f1f2e'
 				description: 'Neon glow dark contrast palette'
+				is_dark: true
+			}
+		}
+		'synthwave84', 'synthwave', 'synth' {
+			Theme{
+				name: 'Synthwave 84'
+				background_color: '#261535'
+				font_color: '#ffeefd'
+				accent_color: '#ff7edb'
+				hover_color: '#36f9f6'
+				surface_hover: '#361d4a'
+				description: 'Retro 80s synthwave neon twilight theme'
+				is_dark: true
+			}
+		}
+		'neonmatrix', 'matrix' {
+			Theme{
+				name: 'Neon Matrix'
+				background_color: '#05100a'
+				font_color: '#00ff66'
+				accent_color: '#39ff14'
+				hover_color: '#00ffaa'
+				surface_hover: '#0e2417'
+				description: 'Digital phosphor green cyber terminal theme'
+				is_dark: true
+			}
+		}
+		'holodeckcyan', 'holodeck', 'holo' {
+			Theme{
+				name: 'Holodeck Cyan'
+				background_color: '#050b14'
+				font_color: '#e0f7fc'
+				accent_color: '#00f0ff'
+				hover_color: '#70f3ff'
+				surface_hover: '#0e1e38'
+				description: 'Futuristic glowing holographic cyan display'
+				is_dark: true
+			}
+		}
+		'scifihudorange', 'scifihud', 'hud' {
+			Theme{
+				name: 'Sci-Fi HUD Orange'
+				background_color: '#121316'
+				font_color: '#ffaa00'
+				accent_color: '#ff6600'
+				hover_color: '#ffcc00'
+				surface_hover: '#22252d'
+				description: 'Tactical amber futuristic cockpit HUD theme'
+				is_dark: true
+			}
+		}
+		'quantumviolet', 'quantum' {
+			Theme{
+				name: 'Quantum Violet'
+				background_color: '#110926'
+				font_color: '#f3e8ff'
+				accent_color: '#9d4edd'
+				hover_color: '#c77dff'
+				surface_hover: '#211242'
+				description: 'Quantum glow electric purple dark palette'
+				is_dark: true
+			}
+		}
+		'corporatenavy', 'corporate' {
+			Theme{
+				name: 'Corporate Navy'
+				background_color: '#f8fafc'
+				font_color: '#0f172a'
+				accent_color: '#1e40af'
+				hover_color: '#2563eb'
+				surface_hover: '#e2e8f0'
+				description: 'Professional enterprise corporate navy light theme'
+				is_dark: false
+			}
+		}
+		'executiveslate', 'executive' {
+			Theme{
+				name: 'Executive Slate'
+				background_color: '#1e293b'
+				font_color: '#f8fafc'
+				accent_color: '#3b82f6'
+				hover_color: '#60a5fa'
+				surface_hover: '#334155'
+				description: 'Dark executive slate enterprise dashboard theme'
+				is_dark: true
+			}
+		}
+		'financialgold', 'finance', 'gold' {
+			Theme{
+				name: 'Financial Gold'
+				background_color: '#181614'
+				font_color: '#fef3c7'
+				accent_color: '#d97706'
+				hover_color: '#f59e0b'
+				surface_hover: '#2a241e'
+				description: 'Fintech luxury gold & dark bronze financial theme'
+				is_dark: true
+			}
+		}
+		'enterpriselight', 'enterprise' {
+			Theme{
+				name: 'Enterprise Light'
+				background_color: '#f3f4f6'
+				font_color: '#1f2937'
+				accent_color: '#0d9488'
+				hover_color: '#14b8a6'
+				surface_hover: '#e5e7eb'
+				description: 'Clean modern enterprise admin & SaaS dashboard'
+				is_dark: false
+			}
+		}
+		'modernminimalist', 'minimalist', 'monochrome' {
+			Theme{
+				name: 'Modern Minimalist'
+				background_color: '#ffffff'
+				font_color: '#111111'
+				accent_color: '#18181b'
+				hover_color: '#3f3f46'
+				surface_hover: '#f4f4f5'
+				description: 'High-contrast sleek monochrome minimalist theme'
+				is_dark: false
+			}
+		}
+		'procharcoal', 'charcoal' {
+			Theme{
+				name: 'Pro Charcoal'
+				background_color: '#18181b'
+				font_color: '#fafafa'
+				accent_color: '#6366f1'
+				hover_color: '#818cf8'
+				surface_hover: '#27272a'
+				description: 'Sleek pro charcoal dark mode for SaaS apps'
+				is_dark: true
+			}
+		}
+		'tokyonight', 'tokyo' {
+			Theme{
+				name: 'Tokyo Night'
+				background_color: '#1a1b26'
+				font_color: '#c0caf5'
+				accent_color: '#7aa2f7'
+				hover_color: '#bb9af7'
+				surface_hover: '#24283b'
+				description: 'Iconic Tokyo neon night developer dark palette'
+				is_dark: true
+			}
+		}
+		'onedarkpro', 'onedark' {
+			Theme{
+				name: 'One Dark Pro'
+				background_color: '#282c34'
+				font_color: '#abb2bf'
+				accent_color: '#61afef'
+				hover_color: '#c678dd'
+				surface_hover: '#353b45'
+				description: 'Popular Atom One Dark editor palette'
+				is_dark: true
+			}
+		}
+		'gruvboxdark', 'gruvbox' {
+			Theme{
+				name: 'Gruvbox Dark'
+				background_color: '#282828'
+				font_color: '#ebdbb2'
+				accent_color: '#fabd2f'
+				hover_color: '#fe8019'
+				surface_hover: '#3c3836'
+				description: 'Retro warm dark orange & green developer theme'
+				is_dark: true
+			}
+		}
+		'monokaipro', 'monokai' {
+			Theme{
+				name: 'Monokai Pro'
+				background_color: '#2d2a2e'
+				font_color: '#fcfcfa'
+				accent_color: '#ff6188'
+				hover_color: '#ffd866'
+				surface_hover: '#403c40'
+				description: 'Classic Monokai vivid dark contrast theme'
+				is_dark: true
+			}
+		}
+		'rosepine', 'rose' {
+			Theme{
+				name: 'Rosé Pine'
+				background_color: '#191724'
+				font_color: '#e0def4'
+				accent_color: '#ebbcba'
+				hover_color: '#c4a7e7'
+				surface_hover: '#26233a'
+				description: 'Soothing natural rose gold & purple dark theme'
+				is_dark: true
+			}
+		}
+		'coffeeroast', 'coffee', 'warm' {
+			Theme{
+				name: 'Coffee Roast'
+				background_color: '#1c1613'
+				font_color: '#fef3c7'
+				accent_color: '#d97706'
+				hover_color: '#f59e0b'
+				surface_hover: '#2d231e'
+				description: 'Warm cozy coffee roast espresso dark theme'
 				is_dark: true
 			}
 		}

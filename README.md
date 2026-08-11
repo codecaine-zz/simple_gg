@@ -80,7 +80,7 @@ The repository includes beginner-friendly example programs in the [`examples/`](
 | Example | Description | Run Command | Snapshot |
 | :--- | :--- | :--- | :--- |
 | **[`01_quickstart.v`](examples/01_quickstart.v)** | First starter app with inputs and button callbacks. | `v run examples/01_quickstart.v` | ![Snapshot 01](snapshots/ex1.png) |
-| **[`02_theme_gallery.v`](examples/02_theme_gallery.v)** | Live theme switcher across 17 production palettes. | `v run examples/02_theme_gallery.v` | ![Snapshot 02](snapshots/ex2.png) |
+| **[`02_theme_gallery.v`](examples/02_theme_gallery.v)** | Live theme switcher across 34 production palettes. | `v run examples/02_theme_gallery.v` | ![Snapshot 02](snapshots/ex2.png) |
 | **[`03_layout_containers.v`](examples/03_layout_containers.v)** | Horizontal rows, multi-column grids, and group cards. | `v run examples/03_layout_containers.v` | ![Snapshot 03](snapshots/ex3.png) |
 | **[`04_widgets_and_forms.v`](examples/04_widgets_and_forms.v)** | Form inputs, sliders, steppers, ratings, dates, and metric cards. | `v run examples/04_widgets_and_forms.v` | ![Snapshot 04](snapshots/ex4.png) |
 | **[`05_nameless_shortcuts.v`](examples/05_nameless_shortcuts.v)** | Rapid prototyping using nameless shortcuts (`win.input()`). | `v run examples/05_nameless_shortcuts.v` | ![Snapshot 05](snapshots/ex5.png) |
