@@ -265,4 +265,45 @@ pub fn (mut win SimpleWindow) load_state_json(file_path string) ! {
 	}
 }
 
+// =============================================================================
+// Control & State Binding API (Two-Way Data Binding)
+// =============================================================================
+
+// bind_state establishes automatic two-way data binding between control `control_name` and state store `key`.
+// Updates to state key automatically update the UI control value, and UI control edits automatically sync back to state key.
+pub fn (mut win SimpleWindow) bind_state(control_name string, key string) &SimpleWindow {
+	if key in win.state_store {
+		win.set_text(control_name, win.state_store[key])
+	} else {
+		init_val := win.get_text(control_name)
+		win.state_store[key] = init_val
+	}
+
+	win.on_state_change(key, fn [control_name] (mut win SimpleWindow, val string) {
+		if win.get_text(control_name) != val {
+			win.set_text(control_name, val)
+		}
+	})
+
+	win.on_change(control_name, fn [key, control_name] (mut win SimpleWindow) {
+		val := win.get_text(control_name)
+		if win.get_state(key) != val {
+			win.set_state(key, val)
+		}
+	})
+
+	return win
+}
+
+// bind_control is an ergonomic alias for `bind_state`.
+pub fn (mut win SimpleWindow) bind_control(control_name string, key string) &SimpleWindow {
+	return win.bind_state(control_name, key)
+}
+
+// bind_value is an ergonomic alias for `bind_state`.
+pub fn (mut win SimpleWindow) bind_value(control_name string, key string) &SimpleWindow {
+	return win.bind_state(control_name, key)
+}
+
+
 

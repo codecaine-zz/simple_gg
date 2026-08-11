@@ -52,6 +52,7 @@ This directory contains beginner-friendly, well-commented examples demonstrating
 | **[`12_system_and_stdlib_features.v`](12_system_and_stdlib_features.v)** | System calls & stdlib toolkit    | Desktop notifications, hardware specs (CPU/RAM/cores), clipboard read/write, system paths, HTTP GET, RegEx, SHA256 crypto, and random password generator. | ![Snapshot 12](../snapshots/ex12.png)  |
 | **[`13_reactive_state_store.v`](13_reactive_state_store.v)**           | Reactive state & persistence     | Key-value state store, typed accessors (`int`/`bool`), reactive state listeners (`on_state_change`), and JSON disk serialization/restoration.             | ![Snapshot 13](../snapshots/ex13.png)  |
 | **[`16_interval_timers.v`](16_interval_timers.v)**                     | Interval timers & timeouts       | Recurring timers (`set_interval`), one-shot delays (`set_timeout`), clock polling, auto-incrementing progress, and timer control APIs.                    | Run locally to preview                 |
+| **[`17_data_and_event_binding.v`](17_data_and_event_binding.v)**       | Two-way data & event binding     | Control-to-state binding (`bind_state`), fluent event aliases (`bind_click`), keyboard key & shortcut binding (`bind_key`, `bind_shortcut`).               | Run locally to preview                 |
 
 ---
 

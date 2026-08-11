@@ -56,6 +56,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 						rel_x := math.max(f32(0.0), math.min(ctrl.w, win.mouse_x - ctrl.x))
 						pct := rel_x / ctrl.w
 						ctrl.int_value = math.max(0, math.min(100, int(pct * 100.0)))
+						ctrl.text_value = ctrl.int_value.str()
 						if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
 					} else if ctrl.kind == 'step_slider' && win.mouse_down && (ctrl.is_pressed || ctrl.is_focused) {
 						rel_x := win.mouse_x - (ctrl.x + 15.0)
@@ -207,6 +208,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 
 						if ctrl.kind in ['checkbox', 'toggle', 'switch'] {
 							ctrl.bool_value = !ctrl.bool_value
+							ctrl.text_value = ctrl.bool_value.str()
 							if ctrl.on_change != unsafe { nil } {
 								ctrl.on_change(mut win)
 							}
@@ -214,6 +216,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 							rel_x := win.mouse_x - ctrl.x
 							pct := rel_x / ctrl.w
 							ctrl.int_value = int(pct * 100.0)
+							ctrl.text_value = ctrl.int_value.str()
 							if ctrl.on_change != unsafe { nil } {
 								ctrl.on_change(mut win)
 							}

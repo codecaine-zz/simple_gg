@@ -28,6 +28,7 @@ Whether you are building a 5-minute utility tool, a multi-tab admin panel, or an
 15. [Ergonomic Standalone Functions](#15-ergonomic-standalone-functions)
 16. [Interval Timers & Scheduled Callbacks](#16-interval-timers--scheduled-callbacks)
 17. [Modern UI & RAD UX Enhancements](#17-modern-ui--rad-ux-enhancements)
+18. [Data & Event Binding (`bind`)](#18-data--event-binding-bind)
 
 ---
 
@@ -1200,6 +1201,97 @@ win.end_tab_container()
 ### 6. Live Search Highlighting & Filtering (`set_table_search_filter`)
 ```v
 win.set_table_search_filter('tbl_users', 'Ada')
+```
+
+---
+
+## 18. Data & Event Binding (`bind`)
+
+`simplegui` provides ergonomic binding mechanisms to connect UI controls to reactive state keys, handle UI events with concise method chaining, and bind keyboard keys and shortcuts.
+
+### 1. Two-Way Control & Reactive State Store Binding (`bind_state`)
+
+`bind_state` (or alias `bind_control`, `bind_value`) binds a UI control directly to a key in the application state store.
+- When `win.set_state(key, val)` is called anywhere in your app, the control value automatically updates in the UI.
+- When the user edits or interacts with the control (typing text, toggling a checkbox, moving a slider), the state store key automatically updates!
+
+```v
+// 1. Create UI controls
+win.add_textbox('input_user', 'Ada Lovelace')
+win.add_checkbox('chk_notifications', 'Enable Notifications', true)
+win.add_slider('slider_volume', 75)
+
+// 2. Bind controls to state keys (Two-Way Data Binding)
+win.bind_state('input_user', 'username')
+win.bind_control('chk_notifications', 'notify_enabled')
+win.bind_value('slider_volume', 'audio_volume')
+
+// Updating state anywhere in your code automatically syncs the UI control!
+win.set_state('username', 'Alan Turing')
+win.set_state('notify_enabled', 'false')
+
+// Reading state store gets the live user input!
+user := win.get_state('username')
+```
+
+### 2. Fluent Event Binding Aliases (`bind_click`, `bind_change`, `bind_event`)
+
+`simplegui` provides fluent `bind_*` event helpers that fit seamlessly into method chaining pipelines:
+
+```v
+// Bind click callback
+win.bind_click('btn_submit', fn (mut win simplegui.SimpleWindow) {
+	win.info('Submitted', 'Form processed successfully!')
+})
+
+// Bind value change callback
+win.bind_change('theme_picker', fn (mut win simplegui.SimpleWindow) {
+	new_theme := win.get_text('theme_picker')
+	win.set_theme(new_theme)
+})
+
+// Bind Enter key press on input field
+win.bind_enter('input_search', fn (mut win simplegui.SimpleWindow) {
+	q := win.get_text('input_search')
+	println('Search query: ${q}')
+})
+
+// Bind hover enter listener
+win.bind_hover('card_box', fn (mut win simplegui.SimpleWindow) {
+	println('Hovering over card box')
+})
+
+// Bind double-click and right-click
+win.bind_dblclick('list_item', fn (mut win simplegui.SimpleWindow) {
+	println('Item double-clicked')
+})
+win.bind_right_click('list_item', fn (mut win simplegui.SimpleWindow) {
+	println('Context menu requested')
+})
+
+// Generic event binding by event name ('click', 'change', 'enter', 'hover', 'dblclick', 'right_click')
+win.bind_event('btn_action', 'click', fn (mut win simplegui.SimpleWindow) {
+	win.toast('Action executed!')
+})
+```
+
+### 3. Keyboard Key & Shortcut Binding (`bind_key`, `bind_shortcut`)
+
+Bind individual keyboard keys or named shortcuts to custom callbacks:
+
+```v
+// Bind specific key press (e.g. gg.KeyCode.f5 or gg.KeyCode.escape)
+win.bind_key(.f5, fn (mut win simplegui.SimpleWindow) {
+	win.toast('Refreshed data!')
+})
+
+// Bind named shortcut strings ('Escape', 'F1', 'F5', etc.)
+win.bind_shortcut('Escape', fn (mut win simplegui.SimpleWindow) {
+	win.hide_modal()
+})
+win.bind_shortcut('F1', fn (mut win simplegui.SimpleWindow) {
+	win.info('Help', 'Press Ctrl+K for Command Palette')
+})
 ```
 
 ---

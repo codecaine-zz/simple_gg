@@ -938,6 +938,11 @@ pub fn (mut win SimpleWindow) add_heading(title string) &SimpleWindow {
 	return win
 }
 
+pub fn (mut win SimpleWindow) add_subheading(title string) &SimpleWindow {
+	win.add_control(Control{ kind: 'label', title: title, font_size: 14, h: 22 })
+	return win
+}
+
 pub fn (mut win SimpleWindow) add_input(name string, value string) &SimpleWindow {
 	win.add_control(Control{ name: name, kind: 'input', text_value: value, h: 32 })
 	return win
@@ -1991,6 +1996,24 @@ pub fn (win &SimpleWindow) get_text(name string, default_val ...string) string {
 // get_text_or retrieves the text value string for control `name`, returning `fallback` if the control is not found.
 pub fn (win &SimpleWindow) get_text_or(name string, fallback string) string {
 	if ctrl := win.control_map[name] {
+		if ctrl.kind in ['checkbox', 'switch', 'toggle'] {
+			return ctrl.bool_value.str()
+		}
+		if ctrl.kind in ['slider', 'number', 'progress', 'stepper', 'rating', 'spinner'] {
+			if ctrl.text_value.len > 0 {
+				return ctrl.text_value
+			}
+			return ctrl.int_value.str()
+		} else if ctrl.kind in ['step_slider', 'range_slider'] {
+			if ctrl.text_value.len > 0 {
+				return ctrl.text_value
+			}
+			return ctrl.f64_value.str()
+		} else if ctrl.kind in ['dropdown', 'select', 'combobox'] {
+			if ctrl.int_value >= 0 && ctrl.int_value < ctrl.items.len {
+				return ctrl.items[ctrl.int_value]
+			}
+		}
 		return ctrl.text_value
 	}
 	return fallback
@@ -2000,7 +2023,23 @@ pub fn (win &SimpleWindow) get_text_or(name string, fallback string) string {
 pub fn (mut win SimpleWindow) set_text(name string, value string) &SimpleWindow {
 	if mut ctrl := win.get_control_ptr(name) {
 		ctrl.text_value = value
-		ctrl.title = value
+		if ctrl.kind in ['label', 'heading', 'button', 'badge', 'link', 'tag'] {
+			ctrl.title = value
+		}
+		if ctrl.kind in ['checkbox', 'switch', 'toggle'] {
+			ctrl.bool_value = (value.to_lower().trim_space() in ['true', '1', 'yes', 'on'])
+		} else if ctrl.kind in ['slider', 'number', 'progress', 'stepper', 'rating', 'spinner'] {
+			ctrl.int_value = value.int()
+		} else if ctrl.kind in ['step_slider', 'range_slider'] {
+			ctrl.f64_value = value.f64()
+		} else if ctrl.kind in ['dropdown', 'select', 'combobox'] {
+			for idx, item in ctrl.items {
+				if item == value {
+					ctrl.int_value = idx
+					break
+				}
+			}
+		}
 	}
 	return win
 }
@@ -2396,6 +2435,81 @@ pub fn (mut win SimpleWindow) on_key_down(cb fn (mut win SimpleWindow, key gg.Ke
 pub fn (mut win SimpleWindow) on_window_resize(cb fn (mut win SimpleWindow, w int, h int)) &SimpleWindow {
 	win.on_resize_cb = cb
 	return win
+}
+
+// Fluent & Concise Event Binding Aliases
+
+pub fn (mut win SimpleWindow) bind_click(name string, cb VoidEventCallback) &SimpleWindow {
+	return win.on_click(name, cb)
+}
+
+pub fn (mut win SimpleWindow) bind_change(name string, cb VoidEventCallback) &SimpleWindow {
+	return win.on_change(name, cb)
+}
+
+pub fn (mut win SimpleWindow) bind_enter(name string, cb VoidEventCallback) &SimpleWindow {
+	return win.on_enter(name, cb)
+}
+
+pub fn (mut win SimpleWindow) bind_hover(name string, cb VoidEventCallback) &SimpleWindow {
+	return win.on_hover(name, cb)
+}
+
+pub fn (mut win SimpleWindow) bind_dblclick(name string, cb VoidEventCallback) &SimpleWindow {
+	return win.on_dblclick(name, cb)
+}
+
+pub fn (mut win SimpleWindow) bind_double_click(name string, cb VoidEventCallback) &SimpleWindow {
+	return win.on_dblclick(name, cb)
+}
+
+pub fn (mut win SimpleWindow) bind_right_click(name string, cb VoidEventCallback) &SimpleWindow {
+	return win.on_right_click(name, cb)
+}
+
+pub fn (mut win SimpleWindow) bind_event(name string, event_type string, cb VoidEventCallback) &SimpleWindow {
+	match event_type.to_lower().trim_space() {
+		'click' { return win.on_click(name, cb) }
+		'change' { return win.on_change(name, cb) }
+		'enter' { return win.on_enter(name, cb) }
+		'hover' { return win.on_hover(name, cb) }
+		'dblclick', 'double_click', 'doubleclick' { return win.on_dblclick(name, cb) }
+		'right_click', 'rightclick' { return win.on_right_click(name, cb) }
+		else { return win.on_click(name, cb) }
+	}
+}
+
+pub fn (mut win SimpleWindow) bind_key(key gg.KeyCode, cb fn (mut win SimpleWindow)) &SimpleWindow {
+	prev_cb := win.on_key_down_cb
+	win.on_key_down(fn [prev_cb, key, cb] (mut win SimpleWindow, k gg.KeyCode) {
+		if prev_cb != unsafe { nil } {
+			prev_cb(mut win, k)
+		}
+		if k == key {
+			cb(mut win)
+		}
+	})
+	return win
+}
+
+pub fn (mut win SimpleWindow) bind_shortcut(shortcut_str string, cb fn (mut win SimpleWindow)) &SimpleWindow {
+	target_key := match shortcut_str.to_lower().trim_space() {
+		'enter', 'return' { gg.KeyCode.enter }
+		'escape', 'esc' { gg.KeyCode.escape }
+		'space' { gg.KeyCode.space }
+		'tab' { gg.KeyCode.tab }
+		'backspace' { gg.KeyCode.backspace }
+		'delete' { gg.KeyCode.delete }
+		'up' { gg.KeyCode.up }
+		'down' { gg.KeyCode.down }
+		'left' { gg.KeyCode.left }
+		'right' { gg.KeyCode.right }
+		'f1' { gg.KeyCode.f1 }
+		'f2' { gg.KeyCode.f2 }
+		'f5' { gg.KeyCode.f5 }
+		else { return win }
+	}
+	return win.bind_key(target_key, cb)
 }
 
 // Modal Dialog & Overlay API
