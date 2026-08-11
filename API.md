@@ -747,6 +747,33 @@ win.set_control_visible('btn_submit', true)
 win.set_control_enabled('btn_submit', true)
 ```
 
+### Linux & Cross-Platform Font Resolution
+
+`simplegui` automatically resolves high-quality system TTF/OTF fonts on Linux distributions (such as Ubuntu, Debian, Fedora, Arch Linux, openSUSE, etc.) to ensure crisp, anti-aliased text rendering across all desktop screens.
+
+```v
+// Programmatically set a custom TTF font path
+win.set_font_path('/path/to/custom_font.ttf')
+
+// Environment variable override option:
+// SIMPLEGUI_FONT_PATH=/path/to/myfont.ttf ./my_app
+
+// Query resolved window font path or linux candidate search list
+font_path := simplegui.resolve_window_font_path()
+candidates := simplegui.linux_font_candidates()
+```
+
+#### Linux System Font Resolution Search Order:
+1. `SIMPLEGUI_FONT_PATH` environment variable override (if set and file exists).
+2. `win.font_path` explicit window property configuration.
+3. Ubuntu Font Family (`Ubuntu-R.ttf`, `Ubuntu-Regular.ttf`, `Ubuntu.ttf`).
+4. Liberation Sans (`LiberationSans-Regular.ttf`).
+5. DejaVu Sans (`DejaVuSans.ttf`).
+6. Noto Sans (`NotoSans-Regular.ttf`).
+7. Cantarell (`Cantarell-Regular.otf`).
+8. FreeSans & Roboto (`FreeSans.ttf`, `Roboto-Regular.ttf`).
+9. User Home Directory Fonts (`~/.local/share/fonts/`, `~/.fonts/`).
+
 ---
 
 ## 9. Reading & Writing Control Values

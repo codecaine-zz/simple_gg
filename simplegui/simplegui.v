@@ -95,6 +95,7 @@ pub mut:
 	modal_on_confirm  VoidEventCallback = unsafe { nil } // Callback when confirm button clicked
 	modal_on_cancel   VoidEventCallback = unsafe { nil } // Callback when cancel button clicked
 	timers            map[string]&IntervalTimer // Map of scheduled interval and timeout timers
+	font_path         string // Custom font file path override (defaults to auto-detected system TTF on Linux)
 }
 
 // new_simple_window creates and initializes a new `SimpleWindow` instance with specified title, width, and height.
@@ -2304,6 +2305,12 @@ pub fn (mut win SimpleWindow) set_control_font_name(name string, font_name strin
 	return win
 }
 
+// set_font_path configures custom TTF or OTF font file path for window text rendering.
+pub fn (mut win SimpleWindow) set_font_path(path string) &SimpleWindow {
+	win.font_path = path
+	return win
+}
+
 pub fn (mut win SimpleWindow) set_control_text_align(name string, align string) &SimpleWindow {
 	if mut ctrl := win.get_control_ptr(name) {
 		ctrl.text_align = align
@@ -2911,6 +2918,12 @@ fn event_cb(e &gg.Event, mut win SimpleWindow) {
 }
 
 pub fn (mut win SimpleWindow) run() {
+	resolved_font := if win.font_path.len > 0 && os.exists(win.font_path) {
+		win.font_path
+	} else {
+		resolve_window_font_path()
+	}
+
 	win.gg_ctx = gg.new_context(
 		width:            win.width
 		height:           win.height
@@ -2921,6 +2934,7 @@ pub fn (mut win SimpleWindow) run() {
 		bg_color:         parse_hex_color(win.theme.background_color)
 		fullscreen:       win.fullscreen
 		enable_dragndrop: true
+		font_path:        resolved_font
 	)
 	win.gg_ctx.run()
 }

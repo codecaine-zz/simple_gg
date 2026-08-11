@@ -84,6 +84,7 @@ This directory contains beginner-friendly, well-commented examples demonstrating
 | **[`15_modern_ui_features_showcase.v`](15_modern_ui_features_showcase.v)** | Modern UI showcase               | Complete showcase of window controls, themes, layout flex containers, form inputs, reactive state, system toolkit.                                         | ![Snapshot 15](../snapshots/ex15.png)  |
 | **[`16_interval_timers.v`](16_interval_timers.v)**                     | Interval timers & timeouts       | Recurring timers (`set_interval`), one-shot delays (`set_timeout`), clock polling, auto-incrementing progress, and timer control APIs.                    | ![Snapshot 16](../snapshots/ex16.png)  |
 | **[`17_data_and_event_binding.v`](17_data_and_event_binding.v)**       | Two-way data & event binding     | Control-to-state binding (`bind_state`), fluent event aliases (`bind_click`), keyboard key & shortcut binding (`bind_key`, `bind_shortcut`).               | ![Snapshot 17](../snapshots/ex17.png)  |
+| **[`18_custom_font_loading.v`](18_custom_font_loading.v)**             | Custom font & typography        | Platform font resolution (`simplegui.resolve_window_font_path`), custom TTF/OTF setting (`win.set_font_path`), macOS/Linux font discovery & env overrides. | ![Snapshot 18](../snapshots/ex18.png)  |
 
 ---
 
