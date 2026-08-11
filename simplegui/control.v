@@ -424,6 +424,15 @@ pub fn (c &Control) set_font_name(font_name string) &Control {
 	return c
 }
 
+// set_placeholder sets placeholder hint text for input controls.
+pub fn (c &Control) set_placeholder(ph string) &Control {
+	unsafe {
+		mut ptr := &Control(c)
+		ptr.placeholder = ph
+	}
+	return c
+}
+
 // set_text_align sets text alignment within control bounds ('left', 'center', 'right').
 pub fn (c &Control) set_text_align(align string) &Control {
 	unsafe {

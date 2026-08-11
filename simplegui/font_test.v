@@ -43,3 +43,30 @@ fn test_window_set_font_path() {
 	win.set_font_path('/custom/font.ttf')
 	assert win.font_path == '/custom/font.ttf'
 }
+
+fn test_dynamic_control_font_styling() {
+	mut win := new_simple_window('Font Styling Test Window', 400, 300)
+	win.add_label('lbl_test', 'Test Label')
+	win.add_button('btn_test', 'Test Button')
+
+	win.set_control_font_size('lbl_test', 24)
+	win.set_control_font_bold('lbl_test', true)
+	win.set_control_font_color('lbl_test', '#30d158')
+
+	assert win.get_control_font_size('lbl_test') == 24
+	if ctrl := win.control_map['lbl_test'] {
+		assert ctrl.font_bold == true
+		assert ctrl.font_color == '#30d158'
+	}
+
+	win.set_control_font_size('btn_test', 18)
+	win.set_control_font_bold('btn_test', false)
+	win.set_control_font_color('btn_test', '#ff9f0a')
+
+	assert win.get_control_font_size('btn_test') == 18
+	if ctrl := win.control_map['btn_test'] {
+		assert ctrl.font_bold == false
+		assert ctrl.font_color == '#ff9f0a'
+	}
+}
+

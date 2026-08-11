@@ -2282,7 +2282,11 @@ pub fn (win &SimpleWindow) get_control_expand_fill(name string) bool {
 pub fn (mut win SimpleWindow) set_control_font_size(name string, size int) &SimpleWindow {
 	if mut ctrl := win.get_control_ptr(name) {
 		ctrl.font_size = size
+		if ctrl.h < f32(size + 6) {
+			ctrl.h = f32(size + 6)
+		}
 	}
+	win.recalculate_layout()
 	return win
 }
 
@@ -2297,6 +2301,7 @@ pub fn (mut win SimpleWindow) set_control_font_bold(name string, bold bool) &Sim
 	if mut ctrl := win.get_control_ptr(name) {
 		ctrl.font_bold = bold
 	}
+	win.recalculate_layout()
 	return win
 }
 
@@ -2310,6 +2315,13 @@ pub fn (mut win SimpleWindow) set_control_font_name(name string, font_name strin
 // set_font_path configures custom TTF or OTF font file path for window text rendering.
 pub fn (mut win SimpleWindow) set_font_path(path string) &SimpleWindow {
 	win.font_path = path
+	return win
+}
+
+pub fn (mut win SimpleWindow) set_control_placeholder(name string, placeholder string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.placeholder = placeholder
+	}
 	return win
 }
 

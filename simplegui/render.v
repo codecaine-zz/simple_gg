@@ -65,35 +65,47 @@ pub fn (mut win SimpleWindow) render_ui() {
 			'label' {
 				txt_c := if ctrl.font_color.len > 0 { parse_hex_color(ctrl.font_color) } else { fg }
 				lbl_txt := if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.title }
+				lbl_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 15 }
+				is_mono := ctrl.font_name.len > 0 && (ctrl.font_name.to_lower().contains('mono') || ctrl.font_name.to_lower().contains('courier'))
 				win.gg_ctx.draw_text2(
 					x:     int(ctrl.x)
 					y:     int(ctrl.y + 4)
 					text:  lbl_txt
 					color: txt_c
-					size:  15
+					size:  lbl_sz
+					bold:  ctrl.font_bold
+					mono:  is_mono
 				)
 			}
 			'heading' {
 				txt_c := if ctrl.font_color.len > 0 { parse_hex_color(ctrl.font_color) } else { fg }
 				hd_txt := if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.title }
+				hd_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 22 }
+				is_mono := ctrl.font_name.len > 0 && (ctrl.font_name.to_lower().contains('mono') || ctrl.font_name.to_lower().contains('courier'))
 				win.gg_ctx.draw_text2(
 					x:     int(ctrl.x)
 					y:     int(ctrl.y)
 					text:  hd_txt
 					color: txt_c
-					size:  22
+					size:  hd_sz
+					bold:  ctrl.font_bold
+					mono:  is_mono
 				)
 				win.gg_ctx.draw_line(ctrl.x, ctrl.y + 28, ctrl.x + ctrl.w, ctrl.y + 28,
 					border_c)
 			}
 			'link' {
 				link_txt := if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.title }
+				lnk_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 14 }
+				is_mono := ctrl.font_name.len > 0 && (ctrl.font_name.to_lower().contains('mono') || ctrl.font_name.to_lower().contains('courier'))
 				win.gg_ctx.draw_text2(
 					x:     int(ctrl.x)
 					y:     int(ctrl.y + 4)
 					text:  link_txt
 					color: accent
-					size:  14
+					size:  lnk_sz
+					bold:  ctrl.font_bold
+					mono:  is_mono
 				)
 				win.gg_ctx.draw_line(ctrl.x, ctrl.y + 20, ctrl.x + f32(link_txt.len * 8),
 					ctrl.y + 20, accent)
@@ -115,27 +127,33 @@ pub fn (mut win SimpleWindow) render_ui() {
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
 					btn_bg)
 
-				max_chars := math.max(1, int((ctrl.w - 16.0) / 8.0))
+				btn_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 14 }
+				btn_tc := if ctrl.font_color.len > 0 {
+					parse_hex_color(ctrl.font_color)
+				} else {
+					gg.Color{ r: 255, g: 255, b: 255 }
+				}
+
+				max_chars := math.max(1, int((ctrl.w - 16.0) / (f32(btn_sz) * 0.55)))
 				disp_title := if ctrl.title.len > max_chars && max_chars > 3 {
 					ctrl.title[0..max_chars - 3] + '...'
 				} else {
 					ctrl.title
 				}
 
-				text_w := disp_title.len * 8
-				text_x := int(ctrl.x + (ctrl.w - f32(text_w)) / 2.0)
-				text_y := int(ctrl.y + (ctrl.h - 16.0) / 2.0)
+				text_w := f32(disp_title.len) * (f32(btn_sz) * 0.55)
+				text_x := int(ctrl.x + (ctrl.w - text_w) / 2.0)
+				text_y := int(ctrl.y + (ctrl.h - f32(btn_sz)) / 2.0)
 
+				is_mono := ctrl.font_name.len > 0 && (ctrl.font_name.to_lower().contains('mono') || ctrl.font_name.to_lower().contains('courier'))
 				win.gg_ctx.draw_text2(
 					x:     math.max(int(ctrl.x + 8), text_x)
 					y:     text_y
 					text:  disp_title
-					color: gg.Color{
-						r: 255
-						g: 255
-						b: 255
-					}
-					size:  14
+					color: btn_tc
+					size:  btn_sz
+					bold:  ctrl.font_bold
+					mono:  is_mono
 				)
 			}
 			'icon_button' {
@@ -152,18 +170,24 @@ pub fn (mut win SimpleWindow) render_ui() {
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
 					if ctrl.is_hovered { hover_c } else { border_c })
 
-				icon_c := if ctrl.is_hovered {
+				ib_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 15 }
+				icon_c := if ctrl.font_color.len > 0 {
+					parse_hex_color(ctrl.font_color)
+				} else if ctrl.is_hovered {
 					accent
 				} else {
 					fg
 				}
-				txt_w := ctrl.title.len * 8
+				txt_w := f32(ctrl.title.len) * (f32(ib_sz) * 0.55)
+				is_mono := ctrl.font_name.len > 0 && (ctrl.font_name.to_lower().contains('mono') || ctrl.font_name.to_lower().contains('courier'))
 				win.gg_ctx.draw_text2(
-					x:     int(ctrl.x + (ctrl.w - f32(txt_w)) / 2.0)
-					y:     int(ctrl.y + (ctrl.h - 16.0) / 2.0)
+					x:     int(ctrl.x + (ctrl.w - txt_w) / 2.0)
+					y:     int(ctrl.y + (ctrl.h - f32(ib_sz)) / 2.0)
 					text:  ctrl.title
 					color: icon_c
-					size:  15
+					size:  ib_sz
+					bold:  ctrl.font_bold
+					mono:  is_mono
 				)
 			}
 			'input', 'password', 'search_field', 'pin_code', 'number', 'time_picker' {
@@ -185,7 +209,10 @@ pub fn (mut win SimpleWindow) render_ui() {
 					ctrl.text_value
 				}
 
-				txt_color := if ctrl.text_value.len == 0 && ctrl.placeholder.len > 0 {
+				inp_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 14 }
+				txt_color := if ctrl.font_color.len > 0 {
+					parse_hex_color(ctrl.font_color)
+				} else if ctrl.text_value.len == 0 && ctrl.placeholder.len > 0 {
 					gg.Color{
 						r: 128
 						g: 128
@@ -195,7 +222,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 					fg
 				}
 
-				max_in_chars := math.max(1, int((ctrl.w - 24.0) / 7.5))
+				max_in_chars := math.max(1, int((ctrl.w - 24.0) / (f32(inp_sz) * 0.55)))
 				mut start_idx := 0
 				if ctrl.caret_pos > max_in_chars {
 					start_idx = ctrl.caret_pos - max_in_chars
@@ -231,12 +258,15 @@ pub fn (mut win SimpleWindow) render_ui() {
 					}
 				}
 
+				is_mono := ctrl.font_name.len > 0 && (ctrl.font_name.to_lower().contains('mono') || ctrl.font_name.to_lower().contains('courier'))
 				win.gg_ctx.draw_text2(
 					x:     int(ctrl.x + 10)
-					y:     int(ctrl.y + (ctrl.h - 16.0) / 2.0)
+					y:     int(ctrl.y + (ctrl.h - f32(inp_sz)) / 2.0)
 					text:  clipped_txt
 					color: txt_color
-					size:  14
+					size:  inp_sz
+					bold:  ctrl.font_bold
+					mono:  is_mono
 				)
 
 				if ctrl.is_focused {
@@ -278,18 +308,21 @@ pub fn (mut win SimpleWindow) render_ui() {
 
 				lines := ctrl.text_value.split('\n')
 				mut line_y := ctrl.y + 8.0
+				txt_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 13 }
+				txt_c := if ctrl.font_color.len > 0 { parse_hex_color(ctrl.font_color) } else { fg }
 				for line in lines {
-					if line_y + 18.0 > ctrl.y + ctrl.h - 8.0 {
+					if line_y + f32(txt_sz + 4) > ctrl.y + ctrl.h - 8.0 {
 						break
 					}
 					win.gg_ctx.draw_text2(
 						x:     int(ctrl.x + 10)
 						y:     int(line_y)
 						text:  line
-						color: fg
-						size:  13
+						color: txt_c
+						size:  txt_sz
+						bold:  ctrl.font_bold
 					)
-					line_y += 18.0
+					line_y += f32(txt_sz + 4)
 				}
 			}
 			'checkbox', 'toggle' {
@@ -315,12 +348,15 @@ pub fn (mut win SimpleWindow) render_ui() {
 						4.0, if ctrl.is_hovered { hover_c } else { border_c })
 				}
 
+				chk_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 14 }
+				chk_tc := if ctrl.font_color.len > 0 { parse_hex_color(ctrl.font_color) } else { fg }
 				win.gg_ctx.draw_text2(
 					x:     int(ctrl.x + box_size + 10)
-					y:     int(ctrl.y + (ctrl.h - 16.0) / 2.0)
+					y:     int(ctrl.y + (ctrl.h - f32(chk_sz)) / 2.0)
 					text:  ctrl.title
-					color: fg
-					size:  14
+					color: chk_tc
+					size:  chk_sz
+					bold:  ctrl.font_bold
 				)
 			}
 			'switch' {
@@ -348,12 +384,15 @@ pub fn (mut win SimpleWindow) render_ui() {
 						knob_s, knob_s, 9.0, white_c)
 				}
 
+				sw_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 14 }
+				sw_tc := if ctrl.font_color.len > 0 { parse_hex_color(ctrl.font_color) } else { fg }
 				win.gg_ctx.draw_text2(
 					x:     int(ctrl.x + sw_w + 12)
-					y:     int(ctrl.y + (ctrl.h - 16.0) / 2.0)
+					y:     int(ctrl.y + (ctrl.h - f32(sw_sz)) / 2.0)
 					text:  ctrl.title
-					color: fg
-					size:  14
+					color: sw_tc
+					size:  sw_sz
+					bold:  ctrl.font_bold
 				)
 			}
 			'slider' {

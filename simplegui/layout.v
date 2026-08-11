@@ -162,16 +162,115 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 
 				group_start_y := cur_y + header_h + 8.0
 				mut inner_y := group_start_y
+				grp_content_w := content_w - 24.0
+				grp_pad := pad + 12.0
 
 				i++
 				// Position inner child controls inside group box border
 				for i < win.controls.len && win.controls[i].kind != 'group_end' {
-					if win.controls[i].visible {
-						mut child := win.controls[i]
-						child.x = pad + 12.0
-						child.y = inner_y
-						child.w = content_w - 24.0
-						inner_y += child.h + sp
+					mut child := win.controls[i]
+					if !child.visible {
+						i++
+						continue
+					}
+
+					match child.kind {
+						'row_start' {
+							mut row_controls := []&Control{}
+							i++
+							for i < win.controls.len && win.controls[i].kind != 'row_end' {
+								if win.controls[i].visible {
+									row_controls << win.controls[i]
+								}
+								i++
+							}
+							if row_controls.len > 0 {
+								row_count := f32(row_controls.len)
+								avail_w := grp_content_w - (row_count - 1.0) * sp
+								item_w := avail_w / row_count
+								mut max_h := f32(0.0)
+								mut cur_x := grp_pad
+								for mut r_ctrl in row_controls {
+									r_ctrl.x = cur_x
+									r_ctrl.y = inner_y
+									if r_ctrl.expand_fill || r_ctrl.w <= 0 {
+										r_ctrl.w = item_w
+									}
+									if r_ctrl.h > max_h {
+										max_h = r_ctrl.h
+									}
+									cur_x += r_ctrl.w + sp
+								}
+								inner_y += max_h + sp
+							}
+						}
+						'grid_start' {
+							cols := if child.int_value > 0 { child.int_value } else { 2 }
+							grid_sp := if child.f64_value > 0 { f32(child.f64_value) } else { sp }
+							mut grid_controls := []&Control{}
+							i++
+							for i < win.controls.len && win.controls[i].kind != 'grid_end' {
+								if win.controls[i].visible {
+									grid_controls << win.controls[i]
+								}
+								i++
+							}
+							if grid_controls.len > 0 {
+								f_cols := f32(cols)
+								col_w := (grp_content_w - (f_cols - 1.0) * grid_sp) / f_cols
+								mut row_max_h := f32(0.0)
+								for idx, mut g_ctrl in grid_controls {
+									col_idx := idx % cols
+									if col_idx == 0 && idx > 0 {
+										inner_y += row_max_h + grid_sp
+										row_max_h = 0.0
+									}
+									g_ctrl.x = grp_pad + f32(col_idx) * (col_w + grid_sp)
+									g_ctrl.y = inner_y
+									g_ctrl.w = col_w
+									if g_ctrl.h > row_max_h {
+										row_max_h = g_ctrl.h
+									}
+								}
+								inner_y += row_max_h + sp
+							}
+						}
+						'flex_start' {
+							mut flex_controls := []&Control{}
+							i++
+							for i < win.controls.len && win.controls[i].kind != 'flex_end' {
+								if win.controls[i].visible {
+									flex_controls << win.controls[i]
+								}
+								i++
+							}
+							if flex_controls.len > 0 {
+								count := f32(flex_controls.len)
+								avail_w := grp_content_w - (count - 1.0) * sp
+								item_w := avail_w / count
+								mut max_h := f32(0.0)
+								mut cur_x := grp_pad
+								for mut f_ctrl in flex_controls {
+									f_ctrl.x = cur_x
+									f_ctrl.y = inner_y
+									f_ctrl.w = item_w
+									if f_ctrl.h > max_h {
+										max_h = f_ctrl.h
+									}
+									cur_x += item_w + sp
+								}
+								inner_y += max_h + sp
+							}
+						}
+						else {
+							child.x = grp_pad + child.margin_left
+							child.y = inner_y + child.margin_top
+							avail_w := grp_content_w - child.margin_left - child.margin_right
+							if child.expand_fill || child.w <= 0 {
+								child.w = f32(math.max(10.0, avail_w))
+							}
+							inner_y += child.margin_top + child.h + child.margin_bottom + sp
+						}
 					}
 					i++
 				}
