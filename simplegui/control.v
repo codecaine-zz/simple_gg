@@ -16,55 +16,62 @@ pub mut:
 pub struct GroupConfig {
 pub mut:
 	title             string
-	border            bool   = true
-	border_width      f32    = 1.0
+	border            bool = true
+	border_width      f32  = 1.0
 	border_color      string
-	corner_radius     f32    = 12.0
+	corner_radius     f32 = 12.0
 	bg_color          string
-	padding           int    = 12
+	padding           int = 12
 	shadow            bool
-	show_caption      bool   = true
+	show_caption      bool = true
 	caption_color     string
 	caption_alignment string = 'left'
+}
+
+pub struct ToolbarItem {
+pub mut:
+	icon     string
+	tooltip  string
+	on_click VoidEventCallback = unsafe { nil }
 }
 
 @[heap]
 pub struct Control {
 pub mut:
-	name            string
-	kind            string
-	title           string
-	text_value      string
-	bool_value      bool
-	int_value       int
-	f64_value       f64
-	items           []string
-	items_selected  []string
-	f64_list        []f64
-	headers         []string
-	rows            [][]string
-	tree_nodes      []TreeNode
-	props           map[string]string
-	placeholder     string
-	min_val         f64
-	max_val         f64 = 100.0
-	step            f64 = 1.0
+	name           string
+	kind           string
+	title          string
+	text_value     string
+	bool_value     bool
+	int_value      int
+	f64_value      f64
+	items          []string
+	items_selected []string
+	f64_list       []f64
+	headers        []string
+	rows           [][]string
+	tree_nodes     []TreeNode
+	props          map[string]string
+	placeholder    string
+	min_val        f64
+	max_val        f64 = 100.0
+	step           f64 = 1.0
 	// Geometry
-	x               f32
-	y               f32
-	w               f32 = 200.0
-	h               f32 = 30.0
+	x f32
+	y f32
+	w f32 = 200.0
+	h f32 = 30.0
 	// Layout properties
-	alignment       string
-	expand_fill     bool
-	container_name  string
+	alignment      string
+	expand_fill    bool
+	container_name string
 	// Visual styling
-	bg_color        string
-	font_color      string
-	accent_color    string
-	tooltip         string
-	custom_cursor   string
-	group_cfg       GroupConfig
+	bg_color      string
+	font_color    string
+	accent_color  string
+	tooltip       string
+	custom_cursor string
+	group_cfg     GroupConfig
 	// Control states
 	visible         bool = true
 	disabled        bool
@@ -78,29 +85,29 @@ pub mut:
 	variant         string
 	is_expanded     bool
 	// Detailed Geometry & Spacing
-	padding_top     f32
-	padding_bottom  f32
-	padding_left    f32
-	padding_right   f32
-	margin_top      f32
-	margin_bottom   f32
-	margin_left     f32
-	margin_right    f32
+	padding_top    f32
+	padding_bottom f32
+	padding_left   f32
+	padding_right  f32
+	margin_top     f32
+	margin_bottom  f32
+	margin_left    f32
+	margin_right   f32
 	// Typography
-	font_size       int
-	font_bold       bool
-	font_name       string
-	text_align      string
+	font_size  int
+	font_bold  bool
+	font_name  string
+	text_align string
 	// Border & Opacity
-	border_width    f32
-	border_color    string
-	corner_radius   f32 = 6.0
-	opacity         f64 = 1.0
+	border_width  f32
+	border_color  string
+	corner_radius f32 = 6.0
+	opacity       f64 = 1.0
 	// Callbacks
-	on_click        VoidEventCallback = unsafe { nil }
-	on_change       VoidEventCallback = unsafe { nil }
-	on_enter        VoidEventCallback = unsafe { nil }
-	on_row_click    VoidEventCallback = unsafe { nil }
+	on_click     VoidEventCallback = unsafe { nil }
+	on_change    VoidEventCallback = unsafe { nil }
+	on_enter     VoidEventCallback = unsafe { nil }
+	on_row_click VoidEventCallback = unsafe { nil }
 }
 
 pub fn (c &Control) set_width(w int) &Control {

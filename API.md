@@ -52,78 +52,93 @@ fn main() {
 8. [Reading & Writing Values](#8-reading--writing-values)
 9. [Event Handling & Callbacks](#9-event-handling--callbacks)
 10. [RAD Development & System Utilities](#10-rad-development--system-utilities)
+11. [More Developer & User-Requested Controls](#11-more-developer--user-requested-controls)
 
 ---
 
 ## 1. Window Setup & Configuration
 
 ### Create a New Window
+
 ```v
 mut win := simplegui.new_simple_window('App Title', 800, 600)
 ```
 
 ### Set Window Title
+
 ```v
 win.set_title('New App Title')
 ```
 
 ### Set Window Dimensions
+
 ```v
 win.set_size(1024, 768)
 ```
 
 ### Lock Fixed Window Size (Non-resizable)
+
 ```v
 win.set_fixed_size(400, 300)
 ```
 
 ### Use Size Presets (`'small'`, `'medium'`, `'large'`, `'hd'`, `'dialog'`, `'login'`, `'settings'`)
+
 ```v
 win.set_size_preset('medium')
 ```
 
 ### Set Minimum & Maximum Window Constraints
+
 ```v
 win.set_min_size(400, 300)
 win.set_max_size(1920, 1080)
 ```
 
 ### Set Inner Window Padding
+
 ```v
 win.set_padding(20) // 20px padding around all edges
 ```
 
 ### Set Default Vertical Spacing Between Controls
+
 ```v
 win.set_spacing(12) // 12px vertical spacing between widgets
 ```
 
 ### Keep Window Always On Top
+
 ```v
 win.set_always_on_top(true)
 ```
 
 ### Set Window Opacity (Transparency `0.0`–`1.0`)
+
 ```v
 win.set_opacity(0.95)
 ```
 
 ### Enable/Disable Keyboard Quit Shortcut (`Cmd+Q` / `Ctrl+Q`)
+
 ```v
 win.set_close_shortcut_enabled(true)
 ```
 
 ### Enable Debug Logs & Footer Bar
+
 ```v
 win.set_debug_mode(true)
 ```
 
 ### Display Floating Toast Notification
+
 ```v
 win.show_toast('Notification Title', 'Operation finished successfully!')
 ```
 
 ### Preset Window Builders
+
 ```v
 // Centered non-resizable dialog window
 mut dialog := simplegui.new_simple_window('Confirm', 400, 200).make_fixed_dialog('Confirm', 400, 200)
@@ -136,6 +151,7 @@ mut utility := simplegui.new_simple_window('Tools', 300, 500).make_utility_panel
 ```
 
 ### Programmatically Close Window
+
 ```v
 win.close()
 // OR
@@ -143,6 +159,7 @@ win.quit()
 ```
 
 ### Run Window Event Loop
+
 ```v
 win.run()
 ```
@@ -154,27 +171,32 @@ win.run()
 `simplegui` includes 17 built-in production themes. Setting a theme dynamically updates all widget colors, borders, font colors, and backgrounds.
 
 ### Apply Built-in Theme
+
 ```v
 win.set_theme('Apple Dark')
 ```
 
 ### Toggle Light / Dark Mode
+
 ```v
 win.toggle_window_theme()
 ```
 
 ### List All Available Theme Names
+
 ```v
 theme_names := simplegui.list_themes()
 println(theme_names) // ['Apple Light', 'Apple Dark', 'Nord', 'Dracula', ...]
 ```
 
 ### Look Up Theme by Name or Short Alias
+
 ```v
 dark_theme := simplegui.get_theme('dark') // accepts 'dark', 'nord', 'cyberpunk', etc.
 ```
 
 ### Apply Custom Theme Struct
+
 ```v
 custom_theme := simplegui.Theme{
 	name: 'My Custom Theme'
@@ -188,31 +210,32 @@ win.apply_theme(custom_theme)
 
 ### Theme Quick Reference Table
 
-| Theme Name | Style / Vibe | Background | Accent | Mode |
-| :--- | :--- | :--- | :--- | :--- |
-| **`Apple Light`** | Default macOS light theme | `#ffffff` | `#007aff` | Light |
-| **`Apple Dark`** | Modern macOS dark mode | `#1c1c1e` | `#0a84ff` | Dark |
-| **`Midnight Space Gray`** | Pro dark titanium gray | `#161618` | `#0a84ff` | Dark |
-| **`Nord`** | Arctic frost dark palette | `#2e3440` | `#88c0d0` | Dark |
-| **`Dracula`** | Classic vampire dark purple | `#282a36` | `#bd93f9` | Dark |
-| **`Cyberpunk`** | High-contrast neon dark | `#0d0d15` | `#ff007f` | Dark |
-| **`Catppuccin Mocha`** | Pastel dark theme | `#1e1e2e` | `#cba6f7` | Dark |
-| **`GitHub Dark`** | Official GitHub dark theme | `#0d1117` | `#58a6ff` | Dark |
-| **`GitHub Light`** | Official GitHub light theme | `#ffffff` | `#0969da` | Light |
-| **`Solarized Dark`** | Solarized dark palette | `#002b36` | `#2aa198` | Dark |
-| **`Solarized Light`** | Solarized light palette | `#fdf6e3` | `#268bd2` | Light |
-| **`Sonoma Emerald`** | Dark forest green glass | `#0d1f18` | `#30d158` | Dark |
-| **`Ventura Amber`** | Sunset amber dark mode | `#211815` | `#ff9500` | Dark |
-| **`Navy Blue`** | Slate navy theme | `#0f172a` | `#38bdf8` | Dark |
-| **`Forest Green`** | Deep green palette | `#14532d` | `#4ade80` | Dark |
-| **`Apple Sunset`** | Mojave twilight dark theme | `#281a24` | `#ff6b00` | Dark |
-| **`Soft Pastel`** | Soft warm studio light | `#faf6f0` | `#e07a5f` | Light |
+| Theme Name                | Style / Vibe                | Background | Accent    | Mode  |
+| :------------------------ | :-------------------------- | :--------- | :-------- | :---- |
+| **`Apple Light`**         | Default macOS light theme   | `#ffffff`  | `#007aff` | Light |
+| **`Apple Dark`**          | Modern macOS dark mode      | `#1c1c1e`  | `#0a84ff` | Dark  |
+| **`Midnight Space Gray`** | Pro dark titanium gray      | `#161618`  | `#0a84ff` | Dark  |
+| **`Nord`**                | Arctic frost dark palette   | `#2e3440`  | `#88c0d0` | Dark  |
+| **`Dracula`**             | Classic vampire dark purple | `#282a36`  | `#bd93f9` | Dark  |
+| **`Cyberpunk`**           | High-contrast neon dark     | `#0d0d15`  | `#ff007f` | Dark  |
+| **`Catppuccin Mocha`**    | Pastel dark theme           | `#1e1e2e`  | `#cba6f7` | Dark  |
+| **`GitHub Dark`**         | Official GitHub dark theme  | `#0d1117`  | `#58a6ff` | Dark  |
+| **`GitHub Light`**        | Official GitHub light theme | `#ffffff`  | `#0969da` | Light |
+| **`Solarized Dark`**      | Solarized dark palette      | `#002b36`  | `#2aa198` | Dark  |
+| **`Solarized Light`**     | Solarized light palette     | `#fdf6e3`  | `#268bd2` | Light |
+| **`Sonoma Emerald`**      | Dark forest green glass     | `#0d1f18`  | `#30d158` | Dark  |
+| **`Ventura Amber`**       | Sunset amber dark mode      | `#211815`  | `#ff9500` | Dark  |
+| **`Navy Blue`**           | Slate navy theme            | `#0f172a`  | `#38bdf8` | Dark  |
+| **`Forest Green`**        | Deep green palette          | `#14532d`  | `#4ade80` | Dark  |
+| **`Apple Sunset`**        | Mojave twilight dark theme  | `#281a24`  | `#ff6b00` | Dark  |
+| **`Soft Pastel`**         | Soft warm studio light      | `#faf6f0`  | `#e07a5f` | Light |
 
 ---
 
 ## 3. Layouts & Containers
 
 ### Side-by-Side Horizontal Row
+
 ```v
 win.begin_row('button_row')
 win.add_button('save_btn', 'Save')
@@ -221,6 +244,7 @@ win.end_row()
 ```
 
 ### Multi-Column Grid Layout
+
 ```v
 // 3 columns with 10px column spacing
 win.begin_grid('my_grid', 3, 10)
@@ -234,6 +258,7 @@ win.end_grid()
 ```
 
 ### Tabbed Panel Container
+
 ```v
 win.begin_tab_container('tab_view', ['General', 'Security', 'Advanced'])
 
@@ -251,6 +276,7 @@ win.end_tab_container()
 ```
 
 ### Split Pane Layout
+
 ```v
 // Left pane takes 30% width, right pane takes 70%
 win.begin_split_view('split_pane', 30)
@@ -260,6 +286,7 @@ win.end_split_view()
 ```
 
 ### Framed Group Box / Card Box
+
 ```v
 win.group('account_group', 'Account Details', fn (mut win simplegui.SimpleWindow) {
 	win.add_form_field('Email Address:', 'user_email', 'user@example.com')
@@ -274,6 +301,7 @@ win.group('account_group', 'Account Details', fn (mut win simplegui.SimpleWindow
 Every control can be styled using fluent method chaining on `&Control` or by calling `win.set_control_*('control_name', value)`.
 
 ### Fluent `&Control` Chaining Example
+
 ```v
 mut btn := win.add_button('submit_btn', 'Submit Order')
 btn.set_width(240)
@@ -292,6 +320,7 @@ btn.set_width(240)
 ### Sizing & Geometry Methods
 
 #### Set Width & Height
+
 ```v
 win.set_control_width('submit_btn', 250)
 win.set_control_height('submit_btn', 40)
@@ -299,22 +328,26 @@ win.set_control_size('submit_btn', 250, 40)
 ```
 
 #### Get Control Width & Height
+
 ```v
 w := win.get_control_width('submit_btn')
 h := win.get_control_height('submit_btn')
 ```
 
 #### Absolute Control Position
+
 ```v
 win.set_control_position('submit_btn', 50, 120)
 ```
 
 #### Alignment (`'left'`, `'center'`, `'right'`)
+
 ```v
 win.set_control_alignment('submit_btn', 'center')
 ```
 
 #### Expand & Fill Available Width
+
 ```v
 win.set_control_expand_fill('submit_btn', true)
 ```
@@ -697,6 +730,7 @@ win.button('Submit Quick Form')
 ## 8. Reading & Writing Values
 
 ### String Values
+
 ```v
 // Read string value from input, password, textarea, dropdown, search, or date picker
 str_val := win.get_text('my_control')
@@ -706,6 +740,7 @@ win.set_text('my_control', 'Updated Text')
 ```
 
 ### Boolean Values
+
 ```v
 // Read checked state from checkbox or switch
 bool_val := win.get_bool('chk_notify')
@@ -715,6 +750,7 @@ win.set_bool('chk_notify', true)
 ```
 
 ### Integer Values
+
 ```v
 // Read numeric integer from number stepper, slider, progress bar, rating, or tab index
 int_val := win.get_value_int('qty_input')
@@ -724,6 +760,7 @@ win.set_value_int('qty_input', 25)
 ```
 
 ### Typed Ergonomic Accessors (`get_int`, `get_f64`, `set_int`, `set_f64`)
+
 ```v
 // Parse integer from text or number field safely
 count := win.get_int('txt_count')
@@ -735,12 +772,14 @@ win.set_f64('txt_price', 49.99)
 ```
 
 ### Table Selected Row
+
 ```v
 // Returns selected row index (0-indexed, -1 if no row selected)
 row_idx := win.get_table_selected_row('my_table')
 ```
 
 ### Batch Reading & Writing Control Values
+
 ```v
 // Read multiple control values into a map
 values_map := win.get_all(['username', 'email', 'country'])
@@ -761,6 +800,7 @@ win.clear_all(['username', 'email', 'country'])
 ## 9. Event Handling & Callbacks
 
 ### Button Click Listener (`on_click`)
+
 ```v
 win.add_button('btn_save', 'Save Changes')
 win.on_click('btn_save', fn (mut win simplegui.SimpleWindow) {
@@ -769,6 +809,7 @@ win.on_click('btn_save', fn (mut win simplegui.SimpleWindow) {
 ```
 
 ### Value Change Listener (`on_change`)
+
 Triggers whenever text is typed, a checkbox is clicked, a slider is dragged, or a dropdown option is picked:
 
 ```v
@@ -780,6 +821,7 @@ win.on_change('theme_picker', fn (mut win simplegui.SimpleWindow) {
 ```
 
 ### Enter Key Listener (`on_enter`)
+
 Triggers when the user hits `Enter` inside an input or search bar:
 
 ```v
@@ -791,6 +833,7 @@ win.on_enter('search_field', fn (mut win simplegui.SimpleWindow) {
 ```
 
 ### Table Row Click Listener (`on_row_click`)
+
 ```v
 win.on_row_click('user_table', fn (mut win simplegui.SimpleWindow) {
 	idx := win.get_table_selected_row('user_table')
@@ -799,6 +842,7 @@ win.on_row_click('user_table', fn (mut win simplegui.SimpleWindow) {
 ```
 
 ### Window Close Interceptor (`on_close`)
+
 Intercepts `Cmd+Q`, `Ctrl+Q`, or closing the window:
 
 ```v
@@ -809,6 +853,7 @@ win.on_close(fn (mut win simplegui.SimpleWindow) bool {
 ```
 
 ### Form Submit Event (`on_submit`)
+
 ```v
 win.on_submit(fn (mut win simplegui.SimpleWindow) {
 	println("Form submission event triggered!")
@@ -816,6 +861,7 @@ win.on_submit(fn (mut win simplegui.SimpleWindow) {
 ```
 
 ### Global Keyboard Key Listener (`on_key_down`)
+
 ```v
 win.on_key_down(fn (mut win simplegui.SimpleWindow, key gg.KeyCode) {
 	if key == .escape {
@@ -825,6 +871,7 @@ win.on_key_down(fn (mut win simplegui.SimpleWindow, key gg.KeyCode) {
 ```
 
 ### Window Resize Event (`on_window_resize`)
+
 ```v
 win.on_window_resize(fn (mut win simplegui.SimpleWindow, w int, h int) {
 	println("Window resized to: ${w}x${h}")
@@ -940,4 +987,101 @@ path_env := win.get_env('PATH')
 
 // Set process environment variable
 win.set_env('MY_APP_ENV', 'production')
+```
+
+---
+
+## 11. More Developer & User-Requested Controls
+
+### Icon Button & Toolbar
+
+```v
+// Single square icon button
+win.add_icon_button('btn_new', '[New]', 'Create a new document')
+win.on_click('btn_new', fn (mut win simplegui.SimpleWindow) {
+	win.show_toast('Toolbar', 'New document created')
+})
+
+// Row of icon buttons with tooltips and callbacks
+win.add_toolbar('main_toolbar', [
+	simplegui.ToolbarItem{
+		icon: '[New]'
+		tooltip: 'Create a new document'
+		on_click: fn (mut win simplegui.SimpleWindow) {
+			win.show_toast('Toolbar', 'New document created')
+		}
+	},
+	simplegui.ToolbarItem{
+		icon: '[Save]'
+		tooltip: 'Save the current document'
+		on_click: fn (mut win simplegui.SimpleWindow) {
+			win.show_toast('Toolbar', 'Document saved')
+		}
+	},
+])
+```
+
+### Hyperlink
+
+```v
+// Clickable text that opens a URL in the system default browser
+win.add_link('docs_link', 'Open SimpleGUI Documentation', 'https://vlang.io')
+```
+
+### Dropdown Menu Button
+
+```v
+// Click to expand a list of action items below the button
+win.add_menu_button('file_menu', 'Actions', ['Export CSV', 'Export JSON', 'Print', 'Archive'])
+
+win.on_change('file_menu', fn (mut win simplegui.SimpleWindow) {
+	selected := win.get_menu_selected('file_menu')
+	win.show_toast('Menu Action', 'You picked: ${selected}')
+})
+```
+
+### Multi-Select Checklist
+
+```v
+win.add_checklist('perms_checklist', ['Read', 'Write', 'Execute', 'Delete', 'Share'], ['Read', 'Write'])
+
+win.on_change('perms_checklist', fn (mut win simplegui.SimpleWindow) {
+	selected := win.get_checklist_selected('perms_checklist')
+	println('Checklist selection: ${selected}')
+})
+
+// Programmatically update selection
+win.set_checklist_selected('perms_checklist', ['Read'])
+```
+
+### Chip Group (Multi-Select Tag Selector)
+
+```v
+win.add_chip_group('tags_chip_group', ['Urgent', 'Bug', 'Feature', 'Design', 'Backend'], ['Bug'])
+
+win.on_change('tags_chip_group', fn (mut win simplegui.SimpleWindow) {
+	selected := win.get_chip_selected('tags_chip_group')
+	println('Chip selection: ${selected}')
+})
+
+// Programmatically update selection
+win.set_chip_selected('tags_chip_group', ['Bug', 'Urgent'])
+```
+
+### Time Picker
+
+```v
+win.add_time_picker('meeting_time', '09:30')
+time_str := win.get_text('meeting_time')
+
+// Or with an auto-generated label row
+win.add_form_time_picker('Meeting Time:', 'meeting_time', '09:30')
+```
+
+### Password Strength Meter
+
+```v
+// Add a password field, then link a strength meter to it by control name
+win.add_form_password('New Password:', 'new_password', '')
+win.add_password_strength('pwd_strength_meter', 'new_password')
 ```

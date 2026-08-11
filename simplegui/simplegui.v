@@ -6,36 +6,36 @@ import os
 
 pub struct SimpleWindow {
 pub mut:
-	gg_ctx            &gg.Context = unsafe { nil }
-	title             string
-	width             int
-	height            int
-	padding           int = 16
-	spacing           int = 10
-	responsive_layout bool = true
-	theme             Theme
-	controls          []&Control
-	control_map       map[string]&Control
-	focused_control   string
-	hovered_control   string
-	mouse_x           f32
-	mouse_y           f32
-	mouse_down        bool
-	debug_mode        bool
-	always_on_top     bool
-	opacity           f64 = 1.0
-	min_width         int = 200
-	min_height        int = 150
-	max_width         int = 4000
-	max_height        int = 3000
-	resizable         bool = true
-	minimizable       bool = true
-	maximizable       bool = true
-	closeable         bool = true
-	titlebar_visible  bool = true
-	subtitle          string
-	cursor_name       string = 'arrow'
-	cursor_stack      []string
+	gg_ctx                 &gg.Context = unsafe { nil }
+	title                  string
+	width                  int
+	height                 int
+	padding                int  = 16
+	spacing                int  = 10
+	responsive_layout      bool = true
+	theme                  Theme
+	controls               []&Control
+	control_map            map[string]&Control
+	focused_control        string
+	hovered_control        string
+	mouse_x                f32
+	mouse_y                f32
+	mouse_down             bool
+	debug_mode             bool
+	always_on_top          bool
+	opacity                f64  = 1.0
+	min_width              int  = 200
+	min_height             int  = 150
+	max_width              int  = 4000
+	max_height             int  = 3000
+	resizable              bool = true
+	minimizable            bool = true
+	maximizable            bool = true
+	closeable              bool = true
+	titlebar_visible       bool = true
+	subtitle               string
+	cursor_name            string = 'arrow'
+	cursor_stack           []string
 	status_text            string
 	close_shortcut_enabled bool = true
 	toast_title            string
@@ -43,19 +43,19 @@ pub mut:
 	toast_timer            f64
 	active_tab_map         map[string]int
 	// event callbacks
-	on_key_down_cb         fn (mut win SimpleWindow, key gg.KeyCode) = unsafe { nil }
-	on_close_cb            fn (mut win SimpleWindow) bool            = unsafe { nil }
-	on_submit_cb           VoidEventCallback                         = unsafe { nil }
-	on_resize_cb           fn (mut win SimpleWindow, w int, h int)   = unsafe { nil }
-	auto_id_counter        int
+	on_key_down_cb  fn (mut win SimpleWindow, key gg.KeyCode) = unsafe { nil }
+	on_close_cb     fn (mut win SimpleWindow) bool            = unsafe { nil }
+	on_submit_cb    VoidEventCallback                         = unsafe { nil }
+	on_resize_cb    fn (mut win SimpleWindow, w int, h int)   = unsafe { nil }
+	auto_id_counter int
 }
 
 pub fn new_simple_window(title string, width int, height int) &SimpleWindow {
 	mut win := &SimpleWindow{
-		title: title
-		width: width
+		title:  title
+		width:  width
 		height: height
-		theme: get_theme('Apple Light')
+		theme:  get_theme('Apple Light')
 	}
 	return win
 }
@@ -680,8 +680,8 @@ pub fn (mut win SimpleWindow) row(name string, callback VoidEventCallback) &Simp
 
 pub fn (mut win SimpleWindow) begin_grid(name string, columns int, spacing int) &SimpleWindow {
 	win.add_control(Control{
-		name: name
-		kind: 'grid_start'
+		name:      name
+		kind:      'grid_start'
 		int_value: columns
 		f64_value: f64(spacing)
 	})
@@ -702,11 +702,11 @@ pub fn (mut win SimpleWindow) grid(name string, columns int, spacing int, callba
 
 pub fn (mut win SimpleWindow) begin_flex_box(name string, direction string, justify string, align string) &SimpleWindow {
 	win.add_control(Control{
-		name: name
-		kind: 'flex_start'
-		title: direction
+		name:        name
+		kind:        'flex_start'
+		title:       direction
 		placeholder: justify
-		alignment: align
+		alignment:   align
 	})
 	return win
 }
@@ -884,33 +884,33 @@ pub fn (mut win SimpleWindow) add_slider(name string, value int) &SimpleWindow {
 
 pub fn (mut win SimpleWindow) add_dropdown(name string, items []string, selected string) &SimpleWindow {
 	win.add_control(Control{
-		name: name
-		kind: 'dropdown'
-		items: items
+		name:       name
+		kind:       'dropdown'
+		items:      items
 		text_value: selected
-		h: 32
+		h:          32
 	})
 	return win
 }
 
 pub fn (mut win SimpleWindow) add_segmented_control(name string, items []string, selected string) &SimpleWindow {
 	win.add_control(Control{
-		name: name
-		kind: 'segmented'
-		items: items
+		name:       name
+		kind:       'segmented'
+		items:      items
 		text_value: selected
-		h: 32
+		h:          32
 	})
 	return win
 }
 
 pub fn (mut win SimpleWindow) add_radio_group(name string, items []string, selected string) &SimpleWindow {
 	win.add_control(Control{
-		name: name
-		kind: 'radio'
-		items: items
+		name:       name
+		kind:       'radio'
+		items:      items
 		text_value: selected
-		h: 32
+		h:          32
 	})
 	return win
 }
@@ -946,10 +946,10 @@ pub fn (mut win SimpleWindow) add_image(name string, file_path string) &SimpleWi
 
 pub fn (mut win SimpleWindow) add_search_field(name string, placeholder string) &SimpleWindow {
 	win.add_control(Control{
-		name: name
-		kind: 'search_field'
+		name:        name
+		kind:        'search_field'
 		placeholder: placeholder
-		h: 32
+		h:           32
 	})
 	return win
 }
@@ -966,11 +966,11 @@ pub fn (mut win SimpleWindow) add_spinner(name string, active bool) &SimpleWindo
 
 pub fn (mut win SimpleWindow) add_grid(name string, headers []string, initial_rows [][]string) &SimpleWindow {
 	win.add_control(Control{
-		name: name
-		kind: 'grid'
+		name:    name
+		kind:    'grid'
 		headers: headers
-		rows: initial_rows
-		h: 150
+		rows:    initial_rows
+		h:       150
 	})
 	return win
 }
@@ -989,23 +989,23 @@ pub fn (mut win SimpleWindow) set_chart_data(name string, values []f64) &SimpleW
 
 pub fn (mut win SimpleWindow) add_metric_card(name string, title string, value string, change_badge string, subtitle string) &SimpleWindow {
 	win.add_control(Control{
-		name: name
-		kind: 'metric_card'
-		title: title
-		text_value: value
+		name:        name
+		kind:        'metric_card'
+		title:       title
+		text_value:  value
 		placeholder: change_badge
-		h: 64
+		h:           64
 	})
 	return win
 }
 
 pub fn (mut win SimpleWindow) add_alert_banner(name string, title string, message string, style string) &SimpleWindow {
 	win.add_control(Control{
-		name: name
-		kind: 'alert_banner'
-		title: title
+		name:       name
+		kind:       'alert_banner'
+		title:      title
 		text_value: message
-		h: 40
+		h:          40
 	})
 	return win
 }
@@ -1029,21 +1029,21 @@ pub fn (mut win SimpleWindow) show_toast(title string, message string) &SimpleWi
 
 pub fn (mut win SimpleWindow) add_tree_view(name string, nodes []TreeNode) &SimpleWindow {
 	win.add_control(Control{
-		name: name
-		kind: 'tree_view'
+		name:       name
+		kind:       'tree_view'
 		tree_nodes: nodes
-		h: f32(math.max(100, nodes.len * 26 + 10))
+		h:          f32(math.max(100, nodes.len * 26 + 10))
 	})
 	return win
 }
 
 pub fn (mut win SimpleWindow) add_table(name string, headers []string, rows [][]string) &SimpleWindow {
 	win.add_control(Control{
-		name: name
-		kind: 'table'
+		name:    name
+		kind:    'table'
 		headers: headers
-		rows: rows
-		h: f32(math.max(120, (rows.len + 1) * 28 + 10))
+		rows:    rows
+		h:       f32(math.max(120, (rows.len + 1) * 28 + 10))
 	})
 	return win
 }
@@ -1064,9 +1064,9 @@ pub fn (win &SimpleWindow) get_table_selected_row(name string) int {
 
 pub fn (mut win SimpleWindow) begin_tab_container(name string, titles []string) &SimpleWindow {
 	win.add_control(Control{
-		name: name
-		kind: 'tab_container_start'
-		items: titles
+		name:      name
+		kind:      'tab_container_start'
+		items:     titles
 		int_value: 0
 	})
 	return win
@@ -1079,8 +1079,8 @@ pub fn (mut win SimpleWindow) end_tab_container() &SimpleWindow {
 
 pub fn (mut win SimpleWindow) begin_tab_page(name string, tab_index int) &SimpleWindow {
 	win.add_control(Control{
-		name: name
-		kind: 'tab_page_start'
+		name:      name
+		kind:      'tab_page_start'
 		int_value: tab_index
 	})
 	return win
@@ -1093,7 +1093,7 @@ pub fn open_native_file_dialog() string {
 			return res.output.trim_space()
 		}
 	} $else {
-		res := os.execute("zenity --file-selection 2>/dev/null")
+		res := os.execute('zenity --file-selection 2>/dev/null')
 		if res.exit_code == 0 {
 			return res.output.trim_space()
 		}
@@ -1108,93 +1108,228 @@ pub fn (mut win SimpleWindow) end_tab_page() &SimpleWindow {
 
 pub fn (mut win SimpleWindow) add_file_picker(name string, label string, initial_path string) &SimpleWindow {
 	win.add_control(Control{
-		name: name
-		kind: 'file_picker'
-		title: label
+		name:       name
+		kind:       'file_picker'
+		title:      label
 		text_value: initial_path
-		h: 34
+		h:          34
 	})
 	return win
 }
 
 pub fn (mut win SimpleWindow) add_search_bar(name string, placeholder string) &SimpleWindow {
 	win.add_control(Control{
-		name: name
-		kind: 'search_bar'
+		name:        name
+		kind:        'search_bar'
 		placeholder: placeholder
-		h: 34
+		h:           34
 	})
 	return win
 }
 
 pub fn (mut win SimpleWindow) add_badge(name string, text string, variant string) &SimpleWindow {
 	win.add_control(Control{
-		name: name
-		kind: 'badge'
-		title: text
+		name:    name
+		kind:    'badge'
+		title:   text
 		variant: variant
-		h: 24
+		h:       24
 	})
 	return win
 }
 
 pub fn (mut win SimpleWindow) add_breadcrumb(name string, items []string) &SimpleWindow {
 	win.add_control(Control{
-		name: name
-		kind: 'breadcrumb'
+		name:  name
+		kind:  'breadcrumb'
 		items: items
-		h: 24
+		h:     24
 	})
 	return win
 }
 
 pub fn (mut win SimpleWindow) add_stepper(name string, steps []string, active_step int) &SimpleWindow {
 	win.add_control(Control{
-		name: name
-		kind: 'stepper'
-		items: steps
+		name:      name
+		kind:      'stepper'
+		items:     steps
 		int_value: active_step
-		h: 40
+		h:         40
 	})
 	return win
 }
 
 pub fn (mut win SimpleWindow) add_accordion(name string, title string, content string, expanded bool) &SimpleWindow {
 	win.add_control(Control{
-		name: name
-		kind: 'accordion'
-		title: title
-		text_value: content
+		name:        name
+		kind:        'accordion'
+		title:       title
+		text_value:  content
 		is_expanded: expanded
-		h: if expanded { f32(110.0) } else { f32(36.0) }
+		h:           if expanded { f32(110.0) } else { f32(36.0) }
 	})
 	return win
 }
 
 pub fn (mut win SimpleWindow) add_avatar(name string, initials string, subtext string) &SimpleWindow {
 	win.add_control(Control{
-		name: name
-		kind: 'avatar'
-		title: initials
+		name:        name
+		kind:        'avatar'
+		title:       initials
 		placeholder: subtext
-		h: 40
+		h:           40
 	})
 	return win
 }
 
 pub fn (mut win SimpleWindow) add_divider(text string) &SimpleWindow {
 	win.add_control(Control{
-		kind: 'divider'
+		kind:  'divider'
 		title: text
-		h: 20
+		h:     20
 	})
 	return win
 }
 
+// Additional Developer & User-Requested Controls
+
+pub fn (mut win SimpleWindow) add_icon_button(name string, icon string, tooltip string) &SimpleWindow {
+	win.add_control(Control{
+		name:    name
+		kind:    'icon_button'
+		title:   icon
+		tooltip: tooltip
+		w:       36
+		h:       34
+	})
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_toolbar(name string, items []ToolbarItem) &SimpleWindow {
+	win.begin_row(name)
+	for item in items {
+		btn_id := win.gen_id('${name}_tool')
+		win.add_icon_button(btn_id, item.icon, item.tooltip)
+		win.set_control_width(btn_id, 36)
+		if item.on_click != unsafe { nil } {
+			win.on_click(btn_id, item.on_click)
+		}
+	}
+	win.end_row()
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_link(name string, text string, url string) &SimpleWindow {
+	win.add_control(Control{ name: name, kind: 'link', title: text, placeholder: url, h: 22 })
+	win.on_click(name, fn [url] (mut win SimpleWindow) {
+		win.open_url(url)
+	})
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_checklist(name string, items []string, selected []string) &SimpleWindow {
+	win.add_control(Control{
+		name:           name
+		kind:           'checklist'
+		items:          items
+		items_selected: selected
+		h:              f32(math.max(60, items.len * 26 + 10))
+	})
+	return win
+}
+
+pub fn (win &SimpleWindow) get_checklist_selected(name string) []string {
+	if ctrl := win.control_map[name] {
+		return ctrl.items_selected
+	}
+	return []string{}
+}
+
+pub fn (mut win SimpleWindow) set_checklist_selected(name string, selected []string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.items_selected = selected
+	}
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_chip_group(name string, items []string, selected []string) &SimpleWindow {
+	win.add_control(Control{
+		name:           name
+		kind:           'chip_group'
+		items:          items
+		items_selected: selected
+		h:              36
+	})
+	return win
+}
+
+pub fn (win &SimpleWindow) get_chip_selected(name string) []string {
+	if ctrl := win.control_map[name] {
+		return ctrl.items_selected
+	}
+	return []string{}
+}
+
+pub fn (mut win SimpleWindow) set_chip_selected(name string, selected []string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.items_selected = selected
+	}
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_time_picker(name string, time_str string) &SimpleWindow {
+	win.add_control(Control{
+		name:        name
+		kind:        'time_picker'
+		text_value:  time_str
+		placeholder: 'HH:MM'
+		h:           32
+	})
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_form_time_picker(label string, name string, time_str string) &SimpleWindow {
+	lbl_id := win.gen_id('lbl')
+	win.begin_row(win.gen_id('form_row'))
+	win.add_label(lbl_id, label)
+	win.add_time_picker(name, time_str)
+	win.end_row()
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_password_strength(name string, target_field string) &SimpleWindow {
+	mut ctrl := Control{
+		name: name
+		kind: 'password_strength'
+		h:    30
+	}
+	ctrl.props['target'] = target_field
+	win.add_control(ctrl)
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_menu_button(name string, title string, items []string) &SimpleWindow {
+	win.add_control(Control{
+		name:  name
+		kind:  'menu_button'
+		title: title
+		items: items
+		h:     34
+	})
+	return win
+}
+
+pub fn (win &SimpleWindow) get_menu_selected(name string) string {
+	if ctrl := win.control_map[name] {
+		return ctrl.text_value
+	}
+	return ''
+}
+
 pub fn (mut win SimpleWindow) begin_split_view(name string, split_pct int) &SimpleWindow {
 	win.add_control(Control{
-		name: name
-		kind: 'split_start'
+		name:      name
+		kind:      'split_start'
 		int_value: split_pct
 	})
 	return win
@@ -1719,13 +1854,13 @@ fn event_cb(e &gg.Event, mut win SimpleWindow) {
 
 pub fn (mut win SimpleWindow) run() {
 	win.gg_ctx = gg.new_context(
-		width: win.width
-		height: win.height
+		width:        win.width
+		height:       win.height
 		window_title: win.title
-		user_data: win
-		frame_fn: frame_cb
-		event_fn: event_cb
-		bg_color: parse_hex_color(win.theme.background_color)
+		user_data:    win
+		frame_fn:     frame_cb
+		event_fn:     event_cb
+		bg_color:     parse_hex_color(win.theme.background_color)
 	)
 	win.gg_ctx.run()
 }
