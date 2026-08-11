@@ -8,7 +8,7 @@ module main
 import simplegui
 
 fn main() {
-	mut win := simplegui.new_simple_window('11 - Data Table Pro', 720, 640)
+	mut win := simplegui.new_simple_window('11 - Data Table Pro', 860, 370)
 	win.set_theme('Apple Dark')
 
 	win.add_heading('Data Table Pro')
