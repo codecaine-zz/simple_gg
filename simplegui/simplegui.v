@@ -1613,6 +1613,15 @@ pub fn (mut win SimpleWindow) add_form_switch(label string, name string, switch_
 	return win
 }
 
+pub fn (mut win SimpleWindow) add_form_checkbox(label string, name string, checkbox_label string, checked bool) &SimpleWindow {
+	lbl_id := win.gen_id('lbl')
+	win.begin_row(win.gen_id('form_row'))
+	win.add_label(lbl_id, label)
+	win.add_checkbox(name, checkbox_label, checked)
+	win.end_row()
+	return win
+}
+
 pub fn (mut win SimpleWindow) add_form_link(label string, name string, link_text string, url string) &SimpleWindow {
 	lbl_id := win.gen_id('lbl')
 	win.begin_row(win.gen_id('form_row'))

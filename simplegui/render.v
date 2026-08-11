@@ -277,16 +277,19 @@ pub fn (mut win SimpleWindow) render_ui() {
 					b: 255
 				}
 
+				knob_s := f32(18.0)
+				knob_y := sw_y + (sw_h - knob_s) / 2.0
+
 				if ctrl.bool_value {
 					win.gg_ctx.draw_rounded_rect_filled(ctrl.x, sw_y, sw_w, sw_h, 11.0,
 						accent)
-					win.gg_ctx.draw_ellipse_filled(ctrl.x + sw_w - 11.0, sw_y + 11.0,
-						9.0, 9.0, white_c)
+					win.gg_ctx.draw_rounded_rect_filled(ctrl.x + sw_w - knob_s - 2.0, knob_y,
+						knob_s, knob_s, 9.0, white_c)
 				} else {
 					win.gg_ctx.draw_rounded_rect_filled(ctrl.x, sw_y, sw_w, sw_h, 11.0,
 						border_c)
-					win.gg_ctx.draw_ellipse_filled(ctrl.x + 11.0, sw_y + 11.0, 9.0, 9.0,
-						white_c)
+					win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 2.0, knob_y,
+						knob_s, knob_s, 9.0, white_c)
 				}
 
 				win.gg_ctx.draw_text2(
@@ -308,8 +311,11 @@ pub fn (mut win SimpleWindow) render_ui() {
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, track_y, fill_w, track_h,
 					3.0, accent)
 
-				thumb_x := ctrl.x + fill_w
-				win.gg_ctx.draw_ellipse_filled(thumb_x, track_y + 3.0, 9.0, 9.0, accent)
+				thumb_w := f32(14.0)
+				thumb_h := f32(14.0)
+				thumb_x := ctrl.x + fill_w - thumb_w / 2.0
+				thumb_y := ctrl.y + (ctrl.h - thumb_h) / 2.0
+				win.gg_ctx.draw_rounded_rect_filled(thumb_x, thumb_y, thumb_w, thumb_h, 4.0, accent)
 			}
 			'progress', 'gauge', 'radial_gauge', 'circular_progress' {
 				track_h := f32(10.0)
@@ -532,13 +538,14 @@ pub fn (mut win SimpleWindow) render_ui() {
 				stars := if ctrl.int_value > 0 { ctrl.int_value } else { 4 }
 				mut star_x := ctrl.x
 				for s_idx in 1 .. 6 {
-					star_txt := if s_idx <= stars { '*' } else { '.' }
+					star_txt := if s_idx <= stars { '★' } else { '☆' }
+					star_c := if s_idx <= stars { accent } else { border_c }
 					win.gg_ctx.draw_text2(
 						x:     int(star_x)
 						y:     int(ctrl.y + 2)
 						text:  star_txt
-						color: accent
-						size:  20
+						color: star_c
+						size:  18
 					)
 					star_x += 24.0
 				}
@@ -1131,7 +1138,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 						is_done := idx <= active_idx
 						circle_c := if is_done { accent } else { border_c }
 
-						win.gg_ctx.draw_ellipse_filled(cx, line_y, 10.0, 10.0, circle_c)
+						win.gg_ctx.draw_rounded_rect_filled(cx - 10.0, line_y - 10.0, 20.0, 20.0, 4.0, circle_c)
 						num_str := '${idx + 1}'
 						win.gg_ctx.draw_text2(
 							x:     int(cx - 3)
@@ -1191,7 +1198,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 				circle_r := f32(18.0)
 				cy := ctrl.y + ctrl.h / 2.0
 				cx := ctrl.x + circle_r
-				win.gg_ctx.draw_ellipse_filled(cx, cy, circle_r, circle_r, accent)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, cy - circle_r, circle_r * 2.0, circle_r * 2.0, 6.0, accent)
 				win.gg_ctx.draw_text2(
 					x:     int(cx - 6)
 					y:     int(cy - 7)
@@ -1253,7 +1260,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 							win.gg_ctx.draw_line(px, py, px_next, py_next, accent)
 						}
 
-						win.gg_ctx.draw_ellipse_filled(px, py, 4.0, 4.0, accent)
+						win.gg_ctx.draw_rect_filled(px - 2.0, py - 2.0, 4.0, 4.0, accent)
 					}
 				}
 			}

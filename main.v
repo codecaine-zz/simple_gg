@@ -8,9 +8,9 @@ fn main() {
 	win.add_heading('SimpleGUI Cross-Platform')
 	win.add_form_field('Name:', 'username', 'Ada Lovelace')
 	win.add_form_password('Password:', 'pwd', 'secret123')
-	win.add_checkbox('subscribe', 'Subscribe to updates', true)
-	win.add_switch('notify', 'Enable Desktop Notifications', true)
-	win.add_slider('volume', 75)
+	win.add_form_checkbox('Subscribe:', 'subscribe', 'Subscribe to updates', true)
+	win.add_form_switch('Notifications:', 'notify', 'Enable Desktop Notifications', true)
+	win.add_form_slider('Volume:', 'volume', 75)
 	win.add_form_dropdown('Theme:', 'theme_select', [
 		'Apple Dark',
 		'Apple Light',
