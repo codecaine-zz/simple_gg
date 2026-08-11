@@ -9,8 +9,13 @@ import crypto.md5
 
 $if macos || linux || freebsd {
 	#include <sys/types.h>
-	#include <sys/sysctl.h>
 	#include <sys/time.h>
+
+$if macos || freebsd {
+	#include <sys/sysctl.h>
+	fn C.sysctl(name &int, namelen u32, oldp voidptr, oldlenp &usize, newp voidptr, newlen usize) int
+}
+
 
 	fn C.getloadavg(loadavg &f64, nelem int) int
 	fn C.sysctl(name &int, namelen u32, oldp voidptr, oldlenp &usize, newp voidptr, newlen usize) int
