@@ -28,20 +28,22 @@ pub fn (mut win SimpleWindow) render_ui() {
 		match ctrl.kind {
 			'label' {
 				txt_c := if ctrl.font_color.len > 0 { parse_hex_color(ctrl.font_color) } else { fg }
+				lbl_txt := if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.title }
 				win.gg_ctx.draw_text2(
 					x:     int(ctrl.x)
 					y:     int(ctrl.y + 4)
-					text:  ctrl.title
+					text:  lbl_txt
 					color: txt_c
 					size:  15
 				)
 			}
 			'heading' {
 				txt_c := if ctrl.font_color.len > 0 { parse_hex_color(ctrl.font_color) } else { fg }
+				hd_txt := if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.title }
 				win.gg_ctx.draw_text2(
 					x:     int(ctrl.x)
 					y:     int(ctrl.y)
-					text:  ctrl.title
+					text:  hd_txt
 					color: txt_c
 					size:  22
 				)
@@ -49,14 +51,15 @@ pub fn (mut win SimpleWindow) render_ui() {
 					border_c)
 			}
 			'link' {
+				link_txt := if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.title }
 				win.gg_ctx.draw_text2(
 					x:     int(ctrl.x)
 					y:     int(ctrl.y + 4)
-					text:  ctrl.title
+					text:  link_txt
 					color: accent
 					size:  14
 				)
-				win.gg_ctx.draw_line(ctrl.x, ctrl.y + 20, ctrl.x + f32(ctrl.title.len * 8),
+				win.gg_ctx.draw_line(ctrl.x, ctrl.y + 20, ctrl.x + f32(link_txt.len * 8),
 					ctrl.y + 20, accent)
 			}
 			'button', 'action' {

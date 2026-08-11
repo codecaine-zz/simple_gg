@@ -1619,6 +1619,7 @@ pub fn (win &SimpleWindow) get_text(name string) string {
 pub fn (mut win SimpleWindow) set_text(name string, value string) &SimpleWindow {
 	if mut ctrl := win.get_control_ptr(name) {
 		ctrl.text_value = value
+		ctrl.title = value
 	}
 	return win
 }
