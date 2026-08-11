@@ -1189,7 +1189,7 @@ win.load_state_json('app_state.json') or {
 
 ## 13. System Calls & OS API Extensions (`sys.v`)
 
-### Command Execution & Processes
+### Synchronous & Asynchronous Command Execution
 
 ```v
 // Synchronous command execution (returns output string and exit code)
@@ -1200,65 +1200,187 @@ output := win.exec_or('which git', '/usr/bin/git')
 
 // Asynchronous background execution (non-blocking thread)
 win.exec_bg('ping -c 4 8.8.8.8')
+
+// Command execution with timeout (milliseconds)
+out, code, timed_out := win.exec_timeout('sleep 5', 2000)
+
+// Command execution with automatic retries and exponential backoff
+res := win.exec_retry('curl -s https://api.ipify.org', 3, 500, 2.0)
+println('Executed ${res.command} in ${res.attempts} attempt(s): ${res.output}')
+
+// Execute command inside a specific working directory
+out, code := win.exec_in_dir('/tmp', 'pwd')
 ```
 
-### OS Notifications & Sound
+### OS Desktop Notifications & Audio
 
 ```v
-// Trigger native desktop notification banner
-win.show_system_notification('Title', 'Message body here...')
+// Trigger cross-platform native notification banner (macOS / Windows PowerShell / Linux notify-send)
+win.show_system_notification('SimpleGUI Alert', 'System background process completed!')
 
 // Play standard system alert sound
 win.beep()
 win.beep_n(3)
 
-// Play macOS named sound or speak text
-simplegui.play_system_sound('Glass')
-simplegui.speak_with_voice('Hello world', 'Samantha')
+// Play named audio sound or speak text out loud
+win.play_system_sound('Glass')
+win.speak_with_voice('Hello, welcome to SimpleGUI!', 'Samantha')
 ```
 
-### Hardware & System Metrics
+### Cross-Platform Native OS Dialogs
 
 ```v
-// Get CPU model string and core count
-cpu_model := win.get_cpu_info()
-cores := win.get_cpu_cores()
+// Native prompt input dialog (blocks until submitted)
+userInput := win.osascript_dialog('Enter your license key:', 'XXXX-XXXX-XXXX')
 
-// Get physical RAM details and load average
-ram_info := win.get_memory_info()
+// Native alert / question box (returns true if OK clicked)
+confirmed := win.osascript_alert('Confirm Action', 'Do you want to proceed with format?')
+
+// Native file-picker dialog (returns chosen file path)
+file_path := win.osascript_choose_file()
+
+// Native folder-picker dialog (returns chosen directory path)
+folder_path := win.osascript_choose_folder()
+```
+
+### Hardware & Device Inspection
+
+```v
+// CPU model brand name & total CPU cores
+cpu_brand := win.get_cpu_info()    // e.g. "Apple M4 Pro"
+cores := win.get_cpu_cores()        // e.g. 14
+
+// RAM memory details & load average
+ram_str := win.get_memory_info()    // e.g. "48.0 GB RAM"
 l1, l5, l15 := win.get_load_average()
-pressure := win.get_memory_pressure() // 'normal', 'warn', 'critical'
+
+// Primary display resolution & GPU hardware model
+res := win.get_screen_resolution() // e.g. "1920 x 1080"
+gpu := win.get_gpu_info()           // e.g. "Apple M4 Pro"
+
+// Device model & serial number
+model := win.get_device_model()     // e.g. "MacBookPro18,3"
+serial := win.get_serial_number()
+
+// Battery & power status
+battery_pct := win.get_battery_percent() // Returns integer 0..100 or -1 if no battery
+on_ac := win.is_on_ac_power()             // Returns true if plugged into charger
+
+// System locale & timezone
+locale := win.get_system_locale()   // e.g. "en_US"
+tz := win.get_timezone()            // e.g. "America/Chicago"
+uptime_str := win.get_uptime_formatted() // e.g. "2 days, 4 hours, 12 mins"
 ```
 
-### Clipboard & Environment
+### File System & Directory Utilities
 
 ```v
-// Clipboard shortcuts
-win.copy_to_clipboard('Copied text!')
-text := win.get_clipboard_text()
-
-// Environment variables
-val := win.get_env('USER')
-win.set_env('MY_VAR', '123')
-win.unset_env('MY_VAR')
-```
-
-### System Directories & File Operations
-
-```v
-// System folder lookup ('home', 'desktop', 'documents', 'downloads', 'temp', 'cache', 'app')
-home_dir := win.get_system_path('home')
+// System path resolver ('home', 'desktop', 'documents', 'downloads', 'temp', 'cache', 'app')
+home := win.get_system_path('home')
 downloads := win.get_system_path('downloads')
 
-// File existence & directory checks
-exists := win.file_exists('/path/to/file')
-is_folder := win.is_dir('/path/to/folder')
+// File checks & directory utilities
+if win.file_exists('data.txt') && !win.is_dir('data.txt') {
+    content := win.read_file('data.txt')
+    win.write_file('data_copy.txt', content)
+    win.delete_file('data_copy.txt')
+}
 
-// File read & write
-content := win.read_file('config.txt')
-win.write_file('config.txt', 'Hello world')
-win.delete_file('config.txt')
-win.create_directory('nested/folder/path')
+// Create directory tree recursively
+win.create_directory('logs/2026/august')
+
+// Inspect disk space usage
+ds := win.get_disk_usage('/')[or { simplegui.DiskStats{} }]
+println('Total: ${ds.total / 1024 / 1024} MB, Free: ${ds.available / 1024 / 1024} MB')
+
+// Move file to Trash / Recycle Bin (safe non-destructive delete)
+win.trash_file('temp_draft.txt') or { println('Trash failed: ${err}') }
+
+// Zip directory archive creation & extraction
+win.zip_directory('my_folder', 'archive.zip') or { println('Zip error: ${err}') }
+win.unzip_archive('archive.zip', 'extracted_folder') or { println('Unzip error: ${err}') }
+
+// Unique temp file & folder creation
+temp_file := win.create_temp_file('draft', '.txt') or { '' }
+temp_dir := win.create_temp_dir('session_work') or { '' }
+```
+
+### Open & Reveal Commands
+
+```v
+// Open URL in default system browser
+win.open_url('https://github.com/codecaine-zz/simple_gg')
+
+// Reveal file/folder highlighted in Finder / File Explorer
+win.reveal_in_finder('/path/to/file.pdf')
+
+// Open file with default desktop application
+win.open_in_default_app('document.docx')
+
+// Launch fresh terminal shell window
+win.open_terminal()
+```
+
+### Network & Connectivity
+
+```v
+// Ping remote host (returns true if reachable)
+is_online := win.ping('8.8.8.8', 1)
+
+// Retrieve local & public IP address
+local_ip := win.get_ip_address()
+public_ip := win.get_public_ip()
+
+// Test TCP port reachability
+if win.is_port_open('127.0.0.1', 8080) {
+    println('Server is listening on 8080')
+}
+
+// Find next available unused TCP port starting from 8000
+port := win.find_available_port(8000)
+```
+
+### OS Dark Mode, Power & System Control
+
+```v
+// Check & set system appearance mode across macOS, Windows, and Linux
+is_dark := win.is_dark_mode()
+win.set_system_dark_mode(true)
+win.toggle_dark_mode()
+
+// Power management & sleep prevention
+win.prevent_sleep_bg(3600) // Prevent system sleep for 1 hour
+
+// Display & session controls
+win.sleep_display()
+win.lock_screen()
+win.start_screen_saver()
+```
+
+### Cross-Window Spy++ Registry & Remote Control
+
+```v
+// Register current window for cross-window inspection
+simplegui.sys_register_window(win)
+
+// List all registered app window titles
+titles := simplegui.sys_list_app_windows()
+
+// Remotely inspect or modify controls in another registered window
+if controls := simplegui.sys_spy_window('Main Dashboard') {
+    for c in controls {
+        println('Control: ${c.name} (${c.kind}) = ${c.value}')
+    }
+}
+
+// Remotely set text or toggle control in target window
+simplegui.sys_set_control_text('Main Dashboard', 'input_username', 'NewUser')
+simplegui.sys_set_control_enabled('Main Dashboard', 'btn_submit', true)
+
+// Subscribe to global live event stream across all windows
+simplegui.sys_subscribe_events(fn (win_title string, control_name string, event_name string, value string) {
+    println('[EVENT STREAM] Window: ${win_title} | Control: ${control_name} | Event: ${event_name} = ${value}')
+})
 ```
 
 ---
@@ -1268,11 +1390,11 @@ win.create_directory('nested/folder/path')
 ### HTTP Client Wrappers
 
 ```v
-// Simple HTTP GET (returns response body as string)
+// Simple HTTP GET (returns body string)
 body := win.http_get('https://api.ipify.org')
 
-// Simple HTTP POST
-res := win.http_post('https://httpbin.org/post', '{"key":"value"}')
+// HTTP POST request with JSON payload
+res := win.http_post('https://httpbin.org/post', '{"username":"ada"}')
 
 // Strict error-propagating variants (!string)
 body_strict := win.http_get_strict('https://api.github.com') or { 'Error' }
@@ -1281,56 +1403,86 @@ body_strict := win.http_get_strict('https://api.github.com') or { 'Error' }
 ### Cryptography & Hashes
 
 ```v
-// SHA256 & MD5
+// SHA256 & MD5 Digests
 sha := win.crypto_sha256('secret text')
 md5 := win.crypto_md5('secret text')
 
-// AES Encryption & Decryption
-cipher_hex := win.crypto_encrypt_aes('plain_text', '0123456789abcdef0123456789abcdef')
-plain := win.crypto_decrypt_aes(cipher_hex, '0123456789abcdef0123456789abcdef')
+// AES Encryption & Decryption (hex encoded cipher)
+key_32bytes := '0123456789abcdef0123456789abcdef'
+cipher_hex := win.crypto_encrypt_aes('my_secret_data', key_32bytes)
+plain_text := win.crypto_decrypt_aes(cipher_hex, key_32bytes)
 
 // Bcrypt Password Hashing & Verification
 hash := win.crypto_bcrypt_hash('password123') or { '' }
 is_valid := win.crypto_bcrypt_verify('password123', hash)
+
+// HMAC SHA256 Signature
+sig := win.crypto_hmac_sha256('message payload', 'secret_key')
 ```
 
 ### RegEx & Pattern Matching
 
 ```v
-// Test pattern match
-has_match := win.regex_match('user@domain.com', r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+// Test regex match
+is_email := win.regex_match('user@domain.com', r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
 
-// Find matches & replace
-matches := win.regex_find('Item 123 and Item 456', r'\d+')
-clean := win.regex_replace('Hello World', 'World', 'V')
+// Find regex matches & replace
+matches := win.regex_find('Order #101 and Order #102', r'\d+')
+clean_str := win.regex_replace('Hello World', 'World', 'V')
 ```
 
-### Random Generators
+### Random & Security Generators
 
 ```v
 // Random integer within range [min, max]
 num := win.rand_int(1, 100)
 
-// Random alphanumeric string
-str := win.rand_string(16)
+// Random alphanumeric string (token generation)
+token := win.rand_string(32)
 
-// Random choice from slice
+// Random item selection & slice shuffle
 item := win.rand_choice_strings(['Apple', 'Banana', 'Cherry'])
+shuffled := win.rand_shuffle_strings(['A', 'B', 'C', 'D'])
 ```
 
 ### Compression & Decompression
 
 ```v
-// Gzip & Zlib
-compressed := win.compress_gzip('Long text content...')
-decompressed := win.decompress_gzip(compressed)
+// Gzip & Zlib Compression
+gzip_compressed := win.compress_gzip('Long repetitive text content...')
+gzip_decompressed := win.decompress_gzip(gzip_compressed)
+
+zlib_compressed := win.compress_zlib('Data payload...')
+zlib_decompressed := win.decompress_zlib(zlib_compressed)
 ```
 
-### TOML & JSON Utilities
+### TOML, JSON & Data Parsing
 
 ```v
 // JSON string to map[string]string
 data_map := win.json_decode_map('{"name":"Ada","role":"Admin"}')
-name := data_map['name']
+println('Name: ${data_map["name"]}')
+
+// Map to JSON string
+json_str := win.json_encode_map({'status': 'ok', 'code': '200'})
+
+// TOML configuration parsing
+toml_map := win.toml_parse('[database]\nserver = "127.0.0.1"\nports = [ 8001, 8001, 8002 ]')
+
+// SemVer version comparison
+if win.semver_compare('1.2.0', '1.0.0') > 0 {
+    println('Version 1.2.0 is newer!')
+}
 ```
+
+### Benchmarking & Performance Timing
+
+```v
+// Start stopwatch benchmark
+mut sw := win.start_stopwatch()
+time.sleep(100 * time.millisecond)
+ms := win.stopwatch_elapsed_ms(sw)
+println('Elapsed time: ${ms} ms')
+```
+
 
