@@ -18,6 +18,12 @@ This directory contains beginner-friendly, well-commented examples demonstrating
 ![05 - Nameless Shortcuts Demo](../snapshots/ex5.png)
 <!-- slide -->
 ![06 - Interactive Dashboard Demo](../snapshots/ex6.png)
+<!-- slide -->
+![07 - Advanced Controls Demo](../snapshots/ex7.png)
+<!-- slide -->
+![08 - RAD Application Builder Demo](../snapshots/ex8.png)
+<!-- slide -->
+![09 - Control Customization & Geometry Demo](../snapshots/ex9.png)
 ````
 
 ---
@@ -32,6 +38,9 @@ This directory contains beginner-friendly, well-commented examples demonstrating
 | **[`04_widgets_and_forms.v`](04_widgets_and_forms.v)** | Form component gallery | Form inputs, password field, number stepper, range slider, toggle switch, rating stars, date picker, progress bar, metric cards, alert banner. | ![Snapshot 04](../snapshots/ex4.png) |
 | **[`05_nameless_shortcuts.v`](05_nameless_shortcuts.v)** | Rapid prototyping | Nameless control shortcuts (`win.input()`, `win.checkbox()`, `win.number()`, `win.button()`). | ![Snapshot 05](../snapshots/ex5.png) |
 | **[`06_dashboard_app.v`](06_dashboard_app.v)** | Interactive dashboard app | Multi-column metric KPI cards, polyline trend charts, environment settings, region dropdown, deployment callbacks. | ![Snapshot 06](../snapshots/ex6.png) |
+| **[`07_advanced_controls.v`](07_advanced_controls.v)** | Advanced UI controls & shortcuts | Data tables, tab containers, tree views, search bar, breadcrumbs, avatars, status badges, accordions, and window close hooks. | ![Snapshot 07](../snapshots/ex7.png) |
+| **[`08_rad_development.v`](08_rad_development.v)** | RAD application builder | Batch field reading/clearing, JSON export, control enable/disable, OS notifications, clipboard access, and native confirm boxes. | ![Snapshot 08](../snapshots/ex8.png) |
+| **[`09_control_customization.v`](09_control_customization.v)** | Control customization & geometry | Explicit sizing, padding/margins, custom font sizes/colors/borders, corner radius, tooltips, and fluent `win.control()` chaining. | ![Snapshot 09](../snapshots/ex9.png) |
 
 ---
 
@@ -55,4 +64,13 @@ v run examples/05_nameless_shortcuts.v
 
 # Run Interactive Dashboard Demo
 v run examples/06_dashboard_app.v
+
+# Run Advanced Controls Demo
+v run examples/07_advanced_controls.v
+
+# Run RAD Application Builder Demo
+v run examples/08_rad_development.v
+
+# Run Control Customization & Geometry Demo
+v run examples/09_control_customization.v
 ```

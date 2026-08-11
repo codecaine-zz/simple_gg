@@ -18,6 +18,12 @@
 ![05 - Nameless Shortcuts Demo](snapshots/ex5.png)
 <!-- slide -->
 ![06 - Interactive Dashboard Demo](snapshots/ex6.png)
+<!-- slide -->
+![07 - Advanced Controls Demo](snapshots/ex7.png)
+<!-- slide -->
+![08 - RAD Application Builder Demo](snapshots/ex8.png)
+<!-- slide -->
+![09 - Control Customization & Geometry Demo](snapshots/ex9.png)
 ````
 
 ---
@@ -26,8 +32,8 @@
 
 - ⚡ **Cross-Platform**: Runs natively on macOS, Linux, and Windows.
 - 🎨 **17 Built-in Production Themes**: Apple Light/Dark, Nord, Dracula, Cyberpunk, Catppuccin Mocha, GitHub Dark/Light, Solarized, etc.
-- 🧩 **Complete Widget Set**: Text/password inputs, steppers, range sliders, toggle switches, checkboxes, dropdowns, segmented controls, rating stars, date pickers, metric cards, charts, list boxes, and alert banners.
-- 📐 **Layout Engine**: Automatic vertical stacking, horizontal rows (`begin_row`), multi-column grids (`begin_grid`), flexboxes (`begin_flex_box`), and group cards.
+- 🧩 **Complete Widget Set**: Text/password inputs, steppers, range sliders, toggle switches, checkboxes, dropdowns, segmented controls, rating stars, date pickers, metric cards, charts, list boxes, tree views, data tables, breadcrumbs, avatars, status badges, accordions, and alert banners.
+- 📐 **Layout Engine**: Automatic vertical stacking, horizontal rows (`begin_row`), multi-column grids (`begin_grid`), flexboxes (`begin_flex_box`), tab containers, and group cards.
 - 🚀 **Beginner Friendly**: Fluent chainable builder API with zero boilerplate.
 
 ---
@@ -59,7 +65,7 @@ fn main() {
 
 ## 📁 Beginner-Friendly Examples & Snapshots
 
-The repository includes 6 beginner-friendly example programs in the [`examples/`](examples) directory:
+The repository includes 9 beginner-friendly example programs in the [`examples/`](examples) directory:
 
 | Example | Description | Run Command | Snapshot |
 | :--- | :--- | :--- | :--- |
@@ -69,6 +75,9 @@ The repository includes 6 beginner-friendly example programs in the [`examples/`
 | **[`04_widgets_and_forms.v`](examples/04_widgets_and_forms.v)** | Form inputs, sliders, steppers, ratings, dates, and metric cards. | `v run examples/04_widgets_and_forms.v` | ![Snapshot 04](snapshots/ex4.png) |
 | **[`05_nameless_shortcuts.v`](examples/05_nameless_shortcuts.v)** | Rapid prototyping using nameless shortcuts (`win.input()`). | `v run examples/05_nameless_shortcuts.v` | ![Snapshot 05](snapshots/ex5.png) |
 | **[`06_dashboard_app.v`](examples/06_dashboard_app.v)** | Real-world dashboard with KPI metrics, charts, and actions. | `v run examples/06_dashboard_app.v` | ![Snapshot 06](snapshots/ex6.png) |
+| **[`07_advanced_controls.v`](examples/07_advanced_controls.v)** | Data tables, tab containers, tree views, search, breadcrumbs, avatars, and shortcuts. | `v run examples/07_advanced_controls.v` | ![Snapshot 07](snapshots/ex7.png) |
+| **[`08_rad_development.v`](examples/08_rad_development.v)** | Rapid app builder with batch ops, JSON form export, clipboard, and OS dialogs. | `v run examples/08_rad_development.v` | ![Snapshot 08](snapshots/ex8.png) |
+| **[`09_control_customization.v`](examples/09_control_customization.v)** | Custom geometry, margins/padding, colors, borders, and fluent control chaining. | `v run examples/09_control_customization.v` | ![Snapshot 09](snapshots/ex9.png) |
 
 ---
 
