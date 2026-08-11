@@ -110,12 +110,15 @@ pub fn (mut win SimpleWindow) set_state(key string, val string) &SimpleWindow {
 }
 
 // get_state retrieves the string value associated with `key` from the state store.
-// Returns an empty string `''` if the key has not been set.
-pub fn (win &SimpleWindow) get_state(key string) string {
-	return win.state_store[key] or { '' }
+// Optional `default_val`: Allows specifying a custom fallback string if `key` is missing or empty (defaults to `""`).
+// Example: `theme := win.get_state('theme', 'Apple Dark')`
+pub fn (win &SimpleWindow) get_state(key string, default_val ...string) string {
+	fallback := if default_val.len > 0 { default_val[0] } else { '' }
+	return win.get_state_or(key, fallback)
 }
 
-// get_state_or retrieves the string value for `key`, returning `fallback` if the key is empty or unset.
+// get_state_or retrieves the string value for `key`.
+// Default Return Value: Returns custom `fallback` string if `key` is unset or contains an empty string `""`.
 pub fn (win &SimpleWindow) get_state_or(key string, fallback string) string {
 	val := win.state_store[key] or { '' }
 	if val == '' {
@@ -146,9 +149,26 @@ pub fn (mut win SimpleWindow) set_state_int(key string, val int) &SimpleWindow {
 	return win.set_state(key, val.str())
 }
 
-// get_state_int retrieves the value of `key` parsed as an integer (returns 0 if invalid or unset).
-pub fn (win &SimpleWindow) get_state_int(key string) int {
-	return win.get_state(key).int()
+// get_state_int retrieves the value of `key` parsed as an integer.
+// Optional `default_val`: Allows specifying a custom fallback integer returned if `key` is missing or unparseable (defaults to `0`).
+// Example: `counter := win.get_state_int('click_count', 10)`
+pub fn (win &SimpleWindow) get_state_int(key string, default_val ...int) int {
+	fallback := if default_val.len > 0 { default_val[0] } else { 0 }
+	return win.get_state_int_or(key, fallback)
+}
+
+// get_state_int_or retrieves the value of `key` parsed as an integer, returning `fallback` if missing or unparseable.
+pub fn (win &SimpleWindow) get_state_int_or(key string, fallback int) int {
+	if key in win.state_store {
+		str_val := win.state_store[key].trim_space()
+		if str_val.len > 0 {
+			parsed := str_val.int()
+			if parsed != 0 || str_val == '0' {
+				return parsed
+			}
+		}
+	}
+	return fallback
 }
 
 // set_state_bool converts a boolean `val` to a string ('true'/'false') and stores it under `key`.
@@ -156,10 +176,25 @@ pub fn (mut win SimpleWindow) set_state_bool(key string, val bool) &SimpleWindow
 	return win.set_state(key, val.str())
 }
 
-// get_state_bool retrieves the value of `key` as a boolean (`true` if stored string is 'true' or '1').
-pub fn (win &SimpleWindow) get_state_bool(key string) bool {
-	val := win.get_state(key).to_lower()
-	return val == 'true' || val == '1'
+// get_state_bool retrieves the value of `key` as a boolean.
+// Optional `default_val`: Allows specifying a custom fallback boolean returned if `key` is missing or unset (defaults to `false`).
+// Example: `enabled := win.get_state_bool('feature_flag', true)`
+pub fn (win &SimpleWindow) get_state_bool(key string, default_val ...bool) bool {
+	fallback := if default_val.len > 0 { default_val[0] } else { false }
+	return win.get_state_bool_or(key, fallback)
+}
+
+// get_state_bool_or retrieves the boolean state value of `key`, returning `fallback` if missing.
+pub fn (win &SimpleWindow) get_state_bool_or(key string, fallback bool) bool {
+	if key in win.state_store {
+		val := win.state_store[key].to_lower().trim_space()
+		if val == 'true' || val == '1' {
+			return true
+		} else if val == 'false' || val == '0' {
+			return false
+		}
+	}
+	return fallback
 }
 
 // set_state_f64 converts a floating point `val` to string and stores it under `key`.
@@ -167,9 +202,26 @@ pub fn (mut win SimpleWindow) set_state_f64(key string, val f64) &SimpleWindow {
 	return win.set_state(key, val.str())
 }
 
-// get_state_f64 retrieves the value of `key` parsed as a 64-bit float (returns 0.0 if invalid or unset).
-pub fn (win &SimpleWindow) get_state_f64(key string) f64 {
-	return win.get_state(key).f64()
+// get_state_f64 retrieves the value of `key` parsed as a 64-bit float.
+// Optional `default_val`: Allows specifying a custom fallback float returned if `key` is missing or unparseable (defaults to `0.0`).
+// Example: `ratio := win.get_state_f64('zoom_ratio', 1.0)`
+pub fn (win &SimpleWindow) get_state_f64(key string, default_val ...f64) f64 {
+	fallback := if default_val.len > 0 { default_val[0] } else { 0.0 }
+	return win.get_state_f64_or(key, fallback)
+}
+
+// get_state_f64_or retrieves the float value of `key`, returning `fallback` if missing or unparseable.
+pub fn (win &SimpleWindow) get_state_f64_or(key string, fallback f64) f64 {
+	if key in win.state_store {
+		str_val := win.state_store[key].trim_space()
+		if str_val.len > 0 {
+			parsed := str_val.f64()
+			if parsed != 0.0 || str_val in ['0', '0.0', '0.'] {
+				return parsed
+			}
+		}
+	}
+	return fallback
 }
 
 // toggle_state_bool flips the boolean state of `key` (true -> false, false -> true) and returns the new boolean value.

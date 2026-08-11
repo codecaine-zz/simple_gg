@@ -185,30 +185,64 @@ pub fn (mut win SimpleWindow) clear_all(names []string) &SimpleWindow {
 // =============================================================================
 
 // get_value is a convenient alias for `get_text(name)`.
-pub fn (win &SimpleWindow) get_value(name string) string {
-	return win.get_text(name)
+// Optional `default_val`: Allows specifying a custom fallback string returned if control `name` does not exist (defaults to `""`).
+// Example: `val := win.get_value('username', 'Guest')`
+pub fn (win &SimpleWindow) get_value(name string, default_val ...string) string {
+	def := if default_val.len > 0 { default_val[0] } else { '' }
+	return win.get_text_or(name, def)
+}
+
+// get_value_or retrieves the text value for control `name`, returning `fallback` if the control is not found.
+pub fn (win &SimpleWindow) get_value_or(name string, fallback string) string {
+	return win.get_text_or(name, fallback)
 }
 
 // get_int parses and returns the numeric integer value of text inputs or numeric controls.
-pub fn (win &SimpleWindow) get_int(name string) int {
+// Optional `default_val`: Allows specifying a custom fallback integer returned if control `name` does not exist or parsing fails (defaults to `0`).
+// Example: `volume := win.get_int('volume_slider', 50)`
+pub fn (win &SimpleWindow) get_int(name string, default_val ...int) int {
+	def := if default_val.len > 0 { default_val[0] } else { 0 }
+	return win.get_int_or(name, def)
+}
+
+// get_int_or retrieves the integer value of control `name`, returning `fallback` if the control is missing or unparseable.
+pub fn (win &SimpleWindow) get_int_or(name string, fallback int) int {
 	if ctrl := win.control_map[name] {
 		if ctrl.text_value.len > 0 {
-			return ctrl.text_value.trim_space().int()
+			trimmed := ctrl.text_value.trim_space()
+			val := trimmed.int()
+			if val != 0 || trimmed == '0' {
+				return val
+			}
+		} else {
+			return ctrl.int_value
 		}
-		return ctrl.int_value
 	}
-	return 0
+	return fallback
 }
 
 // get_f64 parses and returns the 64-bit floating point value of text inputs or numeric controls.
-pub fn (win &SimpleWindow) get_f64(name string) f64 {
+// Optional `default_val`: Allows specifying a custom fallback float returned if control `name` does not exist or parsing fails (defaults to `0.0`).
+// Example: `speed := win.get_f64('speed_slider', 1.0)`
+pub fn (win &SimpleWindow) get_f64(name string, default_val ...f64) f64 {
+	def := if default_val.len > 0 { default_val[0] } else { 0.0 }
+	return win.get_f64_or(name, def)
+}
+
+// get_f64_or retrieves the float value of control `name`, returning `fallback` if the control is missing or unparseable.
+pub fn (win &SimpleWindow) get_f64_or(name string, fallback f64) f64 {
 	if ctrl := win.control_map[name] {
 		if ctrl.text_value.len > 0 {
-			return ctrl.text_value.trim_space().f64()
+			trimmed := ctrl.text_value.trim_space()
+			val := trimmed.f64()
+			if val != 0.0 || trimmed in ['0', '0.0', '0.'] {
+				return val
+			}
+		} else {
+			return ctrl.f64_value
 		}
-		return ctrl.f64_value
 	}
-	return 0.0
+	return fallback
 }
 
 // set_int sets the numeric integer value and string representation for control `name`.

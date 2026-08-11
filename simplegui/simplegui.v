@@ -1957,13 +1957,23 @@ pub fn (mut win SimpleWindow) button(title string) &SimpleWindow {
 
 // Reading & Writing Values
 
-pub fn (win &SimpleWindow) get_text(name string) string {
+// get_text retrieves the text value string for control `name`.
+// Optional `default_val`: Allows specifying a custom fallback string returned if control `name` is not found (defaults to `""`).
+// Example: `name := win.get_text('username_field', 'Guest')`
+pub fn (win &SimpleWindow) get_text(name string, default_val ...string) string {
+	fallback := if default_val.len > 0 { default_val[0] } else { '' }
+	return win.get_text_or(name, fallback)
+}
+
+// get_text_or retrieves the text value string for control `name`, returning `fallback` if the control is not found.
+pub fn (win &SimpleWindow) get_text_or(name string, fallback string) string {
 	if ctrl := win.control_map[name] {
 		return ctrl.text_value
 	}
-	return ''
+	return fallback
 }
 
+// set_text sets the string text value for control `name`.
 pub fn (mut win SimpleWindow) set_text(name string, value string) &SimpleWindow {
 	if mut ctrl := win.get_control_ptr(name) {
 		ctrl.text_value = value
@@ -1972,13 +1982,23 @@ pub fn (mut win SimpleWindow) set_text(name string, value string) &SimpleWindow 
 	return win
 }
 
-pub fn (win &SimpleWindow) get_bool(name string) bool {
+// get_bool retrieves the boolean value for control `name` (e.g. CheckBox/Switch checked state).
+// Optional `default_val`: Allows specifying a custom fallback boolean returned if control `name` is not found (defaults to `false`).
+// Example: `checked := win.get_bool('subscribe_checkbox', true)`
+pub fn (win &SimpleWindow) get_bool(name string, default_val ...bool) bool {
+	fallback := if default_val.len > 0 { default_val[0] } else { false }
+	return win.get_bool_or(name, fallback)
+}
+
+// get_bool_or retrieves the boolean value for control `name`, returning `fallback` if the control is not found.
+pub fn (win &SimpleWindow) get_bool_or(name string, fallback bool) bool {
 	if ctrl := win.control_map[name] {
 		return ctrl.bool_value
 	}
-	return false
+	return fallback
 }
 
+// set_bool sets the boolean state for control `name`.
 pub fn (mut win SimpleWindow) set_bool(name string, value bool) &SimpleWindow {
 	if mut ctrl := win.get_control_ptr(name) {
 		ctrl.bool_value = value
@@ -1986,13 +2006,23 @@ pub fn (mut win SimpleWindow) set_bool(name string, value bool) &SimpleWindow {
 	return win
 }
 
-pub fn (win &SimpleWindow) get_value_int(name string) int {
+// get_value_int retrieves the native integer value for control `name` (e.g. selected index or tab index).
+// Optional `default_val`: Allows specifying a custom fallback integer returned if control `name` is not found (defaults to `0`).
+// Example: `tab_idx := win.get_value_int('tab_bar', 0)`
+pub fn (win &SimpleWindow) get_value_int(name string, default_val ...int) int {
+	fallback := if default_val.len > 0 { default_val[0] } else { 0 }
+	return win.get_value_int_or(name, fallback)
+}
+
+// get_value_int_or retrieves the native integer value for control `name`, returning `fallback` if the control is not found.
+pub fn (win &SimpleWindow) get_value_int_or(name string, fallback int) int {
 	if ctrl := win.control_map[name] {
 		return ctrl.int_value
 	}
-	return 0
+	return fallback
 }
 
+// set_value_int sets the integer value for control `name`.
 pub fn (mut win SimpleWindow) set_value_int(name string, value int) &SimpleWindow {
 	if mut ctrl := win.get_control_ptr(name) {
 		ctrl.int_value = value
@@ -2000,13 +2030,23 @@ pub fn (mut win SimpleWindow) set_value_int(name string, value int) &SimpleWindo
 	return win
 }
 
-pub fn (win &SimpleWindow) get_value_f64(name string) f64 {
+// get_value_f64 retrieves the 64-bit floating point value for control `name` (e.g. slider position).
+// Optional `default_val`: Allows specifying a custom fallback float returned if control `name` is not found (defaults to `0.0`).
+// Example: `pos := win.get_value_f64('slider', 50.0)`
+pub fn (win &SimpleWindow) get_value_f64(name string, default_val ...f64) f64 {
+	fallback := if default_val.len > 0 { default_val[0] } else { 0.0 }
+	return win.get_value_f64_or(name, fallback)
+}
+
+// get_value_f64_or retrieves the 64-bit float value for control `name`, returning `fallback` if the control is not found.
+pub fn (win &SimpleWindow) get_value_f64_or(name string, fallback f64) f64 {
 	if ctrl := win.control_map[name] {
 		return ctrl.f64_value
 	}
-	return 0.0
+	return fallback
 }
 
+// set_value_f64 sets the 64-bit floating point value for control `name`.
 pub fn (mut win SimpleWindow) set_value_f64(name string, value f64) &SimpleWindow {
 	if mut ctrl := win.get_control_ptr(name) {
 		ctrl.f64_value = value
