@@ -84,6 +84,9 @@ pub mut:
 	selected_row    int = -1
 	variant         string
 	is_expanded     bool
+	// Data Table: sorting state
+	sort_col int  = -1
+	sort_asc bool = true
 	// Detailed Geometry & Spacing
 	padding_top    f32
 	padding_bottom f32

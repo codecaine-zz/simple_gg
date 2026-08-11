@@ -440,8 +440,13 @@ pub fn (mut win SimpleWindow) render_ui() {
 				)
 
 				arrow_c := if ctrl.is_expanded { '^' } else { 'v' }
-				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 20), y: int(ctrl.y +
-					(hdr_h - 16.0) / 2.0), text: arrow_c, color: mb_txt_c, size: 12)
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + ctrl.w - 20)
+					y:     int(ctrl.y + (hdr_h - 16.0) / 2.0)
+					text:  arrow_c
+					color: mb_txt_c
+					size:  12
+				)
 
 				if ctrl.is_expanded && ctrl.items.len > 0 {
 					list_y := ctrl.y + hdr_h + 2.0
@@ -549,8 +554,13 @@ pub fn (mut win SimpleWindow) render_ui() {
 					color: fg
 					size:  14
 				)
-				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 48), y: int(ctrl.y +
-					(ctrl.h - 16.0) / 2.0), text: '[Date]', color: fg, size: 12)
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + ctrl.w - 48)
+					y:     int(ctrl.y + (ctrl.h - 16.0) / 2.0)
+					text:  '[Date]'
+					color: fg
+					size:  12
+				)
 			}
 			'color_well', 'color_palette', 'color_grid' {
 				swatch_c := parse_hex_color(if ctrl.text_value.len > 0 {
@@ -681,36 +691,9 @@ pub fn (mut win SimpleWindow) render_ui() {
 				} else {
 					if ctrl.rows.len > 0 { ctrl.rows[0].len } else { 1 }
 				}
-				mut col_widths := []f32{}
-				if col_cnt > 0 {
-					mut weights := []f32{len: col_cnt, init: 1.0}
-					for c_idx in 0 .. col_cnt {
-						mut max_l := 4
-						if c_idx < ctrl.headers.len && ctrl.headers[c_idx].len > max_l {
-							max_l = ctrl.headers[c_idx].len
-						}
-						for row in ctrl.rows {
-							if c_idx < row.len && row[c_idx].len > max_l {
-								max_l = row[c_idx].len
-							}
-						}
-						weights[c_idx] = f32(max_l)
-					}
+				col_widths := calc_table_col_widths(ctrl)
+				header_h := table_header_height(ctrl)
 
-					mut tot_w := f32(0.0)
-					for w_val in weights {
-						tot_w += w_val
-					}
-					if tot_w <= 0 {
-						tot_w = 1.0
-					}
-
-					for w_val in weights {
-						col_widths << (w_val / tot_w) * ctrl.w
-					}
-				}
-
-				header_h := f32(28.0)
 				if ctrl.headers.len > 0 {
 					win.gg_ctx.draw_rect_filled(ctrl.x, ctrl.y, ctrl.w, header_h, border_c)
 					mut cur_col_x := ctrl.x
@@ -720,34 +703,71 @@ pub fn (mut win SimpleWindow) render_ui() {
 						} else {
 							ctrl.w / f32(ctrl.headers.len)
 						}
-						max_len := int((col_w - 10.0) / 7.0)
+						is_sorted_col := c_idx == ctrl.sort_col
+						sort_arrow := if is_sorted_col {
+							if ctrl.sort_asc { ' ^' } else { ' v' }
+						} else {
+							''
+						}
+						max_len := int((col_w - 10.0 - f32(sort_arrow.len * 7)) / 7.0)
 						disp_h := if h_text.len > max_len && max_len > 3 {
 							'${h_text[0..max_len - 3]}...'
 						} else {
 							h_text
 						}
+						hdr_c := if is_sorted_col { accent } else { fg }
 						win.gg_ctx.draw_text2(
 							x:     int(cur_col_x + 8)
 							y:     int(ctrl.y + 6)
-							text:  disp_h
-							color: fg
+							text:  '${disp_h}${sort_arrow}'
+							color: hdr_c
 							size:  13
 						)
 						cur_col_x += col_w
 					}
 				}
 
-				if ctrl.rows.len > 0 {
-					mut row_y := ctrl.y + header_h
+				body_h := ctrl.h - header_h
+				content_h := table_content_height(ctrl)
+				hover_row_idx := if ctrl.is_hovered && !win.mouse_down {
+					int((win.mouse_y - (ctrl.y + header_h) + ctrl.scroll_offset_y) / 26.0)
+				} else {
+					-1
+				}
+
+				if ctrl.rows.len == 0 {
+					empty_txt := 'No data available'
+					win.gg_ctx.draw_text2(
+						x:     int(ctrl.x + (ctrl.w - f32(empty_txt.len * 7)) / 2.0)
+						y:     int(ctrl.y + header_h + (body_h - 16.0) / 2.0)
+						text:  empty_txt
+						color: border_c
+						size:  13
+					)
+				} else {
+					mut row_y := ctrl.y + header_h - ctrl.scroll_offset_y
 
 					for r_idx, row in ctrl.rows {
-						if row_y + 26.0 > ctrl.y + ctrl.h {
+						if row_y + 26.0 < ctrl.y + header_h {
+							row_y += 26.0
+							continue
+						}
+						if row_y > ctrl.y + ctrl.h {
 							break
 						}
 						is_sel := r_idx == ctrl.selected_row
+						is_row_hover := r_idx == hover_row_idx && !is_sel
 						if is_sel {
 							win.gg_ctx.draw_rect_filled(ctrl.x + 2, row_y + 1, ctrl.w - 4,
 								24.0, accent)
+						} else if is_row_hover {
+							hover_bg := if win.theme.is_dark {
+								gg.rgb(60, 63, 78)
+							} else {
+								gg.rgb(232, 236, 241)
+							}
+							win.gg_ctx.draw_rect_filled(ctrl.x + 2, row_y + 1, ctrl.w - 4,
+								24.0, hover_bg)
 						} else if r_idx % 2 == 1 {
 							row_bg := if win.theme.is_dark {
 								gg.rgb(32, 34, 44)
@@ -793,6 +813,17 @@ pub fn (mut win SimpleWindow) render_ui() {
 						}
 						row_y += 26.0
 					}
+				}
+
+				if content_h > body_h {
+					max_scroll := content_h - body_h
+					track_x := ctrl.x + ctrl.w - 6.0
+					win.gg_ctx.draw_rect_filled(track_x, ctrl.y + header_h, 4.0, body_h,
+						border_c)
+					thumb_h := math.max(f32(20.0), body_h * (body_h / content_h))
+					thumb_y := ctrl.y + header_h +
+						(ctrl.scroll_offset_y / max_scroll) * (body_h - thumb_h)
+					win.gg_ctx.draw_rect_filled(track_x, thumb_y, 4.0, thumb_h, accent)
 				}
 			}
 			'tree_view' {
@@ -1023,8 +1054,13 @@ pub fn (mut win SimpleWindow) render_ui() {
 				}
 
 				if ctrl.text_value.len > 0 {
-					win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 22), y: int(ctrl.y +
-						(ctrl.h - 16.0) / 2.0), text: '[x]', color: fg, size: 11)
+					win.gg_ctx.draw_text2(
+						x:     int(ctrl.x + ctrl.w - 22)
+						y:     int(ctrl.y + (ctrl.h - 16.0) / 2.0)
+						text:  '[x]'
+						color: fg
+						size:  11
+					)
 				}
 			}
 			'badge' {
@@ -1343,4 +1379,52 @@ pub fn (mut win SimpleWindow) render_ui() {
 		}
 		win.gg_ctx.draw_text2(x: 10, y: int(footer_y + 4), text: st_text, color: fg, size: 12)
 	}
+}
+
+// table_header_height returns the header band height, or 0 when the table has no headers.
+fn table_header_height(ctrl &Control) f32 {
+	return if ctrl.headers.len > 0 { f32(28.0) } else { f32(0.0) }
+}
+
+// table_content_height returns the total pixel height of all data rows.
+fn table_content_height(ctrl &Control) f32 {
+	return f32(ctrl.rows.len) * 26.0
+}
+
+// calc_table_col_widths distributes column widths proportional to their widest cell content.
+fn calc_table_col_widths(ctrl &Control) []f32 {
+	col_cnt := if ctrl.headers.len > 0 {
+		ctrl.headers.len
+	} else {
+		if ctrl.rows.len > 0 { ctrl.rows[0].len } else { 1 }
+	}
+	mut col_widths := []f32{}
+	if col_cnt > 0 {
+		mut weights := []f32{len: col_cnt, init: 1.0}
+		for c_idx in 0 .. col_cnt {
+			mut max_l := 4
+			if c_idx < ctrl.headers.len && ctrl.headers[c_idx].len > max_l {
+				max_l = ctrl.headers[c_idx].len
+			}
+			for row in ctrl.rows {
+				if c_idx < row.len && row[c_idx].len > max_l {
+					max_l = row[c_idx].len
+				}
+			}
+			weights[c_idx] = f32(max_l)
+		}
+
+		mut tot_w := f32(0.0)
+		for w_val in weights {
+			tot_w += w_val
+		}
+		if tot_w <= 0 {
+			tot_w = 1.0
+		}
+
+		for w_val in weights {
+			col_widths << (w_val / tot_w) * ctrl.w
+		}
+	}
+	return col_widths
 }

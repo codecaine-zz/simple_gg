@@ -1043,6 +1043,7 @@ pub fn (mut win SimpleWindow) add_table(name string, headers []string, rows [][]
 		kind:    'table'
 		headers: headers
 		rows:    rows
+		w:       420.0
 		h:       f32(math.max(120, (rows.len + 1) * 28 + 10))
 	})
 	return win
@@ -1060,6 +1061,123 @@ pub fn (win &SimpleWindow) get_table_selected_row(name string) int {
 		return ctrl.selected_row
 	}
 	return -1
+}
+
+pub fn (mut win SimpleWindow) clear_table_selection(name string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.selected_row = -1
+	}
+	return win
+}
+
+pub fn (win &SimpleWindow) get_table_rows(name string) [][]string {
+	if ctrl := win.control_map[name] {
+		return ctrl.rows
+	}
+	return [][]string{}
+}
+
+pub fn (mut win SimpleWindow) set_table_rows(name string, rows [][]string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.rows = rows
+		ctrl.selected_row = -1
+		ctrl.scroll_offset_y = 0
+		ctrl.h = f32(math.max(120, (rows.len + 1) * 28 + 10))
+	}
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_table_row(name string, row []string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.rows << row
+	}
+	return win
+}
+
+pub fn (mut win SimpleWindow) remove_table_row(name string, index int) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		if index >= 0 && index < ctrl.rows.len {
+			ctrl.rows.delete(index)
+			if ctrl.selected_row == index {
+				ctrl.selected_row = -1
+			}
+		}
+	}
+	return win
+}
+
+// sort_table sorts rows by column_index; numeric cells are compared numerically, others alphabetically.
+pub fn (mut win SimpleWindow) sort_table(name string, column_index int, ascending bool) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		if column_index >= 0 {
+			sort_table_rows(ctrl, column_index, ascending)
+			ctrl.sort_col = column_index
+			ctrl.sort_asc = ascending
+		}
+	}
+	return win
+}
+
+pub fn (win &SimpleWindow) get_table_sort(name string) (int, bool) {
+	if ctrl := win.control_map[name] {
+		return ctrl.sort_col, ctrl.sort_asc
+	}
+	return -1, true
+}
+
+// sort_table_rows performs an in-place insertion sort on ctrl.rows by the given column.
+fn sort_table_rows(ctrl &Control, col_idx int, asc bool) {
+	unsafe {
+		mut ptr := &Control(ctrl)
+		n := ptr.rows.len
+		for i in 1 .. n {
+			key := ptr.rows[i].clone()
+			key_val := if col_idx < key.len { key[col_idx] } else { '' }
+			mut j := i - 1
+			for j >= 0 {
+				cur_val := if col_idx < ptr.rows[j].len { ptr.rows[j][col_idx] } else { '' }
+				should_swap := if asc {
+					compare_table_cell(cur_val, key_val) > 0
+				} else {
+					compare_table_cell(cur_val, key_val) < 0
+				}
+				if !should_swap {
+					break
+				}
+				ptr.rows[j + 1] = ptr.rows[j]
+				j--
+			}
+			ptr.rows[j + 1] = key
+		}
+	}
+}
+
+// compare_table_cell compares two cell values numerically when both look like numbers, else alphabetically.
+fn compare_table_cell(a string, b string) int {
+	a_trim := a.trim_space()
+	b_trim := b.trim_space()
+	a_is_num := a_trim.len > 0
+		&& (a_trim[0].is_digit() || (a_trim[0] == `-` && a_trim.len > 1 && a_trim[1].is_digit()))
+	b_is_num := b_trim.len > 0
+		&& (b_trim[0].is_digit() || (b_trim[0] == `-` && b_trim.len > 1 && b_trim[1].is_digit()))
+	if a_is_num && b_is_num {
+		a_num := a_trim.f64()
+		b_num := b_trim.f64()
+		if a_num < b_num {
+			return -1
+		}
+		if a_num > b_num {
+			return 1
+		}
+		return 0
+	}
+	if a_trim < b_trim {
+		return -1
+	}
+	if a_trim > b_trim {
+		return 1
+	}
+	return 0
 }
 
 pub fn (mut win SimpleWindow) begin_tab_container(name string, titles []string) &SimpleWindow {

@@ -551,6 +551,27 @@ win.on_row_click('user_table', fn (mut win simplegui.SimpleWindow) {
 })
 ```
 
+#### Sorting, Scrolling & Row Management
+
+```v
+// Click any header cell to sort by that column (click again to reverse direction).
+// Numeric-looking cells are compared numerically; everything else compares alphabetically.
+win.sort_table('user_table', 1, true) // sort by column 1 (Name), ascending
+col_index, ascending := win.get_table_sort('user_table')
+
+// Fix the table height to enable mouse-wheel scrolling through overflowing rows
+win.set_control_height('user_table', 220)
+
+// Read back the current (possibly re-sorted) row data
+current_rows := win.get_table_rows('user_table')
+
+// Replace all rows, or mutate incrementally
+win.set_table_rows('user_table', current_rows)
+win.add_table_row('user_table', ['104', 'Margaret Hamilton', 'Architect', 'Active'])
+win.remove_table_row('user_table', 0)
+win.clear_table_selection('user_table')
+```
+
 ### Expandable Tree View Control
 
 ```v

@@ -106,19 +106,46 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 								}
 							}
 						} else if ctrl.kind in ['table', 'grid'] {
-							if ctrl.rows.len > 0 {
-								header_h := f32(28.0)
-								if win.mouse_y >= ctrl.y + header_h {
-									rel_y := win.mouse_y - (ctrl.y + header_h)
-									row_idx := int(rel_y / 26.0)
-									if row_idx >= 0 && row_idx < ctrl.rows.len {
-										ctrl.selected_row = row_idx
-										if ctrl.on_row_click != unsafe { nil } {
-											ctrl.on_row_click(mut win)
-										}
-										if ctrl.on_change != unsafe { nil } {
-											ctrl.on_change(mut win)
-										}
+							header_h := table_header_height(ctrl)
+							if header_h > 0 && win.mouse_y < ctrl.y + header_h {
+								col_widths := calc_table_col_widths(ctrl)
+								mut cur_col_x := ctrl.x
+								mut clicked_col := -1
+								for c_idx in 0 .. ctrl.headers.len {
+									col_w := if c_idx < col_widths.len {
+										col_widths[c_idx]
+									} else {
+										ctrl.w / f32(ctrl.headers.len)
+									}
+									if win.mouse_x >= cur_col_x && win.mouse_x < cur_col_x + col_w {
+										clicked_col = c_idx
+										break
+									}
+									cur_col_x += col_w
+								}
+								if clicked_col >= 0 {
+									if ctrl.sort_col == clicked_col {
+										ctrl.sort_asc = !ctrl.sort_asc
+									} else {
+										ctrl.sort_col = clicked_col
+										ctrl.sort_asc = true
+									}
+									sort_table_rows(ctrl, clicked_col, ctrl.sort_asc)
+									ctrl.selected_row = -1
+									if ctrl.on_change != unsafe { nil } {
+										ctrl.on_change(mut win)
+									}
+								}
+							} else if ctrl.rows.len > 0 {
+								rel_y := win.mouse_y - (ctrl.y + header_h) + ctrl.scroll_offset_y
+								row_idx := int(rel_y / 26.0)
+								if row_idx >= 0 && row_idx < ctrl.rows.len {
+									ctrl.selected_row = row_idx
+									if ctrl.on_row_click != unsafe { nil } {
+										ctrl.on_row_click(mut win)
+									}
+									if ctrl.on_change != unsafe { nil } {
+										ctrl.on_change(mut win)
 									}
 								}
 							}
@@ -367,6 +394,21 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 			win.recalculate_layout()
 			if win.on_resize_cb != unsafe { nil } {
 				win.on_resize_cb(mut win, win.width, win.height)
+			}
+		}
+		.mouse_scroll {
+			if win.hovered_control.len > 0 {
+				if mut ctrl := win.get_control_ptr(win.hovered_control) {
+					if ctrl.kind in ['table', 'grid'] {
+						header_h := table_header_height(ctrl)
+						body_h := ctrl.h - header_h
+						content_h := table_content_height(ctrl)
+						max_scroll := math.max(f32(0.0), content_h - body_h)
+						ctrl.scroll_offset_y -= e.scroll_y * 20.0
+						ctrl.scroll_offset_y = math.max(f32(0.0), math.min(max_scroll,
+							ctrl.scroll_offset_y))
+					}
+				}
 			}
 		}
 		else {}
