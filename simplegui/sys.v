@@ -1,3 +1,11 @@
+// Module simplegui - Core UI Framework for V
+// File: sys.v
+//
+// Description:
+//   This file handles cross-platform system integration, native platform APIs, OS process execution,
+//   clipboard access, native file pickers, notifications, hardware resource metrics, and C interop.
+//   It allows SimpleGUI applications to interact seamlessly with macOS, Windows, and Linux operating systems.
+
 module simplegui
 
 import os
@@ -7,6 +15,7 @@ import net.http
 import crypto.sha256
 import crypto.md5
 
+// Native C declarations for POSIX system calls and OS system information retrieval
 $if macos || linux || freebsd {
 	#include <sys/types.h>
 	#include <sys/time.h>
@@ -21,6 +30,7 @@ $if macos || freebsd {
 	fn C.sysctl(name &int, namelen u32, oldp voidptr, oldlenp &usize, newp voidptr, newlen usize) int
 }
 
+// Native Objective-C / macOS interop functions for automation and external window inspection
 $if macos {
 	fn C.window_list_external_apps() &char
 	fn C.window_spy_external_app(pid int) &char
@@ -31,13 +41,9 @@ $if macos {
 	fn C.window_flash_external_control(pid int, title &char) int
 }
 
-// sys.v - Cross-Platform System Call, OS API & Desktop Extensions for SimpleGUI
-// Extends `SimpleWindow` with direct, fluent methods for system commands,
-// environment variables, filesystem actions, native notifications, and hardware inspection.
-
-// ==========================================
-// 1. Operating System & Execution
-// ==========================================
+// =============================================================================
+// 1. Operating System Execution & Process Commands
+// =============================================================================
 
 // exec runs a system command synchronously, returning its stdout/stderr output and exit code.
 pub fn (win &SimpleWindow) exec(command string) (string, int) {

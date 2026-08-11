@@ -1,3 +1,11 @@
+// Module simplegui - Core UI Framework for V
+// File: events.v
+//
+// Description:
+//   This file handles event processing, hit-testing, mouse clicks, mouse movement, drag operations,
+//   keyboard focus, text caret positioning, scroll wheel events, and keyboard shortcuts for SimpleGUI.
+//   It intercepts raw platform events from V's `gg` graphics library and dispatches them to active controls.
+
 module simplegui
 
 import gg
@@ -5,13 +13,17 @@ import math
 import sokol.sapp
 import time
 
+// handle_event receives raw input events (mouse move, mouse click, mouse scroll, key press)
+// from the windowing subsystem and dispatches them to appropriate control callback handlers.
 pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 	match e.typ {
 		.mouse_move {
+			// Update current mouse coordinates in window state
 			win.mouse_x = e.mouse_x
 			win.mouse_y = e.mouse_y
 
 			mut new_hover := ''
+			// Hit-test mouse position against all active, visible controls
 			for mut ctrl in win.controls {
 				if ctrl.visible && !ctrl.disabled {
 					was_hovered := ctrl.is_hovered
@@ -26,6 +38,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 						ctrl.is_hovered = false
 					}
 
+					// Handle mouse dragging for active sliders and splitters
 					if ctrl.kind == 'range_slider' && win.mouse_down {
 						range_w := ctrl.max_val - ctrl.min_val
 						if range_w > 0 {

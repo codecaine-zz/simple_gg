@@ -1,3 +1,12 @@
+// Module simplegui - Core UI Framework for V
+// File: stdlib.v
+//
+// Description:
+//   This file provides beginner-friendly, high-level wrapper utilities around V's Core Standard Library.
+//   It simplifies complex lower-level operations (such as HTTP requests, JSON parsing, Gzip compression,
+//   AES encryption, Base64/Hex encoding, Regex matching, WebSockets, and Math statistics) so developers
+//   can call simple functions on `SimpleWindow` or via the `simplegui` package namespace.
+
 module simplegui
 
 import net.http
@@ -45,15 +54,9 @@ import math.complex
 import crypto.rand as crand
 import hash as vhash
 
-// stdlib.v - Extended High-Level Standard Library Wrappers for SimpleGUI
-// Provides extremely simple, beginner-friendly, and safe wrappers around V's Core Standard Library.
-// This wraps complex, low-level functionalities (like Gzip, AES block padding, Net, Regex, Websockets, Semver, and TOML)
-// into simple functions, which are exposed both as static helpers under `simplegui` namespace, and
-// as fluent chainable methods on `SimpleWindow`.
-
-// ==========================================
-// 1. HTTP Client Wrappers (Chapter 13: net.http)
-// ==========================================
+// =============================================================================
+// 1. HTTP Client Utilities (net.http)
+// =============================================================================
 
 // http_get sends a synchronous GET request and returns the response body, or empty on failure.
 pub fn http_get(url string) string {

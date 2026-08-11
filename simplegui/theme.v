@@ -1,19 +1,31 @@
+// Module simplegui - Core UI Framework for V
+// File: theme.v
+//
+// Description:
+//   This file manages visual themes, color palettes, and color utilities for SimpleGUI applications.
+//   It defines the `Theme` struct, hex color parsing routines, and preset theme lookup dictionaries
+//   including macOS Light/Dark, Midnight, Cyberpunk, Nord, Catppuccin, Corporate Navy, and more.
+
 module simplegui
 
 import gg
 
+// Theme represents a complete color palette configuration for the application UI.
+// Controls reference these colors to render consistent backgrounds, text, accents, and hover states.
 pub struct Theme {
 pub mut:
-	name             string
-	background_color string
-	font_color       string
-	accent_color     string
-	hover_color      string
-	surface_hover    string
-	description      string
-	is_dark          bool
+	name             string // Human-readable name of the theme (e.g., 'Apple Dark', 'Nord')
+	background_color string // Main window canvas background color in hex (e.g., '#1c1c1e')
+	font_color       string // Primary text font color in hex (e.g., '#f2f2f7')
+	accent_color     string // Active interactive highlight color for buttons/sliders (e.g., '#0a84ff')
+	hover_color      string // Hover highlight tint color when mouse is positioned over elements
+	surface_hover    string // Background tint color for hovered containers or list rows
+	description      string // Brief description of theme aesthetics
+	is_dark          bool   // True for dark mode palettes, false for light mode palettes
 }
 
+// hex_char_val converts a single ASCII hex character byte (`0`-`9`, `a`-`f`, `A`-`F`)
+// into its integer numerical value (0..15).
 fn hex_char_val(c u8) u32 {
 	if c >= `0` && c <= `9` {
 		return u32(c - `0`)
@@ -27,13 +39,16 @@ fn hex_char_val(c u8) u32 {
 	return 0
 }
 
+// parse_hex_color parses a CSS-style hex color string (e.g. "#007aff", "007aff", or "#07f")
+// into a V `gg.Color` struct (RGB bytes: Red, Green, Blue).
 pub fn parse_hex_color(hex string) gg.Color {
 	mut s := hex.trim_space().trim_left('#')
+	// Expand 3-character shorthand "#abc" to 6-character "#aabbcc"
 	if s.len == 3 {
 		s = '${s[0..1]}${s[0..1]}${s[1..2]}${s[1..2]}${s[2..3]}${s[2..3]}'
 	}
 	if s.len < 6 {
-		return gg.rgb(0, 0, 0)
+		return gg.rgb(0, 0, 0) // Default fallback to black if hex string is invalid
 	}
 	r := u8((hex_char_val(s[0]) << 4) | hex_char_val(s[1]))
 	g := u8((hex_char_val(s[2]) << 4) | hex_char_val(s[3]))
@@ -41,6 +56,7 @@ pub fn parse_hex_color(hex string) gg.Color {
 	return gg.rgb(r, g, b)
 }
 
+// list_themes returns a list of all pre-packaged visual theme names supported by SimpleGUI.
 pub fn list_themes() []string {
 	return [
 		'Apple Light',
@@ -80,6 +96,8 @@ pub fn list_themes() []string {
 	]
 }
 
+// get_theme looks up a `Theme` preset configuration by name (case-insensitive, ignoring spaces and dashes).
+// If an unknown theme name is supplied, it gracefully defaults to 'Apple Light'.
 pub fn get_theme(theme_name string) Theme {
 	normalized := theme_name.to_lower().replace(' ', '').replace('_', '').replace('-', '').replace('é', 'e')
 	return match normalized {

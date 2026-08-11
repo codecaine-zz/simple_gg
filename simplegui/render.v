@@ -1,17 +1,36 @@
+// Module simplegui - Core UI Framework for V
+// File: render.v
+//
+// Description:
+//   This file implements the immediate-mode rendering pipeline for SimpleGUI.
+//   It takes the calculated positions (x, y, w, h) of every control and draws them on screen
+//   using V's native `gg` graphics library.
+//
+//   Rendering Responsibilities:
+//     - Clearing the window background canvas with the active Theme colors
+//     - Drawing shapes (filled/rounded rectangles, lines, circles, borders, drop shadows)
+//     - Rendering typography text labels, headings, links, and input carets
+//     - Drawing interactive UI elements (Buttons, Sliders, CheckBoxes, DropDowns, ListBoxes)
+//     - Drawing complex widgets (Data Tables, Sparkline graphs, Accordions, Property Grids, Tag Inputs)
+//     - Rendering overlay popups (Toasts, Tooltips, Modal dialogs, Context menus, Spotlight search)
+
 module simplegui
 
 import gg
 import math
 import time
 
+// render_ui is called on every graphics frame refresh to render the complete window user interface.
+// It recalculates layout coordinates, clears the window canvas, and renders every visible control.
 pub fn (mut win SimpleWindow) render_ui() {
 	if win.gg_ctx == unsafe { nil } {
 		return
 	}
 
+	// Step 1: Compute responsive control coordinate locations
 	win.recalculate_layout()
 
-	// Clear window background with theme background color
+	// Step 2: Resolve color palette values from current active Theme
 	bg := parse_hex_color(win.theme.background_color)
 	fg := parse_hex_color(win.theme.font_color)
 	accent := parse_hex_color(win.theme.accent_color)
@@ -30,9 +49,10 @@ pub fn (mut win SimpleWindow) render_ui() {
 		gg.rgb(225, 230, 238)
 	}
 
+	// Step 3: Clear window background canvas
 	win.gg_ctx.draw_rect_filled(0, 0, f32(win.width), f32(win.height), bg)
 
-	// Render controls
+	// Step 4: Render every visible control registered in the window
 	for mut ctrl in win.controls {
 		if !ctrl.visible {
 			continue

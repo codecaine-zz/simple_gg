@@ -1,76 +1,89 @@
+// Module simplegui - Core UI Framework for V
+// File: simplegui.v
+//
+// Description:
+//   This file serves as the main entry point and core controller for SimpleGUI.
+//   It defines `SimpleWindow`, which manages window lifecycle, UI controls registry, active theme,
+//   reactive state store, overlays (modals, toasts, context menus, command palette), event listeners,
+//   and widget factory methods (`add_button`, `add_textbox`, `add_slider`, `add_data_table`, etc.).
+
 module simplegui
 
 import gg
 import math
 import os
 
+// SimpleWindow represents a top-level desktop GUI window instance.
+// It stores all registered UI controls, mouse/keyboard states, active theme colors,
+// reactive state key-values, and event callback handlers.
 @[heap]
 pub struct SimpleWindow {
 pub mut:
-	gg_ctx                 &gg.Context = unsafe { nil }
-	title                  string
-	width                  int
-	height                 int
-	padding                int  = 16
-	spacing                int  = 10
-	responsive_layout      bool = true
-	theme                  Theme
-	controls               []&Control
-	control_map            map[string]&Control
-	focused_control        string
-	hovered_control        string
-	mouse_x                f32
-	mouse_y                f32
-	mouse_down             bool
-	debug_mode             bool
-	always_on_top          bool
-	opacity                f64  = 1.0
-	min_width              int  = 200
-	min_height             int  = 150
-	max_width              int  = 4000
-	max_height             int  = 3000
-	resizable              bool = true
-	minimizable            bool = true
-	maximizable            bool = true
-	closeable              bool = true
-	titlebar_visible       bool = true
-	subtitle               string
-	cursor_name            string = 'arrow'
-	cursor_stack           []string
-	status_text            string
-	close_shortcut_enabled bool = true
+	gg_ctx                 &gg.Context = unsafe { nil } // Pointer to native V gg rendering graphics context
+	title                  string // Main title text displayed in operating system window titlebar
+	width                  int    // Current window width in pixels
+	height                 int    // Current window height in pixels
+	padding                int  = 16 // Default edge padding around window content in pixels
+	spacing                int  = 10 // Default vertical spacing gap between controls in pixels
+	responsive_layout      bool = true // Automatically recalculates control positions on window resize
+	theme                  Theme  // Active color palette theme configuration (defaults to Apple Light)
+	controls               []&Control // Sequential ordered list of all registered UI controls
+	control_map            map[string]&Control // Fast dictionary lookup map by control name/ID
+	focused_control        string // Name of the control currently receiving keyboard input focus
+	hovered_control        string // Name of the control currently under mouse pointer
+	mouse_x                f32    // Current mouse pointer X coordinate
+	mouse_y                f32    // Current mouse pointer Y coordinate
+	mouse_down             bool   // Mouse left-click button held state
+	debug_mode             bool   // Print verbose diagnostic system logs to console
+	always_on_top          bool   // Keep window layered above all other desktop applications
+	opacity                f64  = 1.0 // Window transparency opacity (1.0 = fully opaque)
+	min_width              int  = 200 // Minimum allowed window width during resize
+	min_height             int  = 150 // Minimum allowed window height during resize
+	max_width              int  = 4000 // Maximum allowed window width
+	max_height             int  = 3000 // Maximum allowed window height
+	resizable              bool = true // Allow user window resizing
+	minimizable            bool = true // Show minimize titlebar button
+	maximizable            bool = true // Show maximize titlebar button
+	closeable              bool = true // Show close titlebar button
+	titlebar_visible       bool = true // Render native OS titlebar
+	subtitle               string // Optional secondary subtitle header text
+	cursor_name            string = 'arrow' // Current mouse cursor icon ('arrow', 'hand', 'ibeam')
+	cursor_stack           []string // Stack for pushing/popping temporary cursor states
+	status_text            string   // Text message displayed in bottom window status bar
+	close_shortcut_enabled bool = true // Close window on Cmd+W / Ctrl+W shortcut
 	toast_title            string
 	toast_message          string
 	toast_timer            f64
-	toasts                 []Toast
-	command_palette_active bool
-	command_palette_query  string
-	command_palette_items  []CommandItem
-	command_palette_sel    int
-	context_menu_active    bool
-	context_menu_x         f32
-	context_menu_y         f32
-	context_menu_items     []ContextMenuItem
-	active_tab_map         map[string]int
-	// event callbacks
-	on_key_down_cb  fn (mut win SimpleWindow, key gg.KeyCode) = unsafe { nil }
-	on_close_cb     fn (mut win SimpleWindow) bool            = unsafe { nil }
-	on_submit_cb    VoidEventCallback                         = unsafe { nil }
-	on_resize_cb    fn (mut win SimpleWindow, w int, h int)   = unsafe { nil }
-	auto_id_counter int
-	state_store     map[string]string
-	state_listeners map[string][]StringEventCallback
-	fullscreen      bool
-	// Modal Overlay State
-	modal_active      bool
-	modal_title       string
-	modal_message     string
-	modal_confirm_txt string = 'OK'
-	modal_cancel_txt  string = 'Cancel'
-	modal_on_confirm  VoidEventCallback = unsafe { nil }
-	modal_on_cancel   VoidEventCallback = unsafe { nil }
+	toasts                 []Toast // List of active notification toast popups on screen
+	command_palette_active bool    // Spotlight / Command Palette overlay visibility (Ctrl+K / Cmd+K)
+	command_palette_query  string  // Command Palette search filter query text
+	command_palette_items  []CommandItem // Command items registered in palette
+	command_palette_sel    int     // Selected index in Command Palette list
+	context_menu_active    bool    // Right-click context menu overlay visibility
+	context_menu_x         f32     // Context menu popup X coordinate
+	context_menu_y         f32     // Context menu popup Y coordinate
+	context_menu_items     []ContextMenuItem // Right-click context menu item list
+	active_tab_map         map[string]int    // Map tracking selected tab index for container tabs
+	// Window-level event callback handlers
+	on_key_down_cb  fn (mut win SimpleWindow, key gg.KeyCode) = unsafe { nil } // Triggered when key pressed
+	on_close_cb     fn (mut win SimpleWindow) bool            = unsafe { nil } // Triggered on close request
+	on_submit_cb    VoidEventCallback                         = unsafe { nil } // Triggered on form submission
+	on_resize_cb    fn (mut win SimpleWindow, w int, h int)   = unsafe { nil } // Triggered on window resize
+	auto_id_counter int // Auto-increment counter for generating unique control IDs
+	state_store     map[string]string // Reactive key-value state store dictionary
+	state_listeners map[string][]StringEventCallback // Reactive listener callbacks for state keys
+	fullscreen      bool // Fullscreen borderless display state
+	// Modal Dialog Overlay State
+	modal_active      bool   // Modal confirm dialog popup visibility
+	modal_title       string // Modal dialog headline text
+	modal_message     string // Modal dialog message body text
+	modal_confirm_txt string = 'OK'     // Confirm button text label
+	modal_cancel_txt  string = 'Cancel' // Cancel button text label
+	modal_on_confirm  VoidEventCallback = unsafe { nil } // Callback when confirm button clicked
+	modal_on_cancel   VoidEventCallback = unsafe { nil } // Callback when cancel button clicked
 }
 
+// new_simple_window creates and initializes a new `SimpleWindow` instance with specified title, width, and height.
 pub fn new_simple_window(title string, width int, height int) &SimpleWindow {
 	mut win := &SimpleWindow{
 		title:  title
@@ -81,15 +94,18 @@ pub fn new_simple_window(title string, width int, height int) &SimpleWindow {
 	return win
 }
 
+// new_window is an alias for `new_simple_window`.
 pub fn new_window(title string, width int, height int) &SimpleWindow {
 	return new_simple_window(title, width, height)
 }
 
+// gen_id generates a unique control ID name string using an internal counter.
 fn (mut win SimpleWindow) gen_id(prefix string) string {
 	win.auto_id_counter++
 	return '${prefix}_${win.auto_id_counter}'
 }
 
+// add_control registers a `Control` struct in the window and returns a pointer to the control for method chaining.
 pub fn (mut win SimpleWindow) add_control(ctrl Control) &SimpleWindow {
 	mut c := &Control{
 		...ctrl
