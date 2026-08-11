@@ -34,6 +34,19 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 								if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
 							}
 						}
+					} else if ctrl.kind == 'slider' && win.mouse_down && (ctrl.is_pressed || ctrl.is_focused) {
+						rel_x := math.max(f32(0.0), math.min(ctrl.w, win.mouse_x - ctrl.x))
+						pct := rel_x / ctrl.w
+						ctrl.int_value = math.max(0, math.min(100, int(pct * 100.0)))
+						if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
+					} else if ctrl.kind == 'step_slider' && win.mouse_down && (ctrl.is_pressed || ctrl.is_focused) {
+						rel_x := win.mouse_x - (ctrl.x + 15.0)
+						track_w := math.max(f32(1.0), ctrl.w - 50.0)
+						pct := math.max(f32(0.0), math.min(f32(1.0), rel_x / track_w))
+						step_cnt := if ctrl.int_value > 0 { ctrl.int_value } else { 4 }
+						snapped_step := math.round(f64(pct) * f64(step_cnt))
+						ctrl.f64_value = math.max(0.0, math.min(100.0, snapped_step * (100.0 / f64(step_cnt))))
+						if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
 					} else if ctrl.kind == 'split_view' && ctrl.is_pressed {
 						rel_x := math.max(f32(0.1), math.min(f32(0.9), (win.mouse_x - ctrl.x) / ctrl.w))
 						ctrl.split_ratio = rel_x
@@ -411,11 +424,12 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 								}
 							}
 						} else if ctrl.kind == 'step_slider' {
-							rel_x := math.max(0.0, math.min(ctrl.w, win.mouse_x - ctrl.x))
-							pct := rel_x / ctrl.w
+							rel_x := win.mouse_x - (ctrl.x + 15.0)
+							track_w := math.max(f32(1.0), ctrl.w - 50.0)
+							pct := math.max(f32(0.0), math.min(f32(1.0), rel_x / track_w))
 							step_cnt := if ctrl.int_value > 0 { ctrl.int_value } else { 4 }
-							snapped_step := math.round(pct * f64(step_cnt))
-							ctrl.f64_value = snapped_step * (100.0 / f64(step_cnt))
+							snapped_step := math.round(f64(pct) * f64(step_cnt))
+							ctrl.f64_value = math.max(0.0, math.min(100.0, snapped_step * (100.0 / f64(step_cnt))))
 							if ctrl.on_change != unsafe { nil } {
 								ctrl.on_change(mut win)
 							}
