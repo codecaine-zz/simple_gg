@@ -36,8 +36,9 @@
 
 ## ✨ Key Features
 
-- ⚡ **Cross-Platform**: Runs natively on macOS, Linux, and Windows.
+- ⚡ **Cross-Platform**: Runs natively on macOS, Linux, and Windows with native OS drag-and-drop support.
 - 🎨 **17 Built-in Production Themes**: Apple Light/Dark, Nord, Dracula, Cyberpunk, Catppuccin Mocha, GitHub Dark/Light, Solarized, etc.
+- 🛠️ **RAD Development Controls Suite**: Multi-select Tag Input, Dual-Thumb Range Slider, Monospace Code Editor, File Drop Zone, Property Grid Inspector, Sparkline Micro-Charts, Pagination Bar, Resizable Split View, Toast Notification Overlay Stack, Command Palette (`Ctrl+K`), and Context Menus.
 - 🧩 **Complete Widget Set**: Text/password inputs, steppers, range sliders, toggle switches, checkboxes, dropdowns, segmented controls, rating stars, date pickers, metric cards, charts, list boxes, tree views, data tables, breadcrumbs, avatars, status badges, accordions, and alert banners.
 - 📐 **Layout Engine**: Automatic vertical stacking, horizontal rows (`begin_row`), multi-column grids (`begin_grid`), flexboxes (`begin_flex_box`), tab containers, and group cards.
 - 🔄 **Reactive State Management (`state.v`)**: Key-value reactive store (`set_state`, `get_state`), typed accessors, reactive state listeners (`on_state_change`), and JSON disk persistence (`save_state_json`, `load_state_json`).
@@ -91,6 +92,7 @@ The repository includes beginner-friendly example programs in the [`examples/`](
 | **[`11_data_table_pro.v`](examples/11_data_table_pro.v)** | Sortable data tables, wheel scrolling, row hover, and table manipulation. | `v run examples/11_data_table_pro.v` | Run locally to preview |
 | **[`12_system_and_stdlib_features.v`](examples/12_system_and_stdlib_features.v)** | Desktop notifications, hardware specs, clipboard, system paths, HTTP GET, RegEx, Crypto. | `v run examples/12_system_and_stdlib_features.v` | ![Snapshot 12](snapshots/ex12.png) |
 | **[`13_reactive_state_store.v`](examples/13_reactive_state_store.v)** | Reactive key-value state store, typed accessors, state change listeners, and JSON disk persistence. | `v run examples/13_reactive_state_store.v` | ![Snapshot 13](snapshots/ex13.png) |
+| **[`14_rad_controls_showcase.v`](examples/14_rad_controls_showcase.v)** | RAD suite showcase: Tag Input, Range Slider, Code Editor, Drop Zone, Property Grid, Sparkline, Pagination, Split View, Toasts, Command Palette (`Ctrl+K`), and Context Menu. | `v run examples/14_rad_controls_showcase.v` | Run locally to preview |
 
 ---
 

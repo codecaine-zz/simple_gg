@@ -1316,7 +1316,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 					size:  14
 				)
 			}
-			'breadcrumbs', 'step_tracker', 'pagination', 'timeline' {
+			'breadcrumbs', 'step_tracker', 'timeline' {
 				win.gg_ctx.draw_text2(
 					x:     int(ctrl.x)
 					y:     int(ctrl.y + 4)
@@ -1343,6 +1343,135 @@ pub fn (mut win SimpleWindow) render_ui() {
 			'separator' {
 				win.gg_ctx.draw_line(ctrl.x, ctrl.y + 1, ctrl.x + ctrl.w, ctrl.y + 1,
 					border_c)
+			}
+			'tag_input' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, if ctrl.is_focused { accent } else { border_c })
+				mut cur_x := ctrl.x + 6.0
+				cur_y := ctrl.y + 5.0
+				for tag in ctrl.tags {
+					tag_w := f32(tag.len * 7 + 22)
+					if cur_x + tag_w > ctrl.x + ctrl.w - 10.0 {
+						break
+					}
+					win.gg_ctx.draw_rounded_rect_filled(cur_x, cur_y, tag_w, 24.0, 4.0, accent)
+					win.gg_ctx.draw_text2(x: int(cur_x + 6), y: int(cur_y + 4), text: tag, color: gg.Color{r: 255, g: 255, b: 255}, size: 12)
+					win.gg_ctx.draw_text2(x: int(cur_x + tag_w - 14), y: int(cur_y + 4), text: 'x', color: gg.Color{r: 255, g: 200, b: 200}, size: 12)
+					cur_x += tag_w + 6.0
+				}
+				if cur_x < ctrl.x + ctrl.w - 20.0 {
+					inp_txt := if ctrl.text_value.len > 0 { ctrl.text_value } else { if ctrl.tags.len == 0 { 'Add tag...' } else { '' } }
+					txt_color := if ctrl.text_value.len > 0 { fg } else { border_c }
+					win.gg_ctx.draw_text2(x: int(cur_x), y: int(cur_y + 4), text: inp_txt, color: txt_color, size: 12)
+				}
+			}
+			'range_slider' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y + 12.0, ctrl.w, 6.0, 3.0, surface)
+				range_w := ctrl.max_val - ctrl.min_val
+				if range_w > 0 {
+					min_pct := f32((ctrl.range_min - ctrl.min_val) / range_w)
+					max_pct := f32((ctrl.range_max - ctrl.min_val) / range_w)
+					fill_x1 := ctrl.x + min_pct * ctrl.w
+					fill_x2 := ctrl.x + max_pct * ctrl.w
+					win.gg_ctx.draw_rounded_rect_filled(fill_x1, ctrl.y + 12.0, math.max(f32(4.0), fill_x2 - fill_x1), 6.0, 3.0, accent)
+					
+					win.gg_ctx.draw_rounded_rect_filled(fill_x1 - 7.0, ctrl.y + 5.0, 14.0, 20.0, 4.0, if ctrl.is_dragging_min { fg } else { accent })
+					win.gg_ctx.draw_rounded_rect_filled(fill_x2 - 7.0, ctrl.y + 5.0, 14.0, 20.0, 4.0, if ctrl.is_dragging_max { fg } else { accent })
+				}
+				win.gg_ctx.draw_text2(x: int(ctrl.x), y: int(ctrl.y + 26.0), text: '${int(ctrl.range_min)} - ${int(ctrl.range_max)}', color: fg, size: 11)
+			}
+			'code_editor' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, gg.rgb(30, 32, 44))
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
+				win.gg_ctx.draw_rect_filled(ctrl.x, ctrl.y, 36.0, ctrl.h, gg.rgb(20, 22, 30))
+				win.gg_ctx.draw_line(ctrl.x + 36.0, ctrl.y, ctrl.x + 36.0, ctrl.y + ctrl.h, border_c)
+
+				lines := ctrl.text_value.split('\n')
+				for i, line in lines {
+					if i * 18 > int(ctrl.h - 10) { break }
+					line_y := ctrl.y + f32(i * 18 + 6)
+					win.gg_ctx.draw_text2(x: int(ctrl.x + 8), y: int(line_y), text: '${i + 1}', color: gg.rgb(100, 105, 125), size: 11)
+					
+					words := line.split(' ')
+					mut word_x := ctrl.x + 44.0
+					for w in words {
+						w_color := if w in ['fn', 'mut', 'struct', 'return', 'if', 'else', 'pub', 'import', 'string', 'int', 'f64', 'bool', 'true', 'false', 'type'] {
+							gg.rgb(189, 147, 249)
+						} else {
+							gg.rgb(248, 248, 242)
+						}
+						win.gg_ctx.draw_text2(x: int(word_x), y: int(line_y), text: w + ' ', color: w_color, size: 12)
+						word_x += f32((w.len + 1) * 7)
+					}
+				}
+			}
+			'drop_zone' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, if ctrl.is_hovered { accent } else { border_c })
+				
+				prompt := if ctrl.placeholder.len > 0 { ctrl.placeholder } else { 'Drag & Drop files here or Click to Browse' }
+				win.gg_ctx.draw_text2(x: int(ctrl.x + (ctrl.w - f32(prompt.len * 7)) / 2.0), y: int(ctrl.y + ctrl.h / 2.0 - 10.0), text: prompt, color: accent, size: 13)
+				if ctrl.items.len > 0 {
+					win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(ctrl.y + ctrl.h - 20.0), text: 'Files: ${ctrl.items.len} selected', color: fg, size: 11)
+				}
+			}
+			'property_grid' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
+				
+				win.gg_ctx.draw_rect_filled(ctrl.x, ctrl.y, ctrl.w, 24.0, gg.rgb(45, 48, 60))
+				win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(ctrl.y + 4), text: 'Property', color: fg, size: 12)
+				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w / 2.0 + 10), y: int(ctrl.y + 4), text: 'Value', color: fg, size: 12)
+				win.gg_ctx.draw_line(ctrl.x + ctrl.w / 2.0, ctrl.y, ctrl.x + ctrl.w / 2.0, ctrl.y + ctrl.h, border_c)
+
+				for idx, item in ctrl.property_items {
+					row_y := ctrl.y + f32(idx * 28 + 28)
+					if row_y + 24 > ctrl.y + ctrl.h { break }
+					win.gg_ctx.draw_line(ctrl.x, row_y, ctrl.x + ctrl.w, row_y, border_c)
+					win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(row_y + 6), text: item.name, color: fg, size: 12)
+
+					val_x := ctrl.x + ctrl.w / 2.0 + 10.0
+					match item.kind {
+						'bool' {
+							b_txt := if item.val == 'true' { '[ON]' } else { '[OFF]' }
+							b_c := if item.val == 'true' { accent } else { border_c }
+							win.gg_ctx.draw_text2(x: int(val_x), y: int(row_y + 6), text: b_txt, color: b_c, size: 12)
+						}
+						'color' {
+							c_box := parse_hex_color(if item.val.len > 0 { item.val } else { '#3b82f6' })
+							win.gg_ctx.draw_rounded_rect_filled(val_x, row_y + 5.0, 16.0, 16.0, 3.0, c_box)
+							win.gg_ctx.draw_text2(x: int(val_x + 22), y: int(row_y + 6), text: item.val, color: fg, size: 12)
+						}
+						else {
+							win.gg_ctx.draw_text2(x: int(val_x), y: int(row_y + 6), text: item.val, color: fg, size: 12)
+						}
+					}
+				}
+			}
+			'pagination' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
+				
+				page_info := 'Page ${ctrl.current_page} of ${ctrl.total_pages}'
+				win.gg_ctx.draw_text2(x: int(ctrl.x + 12), y: int(ctrl.y + 9), text: page_info, color: fg, size: 13)
+
+				btn_w := f32(40.0)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 90, ctrl.y + 4, btn_w, 28.0, 4.0, accent)
+				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 82), y: int(ctrl.y + 9), text: '< Prev', color: gg.Color{r: 255, g: 255, b: 255}, size: 11)
+
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 44, ctrl.y + 4, btn_w, 28.0, 4.0, accent)
+				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 38), y: int(ctrl.y + 9), text: 'Next >', color: gg.Color{r: 255, g: 255, b: 255}, size: 11)
+			}
+			'split_view' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
+				
+				div_x := ctrl.x + ctrl.w * ctrl.split_ratio
+				win.gg_ctx.draw_line(div_x, ctrl.y, div_x, ctrl.y + ctrl.h, accent)
+				win.gg_ctx.draw_rounded_rect_filled(div_x - 4.0, ctrl.y + ctrl.h / 2.0 - 15.0, 8.0, 30.0, 3.0, accent)
+				
+				win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(ctrl.y + 10), text: 'Pane A (Left)', color: fg, size: 12)
+				win.gg_ctx.draw_text2(x: int(div_x + 10), y: int(ctrl.y + 10), text: 'Pane B (Right)', color: fg, size: 12)
 			}
 			else {}
 		}
@@ -1388,6 +1517,99 @@ pub fn (mut win SimpleWindow) render_ui() {
 			'Debug Mode Active | Controls: ${win.controls.len}'
 		}
 		win.gg_ctx.draw_text2(x: 10, y: int(footer_y + 4), text: st_text, color: fg, size: 12)
+	}
+
+	win.render_toasts()
+	win.render_command_palette()
+	win.render_context_menu()
+}
+
+fn (mut win SimpleWindow) render_toasts() {
+	if win.toasts.len == 0 { return }
+	mut active_toasts := []Toast{}
+	mut ty := f32(20.0)
+
+	for mut toast in win.toasts {
+		toast.remaining -= 0.016
+		if toast.remaining <= 0 {
+			continue
+		}
+
+		t_w := f32(280.0)
+		t_h := f32(54.0)
+		tx := f32(win.width) - t_w - 20.0
+		
+		t_color := match toast.variant {
+			'success' { parse_hex_color('#10b981') }
+			'warning' { parse_hex_color('#f59e0b') }
+			'error' { parse_hex_color('#ef4444') }
+			else { parse_hex_color('#3b82f6') }
+		}
+
+		win.gg_ctx.draw_rounded_rect_filled(tx, ty, t_w, t_h, 8.0, gg.rgb(35, 38, 48))
+		win.gg_ctx.draw_rounded_rect_empty(tx, ty, t_w, t_h, 8.0, t_color)
+		win.gg_ctx.draw_rect_filled(tx, ty, 6.0, t_h, t_color)
+
+		win.gg_ctx.draw_text2(x: int(tx + 16), y: int(ty + 8), text: toast.title, color: gg.Color{r: 255, g: 255, b: 255}, size: 13)
+		win.gg_ctx.draw_text2(x: int(tx + 16), y: int(ty + 28), text: toast.message, color: gg.rgb(200, 205, 215), size: 12)
+		win.gg_ctx.draw_text2(x: int(tx + t_w - 20), y: int(ty + 6), text: 'x', color: gg.rgb(180, 185, 200), size: 13)
+
+		active_toasts << toast
+		ty += t_h + 10.0
+	}
+
+	win.toasts = active_toasts
+}
+
+fn (mut win SimpleWindow) render_command_palette() {
+	if !win.command_palette_active { return }
+	win.gg_ctx.draw_rect_filled(0, 0, f32(win.width), f32(win.height), gg.rgba(0, 0, 0, 160))
+
+	box_w := f32(math.min(500, win.width - 40))
+	box_h := f32(300.0)
+	bx := (f32(win.width) - box_w) / 2.0
+	by := f32(80.0)
+
+	win.gg_ctx.draw_rounded_rect_filled(bx, by, box_w, box_h, 10.0, gg.rgb(30, 32, 44))
+	win.gg_ctx.draw_rounded_rect_empty(bx, by, box_w, box_h, 10.0, parse_hex_color(win.theme.accent_color))
+
+	win.gg_ctx.draw_text2(x: int(bx + 16), y: int(by + 16), text: 'Find: ${win.command_palette_query}_', color: gg.Color{r: 255, g: 255, b: 255}, size: 15)
+	win.gg_ctx.draw_line(bx, by + 48, bx + box_w, by + 48, gg.rgb(60, 64, 80))
+
+	mut item_y := by + 56.0
+	for idx, item in win.command_palette_items {
+		if win.command_palette_query.len > 0 && !item.title.to_lower().contains(win.command_palette_query.to_lower()) {
+			continue
+		}
+		if item_y + 32.0 > by + box_h { break }
+
+		if idx == win.command_palette_sel {
+			win.gg_ctx.draw_rounded_rect_filled(bx + 8, item_y, box_w - 16, 28.0, 4.0, parse_hex_color(win.theme.accent_color))
+		}
+		win.gg_ctx.draw_text2(x: int(bx + 20), y: int(item_y + 6), text: item.title, color: gg.Color{r: 255, g: 255, b: 255}, size: 13)
+		if item.shortcut.len > 0 {
+			win.gg_ctx.draw_text2(x: int(bx + box_w - 80), y: int(item_y + 6), text: item.shortcut, color: gg.rgb(180, 185, 200), size: 11)
+		}
+		item_y += 32.0
+	}
+}
+
+fn (mut win SimpleWindow) render_context_menu() {
+	if !win.context_menu_active { return }
+	menu_w := f32(180.0)
+	menu_h := f32(win.context_menu_items.len * 30 + 10)
+	mx := win.context_menu_x
+	my := win.context_menu_y
+
+	win.gg_ctx.draw_rounded_rect_filled(mx, my, menu_w, menu_h, 6.0, gg.rgb(35, 38, 50))
+	win.gg_ctx.draw_rounded_rect_empty(mx, my, menu_w, menu_h, 6.0, parse_hex_color(win.theme.accent_color))
+
+	for idx, item in win.context_menu_items {
+		iy := my + f32(idx * 30 + 5)
+		win.gg_ctx.draw_text2(x: int(mx + 12), y: int(iy + 6), text: item.title, color: gg.Color{r: 255, g: 255, b: 255}, size: 13)
+		if item.shortcut.len > 0 {
+			win.gg_ctx.draw_text2(x: int(mx + menu_w - 60), y: int(iy + 6), text: item.shortcut, color: gg.rgb(160, 165, 180), size: 11)
+		}
 	}
 }
 

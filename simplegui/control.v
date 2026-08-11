@@ -35,6 +35,43 @@ pub mut:
 	on_click VoidEventCallback = unsafe { nil }
 }
 
+pub struct PropertyGridItem {
+pub mut:
+	name    string
+	val     string
+	kind    string // "text", "bool", "number", "color", "choice"
+	choices []string
+}
+
+pub struct Toast {
+pub mut:
+	id          string
+	title       string
+	message     string
+	variant     string // "info", "success", "warning", "error"
+	created_at  i64
+	duration_ms int = 3000
+	remaining   f32 = 3.0
+}
+
+pub struct CommandItem {
+pub mut:
+	id         string
+	title      string
+	category   string
+	shortcut   string
+	on_execute VoidEventCallback = unsafe { nil }
+}
+
+pub struct ContextMenuItem {
+pub mut:
+	id        string
+	title     string
+	icon      string
+	shortcut  string
+	on_select VoidEventCallback = unsafe { nil }
+}
+
 @[heap]
 pub struct Control {
 pub mut:
@@ -106,6 +143,17 @@ pub mut:
 	border_color  string
 	corner_radius f32 = 6.0
 	opacity       f64 = 1.0
+	// RAD Controls State
+	range_min       f64
+	range_max       f64 = 100.0
+	is_dragging_min bool
+	is_dragging_max bool
+	tags            []string
+	code_lang       string
+	split_ratio     f32 = 0.5
+	property_items  []PropertyGridItem
+	total_pages     int = 1
+	current_page    int = 1
 	// Callbacks
 	on_click     VoidEventCallback = unsafe { nil }
 	on_change    VoidEventCallback = unsafe { nil }

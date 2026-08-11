@@ -2,6 +2,7 @@ module simplegui
 
 import gg
 import math
+import sokol.sapp
 
 pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 	match e.typ {
@@ -19,6 +20,25 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 					} else {
 						ctrl.is_hovered = false
 					}
+
+					if ctrl.kind == 'range_slider' && win.mouse_down {
+						range_w := ctrl.max_val - ctrl.min_val
+						if range_w > 0 {
+							rel_x := math.max(f32(0.0), math.min(ctrl.w, win.mouse_x - ctrl.x))
+							val := ctrl.min_val + f64(rel_x / ctrl.w) * range_w
+							if ctrl.is_dragging_min {
+								ctrl.range_min = math.min(val, ctrl.range_max)
+								if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
+							} else if ctrl.is_dragging_max {
+								ctrl.range_max = math.max(val, ctrl.range_min)
+								if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
+							}
+						}
+					} else if ctrl.kind == 'split_view' && ctrl.is_pressed {
+						rel_x := math.max(f32(0.1), math.min(f32(0.9), (win.mouse_x - ctrl.x) / ctrl.w))
+						ctrl.split_ratio = rel_x
+						if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
+					}
 				}
 			}
 			win.hovered_control = new_hover
@@ -27,6 +47,60 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 			win.mouse_down = true
 			win.mouse_x = e.mouse_x
 			win.mouse_y = e.mouse_y
+
+			if win.toasts.len > 0 {
+				mut ty := f32(20.0)
+				t_w := f32(280.0)
+				t_h := f32(54.0)
+				tx := f32(win.width) - t_w - 20.0
+				mut clicked_toast_idx := -1
+				for idx in 0 .. win.toasts.len {
+					if win.mouse_x >= tx && win.mouse_x <= tx + t_w && win.mouse_y >= ty && win.mouse_y <= ty + t_h {
+						clicked_toast_idx = idx
+						break
+					}
+					ty += t_h + 10.0
+				}
+				if clicked_toast_idx >= 0 && clicked_toast_idx < win.toasts.len {
+					mut remaining_toasts := []Toast{}
+					for i, t in win.toasts {
+						if i != clicked_toast_idx {
+							remaining_toasts << t
+						}
+					}
+					win.toasts = remaining_toasts
+					return
+				}
+			}
+
+			if win.command_palette_active {
+				box_w := f32(math.min(500, win.width - 40))
+				box_h := f32(300.0)
+				bx := (f32(win.width) - box_w) / 2.0
+				by := f32(80.0)
+				if win.mouse_x < bx || win.mouse_x > bx + box_w || win.mouse_y < by || win.mouse_y > by + box_h {
+					win.hide_command_palette()
+					return
+				}
+			}
+
+			if win.context_menu_active {
+				menu_w := f32(180.0)
+				menu_h := f32(win.context_menu_items.len * 30 + 10)
+				if win.mouse_x >= win.context_menu_x && win.mouse_x <= win.context_menu_x + menu_w && win.mouse_y >= win.context_menu_y && win.mouse_y <= win.context_menu_y + menu_h {
+					idx := int((win.mouse_y - (win.context_menu_y + 5)) / 30)
+					if idx >= 0 && idx < win.context_menu_items.len {
+						item := win.context_menu_items[idx]
+						win.hide_context_menu()
+						if item.on_select != unsafe { nil } {
+							item.on_select(mut win)
+						}
+						return
+					}
+				} else {
+					win.hide_context_menu()
+				}
+			}
 
 			mut clicked_ctrl := ''
 			for mut ctrl in win.controls {
@@ -38,7 +112,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 						clicked_ctrl = ctrl.name
 
 						if ctrl.kind in ['input', 'password', 'textarea', 'search_field',
-							'search_bar', 'file_picker', 'pin_code', 'time_picker'] {
+							'search_bar', 'file_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
 							left_pad := if ctrl.kind == 'search_bar' { f32(32.0) } else { f32(10.0) }
 							rel_x := win.mouse_x - (ctrl.x + left_pad)
 							mut best_idx := 0
@@ -66,6 +140,61 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 							ctrl.int_value = int(pct * 100.0)
 							if ctrl.on_change != unsafe { nil } {
 								ctrl.on_change(mut win)
+							}
+						} else if ctrl.kind == 'tag_input' {
+							mut cur_x := ctrl.x + 6.0
+							cur_y := ctrl.y + 5.0
+							for idx, tag in ctrl.tags {
+								tag_w := f32(tag.len * 7 + 22)
+								if win.mouse_x >= cur_x + tag_w - 18.0 && win.mouse_x <= cur_x + tag_w && win.mouse_y >= cur_y && win.mouse_y <= cur_y + 24.0 {
+									mut new_tags := []string{}
+									for i, t in ctrl.tags {
+										if i != idx {
+											new_tags << t
+										}
+									}
+									ctrl.tags = new_tags
+									if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
+									break
+								}
+								cur_x += tag_w + 6.0
+							}
+						} else if ctrl.kind == 'range_slider' {
+							range_w := ctrl.max_val - ctrl.min_val
+							if range_w > 0 {
+								min_pct := f32((ctrl.range_min - ctrl.min_val) / range_w)
+								max_pct := f32((ctrl.range_max - ctrl.min_val) / range_w)
+								fill_x1 := ctrl.x + min_pct * ctrl.w
+								fill_x2 := ctrl.x + max_pct * ctrl.w
+								if math.abs(win.mouse_x - fill_x1) < math.abs(win.mouse_x - fill_x2) {
+									ctrl.is_dragging_min = true
+								} else {
+									ctrl.is_dragging_max = true
+								}
+							}
+						} else if ctrl.kind == 'property_grid' {
+							if win.mouse_y > ctrl.y + 24.0 {
+								idx := int((win.mouse_y - (ctrl.y + 28.0)) / 28.0)
+								if idx >= 0 && idx < ctrl.property_items.len {
+									mut item := ctrl.property_items[idx]
+									if item.kind == 'bool' {
+										item.val = if item.val == 'true' { 'false' } else { 'true' }
+										ctrl.property_items[idx] = item
+										if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
+									}
+								}
+							}
+						} else if ctrl.kind == 'pagination' {
+							if win.mouse_x >= ctrl.x + ctrl.w - 90 && win.mouse_x <= ctrl.x + ctrl.w - 50 {
+								if ctrl.current_page > 1 {
+									ctrl.current_page--
+									if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
+								}
+							} else if win.mouse_x >= ctrl.x + ctrl.w - 44 && win.mouse_x <= ctrl.x + ctrl.w {
+								if ctrl.current_page < ctrl.total_pages {
+									ctrl.current_page++
+									if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
+								}
 							}
 						} else if ctrl.kind == 'rating' {
 							rel_x := win.mouse_x - ctrl.x
@@ -179,6 +308,21 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 									ctrl.on_click(mut win)
 								}
 							}
+						} else if ctrl.kind == 'drop_zone' {
+							picked := open_native_file_dialog()
+							if picked.len > 0 {
+								if picked !in ctrl.items {
+									ctrl.items << picked
+								}
+								ctrl.text_value = picked
+								if ctrl.on_change != unsafe { nil } {
+									ctrl.on_change(mut win)
+								}
+								if ctrl.on_click != unsafe { nil } {
+									ctrl.on_click(mut win)
+								}
+								win.push_toast('File Added', 'Added ${picked} to drop zone', 'success', 2500)
+							}
 						} else if ctrl.kind == 'tree_view' {
 							rel_y := win.mouse_y - (ctrl.y + 6.0)
 							node_idx := int(rel_y / 24.0)
@@ -265,6 +409,8 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 		.mouse_up {
 			win.mouse_down = false
 			for mut ctrl in win.controls {
+				ctrl.is_dragging_min = false
+				ctrl.is_dragging_max = false
 				if ctrl.is_pressed {
 					ctrl.is_pressed = false
 					if win.mouse_x >= ctrl.x && win.mouse_x <= ctrl.x + ctrl.w
@@ -277,11 +423,17 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 			}
 		}
 		.char {
+			if win.command_palette_active {
+				if e.char_code >= 32 && e.char_code <= 126 {
+					win.command_palette_query += u8(e.char_code).ascii_str()
+				}
+				return
+			}
 			if win.focused_control.len > 0 {
 				if mut ctrl := win.get_control_ptr(win.focused_control) {
 					if ctrl.kind in ['input', 'password', 'textarea', 'search_field', 'search_bar',
-						'file_picker', 'pin_code', 'time_picker'] {
-						if e.char_code > 32 && e.char_code <= 126 {
+						'file_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
+						if e.char_code >= 32 && e.char_code <= 126 {
 							ch := u8(e.char_code).ascii_str()
 							if ctrl.caret_pos < 0 || ctrl.caret_pos > ctrl.text_value.len {
 								ctrl.caret_pos = ctrl.text_value.len
@@ -301,6 +453,49 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 			is_super := (e.modifiers & u32(gg.Modifier.super)) != 0
 			is_ctrl := (e.modifiers & u32(gg.Modifier.ctrl)) != 0
 			is_alt := (e.modifiers & u32(gg.Modifier.alt)) != 0
+
+			if e.key_code == .escape {
+				if win.command_palette_active {
+					win.hide_command_palette()
+					return
+				}
+				if win.context_menu_active {
+					win.hide_context_menu()
+					return
+				}
+				if win.fullscreen {
+					win.set_fullscreen(false)
+					return
+				}
+			}
+
+			if (is_ctrl || is_super) && e.key_code == .k {
+				win.command_palette_active = !win.command_palette_active
+				return
+			}
+
+			if win.command_palette_active {
+				if e.key_code == .escape {
+					win.hide_command_palette()
+				} else if e.key_code == .up {
+					if win.command_palette_sel > 0 { win.command_palette_sel-- }
+				} else if e.key_code == .down {
+					if win.command_palette_sel < win.command_palette_items.len - 1 { win.command_palette_sel++ }
+				} else if e.key_code == .enter {
+					if win.command_palette_sel >= 0 && win.command_palette_sel < win.command_palette_items.len {
+						item := win.command_palette_items[win.command_palette_sel]
+						win.hide_command_palette()
+						if item.on_execute != unsafe { nil } {
+							item.on_execute(mut win)
+						}
+					}
+				} else if e.key_code == .backspace {
+					if win.command_palette_query.len > 0 {
+						win.command_palette_query = win.command_palette_query[0..win.command_palette_query.len - 1]
+					}
+				}
+				return
+			}
 
 			if win.close_shortcut_enabled {
 				if ((is_super || is_ctrl) && e.key_code == .q) || (is_alt && e.key_code == .f4) {
@@ -323,7 +518,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 				if mut ctrl := win.get_control_ptr(win.focused_control) {
 					if e.key_code == .space {
 						if ctrl.kind in ['input', 'password', 'textarea', 'search_field',
-							'search_bar', 'file_picker', 'pin_code', 'time_picker'] {
+							'search_bar', 'file_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
 							if ctrl.caret_pos < 0 || ctrl.caret_pos > ctrl.text_value.len {
 								ctrl.caret_pos = ctrl.text_value.len
 							}
@@ -333,6 +528,26 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 							if ctrl.on_change != unsafe { nil } {
 								ctrl.on_change(mut win)
 							}
+						}
+					} else if e.key_code == .enter {
+						if ctrl.kind == 'tag_input' && ctrl.text_value.trim_space().len > 0 {
+							ctrl.tags << ctrl.text_value.trim_space()
+							ctrl.text_value = ''
+							if ctrl.on_change != unsafe { nil } {
+								ctrl.on_change(mut win)
+							}
+						} else if ctrl.kind == 'code_editor' {
+							ctrl.text_value += '\n'
+							ctrl.caret_pos++
+							if ctrl.on_change != unsafe { nil } {
+								ctrl.on_change(mut win)
+							}
+						}
+						if ctrl.on_enter != unsafe { nil } {
+							ctrl.on_enter(mut win)
+						}
+						if win.on_submit_cb != unsafe { nil } {
+							win.on_submit_cb(mut win)
 						}
 					} else if e.key_code == .backspace {
 						if ctrl.text_value.len > 0 && ctrl.caret_pos > 0 {
@@ -363,13 +578,6 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 						ctrl.caret_pos = 0
 					} else if e.key_code == .end {
 						ctrl.caret_pos = ctrl.text_value.len
-					} else if e.key_code == .enter {
-						if ctrl.on_enter != unsafe { nil } {
-							ctrl.on_enter(mut win)
-						}
-						if win.on_submit_cb != unsafe { nil } {
-							win.on_submit_cb(mut win)
-						}
 					} else if e.key_code == .up {
 						if ctrl.kind == 'number' {
 							ctrl.int_value++
@@ -407,6 +615,29 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 						ctrl.scroll_offset_y -= e.scroll_y * 20.0
 						ctrl.scroll_offset_y = math.max(f32(0.0), math.min(max_scroll,
 							ctrl.scroll_offset_y))
+					}
+				}
+			}
+		}
+		.files_dropped {
+			num_files := sapp.get_num_dropped_files()
+			mut dropped_paths := []string{}
+			for i in 0 .. num_files {
+				dropped_paths << sapp.get_dropped_file_path(i)
+			}
+			if dropped_paths.len > 0 {
+				for mut ctrl in win.controls {
+					if ctrl.visible && !ctrl.disabled && ctrl.kind == 'drop_zone' {
+						for path in dropped_paths {
+							if path !in ctrl.items {
+								ctrl.items << path
+							}
+						}
+						ctrl.text_value = dropped_paths.join(', ')
+						if ctrl.on_change != unsafe { nil } {
+							ctrl.on_change(mut win)
+						}
+						win.push_toast('Files Dropped', '${dropped_paths.len} file(s) added to drop zone.', 'success', 3000)
 					}
 				}
 			}

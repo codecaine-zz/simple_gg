@@ -530,6 +530,68 @@ win.add_checklist('chk_perms', ['Read', 'Write', 'Execute'], ['Read'])
 win.add_password_strength('pwd_meter', 'input_password')
 ```
 
+### RAD Development Controls & Overlays
+
+```v
+// 🏷️ Multi-Select Tag Input (interactive chips with inline text entry and 'x' removal)
+win.add_tag_input('my_tags', ['vlang', 'gui', 'rad'])
+tags := win.get_tags('my_tags')
+win.set_tags('my_tags', ['tag1', 'tag2'])
+
+// 🎚️ Dual-Thumb Range Slider (min, max, cur_min, cur_max)
+win.add_range_slider('my_range', 0.0, 100.0, 20.0, 80.0)
+bounds := win.get_range_values('my_range') // returns [min_val, max_val]
+win.set_range_values('my_range', 15.0, 85.0)
+
+// 📝 Monospace Code Editor (line numbers sidebar & V syntax keyword highlighting)
+win.add_code_editor('my_code', 'fn main() {\n    println("Hello V")\n}', 'v')
+
+// 📁 File Drop Zone (accepts native OS drag-and-drop files across window or click-to-browse)
+win.add_drop_zone('my_drop', 'Drag & drop files here or click to browse')
+
+// 🛠️ Property Grid Inspector (Key-Value inspector table with inline typed controls)
+win.add_property_grid('my_inspector', [
+	simplegui.PropertyGridItem{ name: 'App Theme', val: 'Dark Mode', kind: 'text' },
+	simplegui.PropertyGridItem{ name: 'Debug Mode', val: 'true', kind: 'bool' },
+	simplegui.PropertyGridItem{ name: 'Accent Color', val: '#3b82f6', kind: 'color' },
+])
+
+// 📊 Sparkline Micro-Chart (high-density inline trend curves)
+win.add_sparkline('my_sparkline', [15.0, 32.0, 28.0, 65.0, 48.0, 92.0, 75.0, 88.0])
+
+// 🔢 Pagination Bar (< Prev | Page X of Y | Next >)
+win.add_pagination('my_pagination', 1, 10)
+
+// ↔️ Resizable Split View Container (pane divider with draggable handle)
+win.add_split_view('my_split', 0.5) // ratio 0.1 to 0.9
+
+// 🔔 Ephemeral Toast Stack (auto-dismissing notification alerts with click-to-close)
+win.push_toast('Success', 'File exported successfully!', 'success', 3000) // variants: info, success, warning, error
+
+// 🔍 Command Palette Modal (Ctrl+K / Cmd+K quick search modal)
+win.show_command_palette([
+	simplegui.CommandItem{
+		id: 'cmd_save'
+		title: 'Save Project State'
+		category: 'File'
+		shortcut: 'Ctrl+S'
+		on_execute: fn (mut win simplegui.SimpleWindow) { win.push_toast('Saved', 'Project saved', 'info', 2000) }
+	}
+])
+win.hide_command_palette()
+
+// 📍 Context Menu Flyout (right-click popup flyout menu)
+win.show_context_menu(x, y, [
+	simplegui.ContextMenuItem{
+		id: 'ctx_copy'
+		title: 'Copy Selection'
+		shortcut: 'Ctrl+C'
+		on_select: fn (mut win simplegui.SimpleWindow) { ... }
+	}
+])
+win.hide_context_menu()
+```
+
 ---
 
 ## 6. Form RAD Helpers (Label + Widget Pairs)

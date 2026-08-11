@@ -95,4 +95,7 @@ v run examples/12_system_and_stdlib_features.v
 
 # Run Reactive State Store Demo
 v run examples/13_reactive_state_store.v
+
+# Run RAD Controls Suite Showcase Demo
+v run examples/14_rad_controls_showcase.v
 ```

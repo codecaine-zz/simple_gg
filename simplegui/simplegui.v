@@ -42,6 +42,15 @@ pub mut:
 	toast_title            string
 	toast_message          string
 	toast_timer            f64
+	toasts                 []Toast
+	command_palette_active bool
+	command_palette_query  string
+	command_palette_items  []CommandItem
+	command_palette_sel    int
+	context_menu_active    bool
+	context_menu_x         f32
+	context_menu_y         f32
+	context_menu_items     []ContextMenuItem
 	active_tab_map         map[string]int
 	// event callbacks
 	on_key_down_cb  fn (mut win SimpleWindow, key gg.KeyCode) = unsafe { nil }
@@ -1080,6 +1089,13 @@ pub fn (mut win SimpleWindow) show_toast(title string, message string) &SimpleWi
 	win.toast_title = title
 	win.toast_message = message
 	win.toast_timer = 4.0
+	win.toasts << Toast{
+		id:          win.gen_id('toast')
+		title:       title
+		message:     message
+		variant:     'info'
+		duration_ms: 4000
+	}
 	return win
 }
 
@@ -2024,6 +2040,165 @@ pub fn (mut win SimpleWindow) on_window_resize(cb fn (mut win SimpleWindow, w in
 	return win
 }
 
+// RAD Builder Controls & Overlays
+
+pub fn (mut win SimpleWindow) add_tag_input(name string, tags []string) &SimpleWindow {
+	win.add_control(Control{
+		name: name
+		kind: 'tag_input'
+		tags: tags
+		h:    36
+		w:    240
+	})
+	return win
+}
+
+pub fn (win &SimpleWindow) get_tags(name string) []string {
+	if ctrl := win.control_map[name] {
+		return ctrl.tags
+	}
+	return []string{}
+}
+
+pub fn (mut win SimpleWindow) set_tags(name string, tags []string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.tags = tags
+	}
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_range_slider(name string, min f64, max f64, current_min f64, current_max f64) &SimpleWindow {
+	win.add_control(Control{
+		name:      name
+		kind:      'range_slider'
+		range_min: current_min
+		range_max: current_max
+		min_val:   min
+		max_val:   max
+		h:         30
+		w:         200
+	})
+	return win
+}
+
+pub fn (win &SimpleWindow) get_range_values(name string) []f64 {
+	if ctrl := win.control_map[name] {
+		return [ctrl.range_min, ctrl.range_max]
+	}
+	return [0.0, 100.0]
+}
+
+pub fn (mut win SimpleWindow) set_range_values(name string, min_val f64, max_val f64) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.range_min = min_val
+		ctrl.range_max = max_val
+	}
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_code_editor(name string, initial_code string, lang string) &SimpleWindow {
+	win.add_control(Control{
+		name:       name
+		kind:       'code_editor'
+		text_value: initial_code
+		code_lang:  lang
+		h:          180
+		w:          320
+	})
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_drop_zone(name string, prompt string) &SimpleWindow {
+	win.add_control(Control{
+		name:        name
+		kind:        'drop_zone'
+		placeholder: prompt
+		h:           100
+		w:           260
+	})
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_property_grid(name string, items []PropertyGridItem) &SimpleWindow {
+	win.add_control(Control{
+		name:           name
+		kind:           'property_grid'
+		property_items: items
+		h:              f32(math.max(80, items.len * 32 + 20))
+		w:              280
+	})
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_sparkline(name string, values []f64) &SimpleWindow {
+	win.add_control(Control{
+		name:     name
+		kind:     'sparkline'
+		f64_list: values
+		h:        40
+		w:        180
+	})
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_pagination(name string, current_page int, total_pages int) &SimpleWindow {
+	win.add_control(Control{
+		name:         name
+		kind:         'pagination'
+		current_page: current_page
+		total_pages:  total_pages
+		h:            36
+		w:            240
+	})
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_split_view(name string, split_ratio f32) &SimpleWindow {
+	win.add_control(Control{
+		name:        name
+		kind:        'split_view'
+		split_ratio: split_ratio
+		h:           160
+		w:           300
+	})
+	return win
+}
+
+pub fn (mut win SimpleWindow) push_toast(title string, message string, variant string, duration_ms int) &SimpleWindow {
+	dur := if duration_ms > 0 { duration_ms } else { 3000 }
+	win.toasts << Toast{
+		id:          win.gen_id('toast')
+		title:       title
+		message:     message
+		variant:     variant
+		duration_ms: dur
+		remaining:   f32(dur) / 1000.0
+	}
+	return win
+}
+
+pub fn (mut win SimpleWindow) show_command_palette(items []CommandItem) {
+	win.command_palette_active = true
+	win.command_palette_query = ''
+	win.command_palette_items = items
+	win.command_palette_sel = 0
+}
+
+pub fn (mut win SimpleWindow) hide_command_palette() {
+	win.command_palette_active = false
+}
+
+pub fn (mut win SimpleWindow) show_context_menu(x f32, y f32, items []ContextMenuItem) {
+	win.context_menu_active = true
+	win.context_menu_x = x
+	win.context_menu_y = y
+	win.context_menu_items = items
+}
+
+pub fn (mut win SimpleWindow) hide_context_menu() {
+	win.context_menu_active = false
+}
+
 // Execution Loop
 
 fn frame_cb(mut win SimpleWindow) {
@@ -2038,14 +2213,15 @@ fn event_cb(e &gg.Event, mut win SimpleWindow) {
 
 pub fn (mut win SimpleWindow) run() {
 	win.gg_ctx = gg.new_context(
-		width:        win.width
-		height:       win.height
-		window_title: win.title
-		user_data:    win
-		frame_fn:     frame_cb
-		event_fn:     event_cb
-		bg_color:     parse_hex_color(win.theme.background_color)
-		fullscreen:   win.fullscreen
+		width:            win.width
+		height:           win.height
+		window_title:     win.title
+		user_data:        win
+		frame_fn:         frame_cb
+		event_fn:         event_cb
+		bg_color:         parse_hex_color(win.theme.background_color)
+		fullscreen:       win.fullscreen
+		enable_dragndrop: true
 	)
 	win.gg_ctx.run()
 }
