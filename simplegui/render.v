@@ -2,6 +2,7 @@ module simplegui
 
 import gg
 import math
+import time
 
 pub fn (mut win SimpleWindow) render_ui() {
 	if win.gg_ctx == unsafe { nil } {
@@ -90,14 +91,22 @@ pub fn (mut win SimpleWindow) render_ui() {
 
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
 					btn_bg)
-				text_w := ctrl.title.len * 8
+
+				max_chars := math.max(1, int((ctrl.w - 16.0) / 8.0))
+				disp_title := if ctrl.title.len > max_chars && max_chars > 3 {
+					ctrl.title[0..max_chars - 3] + '...'
+				} else {
+					ctrl.title
+				}
+
+				text_w := disp_title.len * 8
 				text_x := int(ctrl.x + (ctrl.w - f32(text_w)) / 2.0)
 				text_y := int(ctrl.y + (ctrl.h - 16.0) / 2.0)
 
 				win.gg_ctx.draw_text2(
 					x:     math.max(int(ctrl.x + 8), text_x)
 					y:     text_y
-					text:  ctrl.title
+					text:  disp_title
 					color: gg.Color{
 						r: 255
 						g: 255
@@ -428,6 +437,14 @@ pub fn (mut win SimpleWindow) render_ui() {
 					color: fg
 					size:  11
 				)
+			}
+			'skeleton' {
+				ticks := time.ticks()
+				pulse := math.abs(math.sin(f64(ticks % 2000) / 2000.0 * math.pi))
+				sk_base := if win.theme.is_dark { f32(40.0) } else { f32(210.0) }
+				sk_val := u8(math.max(0.0, math.min(255.0, sk_base + f32(pulse * 45.0))))
+				sk_c := gg.rgb(sk_val, sk_val, sk_val)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, sk_c)
 			}
 			'menu_button' {
 				hdr_h := f32(34.0)
@@ -1667,6 +1684,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 	}
 
 	win.render_toasts()
+	win.render_modal()
+	win.render_tooltip()
 	win.render_command_palette()
 	win.render_context_menu()
 }
@@ -1806,4 +1825,81 @@ fn calc_table_col_widths(ctrl &Control) []f32 {
 		}
 	}
 	return col_widths
+}
+
+fn (mut win SimpleWindow) render_modal() {
+	if !win.modal_active { return }
+	win.gg_ctx.draw_rect_filled(0, 0, f32(win.width), f32(win.height), gg.rgba(0, 0, 0, 160))
+
+	box_w := f32(math.min(460, win.width - 40))
+	box_h := f32(180.0)
+	bx := (f32(win.width) - box_w) / 2.0
+	by := (f32(win.height) - box_h) / 2.0
+
+	modal_bg := if win.theme.is_dark { gg.rgb(28, 30, 42) } else { gg.rgb(255, 255, 255) }
+	accent := parse_hex_color(win.theme.accent_color)
+	fg := parse_hex_color(win.theme.font_color)
+	border_c := if win.theme.is_dark { gg.rgb(65, 68, 82) } else { gg.rgb(210, 215, 220) }
+
+	win.gg_ctx.draw_rounded_rect_filled(bx, by, box_w, box_h, 12.0, modal_bg)
+	win.gg_ctx.draw_rounded_rect_empty(bx, by, box_w, box_h, 12.0, accent)
+
+	win.gg_ctx.draw_text2(x: int(bx + 20), y: int(by + 16), text: win.modal_title, color: fg, size: 16)
+	win.gg_ctx.draw_line(bx, by + 46, bx + box_w, by + 46, border_c)
+
+	win.gg_ctx.draw_text2(x: int(bx + 20), y: int(by + 62), text: win.modal_message, color: fg, size: 13)
+
+	btn_w := f32(100.0)
+	btn_h := f32(36.0)
+	confirm_x := bx + box_w - btn_w - 20.0
+	cancel_x := confirm_x - btn_w - 12.0
+	btn_y := by + box_h - btn_h - 18.0
+
+	if win.modal_cancel_txt.len > 0 {
+		win.gg_ctx.draw_rounded_rect_filled(cancel_x, btn_y, btn_w, btn_h, 6.0, border_c)
+		win.gg_ctx.draw_text2(
+			x: int(cancel_x + (btn_w - f32(win.modal_cancel_txt.len * 7)) / 2.0)
+			y: int(btn_y + 10)
+			text: win.modal_cancel_txt
+			color: fg
+			size: 13
+		)
+	}
+
+	win.gg_ctx.draw_rounded_rect_filled(confirm_x, btn_y, btn_w, btn_h, 6.0, accent)
+	win.gg_ctx.draw_text2(
+		x: int(confirm_x + (btn_w - f32(win.modal_confirm_txt.len * 7)) / 2.0)
+		y: int(btn_y + 10)
+		text: win.modal_confirm_txt
+		color: gg.rgb(255, 255, 255)
+		size: 13
+	)
+}
+
+fn (mut win SimpleWindow) render_tooltip() {
+	if win.hovered_control.len == 0 { return }
+	for ctrl in win.controls {
+		if ctrl.name == win.hovered_control {
+			if ctrl.tooltip.len > 0 {
+				tip_w := f32(ctrl.tooltip.len * 7 + 20)
+				tip_h := f32(26.0)
+				tx := math.min(f32(win.width) - tip_w - 10.0, f32(win.mouse_x + 12))
+				ty := math.min(f32(win.height) - tip_h - 10.0, f32(win.mouse_y + 16))
+
+				tip_bg := gg.rgb(20, 22, 30)
+				border_c := parse_hex_color(win.theme.accent_color)
+
+				win.gg_ctx.draw_rounded_rect_filled(tx, ty, tip_w, tip_h, 6.0, tip_bg)
+				win.gg_ctx.draw_rounded_rect_empty(tx, ty, tip_w, tip_h, 6.0, border_c)
+				win.gg_ctx.draw_text2(
+					x: int(tx + 10)
+					y: int(ty + 5)
+					text: ctrl.tooltip
+					color: gg.rgb(255, 255, 255)
+					size: 12
+				)
+			}
+			break
+		}
+	}
 }

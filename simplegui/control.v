@@ -155,6 +155,9 @@ pub mut:
 	total_pages     int = 1
 	current_page    int = 1
 	last_click_time i64
+	tab_badges      map[int]string
+	search_query    string
+	is_skeleton     bool
 	// Callbacks
 	on_click       VoidEventCallback = unsafe { nil }
 	on_change      VoidEventCallback = unsafe { nil }

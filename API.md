@@ -1063,6 +1063,57 @@ simplegui.quit()
 
 ---
 
+## 16. Modern UI & RAD UX Enhancements
+
+`simplegui` includes modern desktop UI enhancements: floating tooltips, backdrop modal overlays, form field validation tags, skeleton loading shimmers, tab badge counters, and search filtering.
+
+### 1. Rich Floating Tooltips
+```v
+win.add_button('btn_save', 'Save Document')
+win.set_control_tooltip('btn_save', 'Click to save your file state')
+```
+
+### 2. Backdrop Modal Dialogs (`show_modal`)
+```v
+win.show_modal(
+	'Confirm Action',
+	'Are you sure you want to reset all fields?',
+	'Reset',
+	'Cancel',
+	fn (mut win simplegui.SimpleWindow) {
+		win.push_toast('Reset', 'All fields cleared', 'info', 2000)
+	}
+)
+win.hide_modal()
+```
+
+### 3. Live Form Validation Badges (`set_validation_error`)
+```v
+win.set_validation_error('input_email', 'Please enter a valid email address with @ domain')
+win.clear_validation_error('input_email')
+```
+
+### 4. Animated Skeleton Shimmer Placeholders (`add_skeleton`)
+```v
+// Add animated pulse loading placeholder (Width: 300px, Height: 24px)
+win.add_skeleton('sk_user_card', 300, 24)
+```
+
+### 5. Tab Badge Counters (`set_tab_badge`)
+```v
+win.begin_tab_container('main_tabs', ['Overview', 'Messages', 'Settings'])
+win.set_tab_badge('main_tabs', 1, '5')    // Adds red badge '[5]' to Messages tab
+win.set_tab_badge('main_tabs', 2, 'NEW')  // Adds red badge '[NEW]' to Settings tab
+win.end_tab_container()
+```
+
+### 6. Live Search Highlighting & Filtering (`set_table_search_filter`)
+```v
+win.set_table_search_filter('tbl_users', 'Ada')
+```
+
+---
+
 ## Summary Cheat Sheet Tips
 
 1. **Window Creation**: `win := simplegui.new_simple_window('Title', W, H)`

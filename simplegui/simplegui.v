@@ -61,6 +61,14 @@ pub mut:
 	state_store     map[string]string
 	state_listeners map[string][]StringEventCallback
 	fullscreen      bool
+	// Modal Overlay State
+	modal_active      bool
+	modal_title       string
+	modal_message     string
+	modal_confirm_txt string = 'OK'
+	modal_cancel_txt  string = 'Cancel'
+	modal_on_confirm  VoidEventCallback = unsafe { nil }
+	modal_on_cancel   VoidEventCallback = unsafe { nil }
 }
 
 pub fn new_simple_window(title string, width int, height int) &SimpleWindow {
@@ -88,6 +96,12 @@ pub fn (mut win SimpleWindow) add_control(ctrl Control) &SimpleWindow {
 	}
 	if c.name.len == 0 {
 		c.name = win.gen_id(c.kind)
+	}
+	if c.kind in ['button', 'action'] && c.title.len > 0 {
+		min_req_w := f32(c.title.len * 8 + 32)
+		if min_req_w > c.w {
+			c.w = min_req_w
+		}
 	}
 	win.controls << c
 	win.control_map[c.name] = c
@@ -2302,6 +2316,72 @@ pub fn (mut win SimpleWindow) on_key_down(cb fn (mut win SimpleWindow, key gg.Ke
 
 pub fn (mut win SimpleWindow) on_window_resize(cb fn (mut win SimpleWindow, w int, h int)) &SimpleWindow {
 	win.on_resize_cb = cb
+	return win
+}
+
+// Modal Dialog & Overlay API
+
+pub fn (mut win SimpleWindow) show_modal(title string, message string, confirm_txt string, cancel_txt string, on_confirm VoidEventCallback) &SimpleWindow {
+	win.modal_active = true
+	win.modal_title = title
+	win.modal_message = message
+	win.modal_confirm_txt = if confirm_txt.len > 0 { confirm_txt } else { 'OK' }
+	win.modal_cancel_txt = cancel_txt
+	win.modal_on_confirm = on_confirm
+	return win
+}
+
+pub fn (mut win SimpleWindow) hide_modal() &SimpleWindow {
+	win.modal_active = false
+	win.modal_on_confirm = unsafe { nil }
+	win.modal_on_cancel = unsafe { nil }
+	return win
+}
+
+// Validation Error API
+
+pub fn (mut win SimpleWindow) set_validation_error(name string, err_msg string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.validation_err = err_msg
+	}
+	return win
+}
+
+pub fn (mut win SimpleWindow) clear_validation_error(name string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.validation_err = ''
+	}
+	return win
+}
+
+// Skeleton Placeholder Controls
+
+pub fn (mut win SimpleWindow) add_skeleton(name string, w int, h int) &SimpleWindow {
+	win.add_control(Control{
+		name:        name
+		kind:        'skeleton'
+		w:           f32(w)
+		h:           f32(h)
+		is_skeleton: true
+	})
+	return win
+}
+
+// Tab Badge Counter API
+
+pub fn (mut win SimpleWindow) set_tab_badge(container_name string, tab_index int, badge_text string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(container_name) {
+		ctrl.tab_badges[tab_index] = badge_text
+	}
+	return win
+}
+
+// Search Filter & Highlighting API
+
+pub fn (mut win SimpleWindow) set_table_search_filter(name string, query string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.search_query = query
+	}
 	return win
 }
 

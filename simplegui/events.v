@@ -66,6 +66,38 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 			win.mouse_x = e.mouse_x
 			win.mouse_y = e.mouse_y
 
+			if win.modal_active {
+				box_w := f32(math.min(460, win.width - 40))
+				box_h := f32(180.0)
+				bx := (f32(win.width) - box_w) / 2.0
+				by := (f32(win.height) - box_h) / 2.0
+
+				btn_w := f32(100.0)
+				btn_h := f32(36.0)
+				confirm_x := bx + box_w - btn_w - 20.0
+				cancel_x := confirm_x - btn_w - 12.0
+				btn_y := by + box_h - btn_h - 18.0
+
+				if win.mouse_y >= btn_y && win.mouse_y <= btn_y + btn_h {
+					if win.mouse_x >= confirm_x && win.mouse_x <= confirm_x + btn_w {
+						cb := win.modal_on_confirm
+						win.hide_modal()
+						if cb != unsafe { nil } {
+							cb(mut win)
+						}
+						return
+					} else if win.modal_cancel_txt.len > 0 && win.mouse_x >= cancel_x && win.mouse_x <= cancel_x + btn_w {
+						cb := win.modal_on_cancel
+						win.hide_modal()
+						if cb != unsafe { nil } {
+							cb(mut win)
+						}
+						return
+					}
+				}
+				return
+			}
+
 			if e.mouse_button == .right {
 				for mut ctrl in win.controls {
 					if ctrl.visible && !ctrl.disabled {
