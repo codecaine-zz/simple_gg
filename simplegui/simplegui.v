@@ -96,6 +96,8 @@ pub mut:
 	modal_on_cancel   VoidEventCallback = unsafe { nil } // Callback when cancel button clicked
 	timers            map[string]&IntervalTimer // Map of scheduled interval and timeout timers
 	font_path         string // Custom font file path override (defaults to auto-detected system TTF on Linux)
+	is_selecting_text  bool   // Mouse drag text selection active flag
+	text_select_anchor int    // Mouse drag initial caret anchor index
 }
 
 // new_simple_window creates and initializes a new `SimpleWindow` instance with specified title, width, and height.

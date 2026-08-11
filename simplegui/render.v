@@ -214,6 +214,23 @@ pub fn (mut win SimpleWindow) render_ui() {
 					display_txt
 				}
 
+				if ctrl.has_selection() {
+					s_raw, e_raw := ctrl.selection_range()
+					vis_s := math.max(0, math.min(clipped_txt.len, s_raw - start_idx))
+					vis_e := math.max(0, math.min(clipped_txt.len, e_raw - start_idx))
+					if vis_s < vis_e {
+						prefix_s := clipped_txt[0..vis_s]
+						prefix_e := clipped_txt[0..vis_e]
+						sel_x1 := ctrl.x + 10.0 + f32(win.gg_ctx.text_width(prefix_s))
+						sel_x2 := ctrl.x + 10.0 + f32(win.gg_ctx.text_width(prefix_e))
+						sel_w := sel_x2 - sel_x1
+						if sel_w > 0 {
+							win.gg_ctx.draw_rect_filled(sel_x1, ctrl.y + 4.0, sel_w, ctrl.h - 8.0,
+								gg.Color{r: 59, g: 130, b: 246, a: 120})
+						}
+					}
+				}
+
 				win.gg_ctx.draw_text2(
 					x:     int(ctrl.x + 10)
 					y:     int(ctrl.y + (ctrl.h - 16.0) / 2.0)
@@ -1044,6 +1061,23 @@ pub fn (mut win SimpleWindow) render_ui() {
 					raw_path
 				}
 
+				if ctrl.has_selection() {
+					s_raw, e_raw := ctrl.selection_range()
+					vis_s := math.max(0, math.min(disp_path.len, s_raw - start_idx))
+					vis_e := math.max(0, math.min(disp_path.len, e_raw - start_idx))
+					if vis_s < vis_e {
+						prefix_s := disp_path[0..vis_s]
+						prefix_e := disp_path[0..vis_e]
+						sel_x1 := ctrl.x + 10.0 + f32(win.gg_ctx.text_width(prefix_s))
+						sel_x2 := ctrl.x + 10.0 + f32(win.gg_ctx.text_width(prefix_e))
+						sel_w := sel_x2 - sel_x1
+						if sel_w > 0 {
+							win.gg_ctx.draw_rect_filled(sel_x1, ctrl.y + 4.0, sel_w, ctrl.h - 8.0,
+								gg.Color{r: 59, g: 130, b: 246, a: 120})
+						}
+					}
+				}
+
 				win.gg_ctx.draw_text2(
 					x:     int(ctrl.x + 10)
 					y:     int(ctrl.y + (ctrl.h - 16.0) / 2.0)
@@ -1124,6 +1158,23 @@ pub fn (mut win SimpleWindow) render_ui() {
 					s_txt[start_idx..end_idx]
 				} else {
 					s_txt
+				}
+
+				if ctrl.has_selection() {
+					s_raw, e_raw := ctrl.selection_range()
+					vis_s := math.max(0, math.min(disp_s.len, s_raw - start_idx))
+					vis_e := math.max(0, math.min(disp_s.len, e_raw - start_idx))
+					if vis_s < vis_e {
+						prefix_s := disp_s[0..vis_s]
+						prefix_e := disp_s[0..vis_e]
+						sel_x1 := ctrl.x + 32.0 + f32(win.gg_ctx.text_width(prefix_s))
+						sel_x2 := ctrl.x + 32.0 + f32(win.gg_ctx.text_width(prefix_e))
+						sel_w := sel_x2 - sel_x1
+						if sel_w > 0 {
+							win.gg_ctx.draw_rect_filled(sel_x1, ctrl.y + 4.0, sel_w, ctrl.h - 8.0,
+								gg.Color{r: 59, g: 130, b: 246, a: 120})
+						}
+					}
 				}
 
 				win.gg_ctx.draw_text2(

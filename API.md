@@ -405,6 +405,32 @@ win.add_password('input_secret', 'my_pass_123')
 win.add_textarea('input_logs', 'Line 1: Started\nLine 2: Ready')
 ```
 
+#### ✂️ Text Selection & Clipboard Shortcuts
+All text input controls (`input`, `password`, `textarea`, `search_field`, `search_bar`, `file_picker`, `number`, `code_editor`) support multi-character text selection and full system clipboard interaction out of the box:
+
+- **Mouse Selection**: Click and drag across text to select a range of characters. Shift-click extends selection from cursor. Double-clicking selects all text.
+- **Select All (`Ctrl+A` / `Cmd+A`)**: Selects all text inside the focused input field.
+- **Copy (`Ctrl+C` / `Cmd+C`)**: Copies the active text selection to the system clipboard.
+- **Cut (`Ctrl+X` / `Cmd+X`)**: Copies the active text selection to the system clipboard and deletes it from the field.
+- **Paste (`Ctrl+V` / `Cmd+V`)**: Pastes text from the system clipboard at current caret position (or replaces active selection).
+- **Undo (`Ctrl+Z` / `Cmd+Z`)**: Reverts the last text editing change from history stack.
+- **Shift Navigation**: `Shift + Left / Right / Home / End` expands or contracts text selection.
+- **Character Replacement**: Typing printable characters or pressing `Backspace`/`Delete` while text is selected replaces or removes the selected range cleanly.
+
+#### 🛠️ Programmatic Text Selection API
+Programmatically inspect or manipulate text selection on `Control` pointers:
+
+```v
+if mut ctrl := win.get_control_ptr('input_host') {
+    ctrl.select_all()                  // Select all text in control
+    has_sel := ctrl.has_selection()    // Returns true if text selection is active
+    sel_txt := ctrl.selected_text()    // Returns substring of currently selected text
+    ctrl.delete_selected_text()        // Deletes selected range and resets caret
+    ctrl.clear_selection()             // Clears selection highlight
+    ctrl.undo()                        // Reverts last text mutation from history stack
+}
+```
+
 ### Search Bar
 
 ```v

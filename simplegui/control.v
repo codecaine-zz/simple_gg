@@ -143,6 +143,10 @@ pub mut:
 	is_pressed      bool        // Whether mouse button is currently held down over this control
 	scroll_offset_y f32         // Vertical scroll offset (for scrollable containers, lists, or text areas)
 	caret_pos       int         // Text cursor position index (for text input editing)
+	sel_start       int = -1    // Selection start index (-1 if no text selection)
+	sel_end         int = -1    // Selection end index (-1 if no text selection)
+	undo_stack      []string    // Text history stack for Cmd+Z / Ctrl+Z undo operations
+	redo_stack      []string    // Text history stack for Cmd+Shift+Z / Ctrl+Y redo operations
 	validation_err  string      // Validation error message (if text validation failed)
 	selected_row    int = -1    // Selected row index (for Data Tables or List views)
 	variant         string      // Visual style variant (e.g. 'primary', 'secondary', 'danger', 'ghost')
@@ -501,4 +505,107 @@ pub fn (c &Control) set_enabled(enabled bool) &Control {
 	}
 	return c
 }
+
+// has_selection returns true if there is an active text selection range.
+pub fn (ctrl &Control) has_selection() bool {
+	return ctrl.sel_start >= 0 && ctrl.sel_end >= 0 && ctrl.sel_start != ctrl.sel_end
+}
+
+// selection_range returns normalized (start, end) text selection indices clamped to text length.
+pub fn (ctrl &Control) selection_range() (int, int) {
+	if !ctrl.has_selection() {
+		return 0, 0
+	}
+	len := ctrl.text_value.len
+	mut s := ctrl.sel_start
+	mut e := ctrl.sel_end
+	if s > e {
+		s, e = e, s
+	}
+	if s < 0 {
+		s = 0
+	}
+	if e > len {
+		e = len
+	}
+	if s > len {
+		s = len
+	}
+	return s, e
+}
+
+// selected_text returns the currently selected text substring.
+pub fn (ctrl &Control) selected_text() string {
+	if !ctrl.has_selection() {
+		return ''
+	}
+	s, e := ctrl.selection_range()
+	if s >= e || s >= ctrl.text_value.len {
+		return ''
+	}
+	return ctrl.text_value[s..e]
+}
+
+// clear_selection clears active text selection.
+pub fn (mut ctrl Control) clear_selection() {
+	ctrl.sel_start = -1
+	ctrl.sel_end = -1
+}
+
+// select_all selects all text in the control.
+pub fn (mut ctrl Control) select_all() {
+	ctrl.sel_start = 0
+	ctrl.sel_end = ctrl.text_value.len
+	ctrl.caret_pos = ctrl.text_value.len
+}
+
+// delete_selected_text removes the selected text range from text_value and updates caret_pos.
+pub fn (mut ctrl Control) delete_selected_text() {
+	if !ctrl.has_selection() {
+		return
+	}
+	ctrl.save_undo_state()
+	s, e := ctrl.selection_range()
+	ctrl.text_value = ctrl.text_value[0..s] + ctrl.text_value[e..]
+	ctrl.caret_pos = s
+	ctrl.clear_selection()
+}
+
+// save_undo_state pushes the current text_value onto the undo stack before mutation.
+pub fn (mut ctrl Control) save_undo_state() {
+	if ctrl.undo_stack.len == 0 || ctrl.undo_stack[ctrl.undo_stack.len - 1] != ctrl.text_value {
+		ctrl.undo_stack << ctrl.text_value
+		if ctrl.undo_stack.len > 50 {
+			ctrl.undo_stack = ctrl.undo_stack[ctrl.undo_stack.len - 50..]
+		}
+		ctrl.redo_stack.clear()
+	}
+}
+
+// undo restores the previous text value from the undo stack.
+pub fn (mut ctrl Control) undo() bool {
+	if ctrl.undo_stack.len > 0 {
+		ctrl.redo_stack << ctrl.text_value
+		prev := ctrl.undo_stack.pop()
+		ctrl.text_value = prev
+		ctrl.caret_pos = ctrl.text_value.len
+		ctrl.clear_selection()
+		return true
+	}
+	return false
+}
+
+// redo restores the next text value from the redo stack.
+pub fn (mut ctrl Control) redo() bool {
+	if ctrl.redo_stack.len > 0 {
+		ctrl.undo_stack << ctrl.text_value
+		next := ctrl.redo_stack.pop()
+		ctrl.text_value = next
+		ctrl.caret_pos = ctrl.text_value.len
+		ctrl.clear_selection()
+		return true
+	}
+	return false
+}
+
 
