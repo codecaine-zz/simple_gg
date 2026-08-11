@@ -6,7 +6,7 @@
 
 ## 🎨 Visual Showcase & Snapshots of All Examples
 
-````carousel
+```carousel
 ![01 - Quickstart Demo](snapshots/ex1.png)
 <!-- slide -->
 ![02 - Theme Gallery Demo](snapshots/ex2.png)
@@ -24,7 +24,13 @@
 ![08 - RAD Application Builder Demo](snapshots/ex8.png)
 <!-- slide -->
 ![09 - Control Customization & Geometry Demo](snapshots/ex9.png)
-````
+<!-- slide -->
+![10 - More Window UI Controls Demo](snapshots/ex10.png)
+<!-- slide -->
+![12 - System & Stdlib Toolkit Demo](snapshots/ex12.png)
+<!-- slide -->
+![13 - Reactive State Store Demo](snapshots/ex13.png)
+```
 
 ---
 
@@ -34,6 +40,9 @@
 - 🎨 **17 Built-in Production Themes**: Apple Light/Dark, Nord, Dracula, Cyberpunk, Catppuccin Mocha, GitHub Dark/Light, Solarized, etc.
 - 🧩 **Complete Widget Set**: Text/password inputs, steppers, range sliders, toggle switches, checkboxes, dropdowns, segmented controls, rating stars, date pickers, metric cards, charts, list boxes, tree views, data tables, breadcrumbs, avatars, status badges, accordions, and alert banners.
 - 📐 **Layout Engine**: Automatic vertical stacking, horizontal rows (`begin_row`), multi-column grids (`begin_grid`), flexboxes (`begin_flex_box`), tab containers, and group cards.
+- 🔄 **Reactive State Management (`state.v`)**: Key-value reactive store (`set_state`, `get_state`), typed accessors, reactive state listeners (`on_state_change`), and JSON disk persistence (`save_state_json`, `load_state_json`).
+- 💻 **OS & System Extensions (`sys.v`)**: Native notifications, hardware/RAM/CPU inspection, system process execution, clipboard access, environment variables, system directories, and file operations.
+- 🛠️ **V Standard Library Integrations (`stdlib.v`)**: Built-in fluent helpers for HTTP requests, RegEx matching, Cryptography (SHA256, MD5, AES, Bcrypt), Gzip/Zlib/Zstd compression, TOML parsing, SemVer checks, and WebSockets.
 - 🚀 **Beginner Friendly**: Fluent chainable builder API with zero boilerplate.
 
 ---
@@ -65,7 +74,7 @@ fn main() {
 
 ## 📁 Beginner-Friendly Examples & Snapshots
 
-The repository includes 9 beginner-friendly example programs in the [`examples/`](examples) directory:
+The repository includes beginner-friendly example programs in the [`examples/`](examples) directory:
 
 | Example | Description | Run Command | Snapshot |
 | :--- | :--- | :--- | :--- |
@@ -78,10 +87,14 @@ The repository includes 9 beginner-friendly example programs in the [`examples/`
 | **[`07_advanced_controls.v`](examples/07_advanced_controls.v)** | Data tables, tab containers, tree views, search, breadcrumbs, avatars, and shortcuts. | `v run examples/07_advanced_controls.v` | ![Snapshot 07](snapshots/ex7.png) |
 | **[`08_rad_development.v`](examples/08_rad_development.v)** | Rapid app builder with batch ops, JSON form export, clipboard, and OS dialogs. | `v run examples/08_rad_development.v` | ![Snapshot 08](snapshots/ex8.png) |
 | **[`09_control_customization.v`](examples/09_control_customization.v)** | Custom geometry, margins/padding, colors, borders, and fluent control chaining. | `v run examples/09_control_customization.v` | ![Snapshot 09](snapshots/ex9.png) |
+| **[`10_more_controls.v`](examples/10_more_controls.v)** | Icon buttons, toolbars, hyperlinks, checklists, chips, and password strength meter. | `v run examples/10_more_controls.v` | ![Snapshot 10](snapshots/ex10.png) |
+| **[`11_data_table_pro.v`](examples/11_data_table_pro.v)** | Sortable data tables, wheel scrolling, row hover, and table manipulation. | `v run examples/11_data_table_pro.v` | Run locally to preview |
+| **[`12_system_and_stdlib_features.v`](examples/12_system_and_stdlib_features.v)** | Desktop notifications, hardware specs, clipboard, system paths, HTTP GET, RegEx, Crypto. | `v run examples/12_system_and_stdlib_features.v` | ![Snapshot 12](snapshots/ex12.png) |
+| **[`13_reactive_state_store.v`](examples/13_reactive_state_store.v)** | Reactive key-value state store, typed accessors, state change listeners, and JSON disk persistence. | `v run examples/13_reactive_state_store.v` | ![Snapshot 13](snapshots/ex13.png) |
 
 ---
 
 ## 📘 Documentation
 
-- **Full API Guide**: See [API.md](API.md) for complete details on window configuration, controls, layout engine, themes, and event callbacks.
+- **Full API Guide**: See [API.md](API.md) for complete details on window configuration, controls, layout engine, themes, event callbacks, reactive state management (`state.v`), system calls (`sys.v`), and standard library extensions (`stdlib.v`).
 - **Examples Guide**: See [examples/README.md](examples/README.md) for detailed descriptions of all example scripts.

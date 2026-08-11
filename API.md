@@ -53,6 +53,9 @@ fn main() {
 9. [Event Handling & Callbacks](#9-event-handling--callbacks)
 10. [RAD Development & System Utilities](#10-rad-development--system-utilities)
 11. [More Developer & User-Requested Controls](#11-more-developer--user-requested-controls)
+12. [Reactive & Key-Value State Store (`state.v`)](#12-reactive--key-value-state-store-statev)
+13. [System Calls & OS API Extensions (`sys.v`)](#13-system-calls--os-api-extensions-sysv)
+14. [V Standard Library Integrations (`stdlib.v`)](#14-v-standard-library-integrations-stdlibv)
 
 ---
 
@@ -1106,3 +1109,228 @@ win.add_form_time_picker('Meeting Time:', 'meeting_time', '09:30')
 win.add_form_password('New Password:', 'new_password', '')
 win.add_password_strength('pwd_strength_meter', 'new_password')
 ```
+
+---
+
+## 12. Reactive & Key-Value State Store (`state.v`)
+
+### Setting & Getting Generic State
+
+```v
+// Store a string state value
+win.set_state('user_name', 'Alice')
+
+// Retrieve a string state value (returns empty string if key not set)
+name := win.get_state('user_name')
+
+// Retrieve a string state with fallback value if missing
+role := win.get_state_or('user_role', 'Guest')
+
+// Check if a state key exists
+if win.has_state('user_name') {
+    println('State exists!')
+}
+
+// Remove a state key or clear all states
+win.remove_state('user_name')
+win.clear_state()
+```
+
+### Typed State Accessors (`int`, `bool`, `f64`)
+
+```v
+// Integer state
+win.set_state_int('score', 100)
+score := win.get_state_int('score')
+
+// Boolean state
+win.set_state_bool('dark_mode', true)
+is_dark := win.get_state_bool('dark_mode')
+
+// Floating point state
+win.set_state_f64('opacity', 0.85)
+op := win.get_state_f64('opacity')
+```
+
+### Atomic State Manipulations
+
+```v
+// Toggle a boolean state and return the new value
+new_state := win.toggle_state_bool('dark_mode')
+
+// Increment an integer state by delta (+1 / -5) and return new value
+new_score := win.increment_state_int('score', 10)
+```
+
+### Reactive State Change Listeners
+
+```v
+// Register a callback triggered whenever a state key changes
+win.on_state_change('score', fn (mut win simplegui.SimpleWindow, new_val string) {
+    win.set_text('lbl_score_badge', 'Score: ${new_val}')
+})
+```
+
+### State Serialization & Disk Persistence
+
+```v
+// Save state store map as JSON file on disk
+win.save_state_json('app_state.json') or {
+    println('Failed to save state: ${err}')
+}
+
+// Load and restore state store map from JSON file
+win.load_state_json('app_state.json') or {
+    println('Failed to load state: ${err}')
+}
+```
+
+---
+
+## 13. System Calls & OS API Extensions (`sys.v`)
+
+### Command Execution & Processes
+
+```v
+// Synchronous command execution (returns output string and exit code)
+out, code := win.exec('ls -la')
+
+// Synchronous command execution with fallback if exit code != 0
+output := win.exec_or('which git', '/usr/bin/git')
+
+// Asynchronous background execution (non-blocking thread)
+win.exec_bg('ping -c 4 8.8.8.8')
+```
+
+### OS Notifications & Sound
+
+```v
+// Trigger native desktop notification banner
+win.show_system_notification('Title', 'Message body here...')
+
+// Play standard system alert sound
+win.beep()
+win.beep_n(3)
+
+// Play macOS named sound or speak text
+simplegui.play_system_sound('Glass')
+simplegui.speak_with_voice('Hello world', 'Samantha')
+```
+
+### Hardware & System Metrics
+
+```v
+// Get CPU model string and core count
+cpu_model := win.get_cpu_info()
+cores := win.get_cpu_cores()
+
+// Get physical RAM details and load average
+ram_info := win.get_memory_info()
+l1, l5, l15 := win.get_load_average()
+pressure := win.get_memory_pressure() // 'normal', 'warn', 'critical'
+```
+
+### Clipboard & Environment
+
+```v
+// Clipboard shortcuts
+win.copy_to_clipboard('Copied text!')
+text := win.get_clipboard_text()
+
+// Environment variables
+val := win.get_env('USER')
+win.set_env('MY_VAR', '123')
+win.unset_env('MY_VAR')
+```
+
+### System Directories & File Operations
+
+```v
+// System folder lookup ('home', 'desktop', 'documents', 'downloads', 'temp', 'cache', 'app')
+home_dir := win.get_system_path('home')
+downloads := win.get_system_path('downloads')
+
+// File existence & directory checks
+exists := win.file_exists('/path/to/file')
+is_folder := win.is_dir('/path/to/folder')
+
+// File read & write
+content := win.read_file('config.txt')
+win.write_file('config.txt', 'Hello world')
+win.delete_file('config.txt')
+win.create_directory('nested/folder/path')
+```
+
+---
+
+## 14. V Standard Library Integrations (`stdlib.v`)
+
+### HTTP Client Wrappers
+
+```v
+// Simple HTTP GET (returns response body as string)
+body := win.http_get('https://api.ipify.org')
+
+// Simple HTTP POST
+res := win.http_post('https://httpbin.org/post', '{"key":"value"}')
+
+// Strict error-propagating variants (!string)
+body_strict := win.http_get_strict('https://api.github.com') or { 'Error' }
+```
+
+### Cryptography & Hashes
+
+```v
+// SHA256 & MD5
+sha := win.crypto_sha256('secret text')
+md5 := win.crypto_md5('secret text')
+
+// AES Encryption & Decryption
+cipher_hex := win.crypto_encrypt_aes('plain_text', '0123456789abcdef0123456789abcdef')
+plain := win.crypto_decrypt_aes(cipher_hex, '0123456789abcdef0123456789abcdef')
+
+// Bcrypt Password Hashing & Verification
+hash := win.crypto_bcrypt_hash('password123') or { '' }
+is_valid := win.crypto_bcrypt_verify('password123', hash)
+```
+
+### RegEx & Pattern Matching
+
+```v
+// Test pattern match
+has_match := win.regex_match('user@domain.com', r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
+
+// Find matches & replace
+matches := win.regex_find('Item 123 and Item 456', r'\d+')
+clean := win.regex_replace('Hello World', 'World', 'V')
+```
+
+### Random Generators
+
+```v
+// Random integer within range [min, max]
+num := win.rand_int(1, 100)
+
+// Random alphanumeric string
+str := win.rand_string(16)
+
+// Random choice from slice
+item := win.rand_choice_strings(['Apple', 'Banana', 'Cherry'])
+```
+
+### Compression & Decompression
+
+```v
+// Gzip & Zlib
+compressed := win.compress_gzip('Long text content...')
+decompressed := win.decompress_gzip(compressed)
+```
+
+### TOML & JSON Utilities
+
+```v
+// JSON string to map[string]string
+data_map := win.json_decode_map('{"name":"Ada","role":"Admin"}')
+name := data_map['name']
+```
+

@@ -4,6 +4,7 @@ import gg
 import math
 import os
 
+@[heap]
 pub struct SimpleWindow {
 pub mut:
 	gg_ctx                 &gg.Context = unsafe { nil }
@@ -48,6 +49,8 @@ pub mut:
 	on_submit_cb    VoidEventCallback                         = unsafe { nil }
 	on_resize_cb    fn (mut win SimpleWindow, w int, h int)   = unsafe { nil }
 	auto_id_counter int
+	state_store     map[string]string
+	state_listeners map[string][]StringEventCallback
 }
 
 pub fn new_simple_window(title string, width int, height int) &SimpleWindow {
