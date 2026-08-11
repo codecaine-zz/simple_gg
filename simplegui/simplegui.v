@@ -12,6 +12,19 @@ module simplegui
 import gg
 import math
 import os
+import time
+
+// IntervalTimer represents a background scheduled interval or timeout timer callback.
+@[heap]
+pub struct IntervalTimer {
+pub mut:
+	id          string
+	interval_ms int
+	running     bool = true
+	one_shot    bool
+	last_tick   i64
+	callback    fn (mut win SimpleWindow) = unsafe { nil }
+}
 
 // SimpleWindow represents a top-level desktop GUI window instance.
 // It stores all registered UI controls, mouse/keyboard states, active theme colors,
@@ -81,6 +94,7 @@ pub mut:
 	modal_cancel_txt  string = 'Cancel' // Cancel button text label
 	modal_on_confirm  VoidEventCallback = unsafe { nil } // Callback when confirm button clicked
 	modal_on_cancel   VoidEventCallback = unsafe { nil } // Callback when cancel button clicked
+	timers            map[string]&IntervalTimer // Map of scheduled interval and timeout timers
 }
 
 // new_simple_window creates and initializes a new `SimpleWindow` instance with specified title, width, and height.
@@ -90,6 +104,7 @@ pub fn new_simple_window(title string, width int, height int) &SimpleWindow {
 		width:  width
 		height: height
 		theme:  get_theme('Apple Light')
+		timers: map[string]&IntervalTimer{}
 	}
 	return win
 }
@@ -1013,6 +1028,14 @@ pub fn (mut win SimpleWindow) add_radio_group(name string, items []string, selec
 pub fn (mut win SimpleWindow) add_progress_indicator(name string, value int) &SimpleWindow {
 	win.add_control(Control{ name: name, kind: 'progress', int_value: value, h: 24 })
 	return win
+}
+
+pub fn (mut win SimpleWindow) add_progress_bar(name string, value int) &SimpleWindow {
+	return win.add_progress_indicator(name, value)
+}
+
+pub fn (mut win SimpleWindow) add_progress(name string, value int) &SimpleWindow {
+	return win.add_progress_indicator(name, value)
 }
 
 pub fn (mut win SimpleWindow) add_date_picker(name string, date string) &SimpleWindow {
@@ -2617,6 +2640,148 @@ pub fn (mut win SimpleWindow) show_context_menu(x f32, y f32, items []ContextMen
 
 pub fn (mut win SimpleWindow) hide_context_menu() {
 	win.context_menu_active = false
+}
+
+// =============================================================================
+// Interval Timers & Scheduled Callbacks
+// =============================================================================
+
+// set_interval creates or updates a recurring timer with ID `id` running every `interval_ms` milliseconds.
+pub fn (mut win SimpleWindow) set_interval(id string, interval_ms int, cb fn (mut win SimpleWindow)) &SimpleWindow {
+	win.timers[id] = &IntervalTimer{
+		id:          id
+		interval_ms: interval_ms
+		running:     true
+		one_shot:    false
+		last_tick:   time.ticks()
+		callback:    cb
+	}
+	return win
+}
+
+// set_timeout creates or updates a one-shot delay timer firing once after `delay_ms` milliseconds.
+pub fn (mut win SimpleWindow) set_timeout(id string, delay_ms int, cb fn (mut win SimpleWindow)) &SimpleWindow {
+	win.timers[id] = &IntervalTimer{
+		id:          id
+		interval_ms: delay_ms
+		running:     true
+		one_shot:    true
+		last_tick:   time.ticks()
+		callback:    cb
+	}
+	return win
+}
+
+// add_timer is an alias for `set_interval`.
+pub fn (mut win SimpleWindow) add_timer(id string, interval_ms int, cb fn (mut win SimpleWindow)) &SimpleWindow {
+	return win.set_interval(id, interval_ms, cb)
+}
+
+// stop_timer stops and removes a scheduled timer by ID.
+pub fn (mut win SimpleWindow) stop_timer(id string) &SimpleWindow {
+	if id in win.timers {
+		win.timers.delete(id)
+	}
+	return win
+}
+
+// clear_interval is an alias for `stop_timer`.
+pub fn (mut win SimpleWindow) clear_interval(id string) &SimpleWindow {
+	return win.stop_timer(id)
+}
+
+// clear_timeout is an alias for `stop_timer`.
+pub fn (mut win SimpleWindow) clear_timeout(id string) &SimpleWindow {
+	return win.stop_timer(id)
+}
+
+// pause_timer pauses a running timer without removing its registration.
+pub fn (mut win SimpleWindow) pause_timer(id string) &SimpleWindow {
+	if mut tmr := win.timers[id] {
+		tmr.running = false
+	}
+	return win
+}
+
+// start_timer resumes or starts a paused timer.
+pub fn (mut win SimpleWindow) start_timer(id string) &SimpleWindow {
+	if mut tmr := win.timers[id] {
+		tmr.running = true
+		tmr.last_tick = time.ticks()
+	}
+	return win
+}
+
+// reset_timer resets the timer's elapsed time tracker.
+pub fn (mut win SimpleWindow) reset_timer(id string) &SimpleWindow {
+	if mut tmr := win.timers[id] {
+		tmr.last_tick = time.ticks()
+	}
+	return win
+}
+
+// is_timer_running returns true if a timer exists and is currently active.
+pub fn (win &SimpleWindow) is_timer_running(id string) bool {
+	if tmr := win.timers[id] {
+		return tmr.running
+	}
+	return false
+}
+
+// set_timer_interval dynamically adjusts the duration interval of an existing timer.
+pub fn (mut win SimpleWindow) set_timer_interval(id string, interval_ms int) &SimpleWindow {
+	if mut tmr := win.timers[id] {
+		tmr.interval_ms = interval_ms
+	}
+	return win
+}
+
+// clear_all_timers stops and removes all scheduled timers in the window.
+pub fn (mut win SimpleWindow) clear_all_timers() &SimpleWindow {
+	win.timers.clear()
+	return win
+}
+
+// process_timers checks active timers and triggers scheduled callbacks when intervals expire.
+pub fn (mut win SimpleWindow) process_timers() {
+	if win.timers.len == 0 {
+		return
+	}
+	now := time.ticks()
+	mut finished_ids := []string{}
+
+	mut timer_ids := []string{}
+	for id, tmr in win.timers {
+		if tmr.running {
+			timer_ids << id
+		}
+	}
+
+	for id in timer_ids {
+		if mut tmr := win.timers[id] {
+			if !tmr.running {
+				continue
+			}
+			if tmr.last_tick == 0 {
+				tmr.last_tick = now
+				continue
+			}
+			if now - tmr.last_tick >= tmr.interval_ms {
+				tmr.last_tick = now
+				if tmr.callback != unsafe { nil } {
+					tmr.callback(mut win)
+				}
+				if tmr.one_shot {
+					tmr.running = false
+					finished_ids << id
+				}
+			}
+		}
+	}
+
+	for id in finished_ids {
+		win.timers.delete(id)
+	}
 }
 
 // Execution Loop

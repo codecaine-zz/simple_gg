@@ -26,6 +26,8 @@ Whether you are building a 5-minute utility tool, a multi-tab admin panel, or an
 13. [OS System Calls & Hardware API](#13-os-system-calls--hardware-api)
 14. [V Standard Library Integrations](#14-v-standard-library-integrations)
 15. [Ergonomic Standalone Functions](#15-ergonomic-standalone-functions)
+16. [Interval Timers & Scheduled Callbacks](#16-interval-timers--scheduled-callbacks)
+17. [Modern UI & RAD UX Enhancements](#17-modern-ui--rad-ux-enhancements)
 
 ---
 
@@ -1080,7 +1082,78 @@ simplegui.quit()
 
 ---
 
-## 16. Modern UI & RAD UX Enhancements
+## 16. Interval Timers & Scheduled Callbacks
+
+`simplegui` provides non-blocking timer capabilities integrated directly into the window rendering loop. You can schedule recurring background callbacks (`set_interval`), one-shot delayed executions (`set_timeout`), pause/resume active timers, and adjust timer intervals dynamically.
+
+### 1. Recurring Interval Timers (`set_interval`)
+
+Triggers a callback function periodically every $N$ milliseconds:
+
+```v
+// Update a live clock label every 1000ms (1 second)
+win.set_interval('clock_timer', 1000, fn (mut win simplegui.SimpleWindow) {
+	t := time.now()
+	win.set_text('lbl_clock', 'Current Time: ${t.format_ss()}')
+})
+
+// Auto-increment progress bar every 100ms
+win.set_interval('progress_timer', 100, fn (mut win simplegui.SimpleWindow) {
+	mut val := win.get_value_int('prog_bar')
+	val += 2
+	if val > 100 { val = 0 }
+	win.set_value_int('prog_bar', val)
+})
+
+// Alias syntax: add_timer
+win.add_timer('stats_poller', 5000, fn (mut win simplegui.SimpleWindow) {
+	win.append_console_log('app_console', '[INFO] Periodic system metrics polled.')
+})
+```
+
+### 2. One-Shot Delayed Timeouts (`set_timeout`)
+
+Executes a callback function once after a specified millisecond delay and automatically unregisters itself:
+
+```v
+// Trigger an informational toast after a 3-second delay
+win.set_timeout('delayed_alert', 3000, fn (mut win simplegui.SimpleWindow) {
+	win.info('Timeout Triggered', '3 seconds have elapsed since button click.')
+})
+```
+
+### 3. Controlling & Managing Timers
+
+```v
+// Pause a running timer (suspends callbacks without deleting registration)
+win.pause_timer('progress_timer')
+
+// Start or resume a paused timer
+win.start_timer('progress_timer')
+
+// Reset timer tick accumulator (restarts current interval cycle)
+win.reset_timer('progress_timer')
+
+// Check if a timer is currently active and running
+if win.is_timer_running('progress_timer') {
+	println('Progress timer is active')
+}
+
+// Dynamically adjust interval frequency (e.g. speed up from 1000ms to 250ms)
+win.set_timer_interval('clock_timer', 250)
+
+// Stop and remove a specific timer
+win.stop_timer('progress_timer')
+win.clear_interval('clock_timer')  // Alias for stop_timer
+win.clear_timeout('delayed_alert') // Alias for stop_timer
+
+// Stop and remove all registered timers in the window
+win.clear_all_timers()
+```
+
+---
+
+## 17. Modern UI & RAD UX Enhancements
 
 `simplegui` includes modern desktop UI enhancements: floating tooltips, backdrop modal overlays, form field validation tags, skeleton loading shimmers, tab badge counters, and search filtering.
 
@@ -1140,4 +1213,5 @@ win.set_table_search_filter('tbl_users', 'Ada')
 5. **No Emojis in UI**: Use standard font characters or brackets like `[Save]`, `[+]`, `[-]` for icon placeholders.
 6. **Form RAD Helpers**: Use `win.add_form_field()`, `win.add_form_dropdown()`, and `win.add_form_switch()` to pair labels and controls instantly.
 7. **State Management**: Save and load application state with `win.save_state_json()` and `win.load_state_json()` for automatic reactive UI synchronization.
-8. **Execution Loop**: End your script with `win.run()` to start the app.
+8. **Interval Timers & Timeouts**: Schedule background tasks or delayed actions with `win.set_interval('id', 1000, cb)` and `win.set_timeout('id', 3000, cb)`.
+9. **Execution Loop**: End your script with `win.run()` to start the app.

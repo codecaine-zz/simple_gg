@@ -27,6 +27,9 @@ pub fn (mut win SimpleWindow) render_ui() {
 		return
 	}
 
+	// Step 0: Process scheduled interval and timeout timers
+	win.process_timers()
+
 	// Step 1: Compute responsive control coordinate locations
 	win.recalculate_layout()
 

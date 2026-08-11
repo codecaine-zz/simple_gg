@@ -51,6 +51,7 @@ This directory contains beginner-friendly, well-commented examples demonstrating
 | **[`11_data_table_pro.v`](11_data_table_pro.v)**                       | Data table pro                   | Sortable columns (click header, numeric-aware compare), mouse-wheel scrolling for fixed-height tables, row hover highlight, and row add/remove/sort APIs. | Run locally to preview                 |
 | **[`12_system_and_stdlib_features.v`](12_system_and_stdlib_features.v)** | System calls & stdlib toolkit    | Desktop notifications, hardware specs (CPU/RAM/cores), clipboard read/write, system paths, HTTP GET, RegEx, SHA256 crypto, and random password generator. | ![Snapshot 12](../snapshots/ex12.png)  |
 | **[`13_reactive_state_store.v`](13_reactive_state_store.v)**           | Reactive state & persistence     | Key-value state store, typed accessors (`int`/`bool`), reactive state listeners (`on_state_change`), and JSON disk serialization/restoration.             | ![Snapshot 13](../snapshots/ex13.png)  |
+| **[`16_interval_timers.v`](16_interval_timers.v)**                     | Interval timers & timeouts       | Recurring timers (`set_interval`), one-shot delays (`set_timeout`), clock polling, auto-incrementing progress, and timer control APIs.                    | Run locally to preview                 |
 
 ---
 
@@ -98,4 +99,7 @@ v run examples/13_reactive_state_store.v
 
 # Run RAD Controls Suite Showcase Demo
 v run examples/14_rad_controls_showcase.v
+
+# Run Interval Timers & Timeouts Showcase Demo
+v run examples/16_interval_timers.v
 ```
