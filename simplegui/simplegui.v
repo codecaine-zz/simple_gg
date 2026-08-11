@@ -276,14 +276,60 @@ pub fn (win &SimpleWindow) get_maximizable() bool {
 	return win.maximizable
 }
 
+pub fn (mut win SimpleWindow) set_width(width int) &SimpleWindow {
+	win.width = math.max(win.min_width, math.min(win.max_width, width))
+	win.recalculate_layout()
+	return win
+}
+
+pub fn (mut win SimpleWindow) set_height(height int) &SimpleWindow {
+	win.height = math.max(win.min_height, math.min(win.max_height, height))
+	win.recalculate_layout()
+	return win
+}
+
 pub fn (mut win SimpleWindow) set_size(width int, height int) &SimpleWindow {
-	win.width = width
-	win.height = height
+	win.width = math.max(win.min_width, math.min(win.max_width, width))
+	win.height = math.max(win.min_height, math.min(win.max_height, height))
+	win.recalculate_layout()
 	return win
 }
 
 pub fn (mut win SimpleWindow) resize(width int, height int) &SimpleWindow {
 	return win.set_size(width, height)
+}
+
+pub fn (mut win SimpleWindow) fit_to_content() &SimpleWindow {
+	win.recalculate_layout()
+	mut max_x := f32(0.0)
+	mut max_y := f32(0.0)
+	for ctrl in win.controls {
+		if ctrl.visible {
+			right := ctrl.x + ctrl.w
+			bottom := ctrl.y + ctrl.h
+			if right > max_x {
+				max_x = right
+			}
+			if bottom > max_y {
+				max_y = bottom
+			}
+		}
+	}
+	pad := f32(win.padding)
+	req_w := int(max_x + pad)
+	req_h := int(max_y + pad)
+	if req_w > win.width {
+		win.width = math.max(win.min_width, math.min(win.max_width, req_w))
+	}
+	if req_h > win.height {
+		win.height = math.max(win.min_height, math.min(win.max_height, req_h))
+	}
+	win.recalculate_layout()
+	return win
+}
+
+pub fn (mut win SimpleWindow) fit_contents() &SimpleWindow {
+	return win.fit_to_content()
 }
 
 pub fn (win &SimpleWindow) get_width() int {

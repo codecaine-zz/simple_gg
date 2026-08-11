@@ -7,11 +7,11 @@ fn main() {
 	win.set_fullscreen(true)
 	win.set_theme('Apple Dark')
 
-	win.add_heading('💻 System Calls & Standard Library (sys.v / stdlib.v)')
+	win.add_heading('System Calls & Standard Library (sys.v / stdlib.v)')
 	win.add_label('lbl_sub', 'Access OS execution, hardware specs, HTTP, cryptography, clipboard, and system paths.')
 
 	// System Information Group
-	win.group('grp_sys', '🖥️ System & Hardware Details', fn (mut win simplegui.SimpleWindow) {
+	win.group('grp_sys', 'System & Hardware Details', fn (mut win simplegui.SimpleWindow) {
 		win.begin_row('row_sys_btns')
 		win.add_button('btn_sys_info', 'Fetch Hardware Info')
 		win.add_button('btn_notify', 'Trigger Desktop Notification')
@@ -21,7 +21,7 @@ fn main() {
 	})
 
 	// Clipboard & Paths Group
-	win.group('grp_clip', '📋 Clipboard & System Directory Lookup', fn (mut win simplegui.SimpleWindow) {
+	win.group('grp_clip', 'Clipboard & System Directory Lookup', fn (mut win simplegui.SimpleWindow) {
 		win.add_form_field('Clip Input:', 'input_clip', 'Hello from simple_gg!')
 		win.begin_row('row_clip_btns')
 		win.add_button('btn_copy', 'Copy to Clipboard')
@@ -31,7 +31,7 @@ fn main() {
 	})
 
 	// Stdlib Helpers Group (Crypto, HTTP, Random)
-	win.group('grp_stdlib', '🛠️ Standard Library (Crypto, RegEx & HTTP)', fn (mut win simplegui.SimpleWindow) {
+	win.group('grp_stdlib', 'Standard Library (Crypto, RegEx & HTTP)', fn (mut win simplegui.SimpleWindow) {
 		win.begin_row('row_stdlib_btns')
 		win.add_button('btn_hash', 'Generate SHA256')
 		win.add_button('btn_rand', 'Random Password')

@@ -7,7 +7,7 @@ fn main() {
 	win.set_fullscreen(true)
 	win.set_theme('Nord')
 
-	win.add_heading('🔄 Reactive State Store & Persistence (state.v)')
+	win.add_heading('Reactive State Store & Persistence (state.v)')
 	win.add_label('lbl_sub', 'Store key-value states, trigger reactive listeners, and save/load JSON state.')
 
 	// State Listeners (Reactive UI Updates)
@@ -38,18 +38,18 @@ fn main() {
 	win.set_state_bool('dark_mode', true)
 
 	// Reactive Counter Group
-	win.group('grp_counter', '🔢 Counter & Numeric State Operations', fn (mut win simplegui.SimpleWindow) {
+	win.group('grp_counter', 'Counter & Numeric State Operations', fn (mut win simplegui.SimpleWindow) {
 		win.begin_row('row_cnt_btns')
-		win.add_button('btn_dec', '➖ Decrement (-1)')
-		win.add_button('btn_inc', '➕ Increment (+1)')
-		win.add_button('btn_reset', '↺ Reset Counter')
+		win.add_button('btn_dec', '[-] Decrement (-1)')
+		win.add_button('btn_inc', '[+] Increment (+1)')
+		win.add_button('btn_reset', '[R] Reset Counter')
 		win.add_badge('badge_count', 'Count: 42', 'blue')
 		win.end_row()
 		win.add_label('lbl_counter_display', 'Current Counter Value: 42')
 	})
 
 	// String & Boolean State Operations
-	win.group('grp_role', '👤 String & Boolean State Management', fn (mut win simplegui.SimpleWindow) {
+	win.group('grp_role', 'String & Boolean State Management', fn (mut win simplegui.SimpleWindow) {
 		win.add_form_field('User Role:', 'input_role', 'Administrator')
 		win.begin_row('row_role_btns')
 		win.add_button('btn_update_role', 'Update Role')
@@ -59,7 +59,7 @@ fn main() {
 	})
 
 	// Persistence Group
-	win.group('grp_persist', '💾 State Serialization & JSON Disk Persistence', fn (mut win simplegui.SimpleWindow) {
+	win.group('grp_persist', 'State Serialization & JSON Disk Persistence', fn (mut win simplegui.SimpleWindow) {
 		win.begin_row('row_save_btns')
 		win.add_button('btn_save_state', 'Save State to JSON')
 		win.add_button('btn_load_state', 'Load State from JSON')
@@ -109,4 +109,3 @@ fn main() {
 
 	win.run()
 }
-

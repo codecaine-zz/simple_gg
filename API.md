@@ -1,12 +1,35 @@
-# ⚡ SimpleGUI (`simple_gg`) - Beginner & RAD Cheat Sheet API Guide
+# SimpleGUI (`simple_gg`) - Complete API Reference & Beginner Guide
 
 `simplegui` (in package `simple_gg`) is a lightweight, zero-dependency, Rapid Application Development (RAD) UI toolkit for building desktop applications in V using V's native `gg` graphics engine.
 
-Whether you're building a 5-minute utility tool, a multi-tab admin panel, or an interactive data app, `simplegui` lets you create sleek interfaces with concise code, rich built-in themes, reactive state management, and OS system calls.
+Whether you are building a 5-minute utility tool, a multi-tab admin panel, or an interactive data app, `simplegui` lets you create sleek interfaces with concise code, rich built-in themes, reactive state management, and OS system calls.
+
+> [!NOTE]
+> Standard sokol/gg text rendering uses standard font glyphs. Avoid emoji characters in UI text labels to ensure clean cross-platform font rendering. Use standard ASCII characters or brackets like `[+]`, `[-]`, `[Save]`, `[Home]`, `[Settings]` for icons and indicators.
 
 ---
 
-## 🚀 60-Second Copy-Paste Starter App
+## Quick Navigation Index
+
+1. [60-Second Copy-Paste Starter App](#1-60-second-copy-paste-starter-app)
+2. [Window Setup, Sizing & Content Fitting](#2-window-setup-sizing--content-fitting)
+3. [Built-in Themes & Styling](#3-built-in-themes--styling)
+4. [Layout Containers & Grouping](#4-layout-containers--grouping)
+5. [Widget Reference (Complete Catalog)](#5-widget-reference-complete-catalog)
+6. [Form RAD Helpers (Label + Widget Pairs)](#6-form-rad-helpers-label--widget-pairs)
+7. [Nameless RAD Shortcuts](#7-nameless-rad-shortcuts)
+8. [Widget Styling & Fluent Method Chaining](#8-widget-styling--fluent-method-chaining)
+9. [Reading & Writing Control Values](#9-reading--writing-control-values)
+10. [Event Listeners & Callbacks](#10-event-listeners--callbacks)
+11. [RAD Utilities & Form JSON Serialization](#11-rad-utilities--form-json-serialization)
+12. [Reactive State Store & JSON Persistence](#12-reactive-state-store--json-persistence)
+13. [OS System Calls & Hardware API](#13-os-system-calls--hardware-api)
+14. [V Standard Library Integrations](#14-v-standard-library-integrations)
+15. [Ergonomic Standalone Functions](#15-ergonomic-standalone-functions)
+
+---
+
+## 1. 60-Second Copy-Paste Starter App
 
 Copy this complete example into a `main.v` file and run `v run .` to launch your first desktop app:
 
@@ -17,21 +40,21 @@ import simplegui
 
 fn main() {
 	// 1. Create a modern window (Width: 640px, Height: 480px)
-	mut win := simplegui.new_simple_window('⚡ Quick Profile Editor', 640, 480)
+	mut win := simplegui.new_simple_window('Quick Profile Editor', 640, 480)
 	
 	// 2. Pick a stylish dark theme (Nord, Apple Dark, Dracula, Cyberpunk, etc.)
 	win.set_theme('Apple Dark')
 
-	// 3. Add UI Headings & Labeled Form Fields (RAD Ergonomics)
-	win.add_heading('👤 User Profile Settings')
+	// 3. Add UI Headings & Labeled Form Fields
+	win.add_heading('User Profile Settings')
 	win.add_form_field('Full Name:', 'input_name', 'Ada Lovelace')
 	win.add_form_field('Email Address:', 'input_email', 'ada@vlang.io')
 	win.add_checkbox('chk_newsletter', 'Subscribe to Monthly Tech Digest', true)
 
 	// 4. Add Buttons inside a Horizontal Row
 	win.begin_row('action_row')
-	win.add_button('btn_save', '💾 Save Profile')
-	win.add_button('btn_reset', '↺ Reset Fields')
+	win.add_button('btn_save', '[Save] Save Profile')
+	win.add_button('btn_reset', '[R] Reset Fields')
 	win.end_row()
 
 	// 5. Add Interactive Event Handlers
@@ -58,26 +81,7 @@ fn main() {
 
 ---
 
-## 📚 Quick Navigation Index
-
-1. [Window Setup & Configuration](#1-window-setup--configuration)
-2. [Built-in Themes & Styling](#2-built-in-themes--styling)
-3. [Layout Containers & Grouping](#3-layout-containers--grouping)
-4. [Widget Styling & Fluent Chaining](#4-widget-styling--fluent-chaining)
-5. [Complete Widget Reference](#5-complete-widget-reference)
-6. [Form RAD Helpers (Label + Widget)](#6-form-rad-helpers-label--widget)
-7. [Nameless RAD Shortcuts](#7-nameless-rad-shortcuts)
-8. [Reading & Writing Control Values](#8-reading--writing-control-values)
-9. [Event Listeners & Event Callbacks](#9-event-listeners--event-callbacks)
-10. [RAD Utilities & System Notifications](#10-rad-utilities--system-notifications)
-11. [Developer & Advanced UI Controls](#11-developer--advanced-ui-controls)
-12. [Reactive State Store & JSON Persistence](#12-reactive-state-store--json-persistence)
-13. [OS System Calls & Hardware API](#13-os-system-calls--hardware-api)
-14. [V Standard Library Integrations](#14-v-standard-library-integrations)
-
----
-
-## 1. Window Setup & Configuration
+## 2. Window Setup, Sizing & Content Fitting
 
 ### Create Window
 
@@ -89,51 +93,73 @@ mut win := simplegui.new_simple_window('My Desktop App', 800, 600)
 mut win2 := simplegui.new_window('My Desktop App', 800, 600)
 ```
 
-### Window Dimensions & Full Screen
+### Window Dimensions & Width Sizing
+
+You can adjust window width and height programmatically. Layout calculations update automatically when dimensions change.
 
 ```v
-// Resize window programmatically
+// Set window width specifically
+win.set_width(900)
+
+// Set window height specifically
+win.set_height(650)
+
+// Set both width and height
 win.set_size(1024, 768)
 
-// Lock window to fixed dimensions (prevents user resizing)
-win.set_fixed_size(500, 400)
+// Alias for set_size
+win.resize(1024, 768)
 
-// Toggle or enable Full Screen mode
-win.set_fullscreen(true)     // Enable full screen window
-win.toggle_fullscreen()      // Toggle full screen state
-is_fs := win.is_fullscreen() // Returns true if currently full screen
-
-// Quick size presets: 'small', 'medium', 'large', 'hd', 'full_hd', 'dialog', 'settings', 'login'
-win.set_size_preset('hd') // Resizes to 1280x720
+// Read window dimensions
+w := win.get_width()
+h := win.get_height()
+w, h = win.get_size()
 ```
 
-### Window Constraints & Customization
+### Automatic Window Content Fitting (`fit_to_content`)
+
+If your window controls exceed the initial width or height, call `fit_to_content()` to automatically recalculate and expand the window width and height so everything fits without clipping:
 
 ```v
-// Set title bar text dynamically
-win.set_title('Updated App Window Title')
+mut win := simplegui.new_simple_window('Data Table App', 400, 300)
 
-// Set minimum and maximum window boundaries
+// Add wide data table or large controls
+win.add_table('tbl_wide', ['ID', 'User Name', 'Email Address', 'Department', 'Access Role'], [
+	['101', 'Ada Lovelace', 'ada@vlang.io', 'Engineering', 'System Architect'],
+	['102', 'Alan Turing', 'alan@vlang.io', 'Research & AI', 'Lead Scientist'],
+])
+
+// Automatically expands window width and height to fit all visible controls + padding
+win.fit_to_content()
+// Or alias: win.fit_contents()
+
+win.run()
+```
+
+### Size Presets & Window Locking
+
+```v
+// Lock window to fixed dimensions (prevents manual resizing)
+win.set_fixed_size(500, 400)
+
+// Minimum and maximum size constraints
 win.set_min_size(400, 300)
 win.set_max_size(1920, 1080)
 
-// Adjust outer edge padding (default: 16px)
-win.set_padding(24)
-
-// Adjust vertical widget spacing (default: 10px)
-win.set_spacing(12)
-
-// Keep window floated on top of all other desktop applications
-win.set_always_on_top(true)
-
-// Set window background opacity (0.0 transparent to 1.0 opaque)
-win.set_opacity(0.95)
-
-// Enable or disable Cmd+Q / Ctrl+Q hotkey exit shortcut
-win.set_close_shortcut_enabled(true)
+// Preset sizes: 'small' (400x300), 'medium' (640x480), 'large' (800x600),
+// 'hd' (1280x720), 'full_hd' (1920x1080), 'dialog' (420x220), 'settings' (600x500)
+win.set_size_preset('hd')
 ```
 
-### RAD Window Presets (Dialogs & Splash Screens)
+### Full Screen Control
+
+```v
+win.set_fullscreen(true)     // Enable full screen window
+win.toggle_fullscreen()      // Toggle full screen state
+is_fs := win.is_fullscreen() // Returns true if currently full screen
+```
+
+### RAD Preset Window Types
 
 ```v
 // Create a centered non-resizable dialog window
@@ -146,34 +172,55 @@ mut splash := simplegui.new_simple_window('Splash', 500, 300).make_splash_screen
 mut panel := simplegui.new_simple_window('Panel', 300, 600).make_utility_panel()
 ```
 
+### Positioning, Alignment & Window Animations
+
+```v
+// Center window on screen
+win.center_window()
+
+// Align window on screen: 'top_left', 'top_right', 'bottom_left', 'bottom_right', 'center'
+win.align_window('top_right')
+
+// Shake window animation (e.g. invalid login entry feedback)
+win.shake_window()
+
+// Set opacity (0.0 to 1.0)
+win.set_opacity(0.95)
+
+// Make window movable by clicking anywhere on background
+win.set_movable_by_window_background(true)
+
+// Keep window stayed on top of other desktop windows
+win.set_always_on_top(true)
+```
+
 ### Window Lifecycle
 
 ```v
-// Close window programmatically
-win.close()
-// OR
-win.quit()
-
-// Start the window execution loop (blocks main thread until closed)
+// Start window loop (blocks thread until window closes)
 win.run()
+
+// Programmatically close or hide window
+win.close_window()
+win.hide_window()
+win.restore_window()
 ```
 
 ---
 
-## 2. Built-in Themes & Styling
+## 3. Built-in Themes & Styling
 
 `simplegui` includes 17 curated light and dark themes. Setting a theme instantly updates all controls, fonts, hover states, cards, and background colors.
 
 ```v
-// Apply a theme by name
+// Apply theme by name
 win.set_theme('Nord')
 
 // Toggle between Apple Light and Apple Dark themes
 win.toggle_window_theme()
 
-// List all available theme names as an array of strings
+// List all available theme names
 themes := simplegui.list_themes()
-// ['Apple Light', 'Apple Dark', 'Nord', 'Dracula', 'Cyberpunk', 'Catppuccin Mocha', ...]
 
 // Get Theme struct by alias
 theme := simplegui.get_theme('dark') // Accepts 'dark', 'nord', 'cyberpunk', 'github', etc.
@@ -196,9 +243,9 @@ theme := simplegui.get_theme('dark') // Accepts 'dark', 'nord', 'cyberpunk', 'gi
 
 ---
 
-## 3. Layout Containers & Grouping
+## 4. Layout Containers & Grouping
 
-Organize controls easily using rows, grids, tabbed panels, split views, and group boxes.
+Organize controls easily using rows, grids, flexboxes, tabbed panels, split views, and group cards.
 
 ### 1. Horizontal Row (`begin_row` / `end_row`)
 
@@ -217,18 +264,27 @@ win.end_row()
 Arranges controls into equal columns:
 
 ```v
-// 3 columns with 12px gap between columns
+// 3 columns with 12px gap
 win.begin_grid('gallery_grid', 3, 12)
 win.add_button('g1', 'Card 1')
 win.add_button('g2', 'Card 2')
 win.add_button('g3', 'Card 3')
 win.add_button('g4', 'Card 4')
-win.add_button('g5', 'Card 5')
-win.add_button('g6', 'Card 6')
 win.end_grid()
 ```
 
-### 3. Tabbed Container (`begin_tab_container` / `end_tab_container`)
+### 3. Flexbox Layout (`begin_flex_box` / `end_flex_box`)
+
+Auto-calculates item widths to fill row space:
+
+```v
+win.begin_flex_box('flex_container')
+win.add_button('f1', 'Flex Item 1')
+win.add_button('f2', 'Flex Item 2')
+win.end_flex_box()
+```
+
+### 4. Tabbed Container (`begin_tab_container` / `end_tab_container`)
 
 Organizes complex interfaces into tabbed views:
 
@@ -256,9 +312,9 @@ win.end_tab_page()
 win.end_tab_container()
 ```
 
-### 4. Split Pane View (`begin_split_view` / `end_split_view`)
+### 5. Split Pane View (`begin_split_view` / `end_split_view`)
 
-Splits the container into a left sidebar and right main content region:
+Splits container into left sidebar and right main content area:
 
 ```v
 // Left sidebar takes 30% width, right content takes 70%
@@ -266,8 +322,8 @@ win.begin_split_view('sidebar_split', 30)
 
 // Left Region (Sidebar)
 win.add_heading('Navigation')
-win.add_button('nav_home', '🏠 Home')
-win.add_button('nav_settings', '⚙️ Settings')
+win.add_button('nav_home', '[Home] Home')
+win.add_button('nav_settings', '[Set] Settings')
 
 // Right Region (Main Area)
 win.add_heading('Main Dashboard Content')
@@ -276,24 +332,251 @@ win.add_label('lbl_dash', 'Select an option from the left sidebar.')
 win.end_split_view()
 ```
 
-### 5. Group Box Card (`group` / `begin_group`)
+### 6. Group Box Card (`group` / `begin_group`)
 
-Wraps widgets in a visual card container with a title:
+Wraps widgets in a visual card container with a header title:
 
 ```v
-win.group('grp_account', '🔒 User Credentials', fn (mut win simplegui.SimpleWindow) {
+win.group('grp_account', 'User Credentials', fn (mut win simplegui.SimpleWindow) {
 	win.add_form_field('Username:', 'input_u', 'admin')
 	win.add_form_password('Password:', 'input_p', 'secret123')
 })
 ```
 
+### 7. Spacers & Separators
+
+```v
+win.add_spacer(20)     // Add 20px vertical blank space
+win.add_separator()    // Horizontal rule line
+```
+
 ---
 
-## 4. Widget Styling & Fluent Chaining
+## 5. Widget Reference (Complete Catalog)
 
-Customize any control's width, height, colors, fonts, margins, padding, and tooltips using fluent method chaining on `&Control` or direct `win.set_control_*()` methods.
+Every widget is created with a unique `name` string identifier.
 
-### Method Chaining Example
+### Text Labels & Typography
+
+```v
+win.add_heading('Main Page Title')
+win.add_subheading('Section Header')
+win.add_label('lbl_status', 'Status: System Ready')
+win.add_caption('Caption text description...')
+win.add_divider('Optional Settings')
+```
+
+### Buttons
+
+```v
+win.add_button('btn_run', '[Run] Start Processing')
+
+win.on_click('btn_run', fn (mut win simplegui.SimpleWindow) {
+	win.info('Started', 'Processing job launched!')
+})
+```
+
+### Inputs, Passwords & Textareas
+
+```v
+win.add_input('input_host', 'localhost')
+win.add_password('input_secret', 'my_pass_123')
+win.add_textarea('input_logs', 'Line 1: Started\nLine 2: Ready')
+```
+
+### Search Bar
+
+```v
+win.add_search_bar('search_box', 'Type to search records...')
+
+win.on_enter('search_box', fn (mut win simplegui.SimpleWindow) {
+	query := win.get_text('search_box')
+	println('Search query submitted: ${query}')
+})
+```
+
+### Checkboxes, Switches & Toggles
+
+```v
+win.add_checkbox('chk_debug', 'Enable Verbose Logging', false)
+win.add_switch('sw_dark', 'Dark Theme Mode', true)
+win.add_toggle('tgl_auto', 'Auto Save', true)
+```
+
+### Steppers & Sliders
+
+```v
+win.add_number('num_count', 5)        // Up/Down integer stepper
+win.add_slider('slider_vol', 75)      // Range slider 0 to 100
+win.add_progress_bar('prog_bar', 65)  // Progress bar indicator
+```
+
+### Dropdowns & Segmented Controls
+
+```v
+win.add_dropdown('drop_role', ['Administrator', 'Developer', 'Guest'], 'Developer')
+win.add_segmented_control('seg_view', ['Grid View', 'List View', 'Map'], 'Grid View')
+```
+
+### Data Table
+
+Supports header sorting, row selection, scrolling, and dynamic dataset updating:
+
+```v
+headers := ['ID', 'Full Name', 'Role', 'Status']
+rows := [
+	['1', 'Ada Lovelace', 'Mathematician', 'Active'],
+	['2', 'Alan Turing', 'Cryptanalyst', 'Active'],
+	['3', 'Grace Hopper', 'Computer Scientist', 'Offline'],
+]
+
+win.add_table('tbl_users', headers, rows)
+win.set_control_height('tbl_users', 200)
+
+// Programmatic sorting (Column 1 ascending)
+win.sort_table('tbl_users', 1, true)
+
+// Row selection event
+win.on_row_click('tbl_users', fn (mut win simplegui.SimpleWindow) {
+	idx := win.get_table_selected_row('tbl_users')
+	println('Selected row index: ${idx}')
+})
+
+// Update dataset dynamically
+win.set_table_data('tbl_users', headers, new_rows)
+```
+
+### Charts & KPI Cards
+
+```v
+// Line Chart
+win.add_line_chart('chart_sales', 'Monthly Revenue ($k)', [12.5, 18.2, 24.0, 31.8, 42.0])
+
+// Bar Chart
+win.add_bar_chart('chart_visitors', 'Daily Visitors', ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'], [120.0, 240.0, 180.0, 310.0, 450.0])
+
+// Metric KPI Card
+win.add_metric_card('kpi_sales', 'Total Revenue', '$48,250', '+14.2%', 'vs last month')
+```
+
+### Lists & Trees
+
+```v
+// List Box
+win.add_list_box('list_files', ['file1.txt', 'file2.csv', 'document.pdf'], 0)
+selected_file := win.get_list_box_selected('list_files')
+
+// Tree View
+win.add_tree_view('tree_proj', [
+	simplegui.TreeNode{
+		title: 'src'
+		children: [
+			simplegui.TreeNode{ title: 'main.v' },
+			simplegui.TreeNode{ title: 'utils.v' }
+		]
+	}
+])
+```
+
+### Navigation & Badges
+
+```v
+win.add_breadcrumbs('nav_path', ['Home', 'Projects', 'SimpleGUI', 'Settings'])
+win.add_badge('badge_status', 'ONLINE', 'success')
+win.add_status_badge('badge_sys', 'Operational', 'active')
+win.add_avatar('user_avatar', 'AL', 'Ada Lovelace')
+win.add_stepper('step_wizard', ['Account Details', 'Billing', 'Review'], 1)
+```
+
+### Accordions & Alert Banners
+
+```v
+win.add_accordion('acc_faq', 'Frequently Asked Questions', 'SimpleGUI runs natively on macOS, Windows, and Linux.', false)
+win.add_alert_banner('banner_info', 'Notice', 'System maintenance scheduled for tonight at midnight.', 'info')
+```
+
+### Pickers & Wells
+
+```v
+win.add_date_picker('input_date', '2026-08-11')
+win.add_time_picker('input_time', '14:30')
+win.add_file_picker('input_file', 'Choose File:', '/tmp/document.pdf')
+win.add_color_picker('picker_color', 'Select Accent Color:', '#0a84ff')
+win.add_color_well('swatch_accent', '#0a84ff')
+```
+
+### Media, Canvas & Links
+
+```v
+win.add_image_view('img_preview', 'Preview Image', 300, 200)
+win.add_canvas('canvas_draw', 400, 200)
+win.add_spinner('loading_spinner', 'Syncing data...')
+win.add_link('link_docs', 'Open Official V Language Documentation', 'https://vlang.io')
+```
+
+### Tags & Utility Controls
+
+```v
+win.add_tag_cloud('tags_cloud', ['Vlang', 'GUI', 'Desktop', 'CrossPlatform'])
+win.add_chip_group('chips_tags', ['Bug', 'Feature', 'Documentation'], ['Bug'])
+win.add_rich_text('rich_desc', '**Bold** and *italic* text formatting supported.')
+win.add_keyboard_shortcut('hk_save', 'Ctrl+S', 'Save Project')
+win.add_toolbar('main_tb', [
+	simplegui.ToolbarItem{ icon: '[New]', tooltip: 'New File', on_click: fn (mut win simplegui.SimpleWindow) {} },
+	simplegui.ToolbarItem{ icon: '[Save]', tooltip: 'Save File', on_click: fn (mut win simplegui.SimpleWindow) {} }
+])
+win.add_menu_button('menu_actions', 'Actions v', ['Export PDF', 'Export CSV', 'Print'])
+win.add_checklist('chk_perms', ['Read', 'Write', 'Execute'], ['Read'])
+win.add_password_strength('pwd_meter', 'input_password')
+```
+
+---
+
+## 6. Form RAD Helpers (Label + Widget Pairs)
+
+Pairs a descriptive text label with an input widget in one line of code:
+
+```v
+win.add_form_field('Full Name:', 'form_name', 'Ada Lovelace')
+win.add_form_password('Password:', 'form_pass', 'secret_key')
+win.add_form_search('Search Catalog:', 'form_search', '')
+win.add_form_dropdown('Country:', 'form_country', ['USA', 'Canada', 'UK'], 'USA')
+win.add_form_switch('Notifications:', 'form_notify', 'Send Email Digest', true)
+win.add_form_number('Quantity:', 'form_qty', 1)
+win.add_form_slider('Volume:', 'form_vol', 80)
+win.add_form_date_picker('Event Date:', 'form_date', '2026-12-25')
+win.add_form_time_picker('Start Time:', 'form_time', '09:00')
+win.add_form_file_picker('Upload Document:', 'form_file', '/tmp/data.csv')
+win.add_form_color_picker('Theme Accent:', 'form_color', '#0a84ff')
+win.add_form_progress('Download Progress:', 'form_prog', 45)
+```
+
+---
+
+## 7. Nameless RAD Shortcuts
+
+Create controls without defining explicit string IDs:
+
+```v
+win.input('Default Text')
+input_text := win.get_input()
+
+win.checkbox('Enable auto-update', true)
+is_checked := win.get_checkbox()
+
+win.number(10)
+num_val := win.get_number()
+
+win.button('Submit Quick Form')
+```
+
+---
+
+## 8. Widget Styling & Fluent Method Chaining
+
+Customize width, height, colors, fonts, margins, padding, and tooltips using fluent method chaining on `&Control` or direct `win.set_control_*()` window methods.
+
+### Fluent Chaining Example
 
 ```v
 mut btn := win.add_button('btn_submit', 'Submit Registration')
@@ -314,28 +597,23 @@ btn.set_width(220)
 ### Direct Window Setter Reference
 
 ```v
-// Width & Height
 win.set_control_width('btn_submit', 220)
 win.set_control_height('btn_submit', 42)
 win.set_control_size('btn_submit', 220, 42)
 
-// Font & Typography
 win.set_control_font_size('btn_submit', 16)
 win.set_control_font_bold('btn_submit', true)
 win.set_control_font_color('btn_submit', '#ffffff')
 
-// Background & Borders
 win.set_control_bg_color('btn_submit', '#10b981')
 win.set_control_accent_color('btn_submit', '#34c759')
 win.set_control_border('btn_submit', 2.0, '#047857')
 win.set_control_corner_radius('btn_submit', 6.0)
 
-// Margins (Outer spacing) & Padding (Inner spacing)
-win.set_control_margin('btn_submit', 10)         // Margin all sides
-win.set_control_margin_xy('btn_submit', 12, 6)   // Margin X and Y
-win.set_control_padding_xy('btn_submit', 16, 8)  // Padding X and Y
+win.set_control_margin('btn_submit', 10)
+win.set_control_margin_xy('btn_submit', 12, 6)
+win.set_control_padding_xy('btn_submit', 16, 8)
 
-// Tooltips, Visibility, and Enabled State
 win.set_control_tooltip('btn_submit', 'Hover helper tip')
 win.set_control_visible('btn_submit', true)
 win.set_control_enabled('btn_submit', true)
@@ -343,283 +621,35 @@ win.set_control_enabled('btn_submit', true)
 
 ---
 
-## 5. Complete Widget Reference
-
-Every widget is created with a unique `name` string identifier.
-
-### Text Labels & Dividers
-
-```v
-// Static text label
-win.add_label('lbl_status', 'Status: System Ready')
-
-// Bold section title
-win.add_heading('Database Configuration')
-
-// Divider line with label
-win.add_divider('Optional Settings')
-```
-
-### Buttons
-
-```v
-// Standard Push Button
-win.add_button('btn_run', '▶️ Run Processing')
-
-// Click Handler
-win.on_click('btn_run', fn (mut win simplegui.SimpleWindow) {
-	win.info('Started', 'Processing job launched!')
-})
-```
-
-### Inputs, Passwords & Textareas
-
-```v
-// Text Input
-win.add_input('input_host', 'localhost')
-
-// Password Input (masked text)
-win.add_password('input_secret', 'my_pass_123')
-
-// Multi-line Text Area
-win.add_textarea('input_logs', 'Line 1: Started\nLine 2: Ready')
-```
-
-### Search Bar
-
-Includes a search `🔍` icon and an instant clear `✕` button:
-
-```v
-win.add_search_bar('search_box', 'Type to search records...')
-
-// Handle Enter key inside search bar
-win.on_enter('search_box', fn (mut win simplegui.SimpleWindow) {
-	query := win.get_text('search_box')
-	println('Search query submitted: ${query}')
-})
-```
-
-### Checkboxes & Toggle Switches
-
-```v
-// Checkbox
-win.add_checkbox('chk_debug', 'Enable Verbose Logging', false)
-
-// Horizontal Switch
-win.add_switch('sw_dark', 'Dark Theme Mode', true)
-```
-
-### Numeric Steppers & Sliders
-
-```v
-// Number Stepper (with Up ▲ / Down ▼ buttons)
-win.add_number('num_count', 5)
-
-// Range Slider (0 to 100)
-win.add_slider('slider_vol', 75)
-```
-
-### Dropdowns & Segmented Controls
-
-```v
-// Dropdown Selector
-win.add_dropdown('drop_role', ['Administrator', 'Developer', 'Guest'], 'Developer')
-
-// Segmented Control (Pill Button Selector)
-win.add_segmented_control('seg_view', ['Grid View', 'List View', 'Map'], 'Grid View')
-```
-
-### Interactive Data Table
-
-Supports sorting by header clicks, mouse-wheel scrolling, and row selections:
-
-```v
-headers := ['ID', 'Full Name', 'Role', 'Status']
-rows := [
-	['1', 'Ada Lovelace', 'Mathematician', 'Active'],
-	['2', 'Alan Turing', 'Cryptanalyst', 'Active'],
-	['3', 'Grace Hopper', 'Computer Scientist', 'Offline'],
-]
-
-// Add Data Table
-win.add_table('tbl_users', headers, rows)
-win.set_control_height('tbl_users', 200) // Fixed height enables vertical scrolling
-
-// Sort Table programmatically by Column 1 (Full Name) ascending
-win.sort_table('tbl_users', 1, true)
-
-// Handle Row Selection
-win.on_row_click('tbl_users', fn (mut win simplegui.SimpleWindow) {
-	selected_row_idx := win.get_table_selected_row('tbl_users')
-	println('Selected row index: ${selected_row_idx}')
-})
-```
-
-### Badges, Breadcrumbs & Steppers
-
-```v
-// Colored Status Badge ('success', 'warning', 'danger', 'info')
-win.add_badge('badge_status', 'ONLINE', 'success')
-
-// Breadcrumb Navigation Path
-win.add_breadcrumb('nav_path', ['Home', 'Projects', 'SimpleGUI', 'Settings'])
-
-// Multi-step Wizard Indicator (0-indexed step)
-win.add_stepper('step_wizard', ['Account Details', 'Billing', 'Review'], 1)
-```
-
-### Accordions, Avatars & Ratings
-
-```v
-// Collapsible Accordion Box
-win.add_accordion('acc_faq', 'Frequently Asked Questions', 'SimpleGUI runs natively on macOS, Windows, and Linux.', false)
-
-// User Avatar Circle
-win.add_avatar('user_avatar', 'AL', 'Ada Lovelace')
-
-// Interactive 5-Star Rating
-win.add_rating('star_score', 4)
-```
-
-### Pickers & Utilities
-
-```v
-// Date Picker Field
-win.add_date_picker('input_date', '2026-08-11')
-
-// Time Picker Field
-win.add_time_picker('input_time', '14:30')
-
-// File Picker Field (Input + Browse button)
-win.add_file_picker('input_file', 'Choose File:', '/tmp/document.pdf')
-
-// Color Swatch Well
-win.add_color_well('swatch_accent', '#0a84ff')
-
-// Progress Bar (0 to 100%)
-win.add_progress_indicator('prog_bar', 65)
-
-// Metric KPI Card
-win.add_metric_card('kpi_sales', 'Total Revenue', '$48,250', '+14.2%', 'vs last month')
-```
-
----
-
-## 6. Form RAD Helpers (Label + Widget)
-
-Form helpers automatically pair a descriptive text label with an input widget in one clean line of code:
-
-```v
-// 1. Labeled Text Field
-win.add_form_field('Full Name:', 'form_name', 'Ada Lovelace')
-
-// 2. Labeled Password Field
-win.add_form_password('Password:', 'form_pass', 'secret_key')
-
-// 3. Labeled Search Field
-win.add_form_search('Search Catalog:', 'form_search', '')
-
-// 4. Labeled Dropdown
-win.add_form_dropdown('Country:', 'form_country', ['USA', 'Canada', 'UK'], 'USA')
-
-// 5. Labeled Switch Toggle
-win.add_form_switch('Notifications:', 'form_notify', 'Send Email Digest', true)
-
-// 6. Labeled Number Stepper
-win.add_form_number('Quantity:', 'form_qty', 1)
-
-// 7. Labeled Range Slider
-win.add_form_slider('Volume:', 'form_vol', 80)
-
-// 8. Labeled Date Picker
-win.add_form_date_picker('Event Date:', 'form_date', '2026-12-25')
-
-// 9. Labeled Time Picker
-win.add_form_time_picker('Start Time:', 'form_time', '09:00')
-
-// 10. Labeled File Picker
-win.add_form_file_picker('Upload Document:', 'form_file', '/tmp/data.csv')
-
-// 11. Labeled Color Picker
-win.add_form_color_picker('Theme Accent:', 'form_color', '#0a84ff')
-
-// 12. Labeled Progress Bar
-win.add_form_progress('Download Progress:', 'form_prog', 45)
-```
-
----
-
-## 7. Nameless RAD Shortcuts
-
-For quick one-off dialogs and prototype scripts, create controls without defining explicit string IDs:
-
-```v
-// Nameless Text Input
-win.input('Default Text')
-input_text := win.get_input()
-
-// Nameless Checkbox
-win.checkbox('Enable auto-update', true)
-is_checked := win.get_checkbox()
-
-// Nameless Number Stepper
-win.number(10)
-num_val := win.get_number()
-
-// Nameless Button
-win.button('Submit Quick Form')
-```
-
----
-
-## 8. Reading & Writing Control Values
+## 9. Reading & Writing Control Values
 
 ### Strings (`get_text` / `set_text`)
 
-Works on inputs, labels, textareas, dropdowns, badges, search fields, date pickers, and buttons:
-
 ```v
-// Read string value
 username := win.get_text('input_u')
-
-// Set string value
 win.set_text('input_u', 'Grace Hopper')
 ```
 
 ### Booleans (`get_bool` / `set_bool`)
 
-Works on checkboxes, switches, and toggles:
-
 ```v
-// Read boolean state
 is_active := win.get_bool('sw_dark')
-
-// Update boolean state
 win.set_bool('sw_dark', true)
 ```
 
 ### Integers (`get_value_int` / `set_value_int`)
 
-Works on number steppers, sliders, progress bars, ratings, and steppers:
-
 ```v
-// Read integer value
 qty := win.get_value_int('num_count')
-
-// Set integer value
 win.set_value_int('num_count', 42)
 ```
 
 ### Typed Safe Accessors (`get_int`, `get_f64`, `set_int`, `set_f64`)
 
-Safely parses text inputs into numerical types:
-
 ```v
-// Read / Set Integer
 age := win.get_int('input_age')
 win.set_int('input_age', 30)
 
-// Read / Set Float 64
 price := win.get_f64('input_price')
 win.set_f64('input_price', 19.99)
 ```
@@ -627,91 +657,58 @@ win.set_f64('input_price', 19.99)
 ### Batch Value Operations (`get_all` / `set_all` / `clear_all`)
 
 ```v
-// Read multiple control values into a map[string]string
 form_data := win.get_all(['input_name', 'input_email', 'sw_dark'])
 println(form_data['input_name'])
 
-// Populate multiple controls at once from a map[string]string
 win.set_all({
 	'input_name': 'Linus Torvalds',
 	'input_email': 'linus@kernel.org'
 })
 
-// Clear text across multiple controls
 win.clear_all(['input_name', 'input_email'])
 ```
 
 ---
 
-## 9. Event Listeners & Event Callbacks
-
-### 1. Button Click (`on_click`)
+## 10. Event Listeners & Callbacks
 
 ```v
-win.add_button('btn_save', 'Save Changes')
+// Button Click
 win.on_click('btn_save', fn (mut win simplegui.SimpleWindow) {
 	win.info('Saved', 'Your changes were saved successfully.')
 })
-```
 
-### 2. Control Value Change (`on_change`)
-
-Triggers whenever text is typed, a checkbox is toggled, a slider is dragged, or a dropdown option is picked:
-
-```v
-win.add_dropdown('theme_select', ['Apple Light', 'Nord', 'Dracula'], 'Nord')
-
+// Value Change
 win.on_change('theme_select', fn (mut win simplegui.SimpleWindow) {
 	new_theme := win.get_text('theme_select')
 	win.set_theme(new_theme)
 })
-```
 
-### 3. Enter Key Press (`on_enter`)
-
-Triggers when the user presses `Enter` inside a text input or search bar:
-
-```v
-win.add_input('input_query', '')
+// Enter Key Press
 win.on_enter('input_query', fn (mut win simplegui.SimpleWindow) {
 	q := win.get_text('input_query')
 	println('Submitted search: ${q}')
 })
-```
 
-### 4. Table Row Selection (`on_row_click`)
-
-```v
+// Table Row Click
 win.on_row_click('tbl_users', fn (mut win simplegui.SimpleWindow) {
 	selected_row := win.get_table_selected_row('tbl_users')
 	println('Clicked row index: ${selected_row}')
 })
-```
 
-### 5. Window Close Interceptor (`on_close`)
-
-Intercepts `Cmd+Q`, `Ctrl+Q`, or closing the titlebar window button:
-
-```v
+// Window Close Interceptor
 win.on_close(fn (mut win simplegui.SimpleWindow) bool {
-	// Return true to allow window closing, or false to abort closing
 	return win.ask('Confirm Quit', 'Are you sure you want to quit the application?')
 })
-```
 
-### 6. Global Key Down Listener (`on_key_down`)
-
-```v
+// Global Key Down Listener
 win.on_key_down(fn (mut win simplegui.SimpleWindow, key gg.KeyCode) {
 	if key == .escape {
 		println('Escape key pressed!')
 	}
 })
-```
 
-### 7. Window Resize Listener (`on_window_resize`)
-
-```v
+// Window Resize Listener
 win.on_window_resize(fn (mut win simplegui.SimpleWindow, width int, height int) {
 	println('Window resized to: ${width}x${height}')
 })
@@ -719,21 +716,15 @@ win.on_window_resize(fn (mut win simplegui.SimpleWindow, width int, height int) 
 
 ---
 
-## 10. RAD Utilities & System Notifications
+## 11. RAD Utilities & Form JSON Serialization
 
-### Dialogs & Toast Notifications
+### Toast Dialogs
 
 ```v
-// Information Toast Alert
 win.info('Success', 'File exported successfully.')
-
-// Warning Toast Alert
 win.warn('Disk Warning', 'Storage space is running low.')
-
-// Error Toast Alert
 win.error_dialog('Network Error', 'Failed to reach API server.')
 
-// System Confirmation Prompt (returns true if confirmed)
 if win.ask('Delete Record', 'Are you sure you want to delete this entry?') {
 	println('User clicked OK')
 }
@@ -742,123 +733,52 @@ if win.ask('Delete Record', 'Are you sure you want to delete this entry?') {
 ### Batch Control Operations
 
 ```v
-// Show or Hide multiple controls at once
 win.show_controls(['btn_save', 'btn_cancel'])
 win.hide_controls(['lbl_loading', 'prog_bar'])
 
-// Enable or Disable multiple controls at once
 win.enable_controls(['input_u', 'input_p'])
 win.disable_controls(['btn_submit'])
 
-// Toggle single control state
-win.toggle_visible('panel_extra') // Returns new visibility bool
-win.toggle_enabled('btn_action')  // Returns new enabled bool
+win.toggle_visible('panel_extra')
+win.toggle_enabled('btn_action')
 ```
 
 ### Form Serialization to JSON
 
 ```v
-// Export form values to a JSON string
+// Export form values to JSON string
 json_data := win.export_form_json(['form_name', 'form_email', 'form_notify'])
 
-// Populate form fields from a JSON string
+// Populate form fields from JSON string
 win.import_form_json('{"form_name":"Ada","form_email":"ada@vlang.io"}')
-```
-
----
-
-## 11. Developer & Advanced UI Controls
-
-### Toolbar with Icon Buttons
-
-```v
-win.add_toolbar('main_tb', [
-	simplegui.ToolbarItem{
-		icon: '📄'
-		tooltip: 'New Document'
-		on_click: fn (mut win simplegui.SimpleWindow) {
-			win.info('New', 'Created new file')
-		}
-	},
-	simplegui.ToolbarItem{
-		icon: '💾'
-		tooltip: 'Save Document'
-		on_click: fn (mut win simplegui.SimpleWindow) {
-			win.info('Saved', 'File saved')
-		}
-	},
-])
-```
-
-### Hyperlink Control
-
-```v
-// Clickable link text that opens a web browser URL
-win.add_link('link_docs', '🌐 Open Official V Language Documentation', 'https://vlang.io')
-```
-
-### Dropdown Action Menu
-
-```v
-// Click to open an expanding popup action list
-win.add_menu_button('menu_actions', 'Actions ▾', ['Export PDF', 'Export CSV', 'Print', 'Delete'])
-
-win.on_change('menu_actions', fn (mut win simplegui.SimpleWindow) {
-	selected_action := win.get_menu_selected('menu_actions')
-	win.info('Menu Clicked', 'You selected: ${selected_action}')
-})
-```
-
-### Multi-Select Checklist & Tag Chip Group
-
-```v
-// Checklist
-win.add_checklist('chk_perms', ['Read', 'Write', 'Execute', 'Admin'], ['Read', 'Write'])
-selected_perms := win.get_checklist_selected('chk_perms')
-
-// Tag Chip Group
-win.add_chip_group('chips_tags', ['Bug', 'Feature', 'Documentation', 'UX'], ['Bug'])
-selected_tags := win.get_chip_selected('chips_tags')
-```
-
-### Password Strength Meter
-
-```v
-// Attach a strength meter directly to a password input box by control name
-win.add_form_password('Create Password:', 'input_user_pwd', '')
-win.add_password_strength('pwd_meter', 'input_user_pwd')
 ```
 
 ---
 
 ## 12. Reactive State Store & JSON Persistence
 
-`simplegui` includes a built-in reactive key-value state store (`state.v`). Updating a state value automatically triggers all registered reactive listeners and updates bound UI controls across the window.
+Updating a state value automatically triggers registered reactive listeners and updates bound UI controls.
 
 ### Setting & Getting Reactive State
 
 ```v
-// Set state key-value pairs
 win.set_state('user_role', 'Administrator')
 win.set_state_int('counter', 42)
 win.set_state_bool('dark_mode', true)
 win.set_state_f64('font_scale', 1.25)
 
-// Get state values
-role := win.get_state('user_role')                    // returns string
-count := win.get_state_int('counter')                 // returns int
-is_dark := win.get_state_bool('dark_mode')           // returns bool
-fallback_role := win.get_state_or('role', 'Guest')   // returns fallback if key unset
+role := win.get_state('user_role')                    // string
+count := win.get_state_int('counter')                 // int
+is_dark := win.get_state_bool('dark_mode')           // bool
+fallback_role := win.get_state_or('role', 'Guest')   // fallback if key unset
 
-// State mutations
 win.toggle_state_bool('dark_mode')        // Toggles boolean state
-win.increment_state_int('counter', 1)     // Increments integer state by delta
+win.increment_state_int('counter', 1)     // Increments integer state
 ```
 
 ### Reactive State Listeners (`on_state_change`)
 
 ```v
-// Listen for state key changes and update UI reactively
 win.on_state_change('counter', fn (mut win simplegui.SimpleWindow, val string) {
 	win.set_text('lbl_counter_display', 'Current Count: ${val}')
 	win.set_text('badge_count', 'Count: ${val}')
@@ -876,12 +796,12 @@ win.on_state_change('dark_mode', fn (mut win simplegui.SimpleWindow, val string)
 ### JSON Disk Persistence (`save_state_json` / `load_state_json`)
 
 ```v
-// Save current state store to a JSON file on disk
+// Save state store to JSON file
 win.save_state_json('app_state.json') or {
 	win.error_dialog('Save Error', 'Failed to write app_state.json: ${err}')
 }
 
-// Load state store from JSON file (Automatically fires all reactive UI listeners!)
+// Load state store from JSON file (Fires reactive UI listeners!)
 win.load_state_json('app_state.json') or {
 	win.warn('Load Info', 'No previous app_state.json found.')
 }
@@ -891,64 +811,56 @@ win.load_state_json('app_state.json') or {
 
 ## 13. OS System Calls & Hardware API
 
-`simplegui` provides cross-platform system helpers (`sys.v`) for command execution, desktop notifications, audio, clipboard, hardware inspection, and path resolution.
+Cross-platform system helpers (`sys.v`) for command execution, desktop notifications, clipboard, hardware inspection, and path resolution.
 
 ### System Commands & Execution
 
 ```v
-// Synchronously run a shell command (returns stdout string and exit code int)
+// Synchronous command execution
 stdout, exit_code := win.exec('ls -la')
 
-// Run command with fallback string on failure
+// Execution with fallback string
 output := win.exec_or('which git', 'git not installed')
 
-// Run command in background asynchronously
+// Background execution
 win.exec_bg('ping -c 4 8.8.8.8')
 
-// Run command with timeout in milliseconds
+// Timeout execution (milliseconds)
 out, code, timed_out := win.exec_timeout('sleep 10', 2000)
 
-// Run command with automatic retries and exponential backoff
+// Retry with exponential backoff
 res := win.exec_retry('curl -s https://api.ipify.org', 3, 500, 2.0)
-println('Command output: ${res.output} (Attempts: ${res.attempts})')
+println('Output: ${res.output} (Attempts: ${res.attempts})')
 ```
 
 ### Desktop Notifications, Audio & Speech
 
 ```v
-// Trigger OS Desktop Notification Banner (macOS / Windows / Linux)
 win.show_system_notification('Backup Complete', 'Your database backup was created successfully.')
-
-// Play System Alert Beep
 win.beep()
-
-// Text-to-Speech Voice Synthesis
 win.speak_with_voice('Hello! Welcome to SimpleGUI.', 'Samantha')
 ```
 
-### Hardware Specs & System Information
+### Hardware Specs & System Info
 
 ```v
-cpu_name := win.get_cpu_info()          // e.g. "Apple M4 Pro"
-cpu_cores := win.get_cpu_cores()        // e.g. 14
-memory_ram := win.get_memory_info()     // e.g. "48.0 GB RAM"
-screen_res := win.get_screen_resolution() // e.g. "1920 x 1080"
-battery_pct := win.get_battery_percent() // Returns integer 0..100 (-1 if no battery)
-is_charging := win.is_on_ac_power()      // Returns true if plugged in
+cpu_name := win.get_cpu_info()
+cpu_cores := win.get_cpu_cores()
+memory_ram := win.get_memory_info()
+screen_res := win.get_screen_resolution()
+battery_pct := win.get_battery_percent()
+is_charging := win.is_on_ac_power()
 ```
 
-### System Directories & System Utilities
+### Directories & File Operations
 
 ```v
-// System Directories ('home', 'desktop', 'documents', 'downloads', 'tmp', 'app')
 home_path := win.get_system_path('home')
 docs_path := win.get_system_path('documents')
 
-// Clipboard Operations
 win.copy_to_clipboard('Copied text!')
 clip_val := win.get_clipboard_text()
 
-// Open URL or Reveal File in Desktop Finder / File Explorer
 win.open_url('https://vlang.io')
 win.reveal_in_finder('/tmp/my_folder')
 ```
@@ -957,67 +869,76 @@ win.reveal_in_finder('/tmp/my_folder')
 
 ## 14. V Standard Library Integrations
 
-`simplegui` includes built-in wrappers (`stdlib.v`) for V's standard library modules.
+Built-in wrappers (`stdlib.v`) for V standard library operations.
 
 ### HTTP Requests
 
 ```v
-// HTTP GET request
 body := win.http_get('https://api.ipify.org')
-
-// HTTP POST request with JSON payload
 response := win.http_post('https://httpbin.org/post', '{"key":"value"}')
 ```
 
 ### Cryptography & Hashes
 
 ```v
-// SHA256 & MD5 Hashes
 sha := win.crypto_sha256('secret data')
 md5 := win.crypto_md5('secret data')
 
-// AES Symmetric Encryption & Decryption
-key := '0123456789abcdef0123456789abcdef' // 32-byte key
+key := '0123456789abcdef0123456789abcdef'
 cipher_hex := win.crypto_encrypt_aes('plain_text', key)
 decrypted := win.crypto_decrypt_aes(cipher_hex, key)
 
-// Bcrypt Password Hashing & Verification
 hash := win.crypto_bcrypt_hash('my_password') or { '' }
 is_valid := win.crypto_bcrypt_verify('my_password', hash)
 ```
 
-### RegEx & Random Generators
+### RegEx & Random Utilities
 
 ```v
-// RegEx Match
 is_valid_email := win.regex_match('user@domain.com', r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
-
-// Random Number & Random Token String
 random_num := win.rand_int(1, 100)
 token := win.rand_string(16)
 ```
 
-### JSON Data Decoding & Benchmarking
+### JSON Data Decoding & Performance Stopwatch
 
 ```v
-// Parse JSON string into map[string]string
 data := win.json_decode_map('{"name":"Ada","role":"Admin"}')
-println(data['name'])
 
-// Stopwatch Performance Timing
 mut sw := win.start_stopwatch()
-// ... perform heavy operation ...
+// ... operation ...
 elapsed_ms := win.stopwatch_elapsed_ms(sw)
 println('Operation completed in ${elapsed_ms} ms')
 ```
 
 ---
 
-## 💡 Summary Cheat Sheet Tips
+## 15. Ergonomic Standalone Functions
+
+Global standalone helper functions in `simplegui`:
+
+```v
+simplegui.alert('Title', 'Message dialog')
+name := simplegui.prompt('Input Name', 'Default Value')
+if simplegui.confirm('Title', 'Confirm action?') { ... }
+simplegui.notify('Notification Title', 'Message body')
+
+simplegui.copy_to_clipboard('Text to copy')
+clip_text := simplegui.read_clipboard()
+
+simplegui.open_browser('https://vlang.io')
+simplegui.quit()
+```
+
+---
+
+## Summary Cheat Sheet Tips
 
 1. **Window Creation**: `win := simplegui.new_simple_window('Title', W, H)`
-2. **Set Theme**: `win.set_theme('Apple Dark')` or `win.set_theme('Nord')`
-3. **Form RAD Helpers**: Use `win.add_form_field()`, `win.add_form_dropdown()`, and `win.add_form_switch()` to pair labels and controls instantly.
-4. **Layout**: Group items horizontally with `win.begin_row()` / `win.end_row()` or into tabs with `win.begin_tab_container()`.
-5. **State**: Save and load application state with `win.save_state_json()` and `win.load_state_json()` for automatic reactive UI synchronization.
-6. **Execution**: End your script with `win.run()` to start the app.
+2. **Set Width / Height**: `win.set_width(900)` or `win.set_size(1024, 768)`
+3. **Auto Fit Everything**: Call `win.fit_to_content()` after adding controls so window width/height expand to fit all controls without clipping.
+4. **Set Theme**: `win.set_theme('Apple Dark')` or `win.set_theme('Nord')`
+5. **No Emojis in UI**: Use standard font characters or brackets like `[Save]`, `[+]`, `[-]` for icon placeholders.
+6. **Form RAD Helpers**: Use `win.add_form_field()`, `win.add_form_dropdown()`, and `win.add_form_switch()` to pair labels and controls instantly.
+7. **State Management**: Save and load application state with `win.save_state_json()` and `win.load_state_json()` for automatic reactive UI synchronization.
+8. **Execution Loop**: End your script with `win.run()` to start the app.
