@@ -3,16 +3,12 @@ module main
 import simplegui
 
 fn main() {
-	mut win := simplegui.new_simple_window('Reactive State Management & Persistence', 620, 520)
+	mut win := simplegui.new_simple_window('Reactive State Management & Persistence', 960, 760)
+	win.set_fullscreen(true)
 	win.set_theme('Nord')
 
 	win.add_heading('🔄 Reactive State Store & Persistence (state.v)')
 	win.add_label('lbl_sub', 'Store key-value states, trigger reactive listeners, and save/load JSON state.')
-
-	// Initial State Setup
-	win.set_state_int('counter', 42)
-	win.set_state('user_role', 'Administrator')
-	win.set_state_bool('dark_mode', true)
 
 	// State Listeners (Reactive UI Updates)
 	win.on_state_change('counter', fn (mut win simplegui.SimpleWindow, val string) {
@@ -22,7 +18,24 @@ fn main() {
 
 	win.on_state_change('user_role', fn (mut win simplegui.SimpleWindow, val string) {
 		win.set_text('lbl_role_status', 'Active User Role: ${val}')
+		win.set_text('input_role', val)
 	})
+
+	win.on_state_change('dark_mode', fn (mut win simplegui.SimpleWindow, val string) {
+		is_dark := val.to_lower() == 'true' || val == '1'
+		mode_name := if is_dark { 'Dark' } else { 'Light' }
+		if is_dark {
+			win.set_theme('Nord')
+		} else {
+			win.set_theme('Apple Light')
+		}
+		win.set_text('lbl_persist_status', 'Theme updated to: ${mode_name}')
+	})
+
+	// Initial State Setup (Fires state listeners immediately)
+	win.set_state_int('counter', 42)
+	win.set_state('user_role', 'Administrator')
+	win.set_state_bool('dark_mode', true)
 
 	// Reactive Counter Group
 	win.group('grp_counter', '🔢 Counter & Numeric State Operations', fn (mut win simplegui.SimpleWindow) {
@@ -91,14 +104,9 @@ fn main() {
 			win.set_text('lbl_persist_status', 'No app_state.json found or load error: ${err}')
 			return
 		}
-		c := win.get_state_int('counter')
-		r := win.get_state('user_role')
-		win.set_text('lbl_counter_display', 'Current Counter Value: ${c}')
-		win.set_text('badge_count', 'Count: ${c}')
-		win.set_text('input_role', r)
-		win.set_text('lbl_role_status', 'Active User Role: ${r}')
 		win.set_text('lbl_persist_status', 'Loaded state store from app_state.json!')
 	})
 
 	win.run()
 }
+

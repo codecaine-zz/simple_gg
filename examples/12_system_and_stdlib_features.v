@@ -3,7 +3,8 @@ module main
 import simplegui
 
 fn main() {
-	mut win := simplegui.new_simple_window('System Call & Standard Library Toolkit', 640, 520)
+	mut win := simplegui.new_simple_window('System Call & Standard Library Toolkit', 960, 760)
+	win.set_fullscreen(true)
 	win.set_theme('Apple Dark')
 
 	win.add_heading('💻 System Calls & Standard Library (sys.v / stdlib.v)')

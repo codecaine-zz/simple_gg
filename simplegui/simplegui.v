@@ -51,6 +51,7 @@ pub mut:
 	auto_id_counter int
 	state_store     map[string]string
 	state_listeners map[string][]StringEventCallback
+	fullscreen      bool
 }
 
 pub fn new_simple_window(title string, width int, height int) &SimpleWindow {
@@ -401,7 +402,13 @@ pub fn (mut win SimpleWindow) move_cursor_to(x int, y int) &SimpleWindow {
 	return win
 }
 
+pub fn (mut win SimpleWindow) set_fullscreen(enable bool) &SimpleWindow {
+	win.fullscreen = enable
+	return win
+}
+
 pub fn (mut win SimpleWindow) toggle_fullscreen() &SimpleWindow {
+	win.fullscreen = !win.fullscreen
 	return win
 }
 
@@ -430,7 +437,7 @@ pub fn (win &SimpleWindow) is_maximized() bool {
 }
 
 pub fn (win &SimpleWindow) is_fullscreen() bool {
-	return false
+	return win.fullscreen
 }
 
 pub fn (win &SimpleWindow) is_active() bool {
@@ -1983,6 +1990,7 @@ pub fn (mut win SimpleWindow) run() {
 		frame_fn:     frame_cb
 		event_fn:     event_cb
 		bg_color:     parse_hex_color(win.theme.background_color)
+		fullscreen:   win.fullscreen
 	)
 	win.gg_ctx.run()
 }

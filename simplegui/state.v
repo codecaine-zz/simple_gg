@@ -175,6 +175,9 @@ pub fn (mut win SimpleWindow) increment_state_int(key string, delta int) int {
 // on_state_change registers a listener callback for when a specific state key changes.
 pub fn (mut win SimpleWindow) on_state_change(key string, cb StringEventCallback) &SimpleWindow {
 	win.state_listeners[key] << cb
+	if key in win.state_store {
+		cb(mut win, win.state_store[key])
+	}
 	return win
 }
 
@@ -184,8 +187,12 @@ pub fn (win &SimpleWindow) save_state_json(file_path string) ! {
 	os.write_file(file_path, data) or { return error(err.msg()) }
 }
 
-// load_state_json deserializes state store from a JSON file on disk.
+// load_state_json deserializes state store from a JSON file on disk and notifies listeners.
 pub fn (mut win SimpleWindow) load_state_json(file_path string) ! {
 	content := os.read_file(file_path) or { return error(err.msg()) }
-	win.state_store = json.decode(map[string]string, content) or { return error(err.msg()) }
+	loaded := json.decode(map[string]string, content) or { return error(err.msg()) }
+	for key, val in loaded {
+		win.set_state(key, val)
+	}
 }
+
