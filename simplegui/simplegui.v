@@ -2119,6 +2119,25 @@ pub fn (mut win SimpleWindow) add_drop_zone(name string, prompt string) &SimpleW
 	return win
 }
 
+pub fn (win &SimpleWindow) get_dropped_files(name string) []string {
+	if ctrl := win.control_map[name] {
+		return ctrl.items
+	}
+	return []string{}
+}
+
+pub fn (win &SimpleWindow) get_files(name string) []string {
+	return win.get_dropped_files(name)
+}
+
+pub fn (mut win SimpleWindow) clear_dropped_files(name string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.items.clear()
+		ctrl.text_value = ''
+	}
+	return win
+}
+
 pub fn (mut win SimpleWindow) add_property_grid(name string, items []PropertyGridItem) &SimpleWindow {
 	win.add_control(Control{
 		name:           name

@@ -549,6 +549,15 @@ win.add_code_editor('my_code', 'fn main() {\n    println("Hello V")\n}', 'v')
 // 📁 File Drop Zone (accepts native OS drag-and-drop files across window or click-to-browse)
 win.add_drop_zone('my_drop', 'Drag & drop files here or click to browse')
 
+// Retrieve array of all dropped file paths ([]string)
+files := win.get_dropped_files('my_drop') // or win.get_files('my_drop')
+for file_path in files {
+    println('Dropped file: ${file_path}')
+}
+
+// Clear dropped file list
+win.clear_dropped_files('my_drop')
+
 // 🛠️ Property Grid Inspector (Key-Value inspector table with inline typed controls)
 win.add_property_grid('my_inspector', [
 	simplegui.PropertyGridItem{ name: 'App Theme', val: 'Dark Mode', kind: 'text' },

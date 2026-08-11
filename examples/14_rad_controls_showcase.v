@@ -28,6 +28,10 @@ fn main() {
 	win.add_label('lbl_drop', 'File Drag & Drop Target Zone:')
 	win.add_drop_zone('my_drop', 'Drag & drop files here or click to browse')
 	win.set_control_height('my_drop', 80)
+	win.on_change('my_drop', fn (mut w simplegui.SimpleWindow) {
+		files := w.get_dropped_files('my_drop')
+		w.push_toast('Files Received', '${files.len} file(s): ${files.join(", ")}', 'info', 3000)
+	})
 
 	// Column 2: Property Inspector & Data Analytics
 	win.add_group_box('grp_data', '2. Inspector & Micro-Data')
