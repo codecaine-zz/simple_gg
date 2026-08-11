@@ -446,42 +446,84 @@ pub fn (mut win SimpleWindow) render_ui() {
 			}
 			'file_picker' {
 				input_w := ctrl.w - 84.0
+				fp_b_c := if ctrl.is_focused { accent } else { border_c }
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, input_w, ctrl.h, 6.0, surface)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, input_w, ctrl.h, 6.0, border_c)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, input_w, ctrl.h, 6.0, fp_b_c)
 
 				raw_path := if ctrl.text_value.len > 0 { ctrl.text_value } else { 'Select file...' }
 				path_c := if ctrl.text_value.len > 0 { fg } else { gg.Color{ r: 128, g: 128, b: 128 } }
 
-				max_path_chars := int((input_w - 20.0) / 7.5)
-				disp_path := if raw_path.len > max_path_chars && max_path_chars > 5 {
-					'...' + raw_path[raw_path.len - (max_path_chars - 3)..]
+				max_path_chars := math.max(1, int((input_w - 20.0) / 7.5))
+				mut start_idx := 0
+				if ctrl.caret_pos > max_path_chars {
+					start_idx = ctrl.caret_pos - max_path_chars
+				}
+				if start_idx + max_path_chars > ctrl.text_value.len && ctrl.text_value.len > max_path_chars {
+					start_idx = ctrl.text_value.len - max_path_chars
+				}
+				if start_idx < 0 {
+					start_idx = 0
+				}
+
+				end_idx := math.min(raw_path.len, start_idx + max_path_chars)
+				disp_path := if raw_path.len > 0 && start_idx < raw_path.len {
+					raw_path[start_idx..end_idx]
 				} else {
 					raw_path
 				}
 
 				win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(ctrl.y + (ctrl.h - 16.0) / 2.0), text: disp_path, color: path_c, size: 13)
 
+				if ctrl.is_focused {
+					visible_caret_pos := math.max(0, math.min(disp_path.len, ctrl.caret_pos - start_idx))
+					prefix_txt := if visible_caret_pos <= disp_path.len { disp_path[0..visible_caret_pos] } else { disp_path }
+					caret_offset_x := f32(win.gg_ctx.text_width(prefix_txt))
+					caret_x := ctrl.x + 10.0 + caret_offset_x
+					win.gg_ctx.draw_line(caret_x, ctrl.y + 6, caret_x, ctrl.y + ctrl.h - 6, accent)
+				}
+
 				btn_x := ctrl.x + ctrl.w - 78.0
 				win.gg_ctx.draw_rounded_rect_filled(btn_x, ctrl.y, 78.0, ctrl.h, 6.0, accent)
 				win.gg_ctx.draw_text2(x: int(btn_x + 12), y: int(ctrl.y + (ctrl.h - 16.0) / 2.0), text: 'Browse', color: gg.Color{ r: 255, g: 255, b: 255 }, size: 13)
 			}
 			'search_bar' {
+				sb_b_c := if ctrl.is_focused { accent } else { border_c }
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, sb_b_c)
 
 				win.gg_ctx.draw_text2(x: int(ctrl.x + 8), y: int(ctrl.y + (ctrl.h - 16.0) / 2.0), text: '[Q]', color: fg, size: 11)
 
 				s_txt := if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.placeholder }
 				s_color := if ctrl.text_value.len == 0 && ctrl.placeholder.len > 0 { gg.Color{ r: 128, g: 128, b: 128 } } else { fg }
 
-				max_s_chars := int((ctrl.w - 56.0) / 7.5)
-				disp_s := if s_txt.len > max_s_chars && max_s_chars > 3 {
-					s_txt[s_txt.len - max_s_chars..]
+				max_s_chars := math.max(1, int((ctrl.w - 56.0) / 7.5))
+				mut start_idx := 0
+				if ctrl.caret_pos > max_s_chars {
+					start_idx = ctrl.caret_pos - max_s_chars
+				}
+				if start_idx + max_s_chars > ctrl.text_value.len && ctrl.text_value.len > max_s_chars {
+					start_idx = ctrl.text_value.len - max_s_chars
+				}
+				if start_idx < 0 {
+					start_idx = 0
+				}
+
+				end_idx := math.min(s_txt.len, start_idx + max_s_chars)
+				disp_s := if s_txt.len > 0 && start_idx < s_txt.len {
+					s_txt[start_idx..end_idx]
 				} else {
 					s_txt
 				}
 
 				win.gg_ctx.draw_text2(x: int(ctrl.x + 32), y: int(ctrl.y + (ctrl.h - 16.0) / 2.0), text: disp_s, color: s_color, size: 13)
+
+				if ctrl.is_focused {
+					visible_caret_pos := math.max(0, math.min(disp_s.len, ctrl.caret_pos - start_idx))
+					prefix_txt := if visible_caret_pos <= disp_s.len { disp_s[0..visible_caret_pos] } else { disp_s }
+					caret_offset_x := f32(win.gg_ctx.text_width(prefix_txt))
+					caret_x := ctrl.x + 32.0 + caret_offset_x
+					win.gg_ctx.draw_line(caret_x, ctrl.y + 6, caret_x, ctrl.y + ctrl.h - 6, accent)
+				}
 
 				if ctrl.text_value.len > 0 {
 					win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 22), y: int(ctrl.y + (ctrl.h - 16.0) / 2.0), text: '[x]', color: fg, size: 11)

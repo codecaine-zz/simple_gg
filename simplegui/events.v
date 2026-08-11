@@ -38,7 +38,8 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 						clicked_ctrl = ctrl.name
 
 						if ctrl.kind in ['input', 'password', 'textarea', 'search_field', 'search_bar', 'file_picker', 'pin_code'] {
-							rel_x := win.mouse_x - (ctrl.x + 10.0)
+							left_pad := if ctrl.kind == 'search_bar' { f32(32.0) } else { f32(10.0) }
+							rel_x := win.mouse_x - (ctrl.x + left_pad)
 							mut best_idx := 0
 							mut min_dist := f32(999999.0)
 							for idx in 0 .. ctrl.text_value.len + 1 {
@@ -51,7 +52,9 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 								}
 							}
 							ctrl.caret_pos = best_idx
-						} else if ctrl.kind == 'checkbox' || ctrl.kind == 'toggle' || ctrl.kind == 'switch' {
+						}
+
+						if ctrl.kind in ['checkbox', 'toggle', 'switch'] {
 							ctrl.bool_value = !ctrl.bool_value
 							if ctrl.on_change != unsafe { nil } {
 								ctrl.on_change(mut win)
