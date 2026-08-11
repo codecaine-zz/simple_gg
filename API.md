@@ -785,6 +785,29 @@ win.on_click('btn_save', fn (mut win simplegui.SimpleWindow) {
 	win.info('Saved', 'Your changes were saved successfully.')
 })
 
+// Mouse Hover Enter Listener
+win.on_hover('btn_save', fn (mut win simplegui.SimpleWindow) {
+	println('Mouse entered / hovered over btn_save')
+})
+
+// Double Click Listener (on_dblclick or on_double_click)
+win.on_dblclick('card_item', fn (mut win simplegui.SimpleWindow) {
+	win.info('Double Clicked', 'Opened item details on double click.')
+})
+win.on_double_click('card_item', fn (mut win simplegui.SimpleWindow) {
+	// Alias syntax for on_dblclick
+})
+
+// Right Click Listener (Mouse Secondary Button)
+win.on_right_click('card_item', fn (mut win simplegui.SimpleWindow) {
+	// Show custom context menu at current mouse position
+	mx, my := win.get_mouse_position()
+	win.show_context_menu(mx, my, [
+		simplegui.ContextMenuItem{ id: 'ctx_edit', title: 'Edit Item' },
+		simplegui.ContextMenuItem{ id: 'ctx_del', title: 'Delete Item' },
+	])
+})
+
 // Value Change
 win.on_change('theme_select', fn (mut win simplegui.SimpleWindow) {
 	new_theme := win.get_text('theme_select')

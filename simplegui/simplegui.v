@@ -2265,6 +2265,31 @@ pub fn (mut win SimpleWindow) on_enter(name string, cb VoidEventCallback) &Simpl
 	return win
 }
 
+pub fn (mut win SimpleWindow) on_hover(name string, cb VoidEventCallback) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.on_hover = cb
+	}
+	return win
+}
+
+pub fn (mut win SimpleWindow) on_dblclick(name string, cb VoidEventCallback) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.on_dblclick = cb
+	}
+	return win
+}
+
+pub fn (mut win SimpleWindow) on_double_click(name string, cb VoidEventCallback) &SimpleWindow {
+	return win.on_dblclick(name, cb)
+}
+
+pub fn (mut win SimpleWindow) on_right_click(name string, cb VoidEventCallback) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.on_right_click = cb
+	}
+	return win
+}
+
 pub fn (mut win SimpleWindow) on_submit(cb VoidEventCallback) &SimpleWindow {
 	win.on_submit_cb = cb
 	return win

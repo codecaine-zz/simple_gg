@@ -3,6 +3,7 @@ module simplegui
 import gg
 import math
 import sokol.sapp
+import time
 
 pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 	match e.typ {
@@ -13,10 +14,14 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 			mut new_hover := ''
 			for mut ctrl in win.controls {
 				if ctrl.visible && !ctrl.disabled {
+					was_hovered := ctrl.is_hovered
 					if win.mouse_x >= ctrl.x && win.mouse_x <= ctrl.x + ctrl.w
 						&& win.mouse_y >= ctrl.y && win.mouse_y <= ctrl.y + ctrl.h {
 						ctrl.is_hovered = true
 						new_hover = ctrl.name
+						if !was_hovered && ctrl.on_hover != unsafe { nil } {
+							ctrl.on_hover(mut win)
+						}
 					} else {
 						ctrl.is_hovered = false
 					}
@@ -60,6 +65,19 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 			win.mouse_down = true
 			win.mouse_x = e.mouse_x
 			win.mouse_y = e.mouse_y
+
+			if e.mouse_button == .right {
+				for mut ctrl in win.controls {
+					if ctrl.visible && !ctrl.disabled {
+						if win.mouse_x >= ctrl.x && win.mouse_x <= ctrl.x + ctrl.w
+							&& win.mouse_y >= ctrl.y && win.mouse_y <= ctrl.y + ctrl.h {
+							if ctrl.on_right_click != unsafe { nil } {
+								ctrl.on_right_click(mut win)
+							}
+						}
+					}
+				}
+			}
 
 			if win.toasts.len > 0 {
 				mut ty := f32(20.0)
@@ -559,8 +577,15 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 					ctrl.is_pressed = false
 					if win.mouse_x >= ctrl.x && win.mouse_x <= ctrl.x + ctrl.w
 						&& win.mouse_y >= ctrl.y && win.mouse_y <= ctrl.y + ctrl.h {
+						now := time.ticks()
+						is_dbl := ctrl.last_click_time > 0 && (now - ctrl.last_click_time) <= 400
+						ctrl.last_click_time = now
+
 						if ctrl.on_click != unsafe { nil } {
 							ctrl.on_click(mut win)
+						}
+						if is_dbl && ctrl.on_dblclick != unsafe { nil } {
+							ctrl.on_dblclick(mut win)
 						}
 					}
 				}

@@ -154,11 +154,15 @@ pub mut:
 	property_items  []PropertyGridItem
 	total_pages     int = 1
 	current_page    int = 1
+	last_click_time i64
 	// Callbacks
-	on_click     VoidEventCallback = unsafe { nil }
-	on_change    VoidEventCallback = unsafe { nil }
-	on_enter     VoidEventCallback = unsafe { nil }
-	on_row_click VoidEventCallback = unsafe { nil }
+	on_click       VoidEventCallback = unsafe { nil }
+	on_change      VoidEventCallback = unsafe { nil }
+	on_enter       VoidEventCallback = unsafe { nil }
+	on_row_click   VoidEventCallback = unsafe { nil }
+	on_hover       VoidEventCallback = unsafe { nil }
+	on_dblclick    VoidEventCallback = unsafe { nil }
+	on_right_click VoidEventCallback = unsafe { nil }
 }
 
 pub fn (c &Control) set_width(w int) &Control {
