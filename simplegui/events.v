@@ -13,6 +13,59 @@ import math
 import sokol.sapp
 import time
 
+// measure_text_width returns font text width, with fallback for headless unit tests.
+fn measure_text_width(win &SimpleWindow, text string) f32 {
+	if win.gg_ctx == unsafe { nil } {
+		return f32(text.len * 7)
+	}
+	return f32(win.gg_ctx.text_width(text))
+}
+
+// get_multiline_text_index calculates the character index in a multi-line control based on mouse (x, y) coordinates.
+fn get_multiline_text_index(win &SimpleWindow, ctrl &Control, mx f32, my f32) int {
+	left_pad := f32(10.0)
+	top_pad := f32(8.0)
+	txt_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 13 }
+	line_h := f32(txt_sz + 4)
+	rel_y := my - (ctrl.y + top_pad)
+	lines := ctrl.text_value.split('\n')
+	if lines.len == 0 {
+		return 0
+	}
+	mut target_line_idx := int(rel_y / line_h)
+	if target_line_idx < 0 {
+		target_line_idx = 0
+	}
+	if target_line_idx >= lines.len {
+		target_line_idx = lines.len - 1
+	}
+	mut line_start_idx := 0
+	for i in 0 .. target_line_idx {
+		line_start_idx += lines[i].len + 1
+	}
+	target_line := lines[target_line_idx]
+	rel_x := mx - (ctrl.x + left_pad)
+	mut best_col := 0
+	mut min_dist := f32(999999.0)
+	for col in 0 .. target_line.len + 1 {
+		sub := target_line[0..col]
+		w := measure_text_width(win, sub)
+		dist := math.abs(rel_x - w)
+		if dist < min_dist {
+			min_dist = dist
+			best_col = col
+		}
+	}
+	res := line_start_idx + best_col
+	if res < 0 {
+		return 0
+	}
+	if res > ctrl.text_value.len {
+		return ctrl.text_value.len
+	}
+	return res
+}
+
 // handle_event receives raw input events (mouse move, mouse click, mouse scroll, key press)
 // from the windowing subsystem and dispatches them to appropriate control callback handlers.
 pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
@@ -74,17 +127,21 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 
 					if win.is_selecting_text && win.mouse_down && ctrl.is_focused
 						&& ctrl.kind in ['input', 'password', 'textarea', 'search_field', 'search_bar', 'file_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
-						left_pad := if ctrl.kind == 'search_bar' { f32(32.0) } else { f32(10.0) }
-						rel_x := win.mouse_x - (ctrl.x + left_pad)
 						mut best_idx := 0
-						mut min_dist := f32(999999.0)
-						for idx in 0 .. ctrl.text_value.len + 1 {
-							sub := ctrl.text_value[0..idx]
-							w := f32(win.gg_ctx.text_width(sub))
-							dist := math.abs(rel_x - w)
-							if dist < min_dist {
-								min_dist = dist
-								best_idx = idx
+						if ctrl.kind in ['textarea', 'code_editor'] {
+							best_idx = get_multiline_text_index(win, ctrl, win.mouse_x, win.mouse_y)
+						} else {
+							left_pad := if ctrl.kind == 'search_bar' { f32(32.0) } else { f32(10.0) }
+							rel_x := win.mouse_x - (ctrl.x + left_pad)
+							mut min_dist := f32(999999.0)
+							for idx in 0 .. ctrl.text_value.len + 1 {
+								sub := ctrl.text_value[0..idx]
+								w := f32(win.gg_ctx.text_width(sub))
+								dist := math.abs(rel_x - w)
+								if dist < min_dist {
+									min_dist = dist
+									best_idx = idx
+								}
 							}
 						}
 						ctrl.sel_start = win.text_select_anchor
@@ -211,17 +268,21 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 
 						if ctrl.kind in ['input', 'password', 'textarea', 'search_field',
 							'search_bar', 'file_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
-							left_pad := if ctrl.kind == 'search_bar' { f32(32.0) } else { f32(10.0) }
-							rel_x := win.mouse_x - (ctrl.x + left_pad)
 							mut best_idx := 0
-							mut min_dist := f32(999999.0)
-							for idx in 0 .. ctrl.text_value.len + 1 {
-								sub := ctrl.text_value[0..idx]
-								w := f32(win.gg_ctx.text_width(sub))
-								dist := math.abs(rel_x - w)
-								if dist < min_dist {
-									min_dist = dist
-									best_idx = idx
+							if ctrl.kind in ['textarea', 'code_editor'] {
+								best_idx = get_multiline_text_index(win, ctrl, win.mouse_x, win.mouse_y)
+							} else {
+								left_pad := if ctrl.kind == 'search_bar' { f32(32.0) } else { f32(10.0) }
+								rel_x := win.mouse_x - (ctrl.x + left_pad)
+								mut min_dist := f32(999999.0)
+								for idx in 0 .. ctrl.text_value.len + 1 {
+									sub := ctrl.text_value[0..idx]
+									w := f32(win.gg_ctx.text_width(sub))
+									dist := math.abs(rel_x - w)
+									if dist < min_dist {
+										min_dist = dist
+										best_idx = idx
+									}
 								}
 							}
 							if is_shift {
@@ -894,9 +955,17 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 							if ctrl.on_change != unsafe { nil } {
 								ctrl.on_change(mut win)
 							}
-						} else if ctrl.kind == 'code_editor' {
-							ctrl.save_undo_state()
-							ctrl.text_value += '\n'
+						} else if ctrl.kind in ['textarea', 'code_editor'] {
+							if ctrl.has_selection() {
+								ctrl.delete_selected_text()
+							} else {
+								ctrl.save_undo_state()
+							}
+							if ctrl.caret_pos < 0 || ctrl.caret_pos > ctrl.text_value.len {
+								ctrl.caret_pos = ctrl.text_value.len
+							}
+							ctrl.text_value = ctrl.text_value[0..ctrl.caret_pos] + '\n' +
+								ctrl.text_value[ctrl.caret_pos..]
 							ctrl.caret_pos++
 							if ctrl.on_change != unsafe { nil } {
 								ctrl.on_change(mut win)
@@ -974,25 +1043,51 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 							}
 						}
 					} else if e.key_code == .home {
+						mut target_pos := 0
+						if ctrl.kind in ['textarea', 'code_editor'] && !is_ctrl && !is_super {
+							lines := ctrl.text_value.split('\n')
+							mut line_start_idx := 0
+							for i, line in lines {
+								line_end_idx := line_start_idx + line.len
+								if ctrl.caret_pos >= line_start_idx && (ctrl.caret_pos <= line_end_idx || i == lines.len - 1) {
+									target_pos = line_start_idx
+									break
+								}
+								line_start_idx += line.len + 1
+							}
+						}
 						if is_shift {
 							if !ctrl.has_selection() {
 								ctrl.sel_start = ctrl.caret_pos
 							}
-							ctrl.caret_pos = 0
-							ctrl.sel_end = 0
+							ctrl.caret_pos = target_pos
+							ctrl.sel_end = target_pos
 						} else {
-							ctrl.caret_pos = 0
+							ctrl.caret_pos = target_pos
 							ctrl.clear_selection()
 						}
 					} else if e.key_code == .end {
+						mut target_pos := ctrl.text_value.len
+						if ctrl.kind in ['textarea', 'code_editor'] && !is_ctrl && !is_super {
+							lines := ctrl.text_value.split('\n')
+							mut line_start_idx := 0
+							for i, line in lines {
+								line_end_idx := line_start_idx + line.len
+								if ctrl.caret_pos >= line_start_idx && (ctrl.caret_pos <= line_end_idx || i == lines.len - 1) {
+									target_pos = line_end_idx
+									break
+								}
+								line_start_idx += line.len + 1
+							}
+						}
 						if is_shift {
 							if !ctrl.has_selection() {
 								ctrl.sel_start = ctrl.caret_pos
 							}
-							ctrl.caret_pos = ctrl.text_value.len
-							ctrl.sel_end = ctrl.text_value.len
+							ctrl.caret_pos = target_pos
+							ctrl.sel_end = target_pos
 						} else {
-							ctrl.caret_pos = ctrl.text_value.len
+							ctrl.caret_pos = target_pos
 							ctrl.clear_selection()
 						}
 					} else if e.key_code == .up {
@@ -1001,12 +1096,78 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 							if ctrl.on_change != unsafe { nil } {
 								ctrl.on_change(mut win)
 							}
+						} else if ctrl.kind in ['textarea', 'code_editor'] {
+							lines := ctrl.text_value.split('\n')
+							mut curr_line := 0
+							mut curr_col := 0
+							mut line_start_idx := 0
+							for i, line in lines {
+								line_end_idx := line_start_idx + line.len
+								if ctrl.caret_pos >= line_start_idx && (ctrl.caret_pos <= line_end_idx || i == lines.len - 1) {
+									curr_line = i
+									curr_col = ctrl.caret_pos - line_start_idx
+									break
+								}
+								line_start_idx += line.len + 1
+							}
+							if curr_line > 0 {
+								target_line := curr_line - 1
+								mut target_line_start := 0
+								for i in 0 .. target_line {
+									target_line_start += lines[i].len + 1
+								}
+								target_col := math.min(lines[target_line].len, curr_col)
+								new_caret := target_line_start + target_col
+								if is_shift {
+									if !ctrl.has_selection() {
+										ctrl.sel_start = ctrl.caret_pos
+									}
+									ctrl.caret_pos = new_caret
+									ctrl.sel_end = new_caret
+								} else {
+									ctrl.caret_pos = new_caret
+									ctrl.clear_selection()
+								}
+							}
 						}
 					} else if e.key_code == .down {
 						if ctrl.kind == 'number' {
 							ctrl.int_value--
 							if ctrl.on_change != unsafe { nil } {
 								ctrl.on_change(mut win)
+							}
+						} else if ctrl.kind in ['textarea', 'code_editor'] {
+							lines := ctrl.text_value.split('\n')
+							mut curr_line := 0
+							mut curr_col := 0
+							mut line_start_idx := 0
+							for i, line in lines {
+								line_end_idx := line_start_idx + line.len
+								if ctrl.caret_pos >= line_start_idx && (ctrl.caret_pos <= line_end_idx || i == lines.len - 1) {
+									curr_line = i
+									curr_col = ctrl.caret_pos - line_start_idx
+									break
+								}
+								line_start_idx += line.len + 1
+							}
+							if curr_line < lines.len - 1 {
+								target_line := curr_line + 1
+								mut target_line_start := 0
+								for i in 0 .. target_line {
+									target_line_start += lines[i].len + 1
+								}
+								target_col := math.min(lines[target_line].len, curr_col)
+								new_caret := target_line_start + target_col
+								if is_shift {
+									if !ctrl.has_selection() {
+										ctrl.sel_start = ctrl.caret_pos
+									}
+									ctrl.caret_pos = new_caret
+									ctrl.sel_end = new_caret
+								} else {
+									ctrl.caret_pos = new_caret
+									ctrl.clear_selection()
+								}
 							}
 						}
 					}

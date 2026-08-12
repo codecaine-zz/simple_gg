@@ -301,19 +301,57 @@ pub fn (mut win SimpleWindow) render_ui() {
 				}
 			}
 			'textarea', 'console', 'code', 'markdown' {
+				ta_bg := if ctrl.is_hovered { surface_hover } else { surface }
+				ta_bc := if ctrl.is_focused { accent } else if ctrl.is_hovered { hover_c } else { border_c }
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					surface)
+					ta_bg)
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					border_c)
+					ta_bc)
 
 				lines := ctrl.text_value.split('\n')
 				mut line_y := ctrl.y + 8.0
 				txt_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 13 }
 				txt_c := if ctrl.font_color.len > 0 { parse_hex_color(ctrl.font_color) } else { fg }
+				line_h := f32(txt_sz + 4)
+
+				if ctrl.has_selection() {
+					s_raw, e_raw := ctrl.selection_range()
+					mut line_start_idx := 0
+					for i, line in lines {
+						curr_line_y := ctrl.y + 8.0 + f32(i) * line_h
+						if curr_line_y + line_h > ctrl.y + ctrl.h - 4.0 {
+							break
+						}
+						line_end_idx := line_start_idx + line.len
+						vis_s := math.max(line_start_idx, s_raw) - line_start_idx
+						vis_e := math.min(line_end_idx, e_raw) - line_start_idx
+						if vis_s < vis_e && vis_s <= line.len {
+							prefix_s := line[0..vis_s]
+							prefix_e := line[0..vis_e]
+							sel_x1 := ctrl.x + 10.0 + f32(win.gg_ctx.text_width(prefix_s))
+							sel_x2 := ctrl.x + 10.0 + f32(win.gg_ctx.text_width(prefix_e))
+							mut sel_w := sel_x2 - sel_x1
+							if e_raw > line_end_idx {
+								sel_w += 6.0
+							}
+							if sel_w > 0 {
+								win.gg_ctx.draw_rect_filled(sel_x1, curr_line_y, sel_w, line_h,
+									gg.Color{r: 59, g: 130, b: 246, a: 120})
+							}
+						} else if vis_s == vis_e && vis_s == line.len && e_raw > line_end_idx && s_raw <= line_end_idx {
+							sel_x1 := ctrl.x + 10.0 + f32(win.gg_ctx.text_width(line))
+							win.gg_ctx.draw_rect_filled(sel_x1, curr_line_y, 6.0, line_h,
+								gg.Color{r: 59, g: 130, b: 246, a: 120})
+						}
+						line_start_idx += line.len + 1
+					}
+				}
+
 				for line in lines {
-					if line_y + f32(txt_sz + 4) > ctrl.y + ctrl.h - 8.0 {
+					if line_y + line_h > ctrl.y + ctrl.h - 4.0 {
 						break
 					}
+					is_mono := ctrl.font_name.len > 0 && (ctrl.font_name.to_lower().contains('mono') || ctrl.font_name.to_lower().contains('courier'))
 					win.gg_ctx.draw_text2(
 						x:     int(ctrl.x + 10)
 						y:     int(line_y)
@@ -321,8 +359,30 @@ pub fn (mut win SimpleWindow) render_ui() {
 						color: txt_c
 						size:  txt_sz
 						bold:  ctrl.font_bold
+						mono:  is_mono
 					)
-					line_y += f32(txt_sz + 4)
+					line_y += line_h
+				}
+
+				if ctrl.is_focused {
+					mut line_start_idx := 0
+					for i, line in lines {
+						curr_line_y := ctrl.y + 8.0 + f32(i) * line_h
+						if curr_line_y + line_h > ctrl.y + ctrl.h - 4.0 {
+							break
+						}
+						line_end_idx := line_start_idx + line.len
+						if ctrl.caret_pos >= line_start_idx && (ctrl.caret_pos <= line_end_idx || i == lines.len - 1) {
+							col := math.max(0, math.min(line.len, ctrl.caret_pos - line_start_idx))
+							prefix_txt := line[0..col]
+							caret_offset_x := f32(win.gg_ctx.text_width(prefix_txt))
+							caret_x := ctrl.x + 10.0 + caret_offset_x
+							win.gg_ctx.draw_line(caret_x, curr_line_y + 1.0, caret_x, curr_line_y + line_h - 1.0,
+								accent)
+							break
+						}
+						line_start_idx += line.len + 1
+					}
 				}
 			}
 			'checkbox', 'toggle' {
