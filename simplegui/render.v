@@ -199,6 +199,15 @@ pub fn (mut win SimpleWindow) render_ui() {
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
 					b_c)
 
+				if ctrl.kind == 'time_picker' {
+					draw_vector_clock_icon(win.gg_ctx, ctrl.x + ctrl.w - 18.0, ctrl.y + ctrl.h / 2.0, 5.0, fg)
+				}
+				if ctrl.kind == 'number' {
+					up_x := ctrl.x + ctrl.w - 18.0
+					draw_vector_chevron(win.gg_ctx, up_x, ctrl.y + 8.0, 4.0, 'up', fg)
+					draw_vector_chevron(win.gg_ctx, up_x, ctrl.y + 20.0, 4.0, 'down', fg)
+				}
+
 				display_txt := if ctrl.kind == 'password' {
 					'*'.repeat(ctrl.text_value.len)
 				} else if ctrl.kind == 'number' {
@@ -283,21 +292,9 @@ pub fn (mut win SimpleWindow) render_ui() {
 				}
 
 				if ctrl.kind == 'number' {
-					up_x := ctrl.x + ctrl.w - 24
-					win.gg_ctx.draw_text2(
-						x:     int(up_x)
-						y:     int(ctrl.y + 2)
-						text:  '^'
-						color: fg
-						size:  10
-					)
-					win.gg_ctx.draw_text2(
-						x:     int(up_x)
-						y:     int(ctrl.y + 14)
-						text:  'v'
-						color: fg
-						size:  10
-					)
+					up_x := ctrl.x + ctrl.w - 18.0
+					draw_vector_chevron(win.gg_ctx, up_x, ctrl.y + 8.0, 4.0, 'up', fg)
+					draw_vector_chevron(win.gg_ctx, up_x, ctrl.y + 20.0, 4.0, 'down', fg)
 				}
 			}
 			'textarea', 'console', 'code', 'markdown' {
@@ -569,13 +566,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 					color: fg
 					size:  14
 				)
-				win.gg_ctx.draw_text2(
-					x:     int(ctrl.x + ctrl.w - 24)
-					y:     int(ctrl.y + (ctrl.h - 16.0) / 2.0)
-					text:  'v'
-					color: fg
-					size:  11
-				)
+				draw_vector_chevron(win.gg_ctx, ctrl.x + ctrl.w - 18.0, ctrl.y + ctrl.h / 2.0, 5.0, if ctrl.is_expanded { 'up' } else { 'down' }, fg)
 			}
 			'skeleton' {
 				ticks := time.ticks()
@@ -611,14 +602,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 					size:  14
 				)
 
-				arrow_c := if ctrl.is_expanded { '^' } else { 'v' }
-				win.gg_ctx.draw_text2(
-					x:     int(ctrl.x + ctrl.w - 20)
-					y:     int(ctrl.y + (hdr_h - 16.0) / 2.0)
-					text:  arrow_c
-					color: mb_txt_c
-					size:  12
-				)
+				draw_vector_chevron(win.gg_ctx, ctrl.x + ctrl.w - 16.0, ctrl.y + hdr_h / 2.0, 5.0, if ctrl.is_expanded { 'up' } else { 'down' }, mb_txt_c)
 
 				if ctrl.is_expanded && ctrl.items.len > 0 {
 					list_y := ctrl.y + hdr_h + 2.0
@@ -725,13 +709,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 					color: fg
 					size:  14
 				)
-				win.gg_ctx.draw_text2(
-					x:     int(ctrl.x + ctrl.w - 48)
-					y:     int(ctrl.y + (ctrl.h - 16.0) / 2.0)
-					text:  '[Date]'
-					color: fg
-					size:  12
-				)
+				draw_vector_calendar_icon(win.gg_ctx, ctrl.x + ctrl.w - 24.0, ctrl.y + (ctrl.h - 14.0) / 2.0, fg)
 			}
 			'color_well', 'color_palette', 'color_grid' {
 				swatch_c := parse_hex_color(if ctrl.text_value.len > 0 {
@@ -1244,13 +1222,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
 					sb_b_c)
 
-				win.gg_ctx.draw_text2(
-					x:     int(ctrl.x + 8)
-					y:     int(ctrl.y + (ctrl.h - 16.0) / 2.0)
-					text:  '[Q]'
-					color: fg
-					size:  11
-				)
+				draw_vector_search_icon(win.gg_ctx, ctrl.x + 14.0, ctrl.y + ctrl.h / 2.0, 4.5, fg)
+
 
 				s_txt := if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.placeholder }
 				s_color := if ctrl.text_value.len == 0 && ctrl.placeholder.len > 0 {
@@ -1369,13 +1342,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 						)
 						bx += f32(item.len * 7 + 6)
 						if !is_last {
-							win.gg_ctx.draw_text2(
-								x:     int(bx)
-								y:     int(ctrl.y + 4)
-								text:  '>'
-								color: border_c
-								size:  13
-							)
+							draw_vector_chevron(win.gg_ctx, bx + 6.0, ctrl.y + 11.0, 4.0, 'right', border_c)
 							bx += 14.0
 						}
 					}
@@ -1427,11 +1394,11 @@ pub fn (mut win SimpleWindow) render_ui() {
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, hdr_h, 6.0,
 					border_c)
 
-				fold_icon := if ctrl.is_expanded { '[-]' } else { '[+]' }
+				draw_vector_chevron(win.gg_ctx, ctrl.x + 16.0, ctrl.y + hdr_h / 2.0, 5.0, if ctrl.is_expanded { 'down' } else { 'right' }, fg)
 				win.gg_ctx.draw_text2(
-					x:     int(ctrl.x + 10)
+					x:     int(ctrl.x + 28)
 					y:     int(ctrl.y + 8)
-					text:  '${fold_icon} ${ctrl.title}'
+					text:  ctrl.title
 					color: fg
 					size:  14
 				)
@@ -2121,5 +2088,76 @@ fn draw_vector_star(gg_ctx &gg.Context, cx f32, cy f32, outer_r f32, inner_r f32
 	for i in 0 .. 10 {
 		next_i := (i + 1) % 10
 		gg_ctx.draw_line(pts_x[i], pts_y[i], pts_x[next_i], pts_y[next_i], stroke_c)
+	}
+}
+
+fn draw_vector_chevron(gg_ctx &gg.Context, cx f32, cy f32, size f32, dir string, color gg.Color) {
+	half := size / 2.0
+	match dir {
+		'down' {
+			gg_ctx.draw_line(cx - half, cy - half / 2.0, cx, cy + half / 2.0, color)
+			gg_ctx.draw_line(cx, cy + half / 2.0, cx + half, cy - half / 2.0, color)
+		}
+		'up' {
+			gg_ctx.draw_line(cx - half, cy + half / 2.0, cx, cy - half / 2.0, color)
+			gg_ctx.draw_line(cx, cy - half / 2.0, cx + half, cy + half / 2.0, color)
+		}
+		'right' {
+			gg_ctx.draw_line(cx - half / 2.0, cy - half, cx + half / 2.0, cy, color)
+			gg_ctx.draw_line(cx + half / 2.0, cy, cx - half / 2.0, cy + half, color)
+		}
+		'left' {
+			gg_ctx.draw_line(cx + half / 2.0, cy - half, cx - half / 2.0, cy, color)
+			gg_ctx.draw_line(cx - half / 2.0, cy, cx + half / 2.0, cy + half, color)
+		}
+		else {}
+	}
+}
+
+fn draw_vector_search_icon(gg_ctx &gg.Context, cx f32, cy f32, radius f32, color gg.Color) {
+	gg_ctx.draw_circle_empty(cx - 2.0, cy - 2.0, radius, color)
+	gg_ctx.draw_line(cx + 2.0, cy + 2.0, cx + 7.0, cy + 7.0, color)
+}
+
+fn draw_vector_calendar_icon(gg_ctx &gg.Context, x f32, y f32, color gg.Color) {
+	gg_ctx.draw_rounded_rect_empty(x, y, 14.0, 14.0, 3.0, color)
+	gg_ctx.draw_line(x, y + 4.0, x + 14.0, y + 4.0, color)
+	gg_ctx.draw_line(x + 3.0, y - 2.0, x + 3.0, y + 2.0, color)
+	gg_ctx.draw_line(x + 10.0, y - 2.0, x + 10.0, y + 2.0, color)
+	gg_ctx.draw_rect_filled(x + 3.5, y + 7.0, 2.0, 2.0, color)
+	gg_ctx.draw_rect_filled(x + 8.5, y + 7.0, 2.0, 2.0, color)
+	gg_ctx.draw_rect_filled(x + 3.5, y + 10.5, 2.0, 2.0, color)
+	gg_ctx.draw_rect_filled(x + 8.5, y + 10.5, 2.0, 2.0, color)
+}
+
+fn draw_vector_folder_icon(gg_ctx &gg.Context, x f32, y f32, color gg.Color) {
+	gg_ctx.draw_rect_filled(x, y, 6.0, 3.0, color)
+	gg_ctx.draw_rounded_rect_empty(x, y + 2.0, 15.0, 10.0, 2.0, color)
+}
+
+fn draw_vector_clock_icon(gg_ctx &gg.Context, cx f32, cy f32, radius f32, color gg.Color) {
+	gg_ctx.draw_circle_empty(cx, cy, radius, color)
+	gg_ctx.draw_line(cx, cy, cx, cy - radius * 0.55, color)
+	gg_ctx.draw_line(cx, cy, cx + radius * 0.45, cy, color)
+}
+
+fn draw_vector_spinner(gg_ctx &gg.Context, cx f32, cy f32, radius f32, active bool, color gg.Color) {
+	num_dots := 8
+	ticks := time.ticks()
+	step := if active { int(ticks / 100) % num_dots } else { 0 }
+	for i in 0 .. num_dots {
+		angle := f64(i) * (2.0 * math.pi / f64(num_dots))
+		dot_x := cx + f32(radius * math.cos(angle))
+		dot_y := cy + f32(radius * math.sin(angle))
+		diff := (i - step + num_dots) % num_dots
+		alpha := u8(math.max(40.0, 255.0 - f64(diff) * 26.0))
+		dot_color := gg.Color{
+			r: color.r
+			g: color.g
+			b: color.b
+			a: alpha
+		}
+		dot_radius := if diff == 0 { f32(2.5) } else { f32(1.8) }
+		gg_ctx.draw_circle_filled(dot_x, dot_y, dot_radius, dot_color)
 	}
 }
