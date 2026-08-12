@@ -195,9 +195,29 @@ win.set_fixed_size(500, 400)
 
 // Minimum and maximum size constraints
 win.set_min_size(400, 300)
+win.set_minimum_size(400, 300) // Alias syntax
 win.set_max_size(1920, 1080)
+win.set_maximum_size(1920, 1080) // Alias syntax
 min_w, min_h := win.get_min_size() // or win.get_minimum_size()
 max_w, max_h := win.get_max_size() // or win.get_maximum_size()
+
+// Window Opacity & Alpha
+win.set_opacity(0.95)
+win.set_alpha(0.95) // Alias for set_opacity
+
+// Custom Cursor Scaling
+win.set_cursor_size(1.5)
+cur_sz := win.get_cursor_size()
+
+// Debug Mode Toggle & Status
+win.set_debug_mode(true)
+is_debug := win.get_debug_mode()
+
+// Register Custom Control Pointer Directly
+win.add_control(my_control)
+
+// Close Keyboard Shortcut Toggle
+win.set_close_shortcut_enabled(true)
 
 // Preset sizes: 'small' (400x300), 'medium' (640x480), 'large' (800x600),
 // 'xlarge' (1024x768), 'hd' (1280x720), 'full_hd' (1920x1080), 'dialog' (420x220), 'settings' (550x400)
@@ -539,6 +559,20 @@ win.end_group()
 // Alternative group box helpers:
 win.add_group_box('grp_options', 'Preferences')
 win.add_group_box_with_options('grp_framed', 'Advanced Settings', true)
+win.group_with_options('grp_opt', 'Group Title', true, fn (mut win simplegui.SimpleWindow) {})
+win.group_config('grp_cfg', simplegui.GroupConfig{ title: 'Config' }, fn (mut win simplegui.SimpleWindow) {})
+win.card_with_title('card_t', 'Card Header', fn (mut win simplegui.SimpleWindow) {})
+
+// Header & Alignment Helpers
+win.add_header('Page Title')
+win.align_left()
+win.align_center()
+win.align_right()
+
+// Internal Layout & Rendering Pipeline Calls
+win.recalculate_layout()
+win.render_ui()
+win.handle_event(e)
 ```
 
 ### 7. Scroll View & Quick Action Rows
@@ -727,6 +761,9 @@ win.on_row_click('tbl_users', fn (mut win simplegui.SimpleWindow) {
 
 // Update dataset dynamically
 win.set_table_data('tbl_users', headers, new_rows)
+win.set_table_rows('tbl_users', new_rows)
+table_rows := win.get_table_rows('tbl_users')
+win.clear_table_selection('tbl_users')
 ```
 
 ### Charts & KPI Cards
@@ -740,6 +777,7 @@ win.add_bar_chart('chart_visitors', 'Daily Visitors', ['Mon', 'Tue', 'Wed', 'Thu
 
 // Generic Chart container (chart_type: 'line', 'bar', etc.)
 win.add_chart('chart_generic', 'line', 200)
+win.set_chart_data('chart_sales', [10.0, 20.0, 30.0, 40.0])
 
 // Metric KPI Card
 win.add_metric_card('kpi_sales', 'Total Revenue', '$48,250', '+14.2%', 'vs last month')
@@ -756,6 +794,7 @@ win.add_list_box_with_selected('list_files', ['file1.txt', 'file2.csv', 'documen
 selected_file := win.get_list_box_selected('list_files')
 selected_idx := win.get_list_box_index('list_files')
 win.set_list_box_selected('list_files', 'file2.csv')
+win.set_list_box_index('list_files', 1)
 
 // Multi-Select ListBox
 win.add_multi_list_box('list_tags', ['macOS', 'Linux', 'Windows', 'WebAssembly'], ['macOS', 'Linux'])
@@ -890,6 +929,7 @@ win.add_split_view('my_split', 0.5) // ratio 0.1 to 0.9
 
 // 🔔 Ephemeral Toast Stack (auto-dismissing notification alerts with click-to-close)
 win.push_toast('Success', 'File exported successfully!', 'success', 3000) // variants: info, success, warning, error
+win.show_toast('Notice', 'Toast notification display')
 
 // 🔍 Command Palette Modal (Ctrl+K / Cmd+K quick search modal)
 win.show_command_palette([
@@ -952,6 +992,7 @@ Pairs a descriptive text label with an input widget in one line of code:
 
 ```v
 win.add_form_field('Full Name:', 'form_name', 'Ada Lovelace')
+win.add_form_input('form_username', 'Username:', 'Enter username...')
 win.add_form_textarea('Biography:', 'form_bio', 'Developer and mathematician.')
 win.add_form_password('Password:', 'form_pass', 'secret_key')
 win.add_form_search('Search Catalog:', 'form_search', '')
@@ -980,6 +1021,7 @@ Create controls without defining explicit string IDs:
 ```v
 win.input('Default Text')
 input_text := win.get_input()
+area_text := win.get_textarea()
 
 win.checkbox('Enable auto-update', true)
 is_checked := win.get_checkbox()
@@ -1005,7 +1047,11 @@ btn.set_width(220)
    .set_height(42)
    .set_size(220, 42)
    .set_position(50, 100)
+   .set_alignment('center')
+   .set_placeholder('Enter text...')
+   .set_text_align('left')
    .set_bg_color('#0a84ff')
+   .set_accent_color('#0a84ff')
    .set_font_color('#ffffff')
    .set_font_size(15)
    .set_font_bold(true)
@@ -1021,6 +1067,8 @@ btn.set_width(220)
    .set_padding_xy(16, 8)
    .set_padding_trbl(8, 16, 8, 16)
    .set_expand_fill(true)
+   .set_visible(true)
+   .set_enabled(true)
    .set_cursor('pointer')
    .set_tooltip('Click to submit your registration form')
 
@@ -1081,6 +1129,7 @@ is_vis := win.get_control_visible('btn_submit')
 
 win.set_control_enabled('btn_submit', true)
 is_en := win.get_control_enabled('btn_submit')
+win.set_control_opacity('btn_submit', 0.95)
 ```
 
 ### Linux & Cross-Platform Font Resolution
@@ -1094,9 +1143,10 @@ win.set_font_path('/path/to/custom_font.ttf')
 // Environment variable override option:
 // SIMPLEGUI_FONT_PATH=/path/to/myfont.ttf ./my_app
 
-// Query resolved window font path or linux candidate search list
+// Query resolved window font path or cross-platform candidate search lists
 font_path := simplegui.resolve_window_font_path()
-candidates := simplegui.linux_font_candidates()
+linux_candidates := simplegui.linux_font_candidates()
+macos_candidates := simplegui.macos_font_candidates()
 ```
 
 #### Linux System Font Resolution Search Order:
@@ -1135,7 +1185,7 @@ qty := win.get_value_int('num_count')
 win.set_value_int('num_count', 42)
 ```
 
-### Typed Safe Accessors (`get_int`, `get_f64`, `set_int`, `set_f64`)
+### Typed Safe Accessors & Safe Fallback Getters
 
 ```v
 age := win.get_int('input_age')
@@ -1143,6 +1193,17 @@ win.set_int('input_age', 30)
 
 price := win.get_f64('input_price')
 win.set_f64('input_price', 19.99)
+win.set_value_f64('input_price', 19.99)
+val_f64 := win.get_value_f64('input_price', 10.0)
+
+// Safe Fallback Getters (returns fallback value if control is unset or invalid)
+name_str := win.get_text_or('input_name', 'Ada Lovelace')
+val_or_str := win.get_value_or('input_field', 'Fallback Text')
+is_check := win.get_bool_or('chk_terms', true)
+num_int := win.get_int_or('input_qty', 1)
+price_f64 := win.get_f64_or('input_price', 9.99)
+num_val_int := win.get_value_int_or('input_qty', 1)
+price_val_f64 := win.get_value_f64_or('input_price', 9.99)
 ```
 
 ### Batch Value Operations (`get_all` / `set_all` / `clear_all`)
@@ -1180,6 +1241,9 @@ win.on_dblclick('card_item', fn (mut win simplegui.SimpleWindow) {
 })
 win.on_double_click('card_item', fn (mut win simplegui.SimpleWindow) {
 	// Alias syntax for on_dblclick
+})
+win.bind_double_click('card_item', fn (mut win simplegui.SimpleWindow) {
+	// Fluent binding alias for on_dblclick
 })
 
 // Right Click Listener (Mouse Secondary Button)
@@ -1465,6 +1529,8 @@ win.trash_file('/tmp/trash.txt') or { return }
 win.create_directory('/tmp/new_dir')
 dir_items := win.read_dir('/tmp')
 dir_bytes := win.get_directory_size('/tmp/my_folder')
+sha256_file_val := win.sha256_file('/tmp/data.txt') or { '' }
+md5_file_val := win.md5_file('/tmp/data.txt') or { '' }
 
 // File Metadata & Disk Space Specs
 disk_info := win.get_disk_usage('/System/Volumes/Data') or { simplegui.DiskStats{} }
@@ -1561,6 +1627,8 @@ response := win.http_post('https://httpbin.org/post', '{"key":"value"}')
 
 // Strict & Advanced HTTP Requests with headers/timeouts
 strict_body := win.http_get_strict('https://api.ipify.org') or { '' }
+post_strict := win.http_post_strict('https://httpbin.org/post', '{"key":"val"}') or { '' }
+post_strict_g := simplegui.http_post_strict('https://httpbin.org/post', '{"key":"val"}') or { '' }
 res := win.http_request(.post, 'https://api.example.com/data', '{"query":"test"}', simplegui.SimpleHttpRequestOptions{
     headers: {'Authorization': 'Bearer token123'}
     timeout_ms: 5000
@@ -1644,10 +1712,17 @@ zstd_decomp := win.decompress_zstd(zstd_comp)
 ### RegEx, URL, HTML & Format Parsers
 
 ```v
-// RegEx Pattern Matching
+// RegEx Pattern Matching & Strict Fallbacks
 is_valid_email := win.regex_match('user@domain.com', r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$')
 matches := win.regex_find('Order ID #12345', r'\d+')
 replaced := win.regex_replace('Hello World', r'World', 'V')
+
+is_match_strict := win.regex_match_strict('user@domain.com', r'^\w+@\w+\.\w+$') or { false }
+is_match_strict_g := simplegui.regex_match_strict('user@domain.com', r'^\w+@\w+\.\w+$') or { false }
+find_strict := win.regex_find_strict('Order ID #12345', r'\d+') or { []string{} }
+find_strict_g := simplegui.regex_find_strict('Order ID #12345', r'\d+') or { []string{} }
+replace_strict := win.regex_replace_strict('Hello World', r'World', 'V') or { '' }
+replace_strict_g := simplegui.regex_replace_strict('Hello World', r'World', 'V') or { '' }
 
 // URL Parsing & Construction
 parsed_url := win.url_parse('https://example.com:8080/api/users?sort=asc')
@@ -1683,25 +1758,34 @@ lorem_txt := win.lorem_generate('latin', 1, 2, 20)
 // Stack (LIFO)
 mut stack := simplegui.new_stack[string]()
 stack.push('item1')
+top_item := stack.peek() or { '' }
+is_stk_empty := stack.is_empty()
 item := stack.pop()
 
 // Queue (FIFO)
 mut queue := simplegui.new_queue[int]()
 queue.push(10)
+top_q := queue.peek() or { 0 }
+is_q_empty := queue.is_empty()
 val := queue.pop()
 
 // Set (Unique Values)
 mut set := simplegui.new_set[string]()
 set.add('tag1')
 has_tag := set.exists('tag1')
+is_set_empty := set.is_empty()
+set_items := set.to_array()
 
 // Ring Buffer (Circular Fixed Capacity)
 mut ring := simplegui.new_ringbuffer[f64](5)
 ring.push(1.23)
+ring_cap := ring.capacity()
+is_ring_empty := ring.is_empty()
 
 // Min Heap (Priority Queue)
 mut heap := simplegui.new_min_heap[int]()
 heap.push(42)
+heap_top := heap.peek() or { 0 }
 min_val := heap.pop()
 ```
 
@@ -1717,10 +1801,17 @@ days := win.time_days_in_month(2026, 2)
 // Stopwatch & Benchmark Suites
 mut sw := win.start_stopwatch()
 elapsed_ms := win.stopwatch_elapsed_ms(sw)
+elapsed_sec := sw.elapsed_sec()
 
 mut bench := simplegui.start_benchmark()
+mut bench_new := simplegui.new_benchmark()
+mut bench_win := win.new_benchmark()
 bench.step()
+bench.measure('Operation timing')
 bench.ok()
+bench.fail()
+step_msg := bench.step_message('Step 1')
+total_msg := bench.total_message('Complete Run')
 
 // Thread Synchronization
 mut mtx := simplegui.new_mutex()
@@ -1736,7 +1827,7 @@ wg.wait()
 ### Advanced Math, Statistics & String Metrics
 
 ```v
-// Trigonometry, Exponentials & Interpolation
+// Trigonometry, Exponentials & Interpolation (Window & Module Standalone)
 rad := win.math_radians(180.0)
 deg := win.math_degrees(3.14159)
 hyp := win.math_hypot(3.0, 4.0)
@@ -1744,6 +1835,35 @@ gcd_val := win.math_gcd(12, 18)
 lcm_val := win.math_lcm(12, 18)
 remapped := win.math_remap(50.0, 0.0, 100.0, 0.0, 1.0)
 smoothed := win.math_smoothstep(0.0, 1.0, 0.5)
+
+sin_val := win.math_sin(1.57)
+sin_g := simplegui.math_sin(1.57)
+cos_val := win.math_cos(3.14)
+cos_g := simplegui.math_cos(3.14)
+tan_val := win.math_tan(0.78)
+tan_g := simplegui.math_tan(0.78)
+sqrt_val := win.math_sqrt(16.0)
+sqrt_g := simplegui.math_sqrt(16.0)
+pow_val := win.math_pow(2.0, 8.0)
+pow_g := simplegui.math_pow(2.0, 8.0)
+abs_val := win.math_abs(-42.0)
+abs_g := simplegui.math_abs(-42.0)
+clamp_val := win.math_clamp(150.0, 0.0, 100.0)
+clamp_g := simplegui.math_clamp(150.0, 0.0, 100.0)
+round_val := win.math_round(3.56)
+round_g := simplegui.math_round(3.56)
+floor_val := win.math_floor(3.99)
+floor_g := simplegui.math_floor(3.99)
+ceil_val := win.math_ceil(3.01)
+ceil_g := simplegui.math_ceil(3.01)
+atan2_val := win.math_atan2(1.0, 1.0)
+atan2_g := simplegui.math_atan2(1.0, 1.0)
+log10_val := win.math_log10(100.0)
+log10_g := simplegui.math_log10(100.0)
+log2_val := win.math_log2(8.0)
+log2_g := simplegui.math_log2(8.0)
+round_sig_val := win.math_round_sig(3.14159, 3)
+round_sig_g := simplegui.math_round_sig(3.14159, 3)
 
 // Complex Numbers
 mut c1 := simplegui.complex_new(3.0, 4.0)
@@ -1754,7 +1874,7 @@ mut b1 := simplegui.big_int_from_str('12345678901234567890')
 mut b2 := simplegui.big_int_from_int(100)
 b3 := b1.add(b2)
 
-// Statistical Calculations
+// Statistical Calculations (Window & Module Standalone)
 mean_val := win.stats_mean([1.0, 2.0, 3.0, 4.0, 5.0])
 med_val := win.stats_median([1.0, 2.0, 3.0, 4.0, 5.0])
 std_dev := win.stats_sample_std_dev([1.0, 2.0, 3.0, 4.0, 5.0])
@@ -1762,6 +1882,121 @@ geo_mean := win.stats_geometric_mean([1.0, 2.0, 3.0, 4.0, 5.0])
 harm_mean := win.stats_harmonic_mean([1.0, 2.0, 3.0, 4.0, 5.0])
 rms_val := win.stats_rms([1.0, 2.0, 3.0, 4.0, 5.0])
 cov_val := win.stats_covariance([1.0, 2.0, 3.0], [4.0, 5.0, 6.0])
+
+sample_var := win.stats_sample_variance([1.0, 2.0, 3.0, 4.0])
+sample_v_g := simplegui.stats_sample_variance([1.0, 2.0, 3.0, 4.0])
+pop_var := win.stats_population_variance([1.0, 2.0, 3.0, 4.0])
+pop_v_g := simplegui.stats_population_variance([1.0, 2.0, 3.0, 4.0])
+pop_sd := win.stats_population_std_dev([1.0, 2.0, 3.0, 4.0])
+pop_sd_g := simplegui.stats_population_std_dev([1.0, 2.0, 3.0, 4.0])
+mode_val := win.stats_mode([1.0, 2.0, 2.0, 3.0])
+mode_g := simplegui.stats_mode([1.0, 2.0, 2.0, 3.0])
+range_val := win.stats_range([1.0, 5.0, 10.0])
+range_g := simplegui.stats_range([1.0, 5.0, 10.0])
+kurt_val := win.stats_kurtosis([1.0, 2.0, 3.0, 4.0])
+kurt_g := simplegui.stats_kurtosis([1.0, 2.0, 3.0, 4.0])
+skew_val := win.stats_skew([1.0, 2.0, 3.0, 4.0])
+skew_g := simplegui.stats_skew([1.0, 2.0, 3.0, 4.0])
+
+// Array Utilities (Window & Module Standalone)
+arr_min_i := win.array_min([10, 20, 5])
+arr_min_ig := simplegui.array_min([10, 20, 5])
+arr_max_i := win.array_max([10, 20, 5])
+arr_max_ig := simplegui.array_max([10, 20, 5])
+arr_min_f := win.array_min_f64([10.5, 20.2, 5.1])
+arr_min_fg := simplegui.array_min_f64([10.5, 20.2, 5.1])
+arr_max_f := win.array_max_f64([10.5, 20.2, 5.1])
+arr_max_fg := simplegui.array_max_f64([10.5, 20.2, 5.1])
+arr_sum_i := win.array_sum([10, 20, 30])
+arr_sum_ig := simplegui.array_sum([10, 20, 30])
+arr_sum_f := win.array_sum_f64([10.5, 20.5])
+arr_sum_fg := simplegui.array_sum_f64([10.5, 20.5])
+arr_uniq_s := win.array_unique_strings(['a', 'b', 'a'])
+arr_uniq_sg := simplegui.array_unique_strings(['a', 'b', 'a'])
+
+// UTF-8 Helpers
+utf8_l := win.utf8_len('Hello V')
+utf8_lg := simplegui.utf8_len('Hello V')
+utf8_v := win.utf8_is_valid('Hello V')
+utf8_vg := simplegui.utf8_is_valid('Hello V')
+
+// String Padding & Repeat (Window & Module Standalone)
+pad_l := win.string_pad_left('42', 5, '0')
+pad_lg := simplegui.string_pad_left('42', 5, '0')
+pad_r := win.string_pad_right('42', 5, '0')
+pad_rg := simplegui.string_pad_right('42', 5, '0')
+rep_s := win.string_repeat('V', 3)
+rep_sg := simplegui.string_repeat('V', 3)
+
+// Random Utilities & Choice Functions (Window & Module Standalone)
+rand_i := win.rand_int(1, 100)
+rand_ig := simplegui.rand_int(1, 100)
+rand_s := win.rand_string(16)
+rand_sg := simplegui.rand_string(16)
+
+mut arr_s := ['apple', 'banana', 'cherry']
+win.rand_shuffle_strings(mut arr_s)
+simplegui.rand_shuffle_strings(mut arr_s)
+
+choice_s := win.rand_choice_strings(arr_s)
+choice_sg := simplegui.rand_choice_strings(arr_s)
+choice_i := win.rand_choice_ints([10, 20, 30])
+choice_ig := simplegui.rand_choice_ints([10, 20, 30])
+
+w_choice_s := win.rand_weighted_choice_strings(['low', 'high'], [0.8, 0.2])
+w_choice_sg := simplegui.rand_weighted_choice_strings(['low', 'high'], [0.8, 0.2])
+w_choice_i := win.rand_weighted_choice_ints([1, 2], [0.9, 0.1])
+w_choice_ig := simplegui.rand_weighted_choice_ints([1, 2], [0.9, 0.1])
+
+// Hex & Base64 Encoders / Decoders
+hex_e := win.hex_encode('Hello')
+hex_eg := simplegui.hex_encode('Hello')
+hex_d := win.hex_decode(hex_e)
+hex_dg := simplegui.hex_decode(hex_e)
+
+// SemVer Comparison & Version Queries
+sem_c := win.semver_compare('1.2.0', '1.1.5')
+sem_cg := simplegui.semver_compare('1.2.0', '1.1.5')
+sem_s := win.semver_satisfies('1.2.0', '>=1.0.0')
+sem_sg := simplegui.semver_satisfies('1.2.0', '>=1.0.0')
+
+// URL Encoders & Decoders
+url_enc := win.url_encode('hello world')
+url_enc_g := simplegui.url_encode('hello world')
+url_dec := win.url_decode('hello%20world')
+url_dec_g := simplegui.url_decode('hello%20world')
+
+// Formatted Time & Terminal Colors
+time_e := win.time_elapsed(3600000)
+time_eg := simplegui.time_elapsed(3600000)
+term_c := win.term_color('Warning', 'yellow')
+term_cg := simplegui.term_color('Warning', 'yellow')
+
+// JSON Map Decoders
+json_m := win.json_decode_map('{"key":"val"}')
+json_mg := simplegui.json_decode_map('{"key":"val"}')
+json_ms := win.json_decode_map_strict('{"key":"val"}') or { map[string]string{} }
+json_msg := simplegui.json_decode_map_strict('{"key":"val"}') or { map[string]string{} }
+json_ml := win.json_decode_map_list('[{"key":"val"}]')
+json_mlg := simplegui.json_decode_map_list('[{"key":"val"}]')
+
+// CSV Column Extraction & Filtering
+csv_col := win.csv_extract_column(csv_rows, 0)
+csv_colg := simplegui.csv_extract_column(csv_rows, 0)
+csv_filt := win.csv_filter_by_column(csv_rows, 1, '30')
+csv_filtg := simplegui.csv_filter_by_column(csv_rows, 1, '30')
+
+// StringBuilder & Complex Conjugate
+mut ssb := simplegui.new_string_builder()
+mut ssb_w := win.new_string_builder()
+ssb.write_line('Line text')
+c_conj := c1.conj()
+
+// HTML & URL Methods
+url_built := parsed_url.build_url()
+html_attr := html_doc.get_attr('a', 'href')
+html_imgs := html_doc.get_all_images()
+toml_def := toml_doc.get_string_default('name', 'DefaultApp')
 
 // String Metrics & Similarity
 lev_dist := win.string_levenshtein('kitten', 'sitting')
@@ -1785,7 +2020,9 @@ if simplegui.confirm('Title', 'Confirm action?') { ... }
 simplegui.notify('Notification Title', 'Message body')
 
 simplegui.copy_to_clipboard('Text to copy')
+simplegui.clipboard_copy('Text to copy') // Alias
 clip_text := simplegui.read_clipboard()
+clip_text_alias := simplegui.clipboard_read() // Alias
 
 simplegui.open_browser('https://vlang.io')
 simplegui.quit()
@@ -1860,6 +2097,9 @@ win.clear_timeout('delayed_alert') // Alias for stop_timer
 
 // Stop and remove all registered timers in the window
 win.clear_all_timers()
+
+// Internal timer processing tick
+win.process_timers()
 ```
 
 ---
@@ -2015,8 +2255,9 @@ win.bind_shortcut('F1', fn (mut win simplegui.SimpleWindow) {
 Register windows in a global process registry to inspect, message, or manipulate controls on other active application windows:
 
 ```v
-// Register window in global registry
+// Register / Unregister window in global registry
 simplegui.sys_register_window(win)
+simplegui.sys_unregister_window('Dashboard Manager')
 
 // List all registered window titles ([]string)
 win_titles := simplegui.sys_list_app_windows()
@@ -2086,11 +2327,13 @@ if external_apps.len > 0 {
         println('AXControl: ${ctrl.title} | Role: ${ctrl.role} | Value: ${ctrl.value}')
     }
 
-    // Automate external application controls
+    // Automate external application controls & visibility
     simplegui.sys_set_external_app_frontmost(target_pid)
+    simplegui.sys_set_external_app_visible(target_pid, true)
     simplegui.sys_press_external_control(target_pid, 'Save')
     simplegui.sys_set_external_control_value(target_pid, 'Search Field', 'Query')
     simplegui.sys_set_external_control_enabled(target_pid, 'Submit Button', true)
+    simplegui.sys_set_external_control_visible(target_pid, 'Submit Button', true)
     simplegui.sys_flash_external_control(target_pid, 'Save')
 }
 ```
