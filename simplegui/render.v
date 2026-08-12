@@ -699,17 +699,15 @@ pub fn (mut win SimpleWindow) render_ui() {
 			}
 			'rating' {
 				stars := if ctrl.int_value > 0 { ctrl.int_value } else { 4 }
-				mut star_x := ctrl.x
+				star_gold := gg.Color{ r: 255, g: 193, b: 7 }
+				star_border := if win.theme.is_dark { gg.Color{ r: 120, g: 120, b: 125 } } else { border_c }
+				mut star_x := ctrl.x + 12.0
+				star_y := ctrl.y + 12.0
 				for s_idx in 1 .. 6 {
-					star_txt := if s_idx <= stars { '★' } else { '☆' }
-					star_c := if s_idx <= stars { accent } else { border_c }
-					win.gg_ctx.draw_text2(
-						x:     int(star_x)
-						y:     int(ctrl.y + 2)
-						text:  star_txt
-						color: star_c
-						size:  18
-					)
+					is_filled := s_idx <= stars
+					fill_c := if is_filled { star_gold } else { bg }
+					stroke_c := if is_filled { star_gold } else { star_border }
+					draw_vector_star(win.gg_ctx, star_x, star_y, 8.5, 3.6, is_filled, fill_c, stroke_c)
 					star_x += 24.0
 				}
 			}
@@ -745,6 +743,32 @@ pub fn (mut win SimpleWindow) render_ui() {
 					swatch_c)
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
 					border_c)
+			}
+			'color_picker' {
+				cp_b_c := if ctrl.is_focused { accent } else { border_c }
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
+					surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
+					cp_b_c)
+
+				swatch_w := f32(24.0)
+				swatch_h := f32(ctrl.h - 10.0)
+				swatch_x := f32(ctrl.x + 5.0)
+				swatch_y := f32(ctrl.y + 5.0)
+				hex_str := if ctrl.text_value.len > 0 { ctrl.text_value } else { '#0a84ff' }
+				swatch_c := parse_hex_color(hex_str)
+				win.gg_ctx.draw_rounded_rect_filled(swatch_x, swatch_y, swatch_w, swatch_h, 4.0,
+					swatch_c)
+				win.gg_ctx.draw_rounded_rect_empty(swatch_x, swatch_y, swatch_w, swatch_h, 4.0,
+					border_c)
+
+				win.gg_ctx.draw_text2(
+					x:     int(swatch_x + swatch_w + 8.0)
+					y:     int(ctrl.y + (ctrl.h - 16.0) / 2.0)
+					text:  hex_str
+					color: fg
+					size:  14
+				)
 			}
 			'list_box' {
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
@@ -2074,5 +2098,28 @@ fn (mut win SimpleWindow) render_tooltip() {
 			}
 			break
 		}
+	}
+}
+
+fn draw_vector_star(gg_ctx &gg.Context, cx f32, cy f32, outer_r f32, inner_r f32, is_filled bool, fill_c gg.Color, stroke_c gg.Color) {
+	mut pts_x := [10]f32{}
+	mut pts_y := [10]f32{}
+	for i in 0 .. 10 {
+		angle := -math.pi / 2.0 + f64(i) * (math.pi / 5.0)
+		r := if i % 2 == 0 { outer_r } else { inner_r }
+		pts_x[i] = cx + f32(r * math.cos(angle))
+		pts_y[i] = cy + f32(r * math.sin(angle))
+	}
+
+	if is_filled {
+		for i in 0 .. 10 {
+			next_i := (i + 1) % 10
+			gg_ctx.draw_triangle_filled(cx, cy, pts_x[i], pts_y[i], pts_x[next_i], pts_y[next_i], fill_c)
+		}
+	}
+
+	for i in 0 .. 10 {
+		next_i := (i + 1) % 10
+		gg_ctx.draw_line(pts_x[i], pts_y[i], pts_x[next_i], pts_y[next_i], stroke_c)
 	}
 }

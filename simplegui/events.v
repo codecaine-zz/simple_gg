@@ -126,7 +126,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 					}
 
 					if win.is_selecting_text && win.mouse_down && ctrl.is_focused
-						&& ctrl.kind in ['input', 'password', 'textarea', 'search_field', 'search_bar', 'file_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
+						&& ctrl.kind in ['input', 'password', 'textarea', 'search_field', 'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
 						mut best_idx := 0
 						if ctrl.kind in ['textarea', 'code_editor'] {
 							best_idx = get_multiline_text_index(win, ctrl, win.mouse_x, win.mouse_y)
@@ -267,7 +267,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 						clicked_ctrl = ctrl.name
 
 						if ctrl.kind in ['input', 'password', 'textarea', 'search_field',
-							'search_bar', 'file_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
+							'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
 							mut best_idx := 0
 							if ctrl.kind in ['textarea', 'code_editor'] {
 								best_idx = get_multiline_text_index(win, ctrl, win.mouse_x, win.mouse_y)
@@ -733,7 +733,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 						is_dbl := ctrl.last_click_time > 0 && (now - ctrl.last_click_time) <= 400
 						ctrl.last_click_time = now
 
-						if is_dbl && ctrl.kind in ['input', 'password', 'textarea', 'search_field', 'search_bar', 'file_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
+						if is_dbl && ctrl.kind in ['input', 'password', 'textarea', 'search_field', 'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
 							ctrl.select_all()
 						}
 
@@ -762,7 +762,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 			if win.focused_control.len > 0 {
 				if mut ctrl := win.get_control_ptr(win.focused_control) {
 					if ctrl.kind in ['input', 'password', 'textarea', 'search_field', 'search_bar',
-						'file_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
+						'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
 						if e.char_code >= 32 && e.char_code <= 126 {
 							ch := u8(e.char_code).ascii_str()
 							if ctrl.has_selection() {
@@ -854,13 +854,13 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 				if mut ctrl := win.get_control_ptr(win.focused_control) {
 					if (is_ctrl || is_super) && e.key_code == .a {
 						if ctrl.kind in ['input', 'password', 'textarea', 'search_field',
-							'search_bar', 'file_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
+							'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
 							ctrl.select_all()
 							return
 						}
 					} else if (is_ctrl || is_super) && e.key_code == .c {
 						if ctrl.kind in ['input', 'password', 'textarea', 'search_field',
-							'search_bar', 'file_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
+							'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
 							if ctrl.has_selection() {
 								win.copy_to_clipboard(ctrl.selected_text())
 							}
@@ -868,7 +868,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 						}
 					} else if (is_ctrl || is_super) && e.key_code == .x {
 						if ctrl.kind in ['input', 'password', 'textarea', 'search_field',
-							'search_bar', 'file_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
+							'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
 							if ctrl.has_selection() {
 								win.copy_to_clipboard(ctrl.selected_text())
 								ctrl.delete_selected_text()
@@ -880,7 +880,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 						}
 					} else if (is_ctrl || is_super) && e.key_code == .v {
 						if ctrl.kind in ['input', 'password', 'textarea', 'search_field',
-							'search_bar', 'file_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
+							'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
 							clip_txt := win.get_clipboard_text()
 							if clip_txt.len > 0 {
 								if ctrl.has_selection() {
@@ -902,7 +902,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 						}
 					} else if (is_ctrl || is_super) && e.key_code == .z {
 						if ctrl.kind in ['input', 'password', 'textarea', 'search_field',
-							'search_bar', 'file_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
+							'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
 							if is_shift {
 								if ctrl.redo() {
 									if ctrl.on_change != unsafe { nil } {
@@ -920,7 +920,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 						}
 					} else if (is_ctrl || is_super) && e.key_code == .y {
 						if ctrl.kind in ['input', 'password', 'textarea', 'search_field',
-							'search_bar', 'file_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
+							'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
 							if ctrl.redo() {
 								if ctrl.on_change != unsafe { nil } {
 									ctrl.on_change(mut win)

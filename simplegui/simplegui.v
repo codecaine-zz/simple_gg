@@ -1056,6 +1056,18 @@ pub fn (mut win SimpleWindow) add_color_well(name string, hex_color string) &Sim
 	return win
 }
 
+pub fn (mut win SimpleWindow) add_color_picker(name string, label string, hex_color string) &SimpleWindow {
+	win.add_control(Control{
+		name:       name
+		kind:       'color_picker'
+		title:      label
+		text_value: hex_color
+		h:          34
+	})
+	return win
+}
+
+
 pub fn (mut win SimpleWindow) add_mode_control(name string, selected string) &SimpleWindow {
 	return win.add_segmented_control(name, ['Simple', 'Advanced', 'Expert'], selected)
 }
@@ -1908,6 +1920,15 @@ pub fn (mut win SimpleWindow) add_form_date_picker(label string, name string, da
 	win.begin_row(win.gen_id('form_row'))
 	win.add_label(lbl_id, label)
 	win.add_date_picker(name, date)
+	win.end_row()
+	return win
+}
+
+pub fn (mut win SimpleWindow) add_form_color_picker(label string, name string, hex_color string) &SimpleWindow {
+	lbl_id := win.gen_id('lbl')
+	win.begin_row(win.gen_id('form_row'))
+	win.add_label(lbl_id, label)
+	win.add_color_picker(name, label, hex_color)
 	win.end_row()
 	return win
 }
