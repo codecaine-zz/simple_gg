@@ -46,7 +46,7 @@ import simplegui
 fn main() {
 	// 1. Create a modern window (Width: 640px, Height: 480px)
 	mut win := simplegui.new_simple_window('Quick Profile Editor', 640, 480)
-	
+
 	// 2. Pick a stylish dark theme (Nord, Apple Dark, Dracula, Cyberpunk, etc.)
 	win.set_theme('Apple Dark')
 
@@ -411,35 +411,35 @@ theme := simplegui.get_theme('executive') // Accepts 'dark', 'nord', 'synthwave'
 
 ### Themes Reference Table
 
-| Theme Name | Style Description | Background | Accent Color | Hover Color | Type |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **`Apple Light`** | Default clean macOS light mode | `#ffffff` | `#007aff` | `#3395ff` | Light |
-| **`Apple Dark`** | Modern macOS dark mode | `#1c1c1e` | `#0a84ff` | `#409cff` | Dark |
-| **`Synthwave 84`** | Retro 80s synthwave neon twilight | `#261535` | `#ff7edb` | `#36f9f6` | Dark |
-| **`Neon Matrix`** | Digital phosphor green cyber terminal | `#05100a` | `#39ff14` | `#00ffaa` | Dark |
-| **`Holodeck Cyan`** | Futuristic glowing holographic cyan | `#050b14` | `#00f0ff` | `#70f3ff` | Dark |
-| **`Sci-Fi HUD Orange`** | Tactical amber cockpit HUD | `#121316` | `#ff6600` | `#ffcc00` | Dark |
-| **`Quantum Violet`** | Quantum glow electric purple dark | `#110926` | `#9d4edd` | `#c77dff` | Dark |
-| **`Corporate Navy`** | Enterprise corporate navy light mode | `#f8fafc` | `#1e40af` | `#2563eb` | Light |
-| **`Executive Slate`** | Dark executive slate dashboard | `#1e293b` | `#3b82f6` | `#60a5fa` | Dark |
-| **`Financial Gold`** | Fintech luxury gold & dark bronze | `#181614` | `#d97706` | `#f59e0b` | Dark |
-| **`Enterprise Light`** | Clean modern SaaS admin panel | `#f3f4f6` | `#0d9488` | `#14b8a6` | Light |
-| **`Modern Minimalist`** | Stark high-contrast monochrome | `#ffffff` | `#18181b` | `#3f3f46` | Light |
-| **`Pro Charcoal`** | Sleek pro charcoal SaaS dark mode | `#18181b` | `#6366f1` | `#818cf8` | Dark |
-| **`Tokyo Night`** | Iconic Tokyo neon night IDE theme | `#1a1b26` | `#7aa2f7` | `#bb9af7` | Dark |
-| **`One Dark Pro`** | Atom One Dark editor palette | `#282c34` | `#61afef` | `#c678dd` | Dark |
-| **`Gruvbox Dark`** | Retro warm orange/green developer theme | `#282828` | `#fabd2f` | `#fe8019` | Dark |
-| **`Monokai Pro`** | Classic Monokai vivid dark palette | `#2d2a2e` | `#ff6188` | `#ffd866` | Dark |
-| **`Rosé Pine`** | Natural rose gold & purple theme | `#191724` | `#ebbcba` | `#c4a7e7` | Dark |
-| **`Coffee Roast`** | Warm cozy espresso dark mode | `#1c1613` | `#d97706` | `#f59e0b` | Dark |
-| **`Nord`** | Cool arctic frost blue palette | `#2e3440` | `#88c0d0` | `#81a1c1` | Dark |
-| **`Dracula`** | Classic vampire dark purple | `#282a36` | `#bd93f9` | `#ff79c6` | Dark |
-| **`Cyberpunk`** | High-contrast neon dark vibe | `#0d0d15` | `#ff007f` | `#7000ff` | Dark |
-| **`Catppuccin Mocha`** | Smooth pastel dark theme | `#1e1e2e` | `#cba6f7` | `#f5c2e7` | Dark |
-| **`GitHub Dark`** | Official GitHub dark mode | `#0d1117` | `#58a6ff` | `#79c0ff` | Dark |
-| **`GitHub Light`** | Official GitHub light mode | `#ffffff` | `#0969da` | `#218bff` | Light |
-| **`Sonoma Emerald`** | Dark forest glass layout | `#0d1f18` | `#30d158` | `#4ade80` | Dark |
-| **`Ventura Amber`** | Warm sunset dark palette | `#211815` | `#ff9500` | `#ffaa33` | Dark |
+| Theme Name              | Style Description                       | Background | Accent Color | Hover Color | Type  |
+| :---------------------- | :-------------------------------------- | :--------- | :----------- | :---------- | :---- |
+| **`Apple Light`**       | Default clean macOS light mode          | `#ffffff`  | `#007aff`    | `#3395ff`   | Light |
+| **`Apple Dark`**        | Modern macOS dark mode                  | `#1c1c1e`  | `#0a84ff`    | `#409cff`   | Dark  |
+| **`Synthwave 84`**      | Retro 80s synthwave neon twilight       | `#261535`  | `#ff7edb`    | `#36f9f6`   | Dark  |
+| **`Neon Matrix`**       | Digital phosphor green cyber terminal   | `#05100a`  | `#39ff14`    | `#00ffaa`   | Dark  |
+| **`Holodeck Cyan`**     | Futuristic glowing holographic cyan     | `#050b14`  | `#00f0ff`    | `#70f3ff`   | Dark  |
+| **`Sci-Fi HUD Orange`** | Tactical amber cockpit HUD              | `#121316`  | `#ff6600`    | `#ffcc00`   | Dark  |
+| **`Quantum Violet`**    | Quantum glow electric purple dark       | `#110926`  | `#9d4edd`    | `#c77dff`   | Dark  |
+| **`Corporate Navy`**    | Enterprise corporate navy light mode    | `#f8fafc`  | `#1e40af`    | `#2563eb`   | Light |
+| **`Executive Slate`**   | Dark executive slate dashboard          | `#1e293b`  | `#3b82f6`    | `#60a5fa`   | Dark  |
+| **`Financial Gold`**    | Fintech luxury gold & dark bronze       | `#181614`  | `#d97706`    | `#f59e0b`   | Dark  |
+| **`Enterprise Light`**  | Clean modern SaaS admin panel           | `#f3f4f6`  | `#0d9488`    | `#14b8a6`   | Light |
+| **`Modern Minimalist`** | Stark high-contrast monochrome          | `#ffffff`  | `#18181b`    | `#3f3f46`   | Light |
+| **`Pro Charcoal`**      | Sleek pro charcoal SaaS dark mode       | `#18181b`  | `#6366f1`    | `#818cf8`   | Dark  |
+| **`Tokyo Night`**       | Iconic Tokyo neon night IDE theme       | `#1a1b26`  | `#7aa2f7`    | `#bb9af7`   | Dark  |
+| **`One Dark Pro`**      | Atom One Dark editor palette            | `#282c34`  | `#61afef`    | `#c678dd`   | Dark  |
+| **`Gruvbox Dark`**      | Retro warm orange/green developer theme | `#282828`  | `#fabd2f`    | `#fe8019`   | Dark  |
+| **`Monokai Pro`**       | Classic Monokai vivid dark palette      | `#2d2a2e`  | `#ff6188`    | `#ffd866`   | Dark  |
+| **`Rosé Pine`**         | Natural rose gold & purple theme        | `#191724`  | `#ebbcba`    | `#c4a7e7`   | Dark  |
+| **`Coffee Roast`**      | Warm cozy espresso dark mode            | `#1c1613`  | `#d97706`    | `#f59e0b`   | Dark  |
+| **`Nord`**              | Cool arctic frost blue palette          | `#2e3440`  | `#88c0d0`    | `#81a1c1`   | Dark  |
+| **`Dracula`**           | Classic vampire dark purple             | `#282a36`  | `#bd93f9`    | `#ff79c6`   | Dark  |
+| **`Cyberpunk`**         | High-contrast neon dark vibe            | `#0d0d15`  | `#ff007f`    | `#7000ff`   | Dark  |
+| **`Catppuccin Mocha`**  | Smooth pastel dark theme                | `#1e1e2e`  | `#cba6f7`    | `#f5c2e7`   | Dark  |
+| **`GitHub Dark`**       | Official GitHub dark mode               | `#0d1117`  | `#58a6ff`    | `#79c0ff`   | Dark  |
+| **`GitHub Light`**      | Official GitHub light mode              | `#ffffff`  | `#0969da`    | `#218bff`   | Light |
+| **`Sonoma Emerald`**    | Dark forest glass layout                | `#0d1f18`  | `#30d158`    | `#4ade80`   | Dark  |
+| **`Ventura Amber`**     | Warm sunset dark palette                | `#211815`  | `#ff9500`    | `#ffaa33`   | Dark  |
 
 ---
 
@@ -661,6 +661,7 @@ win.add_search_field('sf_query', 'Filter results...')
 ```
 
 #### ✂️ Text Selection & Clipboard Shortcuts
+
 All text input controls (`input`, `password`, `textarea`, `search_field`, `search_bar`, `file_picker`, `number`, `code_editor`) support multi-character text selection and full system clipboard interaction out of the box:
 
 - **Mouse Selection**: Click and drag across text to select a range of characters. Shift-click extends selection from cursor. Double-clicking selects all text.
@@ -673,6 +674,7 @@ All text input controls (`input`, `password`, `textarea`, `search_field`, `searc
 - **Character Replacement**: Typing printable characters or pressing `Backspace`/`Delete` while text is selected replaces or removes the selected range cleanly.
 
 #### 🛠️ Programmatic Text Selection API
+
 Programmatically inspect or manipulate text selection on `Control` pointers:
 
 ```v
@@ -1150,6 +1152,7 @@ macos_candidates := simplegui.macos_font_candidates()
 ```
 
 #### Linux System Font Resolution Search Order:
+
 1. `SIMPLEGUI_FONT_PATH` environment variable override (if set and file exists).
 2. `win.font_path` explicit window property configuration.
 3. Ubuntu Font Family (`Ubuntu-R.ttf`, `Ubuntu-Regular.ttf`, `Ubuntu.ttf`).
@@ -2109,12 +2112,14 @@ win.process_timers()
 `simplegui` includes modern desktop UI enhancements: floating tooltips, backdrop modal overlays, form field validation tags, skeleton loading shimmers, tab badge counters, and search filtering.
 
 ### 1. Rich Floating Tooltips
+
 ```v
 win.add_button('btn_save', 'Save Document')
 win.set_control_tooltip('btn_save', 'Click to save your file state')
 ```
 
 ### 2. Backdrop Modal Dialogs (`show_modal`)
+
 ```v
 win.show_modal(
 	'Confirm Action',
@@ -2129,18 +2134,21 @@ win.hide_modal()
 ```
 
 ### 3. Live Form Validation Badges (`set_validation_error`)
+
 ```v
 win.set_validation_error('input_email', 'Please enter a valid email address with @ domain')
 win.clear_validation_error('input_email')
 ```
 
 ### 4. Animated Skeleton Shimmer Placeholders (`add_skeleton`)
+
 ```v
 // Add animated pulse loading placeholder (Width: 300px, Height: 24px)
 win.add_skeleton('sk_user_card', 300, 24)
 ```
 
 ### 5. Tab Badge Counters (`set_tab_badge`)
+
 ```v
 win.begin_tab_container('main_tabs', ['Overview', 'Messages', 'Settings'])
 win.set_tab_badge('main_tabs', 1, '5')    // Adds red badge '[5]' to Messages tab
@@ -2149,6 +2157,7 @@ win.end_tab_container()
 ```
 
 ### 6. Live Search Highlighting & Filtering (`set_table_search_filter`)
+
 ```v
 win.set_table_search_filter('tbl_users', 'Ada')
 ```
@@ -2162,6 +2171,7 @@ win.set_table_search_filter('tbl_users', 'Ada')
 ### 1. Two-Way Control & Reactive State Store Binding (`bind_state`)
 
 `bind_state` (or alias `bind_control`, `bind_value`) binds a UI control directly to a key in the application state store.
+
 - When `win.set_state(key, val)` is called anywhere in your app, the control value automatically updates in the UI.
 - When the user edits or interacts with the control (typing text, toggling a checkbox, moving a slider), the state store key automatically updates!
 
@@ -2346,21 +2356,23 @@ A reference index of core data structures, callback aliases, and configuration s
 
 ### Callback Type Aliases
 
-| Callback Type Alias | Signature / Definition | Description |
-|---|---|---|
-| **`VoidEventCallback`** | `fn (mut win SimpleWindow)` | Default widget event handler callback |
-| **`ControlValidator`** | `fn (val string) bool` | Custom validation function for form inputs |
-| **`StringEventCallback`** | `fn (mut win SimpleWindow, val string)` | Reactive state string mutation callback |
-| **`FileDropCallback`** | `fn (mut win SimpleWindow, files []string)` | Native OS drag-and-drop files callback |
-| **`CloseRequestedCallback`** | `fn (mut win SimpleWindow) bool` | Intercept window close request (return false to cancel close) |
-| **`AnyEventCallback`** | `fn (mut win SimpleWindow, event_type string, ctrl_name string)` | Catch-all event listener |
-| **`SystemEventCallback`** | `fn (win_title string, control_name string, event_name string, value string)` | Cross-window event bus subscriber callback |
-| **`SimpleWSMessageCallback`** | `fn (msg string)` | WebSocket incoming text payload listener |
+| Callback Type Alias           | Signature / Definition                                                        | Description                                                   |
+| ----------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| **`VoidEventCallback`**       | `fn (mut win SimpleWindow)`                                                   | Default widget event handler callback                         |
+| **`ControlValidator`**        | `fn (val string) bool`                                                        | Custom validation function for form inputs                    |
+| **`StringEventCallback`**     | `fn (mut win SimpleWindow, val string)`                                       | Reactive state string mutation callback                       |
+| **`FileDropCallback`**        | `fn (mut win SimpleWindow, files []string)`                                   | Native OS drag-and-drop files callback                        |
+| **`CloseRequestedCallback`**  | `fn (mut win SimpleWindow) bool`                                              | Intercept window close request (return false to cancel close) |
+| **`AnyEventCallback`**        | `fn (mut win SimpleWindow, event_type string, ctrl_name string)`              | Catch-all event listener                                      |
+| **`SystemEventCallback`**     | `fn (win_title string, control_name string, event_name string, value string)` | Cross-window event bus subscriber callback                    |
+| **`SimpleWSMessageCallback`** | `fn (msg string)`                                                             | WebSocket incoming text payload listener                      |
 
 ### Core Struct Definitions
 
 #### `simplegui.Control`
+
 The core rendering and state container for every widget inside `SimpleWindow`:
+
 - **Identification**: `name string`, `kind string`, `title string`, `placeholder string`, `tooltip string`, `variant string`
 - **Geometry & Bounds**: `x f32`, `y f32`, `w f32`, `h f32`, `padding_left f32`, `padding_right f32`, `padding_top f32`, `padding_bottom f32`, `margin_left f32`, `margin_right f32`, `margin_top f32`, `margin_bottom f32`, `alignment string`, `expand_fill bool`
 - **Values & Data**: `text_value string`, `int_value int`, `bool_value bool`, `f64_value f64`, `items []string`, `items_selected []string`, `tags []string`, `rows [][]string`, `headers []string`
@@ -2368,7 +2380,9 @@ The core rendering and state container for every widget inside `SimpleWindow`:
 - **States & Handlers**: `disabled bool`, `visible bool`, `focused bool`, `hovered bool`, `validation_err string`, `on_click VoidEventCallback`, `on_change VoidEventCallback`, `on_enter VoidEventCallback`
 
 #### `simplegui.Theme`
+
 Theme configuration definition:
+
 - `name string`: Theme display name
 - `background_color string`: Main window background hex color
 - `font_color string`: Text typography hex color
@@ -2379,41 +2393,161 @@ Theme configuration definition:
 - `is_dark bool`: Boolean flag indicating dark or light theme
 
 #### `simplegui.TreeNode`
+
 Recursive tree structure node for `add_tree_view`:
+
 - `title string`: Label text for tree item
 - `children []TreeNode`: Array of child nodes
 
 #### `simplegui.ToolbarItem`
+
 Item descriptor for `add_toolbar`:
+
 - `icon string`: Symbol/text icon string
 - `tooltip string`: Hover tooltip text
 - `on_click VoidEventCallback`: Click callback
 
 #### `simplegui.PropertyGridItem`
+
 Key-value entry for `add_property_grid`:
+
 - `name string`: Property label name
 - `val string`: Current property text representation
 - `kind string`: Property input type (`text`, `bool`, `color`, `number`)
 
 #### `simplegui.Toast`
+
 Toast notification alert item:
+
 - `id string`, `title string`, `message string`, `variant string` (`info`, `success`, `warning`, `error`), `duration_ms int`, `remaining f32`
 
 #### `simplegui.CommandItem`
+
 Command descriptor for `show_command_palette`:
+
 - `id string`, `title string`, `category string`, `shortcut string`, `on_execute VoidEventCallback`
 
 #### `simplegui.ContextMenuItem`
+
 Menu item for `show_context_menu`:
+
 - `id string`, `title string`, `shortcut string`, `on_select VoidEventCallback`
 
-#### `simplegui.DiskStats` & `simplegui.FileMetadata`
-- **`DiskStats`**: `total_bytes u64`, `free_bytes u64`, `used_bytes u64`, `used_percent f64`
-- **`FileMetadata`**: `size_bytes u64`, `modified_time i64`, `is_dir bool`, `permissions string`
+#### `simplegui.CommandResult`, `simplegui.DiskStats` & `simplegui.FileMetadata`
+
+- **`CommandResult`**: `command string`, `output string`, `exit_code int`, `timed_out bool`, `duration_ms i64`, `attempts int`
+- **`DiskStats`**: `total u64`, `available u64`, `used u64`
+- **`FileMetadata`**: `size i64`, `inode u64`, `nlink u64`, `dev u64`, `uid u32`, `gid u32`, `mode u32`, `atime i64`, `mtime i64`, `ctime i64`, `is_dir bool`, `is_file bool`, `is_link bool`, `is_readable bool`, `is_writable bool`, `is_executable bool`
 
 #### `simplegui.ExternalAppInfo` & `simplegui.ExternalControlInfo`
+
 - **`ExternalAppInfo`**: `pid int`, `name string`, `bundle_id string`
 - **`ExternalControlInfo`**: `role string`, `title string`, `value string`, `enabled bool`
+
+#### `simplegui.WindowConfig`, `simplegui.WindowParams`, `simplegui.ControlInfo`
+
+These are the data objects used for state persistence, window parameter creation, and inspection of live UI controls.
+
+- **`WindowConfig`**: serializable values for title, dimensions, padding, spacing, colors, window flags, and draggable/titlebar flags.
+- **`WindowParams`**: low-level int-based equivalent used by window construction and native interop.
+- **`ControlInfo`**: exported metadata snapshot including `name`, `kind`, `label`, `value`, `checked`, `number`, `enabled`, `visible`, `width`, `height`, `placeholder`, `error_text`, `tooltip`, `background_color`, `font_color`, `font_size`.
+
+#### `simplegui.IntervalTimer`
+
+Represents a scheduled callback inserted into the window timer registry.
+
+- Fields: `id string`, `interval_ms int`, `running bool`, `one_shot bool`, `last_tick int`, `callback fn (mut win SimpleWindow)`
+- Methods: `set_interval`, `set_timeout`, `add_timer`, `pause_timer`, `start_timer`, `reset_timer`, `stop_timer`, `is_timer_running`
+
+#### `simplegui.TOMLWrapperDoc`
+
+Convenience wrapper around `toml.parse_text` for quick config access.
+
+- Methods: `get_string(key)`, `get_string_default(key, def)`, `get_int(key)`, `get_bool(key)`
+- Factory: `toml_parse(content)`
+
+#### `simplegui.SimpleWSClient`
+
+Lightweight WebSocket wrapper for sending and closing text messages.
+
+- Methods: `write_string(msg) !`, `close()`
+- Factory: `websocket_client(url, on_msg)`
+
+#### `simplegui.SimpleStopwatch`
+
+High-precision timing helper for benchmarking and elapsed-time measurement.
+
+- Methods: `elapsed_ms()`, `elapsed_sec()`, `restart()`, `stop()`
+- Factory: `start_stopwatch()`
+
+#### `simplegui.SimpleStack[T]`, `SimpleQueue[T]`, `SimpleSet[T]`, `SimpleRingBuffer[T]`
+
+Generic collection wrappers around the V datatypes library.
+
+- `SimpleStack[T]`: `push`, `pop`, `peek`, `len`, `is_empty`
+- `SimpleQueue[T]`: `push`, `pop`, `peek`, `len`, `is_empty`
+- `SimpleSet[T]`: `add`, `remove`, `exists`, `len`, `is_empty`, `to_array`
+- `SimpleRingBuffer[T]`: `push`, `pop`, `len`, `capacity`, `is_empty`, `is_full`
+- Factory helpers: `new_stack()`, `new_queue()`, `new_set()`, `new_ringbuffer(capacity)`
+
+#### `simplegui.SimpleStringBuilder`
+
+Growable string buffer for efficient concatenation.
+
+- Methods: `write(text)`, `write_line(text)`, `str()`, `len()`
+- Factory: `new_string_builder()`
+
+#### `simplegui.SimpleBenchmark`
+
+Benchmark helper that wraps V's `benchmark` package.
+
+- Methods: `measure(label)`, `step()`, `ok()`, `fail()`, `step_message(label)`, `total_message(label)`, `stop()`
+- Factory: `start_benchmark()`, `new_benchmark()`
+
+#### `simplegui.SimpleTCPClient`, `SimpleUDPClient`, `SimpleUnixClient`
+
+Simplified network clients for common socket protocols.
+
+- `SimpleTCPClient`: `write(data) !`, `read() !string`, `close()`
+- `SimpleUDPClient`: `write(data) !`, `read() !string`, `close()`
+- `SimpleUnixClient`: `write(data) !`, `read() !string`, `close()`
+- Factory functions: `tcp_connect(address)`, `udp_connect(address)`, `unix_connect(path)`
+
+#### `simplegui.SimpleURL`
+
+Parsed URL model used for URL construction and query serialization.
+
+- Fields: `scheme string`, `host string`, `port string`, `path string`, `query map[string]string`, `fragment string`
+- Methods: `build_url()`
+- Factory: `url_parse(raw_url)`, `url_build(scheme, host, path, query_params)`
+
+#### `simplegui.SimpleHTMLDocument`
+
+HTML DOM wrapper for quick tag and attribute inspection.
+
+- Methods: `get_tag_text(name)`, `get_tags_by_class(class_name)`, `get_attr(tag_name, attr_name)`, `get_all_links()`, `get_all_images()`, `strip_tags()`
+- Factory: `html_parse(content)`
+
+#### `simplegui.SimpleMinHeap[T]`
+
+Min-priority queue wrapper around V's heap implementation.
+
+- Methods: `push(item)`, `pop() !T`, `peek() !T`, `len()`
+- Factory: `new_min_heap()`
+
+#### `simplegui.SimpleBigInt`, `SimpleComplex`
+
+Advanced numeric helper objects.
+
+- `SimpleBigInt`: `add`, `sub`, `mul`, `div`, `mod`, `str()`; constructors `big_int_from_int`, `big_int_from_str`
+- `SimpleComplex`: `add`, `sub`, `mul`, `div`, `abs()`, `arg()`, `conj()`, `exp()`, `str()`; constructor `complex_new(re, im)`
+
+#### `simplegui.SimpleMutex`, `SimpleWaitGroup`
+
+Thread synchronization wrappers.
+
+- `SimpleMutex`: `lock()`, `unlock()`; constructor `new_mutex()`
+- `SimpleWaitGroup`: `add(delta)`, `done()`, `wait()`; constructor `new_wait_group()`
 
 ---
 
