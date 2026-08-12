@@ -64,7 +64,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 		match ctrl.kind {
 			'label' {
 				txt_c := if ctrl.font_color.len > 0 { parse_hex_color(ctrl.font_color) } else { fg }
-				lbl_txt := if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.title }
+				lbl_txt := clean_text(if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.title })
 				lbl_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 15 }
 				is_mono := ctrl.font_name.len > 0 && (ctrl.font_name.to_lower().contains('mono') || ctrl.font_name.to_lower().contains('courier'))
 				win.gg_ctx.draw_text2(
@@ -79,7 +79,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 			}
 			'heading' {
 				txt_c := if ctrl.font_color.len > 0 { parse_hex_color(ctrl.font_color) } else { fg }
-				hd_txt := if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.title }
+				hd_txt := clean_text(if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.title })
 				hd_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 22 }
 				is_mono := ctrl.font_name.len > 0 && (ctrl.font_name.to_lower().contains('mono') || ctrl.font_name.to_lower().contains('courier'))
 				win.gg_ctx.draw_text2(
@@ -135,10 +135,11 @@ pub fn (mut win SimpleWindow) render_ui() {
 				}
 
 				max_chars := math.max(1, int((ctrl.w - 16.0) / (f32(btn_sz) * 0.55)))
-				disp_title := if ctrl.title.len > max_chars && max_chars > 3 {
-					ctrl.title[0..max_chars - 3] + '...'
+				raw_title := clean_text(ctrl.title)
+				disp_title := if raw_title.len > max_chars && max_chars > 3 {
+					raw_title[0..max_chars - 3] + '...'
 				} else {
-					ctrl.title
+					raw_title
 				}
 
 				text_w := f32(disp_title.len) * (f32(btn_sz) * 0.55)
@@ -1691,8 +1692,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, 32.0, 6.0, surface)
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, 32.0, 6.0, border_c)
 				val_str := if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.placeholder }
-				win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(ctrl.y + 8), text: val_str, color: fg, size: 12)
-				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 20), y: int(ctrl.y + 8), text: '▼', color: accent, size: 10)
+				win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(ctrl.y + 8), text: clean_text(val_str), color: fg, size: 12)
+				draw_vector_chevron(win.gg_ctx, ctrl.x + ctrl.w - 14.0, ctrl.y + 16.0, 4.5, if ctrl.is_expanded { 'up' } else { 'down' }, accent)
 
 				if ctrl.is_expanded {
 					pop_h := f32(math.min(150, ctrl.items.len * 26 + 8))
@@ -1759,13 +1760,14 @@ pub fn (mut win SimpleWindow) render_ui() {
 
 				btn_x := ctrl.x + box_w + 10.0
 				win.gg_ctx.draw_rounded_rect_filled(btn_x, ctrl.y + 10, 40.0, 28.0, 4.0, accent)
-				win.gg_ctx.draw_text2(x: int(btn_x + 15), y: int(ctrl.y + 16), text: '>', color: gg.Color{r: 255, g: 255, b: 255}, size: 14)
+				draw_vector_chevron(win.gg_ctx, btn_x + 20.0, ctrl.y + 24.0, 5.0, 'right', gg.Color{r: 255, g: 255, b: 255})
 
 				win.gg_ctx.draw_rounded_rect_filled(btn_x, ctrl.y + 44, 40.0, 28.0, 4.0, accent)
-				win.gg_ctx.draw_text2(x: int(btn_x + 15), y: int(ctrl.y + 50), text: '<', color: gg.Color{r: 255, g: 255, b: 255}, size: 14)
+				draw_vector_chevron(win.gg_ctx, btn_x + 20.0, ctrl.y + 58.0, 5.0, 'left', gg.Color{r: 255, g: 255, b: 255})
 
 				win.gg_ctx.draw_rounded_rect_filled(btn_x, ctrl.y + 78, 40.0, 28.0, 4.0, accent)
-				win.gg_ctx.draw_text2(x: int(btn_x + 12), y: int(ctrl.y + 84), text: '>>', color: gg.Color{r: 255, g: 255, b: 255}, size: 12)
+				draw_vector_chevron(win.gg_ctx, btn_x + 16.0, ctrl.y + 92.0, 5.0, 'right', gg.Color{r: 255, g: 255, b: 255})
+				draw_vector_chevron(win.gg_ctx, btn_x + 24.0, ctrl.y + 92.0, 5.0, 'right', gg.Color{r: 255, g: 255, b: 255})
 
 				rx := ctrl.x + box_w + 60.0
 				win.gg_ctx.draw_rounded_rect_filled(rx, ctrl.y, box_w, ctrl.h, 6.0, surface)
@@ -1880,8 +1882,8 @@ fn (mut win SimpleWindow) render_toasts() {
 		win.gg_ctx.draw_rounded_rect_empty(tx, ty, t_w, t_h, 8.0, t_color)
 		win.gg_ctx.draw_rect_filled(tx, ty, 6.0, t_h, t_color)
 
-		win.gg_ctx.draw_text2(x: int(tx + 16), y: int(ty + 8), text: toast.title, color: gg.Color{r: 255, g: 255, b: 255}, size: 13)
-		win.gg_ctx.draw_text2(x: int(tx + 16), y: int(ty + 28), text: toast.message, color: gg.rgb(200, 205, 215), size: 12)
+		win.gg_ctx.draw_text2(x: int(tx + 16), y: int(ty + 8), text: clean_text(toast.title), color: gg.Color{r: 255, g: 255, b: 255}, size: 13)
+		win.gg_ctx.draw_text2(x: int(tx + 16), y: int(ty + 28), text: clean_text(toast.message), color: gg.rgb(200, 205, 215), size: 12)
 		win.gg_ctx.draw_text2(x: int(tx + t_w - 20), y: int(ty + 6), text: 'x', color: gg.rgb(180, 185, 200), size: 13)
 
 		active_toasts << toast
@@ -2160,4 +2162,24 @@ fn draw_vector_spinner(gg_ctx &gg.Context, cx f32, cy f32, radius f32, active bo
 		dot_radius := if diff == 0 { f32(2.5) } else { f32(1.8) }
 		gg_ctx.draw_circle_filled(dot_x, dot_y, dot_radius, dot_color)
 	}
+}
+
+fn clean_text(s string) string {
+	if s.len == 0 {
+		return ''
+	}
+	mut runes := s.runes()
+	mut res := []rune{cap: runes.len}
+	for r in runes {
+		u := u32(r)
+		if (u >= 0x1F000 && u <= 0x1FAFF) || (u >= 0x2600 && u <= 0x27BF) || (u >= 0xFE00 && u <= 0xFE0F) {
+			continue
+		}
+		if r == `★` || r == `☆` || r == `⭐` {
+			res << `*`
+			continue
+		}
+		res << r
+	}
+	return res.string().trim_space()
 }
