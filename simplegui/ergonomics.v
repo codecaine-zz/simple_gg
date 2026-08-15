@@ -9,7 +9,7 @@
 
 module simplegui
 
-import json
+import x.json2
 import os
 
 // =============================================================================
@@ -266,12 +266,12 @@ pub fn (mut win SimpleWindow) set_f64(name string, val f64) &SimpleWindow {
 // export_form_json encodes field values for the specified control `names` into a JSON formatted string.
 pub fn (win &SimpleWindow) export_form_json(names []string) string {
 	m := win.get_all(names)
-	return json.encode(m)
+	return json2.encode(m)
 }
 
 // import_form_json populates control values from a JSON formatted string map.
 pub fn (mut win SimpleWindow) import_form_json(json_str string) &SimpleWindow {
-	m := json.decode(map[string]string, json_str) or { return win }
+	m := json2.decode[map[string]string](json_str) or { return win }
 	win.set_all(m)
 	return win
 }

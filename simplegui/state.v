@@ -9,7 +9,7 @@
 
 module simplegui
 
-import json
+import x.json2
 import os
 
 // StringEventCallback is a callback function invoked with a string parameter (e.g. state value change).
@@ -252,14 +252,14 @@ pub fn (mut win SimpleWindow) on_state_change(key string, cb StringEventCallback
 
 // save_state_json serializes the entire state store dictionary to a JSON file at `file_path`.
 pub fn (win &SimpleWindow) save_state_json(file_path string) ! {
-	data := json.encode(win.state_store)
+	data := json2.encode(win.state_store)
 	os.write_file(file_path, data) or { return error(err.msg()) }
 }
 
 // load_state_json reads a JSON file from `file_path`, updates the state store, and triggers reactive listeners.
 pub fn (mut win SimpleWindow) load_state_json(file_path string) ! {
 	content := os.read_file(file_path) or { return error(err.msg()) }
-	loaded := json.decode(map[string]string, content) or { return error(err.msg()) }
+	loaded := json2.decode[map[string]string](content) or { return error(err.msg()) }
 	for key, val in loaded {
 		win.set_state(key, val)
 	}

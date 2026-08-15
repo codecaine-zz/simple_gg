@@ -9,7 +9,7 @@
 module simplegui
 
 import os
-import json as _
+import x.json2 as _
 import time
 import net.http
 import crypto.sha256

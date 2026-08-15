@@ -22,7 +22,7 @@ import net.urllib
 import net.websocket
 import toml
 import semver
-import json
+import x.json2
 import encoding.hex
 import encoding.base64
 import crypto.sha512
@@ -721,7 +721,7 @@ pub fn (win &SimpleWindow) semver_satisfies(v string, range_query string) bool {
 
 // json_decode_map cleanly deserializes a JSON string into a flat key-value map without mandatory struct setups.
 pub fn json_decode_map(json_str string) map[string]string {
-	res := json.decode(map[string]string, json_str) or { return map[string]string{} }
+	res := json2.decode[map[string]string](json_str) or { return map[string]string{} }
 	return res
 }
 
@@ -732,7 +732,7 @@ pub fn (win &SimpleWindow) json_decode_map(json_str string) map[string]string {
 
 // json_decode_map_strict decodes a JSON object and returns an explicit error for malformed payloads.
 pub fn json_decode_map_strict(json_str string) !map[string]string {
-	return json.decode(map[string]string, json_str)!
+	return json2.decode[map[string]string](json_str)!
 }
 
 // json_decode_map_strict delegates to standalone json_decode_map_strict.
@@ -886,7 +886,7 @@ pub fn (win &SimpleWindow) decompress_zlib(data []u8) string {
 
 // json_encode_map_list serializes an array of maps into a JSON string.
 pub fn json_encode_map_list(m []map[string]string) string {
-	return json.encode(m)
+	return json2.encode(m)
 }
 
 // json_encode_map_list delegates to standalone json_encode_map_list.
@@ -896,7 +896,7 @@ pub fn (win &SimpleWindow) json_encode_map_list(m []map[string]string) string {
 
 // json_decode_map_list deserializes a JSON string into an array of flat key-value maps.
 pub fn json_decode_map_list(json_str string) []map[string]string {
-	res := json.decode([]map[string]string, json_str) or { return []map[string]string{} }
+	res := json2.decode[[]map[string]string](json_str) or { return []map[string]string{} }
 	return res
 }
 
@@ -2844,7 +2844,7 @@ pub fn (win &SimpleWindow) time_days_in_month(year int, month int) int {
 
 // json_validate checks if a string contains valid JSON syntax by testing map decoding.
 pub fn json_validate(json_str string) bool {
-	_ := json.decode(map[string]string, json_str) or { return false }
+	_ := json2.decode[map[string]string](json_str) or { return false }
 	return true
 }
 
@@ -2855,7 +2855,7 @@ pub fn (win &SimpleWindow) json_validate(json_str string) bool {
 
 // json_pretty_print formats a flat key-value map JSON string with clean line indents.
 pub fn json_pretty_print(json_str string) string {
-	m := json.decode(map[string]string, json_str) or { return json_str }
+	m := json2.decode[map[string]string](json_str) or { return json_str }
 	mut sb := strings.new_builder(128)
 	sb.writeln('{')
 	mut count := 0
