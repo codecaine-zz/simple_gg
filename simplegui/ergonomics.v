@@ -9,7 +9,7 @@
 
 module simplegui
 
-import x.json2
+import json2
 import os
 
 // =============================================================================

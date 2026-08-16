@@ -22,7 +22,7 @@ import net.urllib
 import net.websocket
 import toml
 import semver
-import x.json2
+import json2
 import encoding.hex
 import encoding.base64
 import crypto.sha512
