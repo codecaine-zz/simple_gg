@@ -32,6 +32,7 @@ fn test_user_profile_card() {
 	mut ctrl := win.control('prof_ada')
 	assert ctrl.name == 'prof_ada'
 	assert ctrl.kind == 'user_profile_card'
+	assert ctrl.text_value == 'assets/images/avatar_ada_lovelace.jpg'
 	assert ctrl.title == 'Ada Lovelace'
 	assert ctrl.placeholder == '@ada_lovelace'
 	assert ctrl.bool_value == true
@@ -43,6 +44,7 @@ fn test_user_profile_card() {
 	win.set_user_online_status('prof_ada', false)
 	ctrl = win.control('prof_ada')
 	assert ctrl.bool_value == false
+	assert ctrl.text_value == 'assets/images/avatar_ada_lovelace.jpg'
 
 	// Test method chaining update
 	ctrl.set_user_profile(
@@ -53,6 +55,7 @@ fn test_user_profile_card() {
 		'Full-stack cloud infrastructure developer.',
 		true
 	)
+	assert ctrl.text_value == 'assets/images/avatar_alex_chen.jpg'
 	assert ctrl.title == 'Alex Chen'
 	assert ctrl.placeholder == '@alex_dev'
 	assert ctrl.bool_value == true

@@ -882,17 +882,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 									if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
 								}
 							}
-						} else if ctrl.kind == 'image' || ctrl.kind == 'image_box' {
-							// Handled on mouse_up
-						} else if ctrl.kind == 'user_profile_card' {
-							btn_w := f32(96.0)
-							btn_h := f32(30.0)
-							btn_x := ctrl.x + ctrl.w - btn_w - 14.0
-							btn_y := ctrl.y + 24.0
-							if win.mouse_x >= btn_x && win.mouse_x <= btn_x + btn_w && win.mouse_y >= btn_y && win.mouse_y <= btn_y + btn_h {
-								ctrl.text_value = if ctrl.variant.len > 0 { ctrl.variant } else { '[Message]' }
-							}
-						} else if ctrl.kind == 'product_card' {
+						} else if ctrl.kind == 'image' || ctrl.kind == 'image_box' || ctrl.kind == 'user_profile_card' || ctrl.kind == 'product_card' {
 							// Handled on mouse_up
 						} else if ctrl.kind == 'image_gallery' {
 							pad := f32(8.0)
