@@ -102,6 +102,7 @@ pub mut:
 	modal_input_mode     bool              // If true, enables input box inside dialog
 	modal_input_val      string            // Text value in input box
 	modal_input_holder   string            // Placeholder for input box
+	modal_input_caret    int               // Text cursor/caret position in modal input box
 	modal_on_confirm     VoidEventCallback = unsafe { nil } // Callback when confirm button clicked
 	modal_on_cancel      VoidEventCallback = unsafe { nil } // Callback when cancel button clicked
 	modal_on_neutral     VoidEventCallback = unsafe { nil } // Callback when neutral button clicked
@@ -3239,7 +3240,10 @@ pub fn (win &SimpleWindow) get_modal_layout() ModalLayout {
 	content_x_offset := if has_image { f32(84.0) } else { f32(24.0) }
 	content_w_offset := if has_image { f32(108.0) } else { f32(48.0) }
 
-	msg_lines := int(math.max(1, (win.modal_message.len / 44) + 1))
+	content_w := bw - content_w_offset
+
+	lines := wrap_text_to_width(win, win.modal_message, content_w)
+	msg_lines := math.max(1, lines.len)
 	msg_h := f32(msg_lines * 18)
 
 	mut extra_h := f32(0.0)
@@ -3258,7 +3262,6 @@ pub fn (win &SimpleWindow) get_modal_layout() ModalLayout {
 	by := f32((f32(win.height) - bh) / 2.0)
 
 	content_x := bx + content_x_offset
-	content_w := bw - content_w_offset
 
 	mut curr_y := by + 50.0 + msg_h
 
@@ -3343,6 +3346,7 @@ pub fn (mut win SimpleWindow) show_custom_dialog(cfg DialogConfig) &SimpleWindow
 	win.modal_input_mode = cfg.input_mode
 	win.modal_input_val = cfg.input_val
 	win.modal_input_holder = cfg.input_placeholder
+	win.modal_input_caret = cfg.input_val.len
 	win.modal_on_confirm = cfg.on_confirm
 	win.modal_on_cancel = cfg.on_cancel
 	win.modal_on_neutral = cfg.on_neutral
@@ -3473,7 +3477,8 @@ pub fn (mut win SimpleWindow) show_dialog_tip(title string, message string) &Sim
 // show_dialog_input displays an input prompt modal dialog with an inline text field.
 pub fn (mut win SimpleWindow) show_dialog_input(title string, message string, default_val string, placeholder string, on_confirm VoidEventCallback) &SimpleWindow {
 	return win.show_custom_dialog(DialogConfig{
-		kind: .custom
+		kind: .confirm
+		image_path: 'assets/images/dialog_icon_question.jpg'
 		title: title
 		message: message
 		input_mode: true
@@ -3488,6 +3493,24 @@ pub fn (mut win SimpleWindow) show_dialog_input(title string, message string, de
 // get_dialog_input returns the current text inside the active or last modal dialog input box.
 pub fn (win &SimpleWindow) get_dialog_input() string {
 	return win.modal_input_val
+}
+
+// set_dialog_input updates the text inside the modal dialog input box and resets the cursor to the end.
+pub fn (mut win SimpleWindow) set_dialog_input(val string) &SimpleWindow {
+	win.modal_input_val = val
+	win.modal_input_caret = val.len
+	return win
+}
+
+// get_dialog_input_cursor returns the current cursor/caret character index inside the modal input box.
+pub fn (win &SimpleWindow) get_dialog_input_cursor() int {
+	return win.modal_input_caret
+}
+
+// set_dialog_input_cursor sets the cursor/caret character index inside the modal input box.
+pub fn (mut win SimpleWindow) set_dialog_input_cursor(pos int) &SimpleWindow {
+	win.modal_input_caret = math.max(0, math.min(win.modal_input_val.len, pos))
+	return win
 }
 
 // get_dialog_checkbox returns whether the modal dialog checkbox was checked.

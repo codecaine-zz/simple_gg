@@ -3066,23 +3066,11 @@ fn (mut win SimpleWindow) render_modal() {
 	win.gg_ctx.draw_line(layout.content_x, layout.by + 42, layout.bx + layout.bw - 20.0, layout.by + 42, border_c)
 
 	// Message lines
-	msg_lines := win.modal_message.split('\n')
+	lines := wrap_text_to_width(win, win.modal_message, layout.content_w)
 	mut my := layout.by + 52.0
-	for line in msg_lines {
-		if line.len <= 44 {
-			win.gg_ctx.draw_text2(x: int(layout.content_x), y: int(my), text: clean_text(line), color: fg, size: 13)
-			my += 18.0
-		} else {
-			// Wrap longer strings
-			mut remaining := line
-			for remaining.len > 0 {
-				chunk_len := math.min(44, remaining.len)
-				chunk := remaining[0..chunk_len]
-				win.gg_ctx.draw_text2(x: int(layout.content_x), y: int(my), text: clean_text(chunk), color: fg, size: 13)
-				my += 18.0
-				remaining = remaining[chunk_len..]
-			}
-		}
+	for line in lines {
+		win.gg_ctx.draw_text2(x: int(layout.content_x), y: int(my), text: line, color: fg, size: 13)
+		my += 18.0
 	}
 
 	// Optional Detail text callout
@@ -3109,24 +3097,32 @@ fn (mut win SimpleWindow) render_modal() {
 		if win.modal_input_val.len > 0 {
 			win.gg_ctx.draw_text2(
 				x: int(layout.content_x + 10)
-				y: int(layout.input_y + 8)
-				text: clean_text(win.modal_input_val)
+				y: int(layout.input_y + (layout.input_h - 14) / 2.0)
+				text: win.modal_input_val
 				color: fg
-				size: 13
+				size: 14
 			)
-			// Blinking cursor
-			cursor_x := int(layout.content_x + 10 + f32(win.modal_input_val.len * 8))
-			if (time.now().unix_milli() / 500) % 2 == 0 {
-				win.gg_ctx.draw_line(f32(cursor_x), layout.input_y + 6, f32(cursor_x), layout.input_y + layout.input_h - 6, accent)
-			}
 		} else if win.modal_input_holder.len > 0 {
 			win.gg_ctx.draw_text2(
 				x: int(layout.content_x + 10)
-				y: int(layout.input_y + 8)
-				text: clean_text(win.modal_input_holder)
+				y: int(layout.input_y + (layout.input_h - 14) / 2.0)
+				text: win.modal_input_holder
 				color: muted_fg
-				size: 13
+				size: 14
 			)
+		}
+
+		// Blinking caret cursor
+		if (time.now().unix_milli() / 500) % 2 == 0 {
+			caret_pos := math.max(0, math.min(win.modal_input_val.len, win.modal_input_caret))
+			sub := if caret_pos <= win.modal_input_val.len {
+				win.modal_input_val[0..caret_pos]
+			} else {
+				win.modal_input_val
+			}
+			caret_offset := measure_text_width(win, sub)
+			cursor_x := layout.content_x + 10.0 + caret_offset
+			win.gg_ctx.draw_line(cursor_x, layout.input_y + 6.0, cursor_x, layout.input_y + layout.input_h - 6.0, accent)
 		}
 	}
 
@@ -3353,7 +3349,7 @@ fn clean_text(s string) string {
 		}
 		res << r
 	}
-	return res.string().trim_space()
+	return res.string()
 }
 
 // truncate_text_to_width truncates a string with '...' if its rendered width exceeds max_width.
@@ -3384,6 +3380,63 @@ fn truncate_text_to_width(win &SimpleWindow, text string, max_width f32) string 
 		return '...'
 	}
 	return clean[0..best] + '...'
+}
+
+// wrap_text_to_width splits text into wrapped lines based on max pixel width and word boundaries.
+fn wrap_text_to_width(win &SimpleWindow, text string, max_w f32) []string {
+	if text.len == 0 {
+		return []
+	}
+	clean := clean_text(text)
+	raw_lines := clean.split('\n')
+	mut result := []string{}
+	for raw_line in raw_lines {
+		if raw_line.len == 0 {
+			result << ''
+			continue
+		}
+		if max_w <= 0 || measure_text_width(win, raw_line) <= max_w {
+			result << raw_line
+			continue
+		}
+		words := raw_line.split(' ')
+		mut current_line := ''
+		for word in words {
+			// If a single unbroken word exceeds max_w, split it by characters
+			if max_w > 0 && measure_text_width(win, word) > max_w {
+				if current_line.len > 0 {
+					result << current_line
+					current_line = ''
+				}
+				mut chunk := ''
+				for ch in word.runes() {
+					test_chunk := chunk + ch.str()
+					if measure_text_width(win, test_chunk) <= max_w || chunk.len == 0 {
+						chunk = test_chunk
+					} else {
+						result << chunk
+						chunk = ch.str()
+					}
+				}
+				if chunk.len > 0 {
+					current_line = chunk
+				}
+				continue
+			}
+
+			test_line := if current_line.len == 0 { word } else { current_line + ' ' + word }
+			if measure_text_width(win, test_line) <= max_w || current_line.len == 0 {
+				current_line = test_line
+			} else {
+				result << current_line
+				current_line = word
+			}
+		}
+		if current_line.len > 0 {
+			result << current_line
+		}
+	}
+	return result
 }
 
 // draw_image_fit draws an image scaled to fit inside the specified (x, y, w, h) bounds.

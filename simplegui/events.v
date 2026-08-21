@@ -75,6 +75,33 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 			win.mouse_x = e.mouse_x
 			win.mouse_y = e.mouse_y
 
+			if win.modal_active {
+				layout := win.get_modal_layout()
+				if win.modal_input_mode && win.mouse_x >= layout.content_x && win.mouse_x <= layout.content_x + layout.input_w
+					&& win.mouse_y >= layout.input_y && win.mouse_y <= layout.input_y + layout.input_h {
+					win.cursor_name = 'ibeam'
+					if win.mouse_down {
+						left_pad := f32(10.0)
+						rel_x := win.mouse_x - (layout.content_x + left_pad)
+						mut min_dist := f32(999999.0)
+						mut best_idx := 0
+						for idx in 0 .. win.modal_input_val.len + 1 {
+							sub := win.modal_input_val[0..idx]
+							w := measure_text_width(win, sub)
+							dist := math.abs(rel_x - w)
+							if dist < min_dist {
+								min_dist = dist
+								best_idx = idx
+							}
+						}
+						win.modal_input_caret = best_idx
+					}
+				} else {
+					win.cursor_name = 'arrow'
+				}
+				return
+			}
+
 			mut new_hover := ''
 			// Hit-test mouse position against all active, visible controls
 			for mut ctrl in win.controls {
@@ -172,7 +199,27 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 					return
 				}
 
-				// 2. Checkbox toggle click
+				// 2. Text Input Box click & caret position
+				if win.modal_input_mode && win.mouse_x >= layout.content_x && win.mouse_x <= layout.content_x + layout.input_w
+					&& win.mouse_y >= layout.input_y && win.mouse_y <= layout.input_y + layout.input_h {
+					left_pad := f32(10.0)
+					rel_x := win.mouse_x - (layout.content_x + left_pad)
+					mut min_dist := f32(999999.0)
+					mut best_idx := 0
+					for idx in 0 .. win.modal_input_val.len + 1 {
+						sub := win.modal_input_val[0..idx]
+						w := measure_text_width(win, sub)
+						dist := math.abs(rel_x - w)
+						if dist < min_dist {
+							min_dist = dist
+							best_idx = idx
+						}
+					}
+					win.modal_input_caret = best_idx
+					return
+				}
+
+				// 3. Checkbox toggle click
 				if win.modal_checkbox_txt.len > 0 {
 					if win.mouse_x >= layout.content_x && win.mouse_x <= layout.content_x + layout.content_w
 						&& win.mouse_y >= layout.check_y - 2.0 && win.mouse_y <= layout.check_y + 20.0 {
@@ -181,7 +228,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 					}
 				}
 
-				// 3. Action Buttons Click (Confirm, Cancel, Neutral)
+				// 4. Action Buttons Click (Confirm, Cancel, Neutral)
 				if win.mouse_y >= layout.btn_y && win.mouse_y <= layout.btn_y + layout.btn_h {
 					if win.mouse_x >= layout.confirm_x && win.mouse_x <= layout.confirm_x + layout.confirm_w {
 						cb := win.modal_on_confirm
@@ -956,8 +1003,14 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 				return
 			}
 			if win.modal_active {
-				if win.modal_input_mode && e.char_code >= 32 && e.char_code <= 126 {
-					win.modal_input_val += u8(e.char_code).ascii_str()
+				if win.modal_input_mode && e.char_code > 32 && e.char_code <= 126 {
+					ch := u8(e.char_code).ascii_str()
+					if win.modal_input_caret < 0 || win.modal_input_caret > win.modal_input_val.len {
+						win.modal_input_caret = win.modal_input_val.len
+					}
+					win.modal_input_val = win.modal_input_val[0..win.modal_input_caret] + ch +
+						win.modal_input_val[win.modal_input_caret..]
+					win.modal_input_caret++
 				}
 				return
 			}
@@ -1013,11 +1066,72 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 						cb(mut win)
 					}
 					return
-				} else if win.modal_input_mode && e.key_code == .backspace {
-					if win.modal_input_val.len > 0 {
-						win.modal_input_val = win.modal_input_val[0..win.modal_input_val.len - 1]
+				}
+
+				if win.modal_input_mode {
+					if (is_ctrl || is_super) && e.key_code == .v {
+						clip := win.get_clipboard_text()
+						if clip.len > 0 {
+							if win.modal_input_caret < 0 || win.modal_input_caret > win.modal_input_val.len {
+								win.modal_input_caret = win.modal_input_val.len
+							}
+							win.modal_input_val = win.modal_input_val[0..win.modal_input_caret] + clip +
+								win.modal_input_val[win.modal_input_caret..]
+							win.modal_input_caret += clip.len
+						}
+						return
+					} else if (is_ctrl || is_super) && e.key_code == .c {
+						win.copy_to_clipboard(win.modal_input_val)
+						return
+					} else if (is_ctrl || is_super) && e.key_code == .x {
+						win.copy_to_clipboard(win.modal_input_val)
+						win.modal_input_val = ''
+						win.modal_input_caret = 0
+						return
+					} else if (is_ctrl || is_super) && e.key_code == .a {
+						win.modal_input_caret = win.modal_input_val.len
+						return
+					} else if e.key_code == .space {
+						if win.modal_input_caret < 0 || win.modal_input_caret > win.modal_input_val.len {
+							win.modal_input_caret = win.modal_input_val.len
+						}
+						win.modal_input_val = win.modal_input_val[0..win.modal_input_caret] + ' ' +
+							win.modal_input_val[win.modal_input_caret..]
+						win.modal_input_caret++
+						return
+					} else if e.key_code == .left {
+						if win.modal_input_caret > 0 {
+							win.modal_input_caret--
+						}
+						return
+					} else if e.key_code == .right {
+						if win.modal_input_caret < win.modal_input_val.len {
+							win.modal_input_caret++
+						}
+						return
+					} else if e.key_code == .home {
+						win.modal_input_caret = 0
+						return
+					} else if e.key_code == .end {
+						win.modal_input_caret = win.modal_input_val.len
+						return
+					} else if e.key_code == .backspace {
+						if win.modal_input_val.len > 0 && win.modal_input_caret > 0 {
+							if win.modal_input_caret > win.modal_input_val.len {
+								win.modal_input_caret = win.modal_input_val.len
+							}
+							win.modal_input_val = win.modal_input_val[0..win.modal_input_caret - 1] +
+								win.modal_input_val[win.modal_input_caret..]
+							win.modal_input_caret--
+						}
+						return
+					} else if e.key_code == .delete {
+						if win.modal_input_caret < win.modal_input_val.len {
+							win.modal_input_val = win.modal_input_val[0..win.modal_input_caret] +
+								win.modal_input_val[win.modal_input_caret + 1..]
+						}
+						return
 					}
-					return
 				}
 				return
 			}

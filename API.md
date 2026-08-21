@@ -2248,6 +2248,9 @@ win.show_custom_dialog(simplegui.DialogConfig{
 // Query active dialog state
 is_open := win.is_dialog_active()
 input_val := win.get_dialog_input()
+cursor_pos := win.get_dialog_input_cursor()
+win.set_dialog_input('feature/new-branch')
+win.set_dialog_input_cursor(8)
 chk_val := win.get_dialog_checkbox()
 win.hide_dialog() // or win.hide_modal()
 ```
