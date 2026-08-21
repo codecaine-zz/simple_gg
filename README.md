@@ -20,20 +20,16 @@
 </p>
 
 <details>
-<summary><b>📸 Click to view all 24 example screenshots</b></summary>
+<summary><b>📸 Click to view remaining example screenshots (18 more)</b></summary>
 <br/>
 
 <p align="center">
-  <img src="snapshots/ex1.png" width="48%" alt="01 - Quickstart Demo" />
   <img src="snapshots/ex2.png" width="48%" alt="02 - Theme Gallery Demo" />
-</p>
-<p align="center">
   <img src="snapshots/ex3.png" width="48%" alt="03 - Layout Containers Demo" />
-  <img src="snapshots/ex4.png" width="48%" alt="04 - Component Gallery Demo" />
 </p>
 <p align="center">
+  <img src="snapshots/ex4.png" width="48%" alt="04 - Component Gallery Demo" />
   <img src="snapshots/ex5.png" width="48%" alt="05 - Nameless Shortcuts Demo" />
-  <img src="snapshots/ex6.png" width="48%" alt="06 - Interactive Dashboard Demo" />
 </p>
 <p align="center">
   <img src="snapshots/ex7.png" width="48%" alt="07 - Advanced Controls Demo" />
@@ -49,27 +45,19 @@
 </p>
 <p align="center">
   <img src="snapshots/ex13.png" width="48%" alt="13 - Reactive State Store Demo" />
-  <img src="snapshots/ex14.png" width="48%" alt="14 - RAD Controls Showcase Demo" />
-</p>
-<p align="center">
   <img src="snapshots/ex15.png" width="48%" alt="15 - Modern UI Features Showcase Demo" />
+</p>
+<p align="center">
   <img src="snapshots/ex16.png" width="48%" alt="16 - Interval Timers Demo" />
-</p>
-<p align="center">
   <img src="snapshots/ex17.png" width="48%" alt="17 - Data & Event Binding Demo" />
+</p>
+<p align="center">
   <img src="snapshots/ex18.png" width="48%" alt="18 - Custom Font Typography Demo" />
-</p>
-<p align="center">
   <img src="snapshots/ex19.png" width="48%" alt="19 - Cross-Window Spy Demo" />
+</p>
+<p align="center">
   <img src="snapshots/ex20.png" width="48%" alt="20 - Stdlib Data Structures Demo" />
-</p>
-<p align="center">
   <img src="snapshots/ex21.png" width="48%" alt="21 - Extended OS System Calls Demo" />
-  <img src="snapshots/ex22.png" width="48%" alt="22 - Modern Super Controls Demo" />
-</p>
-<p align="center">
-  <img src="snapshots/ex23.png" width="48%" alt="23 - Modern Image Controls Demo" />
-  <img src="snapshots/ex24.png" width="48%" alt="24 - RAD Custom 3D Image Dialogs Demo" />
 </p>
 
 </details>
@@ -121,30 +109,30 @@ The repository includes beginner-friendly example programs in the [`examples/`](
 
 | Example | Description | Run Command | Snapshot |
 | :--- | :--- | :--- | :--- |
-| **[`01_quickstart.v`](examples/01_quickstart.v)** | First starter app with inputs and button callbacks. | `v run examples/01_quickstart.v` | ![Snapshot 01](snapshots/ex1.png) |
-| **[`02_theme_gallery.v`](examples/02_theme_gallery.v)** | Live theme switcher across 34 production palettes. | `v run examples/02_theme_gallery.v` | ![Snapshot 02](snapshots/ex2.png) |
-| **[`03_layout_containers.v`](examples/03_layout_containers.v)** | Horizontal rows, multi-column grids, and group cards. | `v run examples/03_layout_containers.v` | ![Snapshot 03](snapshots/ex3.png) |
-| **[`04_widgets_and_forms.v`](examples/04_widgets_and_forms.v)** | Form inputs, sliders, steppers, ratings, dates, and metric cards. | `v run examples/04_widgets_and_forms.v` | ![Snapshot 04](snapshots/ex4.png) |
-| **[`05_nameless_shortcuts.v`](examples/05_nameless_shortcuts.v)** | Rapid prototyping using nameless shortcuts (`win.input()`). | `v run examples/05_nameless_shortcuts.v` | ![Snapshot 05](snapshots/ex5.png) |
-| **[`06_dashboard_app.v`](examples/06_dashboard_app.v)** | Real-world dashboard with KPI metrics, charts, and actions. | `v run examples/06_dashboard_app.v` | ![Snapshot 06](snapshots/ex6.png) |
-| **[`07_advanced_controls.v`](examples/07_advanced_controls.v)** | Data tables, tab containers, tree views, search, breadcrumbs, avatars, and shortcuts. | `v run examples/07_advanced_controls.v` | ![Snapshot 07](snapshots/ex7.png) |
-| **[`08_rad_development.v`](examples/08_rad_development.v)** | Rapid app builder with batch ops, JSON form export, clipboard, and OS dialogs. | `v run examples/08_rad_development.v` | ![Snapshot 08](snapshots/ex8.png) |
-| **[`09_control_customization.v`](examples/09_control_customization.v)** | Custom geometry, margins/padding, colors, borders, and fluent control chaining. | `v run examples/09_control_customization.v` | ![Snapshot 09](snapshots/ex9.png) |
-| **[`10_more_controls.v`](examples/10_more_controls.v)** | Icon buttons, toolbars, hyperlinks, checklists, chips, and password strength meter. | `v run examples/10_more_controls.v` | ![Snapshot 10](snapshots/ex10.png) |
-| **[`11_data_table_pro.v`](examples/11_data_table_pro.v)** | Sortable data tables, wheel scrolling, row hover, and table manipulation. | `v run examples/11_data_table_pro.v` | ![Snapshot 11](snapshots/ex11.png) |
-| **[`12_system_and_stdlib_features.v`](examples/12_system_and_stdlib_features.v)** | Desktop notifications, hardware specs, clipboard, system paths, HTTP GET, RegEx, Crypto. | `v run examples/12_system_and_stdlib_features.v` | ![Snapshot 12](snapshots/ex12.png) |
-| **[`13_reactive_state_store.v`](examples/13_reactive_state_store.v)** | Reactive key-value state store, typed accessors, state change listeners, and JSON disk persistence. | `v run examples/13_reactive_state_store.v` | ![Snapshot 13](snapshots/ex13.png) |
-| **[`14_rad_controls_showcase.v`](examples/14_rad_controls_showcase.v)** | RAD & Advanced Suite: ListBox, Multi-Select ListBox, ComboBox, Transfer List, Code Editor, Console Log, Color Palette, Step Slider, Status Bar, Tag Input, Range Slider, Drop Zone, Property Grid, Sparkline, Pagination, Split View, Toasts, Command Palette, Context Menu. | `v run examples/14_rad_controls_showcase.v` | ![Snapshot 14](snapshots/ex14.png) |
-| **[`15_modern_ui_features_showcase.v`](examples/15_modern_ui_features_showcase.v)** | Modern UI Showcase: Window controls, themes, layouts, forms, state store, system utilities. | `v run examples/15_modern_ui_features_showcase.v` | ![Snapshot 15](snapshots/ex15.png) |
-| **[`16_interval_timers.v`](examples/16_interval_timers.v)** | Interval Timers & Timeouts: Recurring timers, timeouts, clock, auto progress bar. | `v run examples/16_interval_timers.v` | ![Snapshot 16](snapshots/ex16.png) |
-| **[`17_data_and_event_binding.v`](examples/17_data_and_event_binding.v)** | Data & Event Binding: Two-way state binding (`bind_state`), click aliases, shortcut bindings. | `v run examples/17_data_and_event_binding.v` | ![Snapshot 17](snapshots/ex17.png) |
-| **[`18_custom_font_loading.v`](examples/18_custom_font_loading.v)** | Custom Font & Typography: Platform font resolution, custom TTF/OTF setting, font discovery. | `v run examples/18_custom_font_loading.v` | ![Snapshot 18](snapshots/ex18.png) |
-| **[`19_cross_window_spy_and_automation.v`](examples/19_cross_window_spy_and_automation.v)** | Cross-Window Spy++ & Automation: Global window registry, control inspection, event bus. | `v run examples/19_cross_window_spy_and_automation.v` | ![Snapshot 19](snapshots/ex19.png) |
-| **[`20_stdlib_data_structures_math_and_sockets.v`](examples/20_stdlib_data_structures_math_and_sockets.v)** | Collections, Math & Sockets: Stack, Queue, Set, MinHeap, BigInt, string distance metrics. | `v run examples/20_stdlib_data_structures_math_and_sockets.v` | ![Snapshot 20](snapshots/ex20.png) |
-| **[`21_extended_os_system_calls.v`](examples/21_extended_os_system_calls.v)** | Extended OS & Hardware: CPU/memory pressure, environment variables, audio beeps, zip. | `v run examples/21_extended_os_system_calls.v` | ![Snapshot 21](snapshots/ex21.png) |
-| **[`22_modern_super_controls_showcase.v`](examples/22_modern_super_controls_showcase.v)** | Super Controls Suite: Super Terminal, Code Studio, Smart Table, Kanban Board, Wizard Stepper, Floating Toolbar, Score Card, Sparklines, Donut Chart, Chip Input. | `v run examples/22_modern_super_controls_showcase.v` | ![Snapshot 22](snapshots/ex22.png) |
-| **[`23_modern_image_controls_showcase.v`](examples/23_modern_image_controls_showcase.v)** | Modern Image Controls: User Profile Cards, Product Cards, Multi-Image Showcase Gallery, 3D App Launcher Tiles, Media Player Card, Hero Banners, and Hardware Texture Caching. | `v run examples/23_modern_image_controls_showcase.v` | ![Snapshot 23](snapshots/ex23.png) |
-| **[`24_custom_image_dialogs_showcase.v`](examples/24_custom_image_dialogs_showcase.v)** | RAD Custom 3D Image Dialogs: 3D glossy icons (Success, Error, Warning, Info, Confirm, Danger, Security, Database, Cloud, Tip), 3-button actions, Checkboxes & Inline Input Prompts. | `v run examples/24_custom_image_dialogs_showcase.v` | ![Snapshot 24](snapshots/ex24.png) |
+| **[`01_quickstart.v`](examples/01_quickstart.v)** | First starter app with inputs and button callbacks. | `v run examples/01_quickstart.v` | [📸 Snapshot](snapshots/ex1.png) |
+| **[`02_theme_gallery.v`](examples/02_theme_gallery.v)** | Live theme switcher across 34 production palettes. | `v run examples/02_theme_gallery.v` | [📸 Snapshot](snapshots/ex2.png) |
+| **[`03_layout_containers.v`](examples/03_layout_containers.v)** | Horizontal rows, multi-column grids, and group cards. | `v run examples/03_layout_containers.v` | [📸 Snapshot](snapshots/ex3.png) |
+| **[`04_widgets_and_forms.v`](examples/04_widgets_and_forms.v)** | Form inputs, sliders, steppers, ratings, dates, and metric cards. | `v run examples/04_widgets_and_forms.v` | [📸 Snapshot](snapshots/ex4.png) |
+| **[`05_nameless_shortcuts.v`](examples/05_nameless_shortcuts.v)** | Rapid prototyping using nameless shortcuts (`win.input()`). | `v run examples/05_nameless_shortcuts.v` | [📸 Snapshot](snapshots/ex5.png) |
+| **[`06_dashboard_app.v`](examples/06_dashboard_app.v)** | Real-world dashboard with KPI metrics, charts, and actions. | `v run examples/06_dashboard_app.v` | [📸 Snapshot](snapshots/ex6.png) |
+| **[`07_advanced_controls.v`](examples/07_advanced_controls.v)** | Data tables, tab containers, tree views, search, breadcrumbs, avatars, and shortcuts. | `v run examples/07_advanced_controls.v` | [📸 Snapshot](snapshots/ex7.png) |
+| **[`08_rad_development.v`](examples/08_rad_development.v)** | Rapid app builder with batch ops, JSON form export, clipboard, and OS dialogs. | `v run examples/08_rad_development.v` | [📸 Snapshot](snapshots/ex8.png) |
+| **[`09_control_customization.v`](examples/09_control_customization.v)** | Custom geometry, margins/padding, colors, borders, and fluent control chaining. | `v run examples/09_control_customization.v` | [📸 Snapshot](snapshots/ex9.png) |
+| **[`10_more_controls.v`](examples/10_more_controls.v)** | Icon buttons, toolbars, hyperlinks, checklists, chips, and password strength meter. | `v run examples/10_more_controls.v` | [📸 Snapshot](snapshots/ex10.png) |
+| **[`11_data_table_pro.v`](examples/11_data_table_pro.v)** | Sortable data tables, wheel scrolling, row hover, and table manipulation. | `v run examples/11_data_table_pro.v` | [📸 Snapshot](snapshots/ex11.png) |
+| **[`12_system_and_stdlib_features.v`](examples/12_system_and_stdlib_features.v)** | Desktop notifications, hardware specs, clipboard, system paths, HTTP GET, RegEx, Crypto. | `v run examples/12_system_and_stdlib_features.v` | [📸 Snapshot](snapshots/ex12.png) |
+| **[`13_reactive_state_store.v`](examples/13_reactive_state_store.v)** | Reactive key-value state store, typed accessors, state change listeners, and JSON disk persistence. | `v run examples/13_reactive_state_store.v` | [📸 Snapshot](snapshots/ex13.png) |
+| **[`14_rad_controls_showcase.v`](examples/14_rad_controls_showcase.v)** | RAD & Advanced Suite: ListBox, Multi-Select ListBox, ComboBox, Transfer List, Code Editor, Console Log, Color Palette, Step Slider, Status Bar, Tag Input, Range Slider, Drop Zone, Property Grid, Sparkline, Pagination, Split View, Toasts, Command Palette, Context Menu. | `v run examples/14_rad_controls_showcase.v` | [📸 Snapshot](snapshots/ex14.png) |
+| **[`15_modern_ui_features_showcase.v`](examples/15_modern_ui_features_showcase.v)** | Modern UI Showcase: Window controls, themes, layouts, forms, state store, system utilities. | `v run examples/15_modern_ui_features_showcase.v` | [📸 Snapshot](snapshots/ex15.png) |
+| **[`16_interval_timers.v`](examples/16_interval_timers.v)** | Interval Timers & Timeouts: Recurring timers, timeouts, clock, auto progress bar. | `v run examples/16_interval_timers.v` | [📸 Snapshot](snapshots/ex16.png) |
+| **[`17_data_and_event_binding.v`](examples/17_data_and_event_binding.v)** | Data & Event Binding: Two-way state binding (`bind_state`), click aliases, shortcut bindings. | `v run examples/17_data_and_event_binding.v` | [📸 Snapshot](snapshots/ex17.png) |
+| **[`18_custom_font_loading.v`](examples/18_custom_font_loading.v)** | Custom Font & Typography: Platform font resolution, custom TTF/OTF setting, font discovery. | `v run examples/18_custom_font_loading.v` | [📸 Snapshot](snapshots/ex18.png) |
+| **[`19_cross_window_spy_and_automation.v`](examples/19_cross_window_spy_and_automation.v)** | Cross-Window Spy++ & Automation: Global window registry, control inspection, event bus. | `v run examples/19_cross_window_spy_and_automation.v` | [📸 Snapshot](snapshots/ex19.png) |
+| **[`20_stdlib_data_structures_math_and_sockets.v`](examples/20_stdlib_data_structures_math_and_sockets.v)** | Collections, Math & Sockets: Stack, Queue, Set, MinHeap, BigInt, string distance metrics. | `v run examples/20_stdlib_data_structures_math_and_sockets.v` | [📸 Snapshot](snapshots/ex20.png) |
+| **[`21_extended_os_system_calls.v`](examples/21_extended_os_system_calls.v)** | Extended OS & Hardware: CPU/memory pressure, environment variables, audio beeps, zip. | `v run examples/21_extended_os_system_calls.v` | [📸 Snapshot](snapshots/ex21.png) |
+| **[`22_modern_super_controls_showcase.v`](examples/22_modern_super_controls_showcase.v)** | Super Controls Suite: Super Terminal, Code Studio, Smart Table, Kanban Board, Wizard Stepper, Floating Toolbar, Score Card, Sparklines, Donut Chart, Chip Input. | `v run examples/22_modern_super_controls_showcase.v` | [📸 Snapshot](snapshots/ex22.png) |
+| **[`23_modern_image_controls_showcase.v`](examples/23_modern_image_controls_showcase.v)** | Modern Image Controls: User Profile Cards, Product Cards, Multi-Image Showcase Gallery, 3D App Launcher Tiles, Media Player Card, Hero Banners, and Hardware Texture Caching. | `v run examples/23_modern_image_controls_showcase.v` | [📸 Snapshot](snapshots/ex23.png) |
+| **[`24_custom_image_dialogs_showcase.v`](examples/24_custom_image_dialogs_showcase.v)** | RAD Custom 3D Image Dialogs: 3D glossy icons (Success, Error, Warning, Info, Confirm, Danger, Security, Database, Cloud, Tip), 3-button actions, Checkboxes & Inline Input Prompts. | `v run examples/24_custom_image_dialogs_showcase.v` | [📸 Snapshot](snapshots/ex24.png) |
 
 
 ---
