@@ -3714,15 +3714,111 @@ pub fn (mut win SimpleWindow) add_split_view(name string, split_ratio f32) &Simp
 	return win
 }
 
+// Toast Notification API
+
+pub fn resolve_toast_icon(variant string, custom_icon string) string {
+	if custom_icon.len > 0 {
+		return custom_icon
+	}
+	return match variant {
+		'success' { 'assets/images/dialog_icon_success.jpg' }
+		'error' { 'assets/images/dialog_icon_error.jpg' }
+		'warning' { 'assets/images/dialog_icon_warning.jpg' }
+		'info' { 'assets/images/dialog_icon_info.jpg' }
+		'cloud' { 'assets/images/dialog_icon_cloud.jpg' }
+		'security' { 'assets/images/dialog_icon_security.jpg' }
+		'database' { 'assets/images/dialog_icon_database.jpg' }
+		'danger' { 'assets/images/dialog_icon_danger.jpg' }
+		'tip' { 'assets/images/dialog_icon_tip.jpg' }
+		else { 'assets/images/dialog_icon_info.jpg' }
+	}
+}
+
 pub fn (mut win SimpleWindow) push_toast(title string, message string, variant string, duration_ms int) &SimpleWindow {
+	return win.push_toast_with_icon(title, message, '', variant, duration_ms)
+}
+
+pub fn (mut win SimpleWindow) push_toast_with_icon(title string, message string, icon_path string, variant string, duration_ms int) &SimpleWindow {
 	dur := if duration_ms > 0 { duration_ms } else { 3000 }
 	win.toasts << Toast{
 		id:          win.gen_id('toast')
 		title:       title
 		message:     message
 		variant:     variant
+		icon_path:   resolve_toast_icon(variant, icon_path)
 		duration_ms: dur
 		remaining:   f32(dur) / 1000.0
+	}
+	return win
+}
+
+// Button Icon API
+
+pub fn (mut win SimpleWindow) add_button_with_icon(name string, text string, icon_path string) &SimpleWindow {
+	win.add_control(Control{
+		name:      name
+		kind:      'button'
+		title:     text
+		icon_path: icon_path
+	})
+	return win
+}
+
+pub fn (mut win SimpleWindow) set_button_icon(name string, icon_path string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.icon_path = icon_path
+	}
+	return win
+}
+
+// Tab Icon API
+
+pub fn (mut win SimpleWindow) set_tab_icon(container_name string, tab_index int, icon_path string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(container_name) {
+		if ctrl.tab_icons.len == 0 {
+			ctrl.tab_icons = map[int]string{}
+		}
+		ctrl.tab_icons[tab_index] = icon_path
+	}
+	return win
+}
+
+// Input Icon API
+
+pub fn (mut win SimpleWindow) add_input_with_icon(name string, default_val string, placeholder string, icon_path string) &SimpleWindow {
+	win.add_control(Control{
+		name:        name
+		kind:        'input'
+		text_value:  default_val
+		placeholder: placeholder
+		icon_path:   icon_path
+	})
+	return win
+}
+
+pub fn (mut win SimpleWindow) set_input_icon(name string, icon_path string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.icon_path = icon_path
+	}
+	return win
+}
+
+// Status Bar Icon API
+
+pub fn (mut win SimpleWindow) add_status_bar_with_icon(name string, status_text string, badge string, icon_path string) &SimpleWindow {
+	win.add_control(Control{
+		name:        name
+		kind:        'status_bar'
+		title:       status_text
+		placeholder: badge
+		icon_path:   icon_path
+	})
+	return win
+}
+
+pub fn (mut win SimpleWindow) set_status_bar_icon(name string, icon_path string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.icon_path = icon_path
 	}
 	return win
 }

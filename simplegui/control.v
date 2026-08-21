@@ -70,6 +70,7 @@ pub mut:
 	title       string // Bold headline text of the toast message
 	message     string // Body text content of the notification
 	variant     string // Alert type/color theme: "info" (blue), "success" (green), "warning" (yellow), "error" (red)
+	icon_path   string // Custom or auto-resolved icon asset path
 	created_at  i64    // Unix timestamp (milliseconds) when the toast was created
 	duration_ms int = 3000 // Display duration in milliseconds before auto-dismissing
 	remaining   f32 = 3.0  // Remaining time countdown in seconds
@@ -82,6 +83,7 @@ pub mut:
 	title      string            // Human-readable command title shown in the palette search list
 	category   string            // Category grouping header (e.g. 'Navigation', 'Settings', 'Actions')
 	shortcut   string            // Keyboard shortcut hint string (e.g. 'Ctrl+Shift+P')
+	icon_path  string            // Custom icon asset path
 	on_execute VoidEventCallback = unsafe { nil } // Callback executed when selected
 }
 
@@ -91,6 +93,7 @@ pub mut:
 	id        string            // Unique item identifier
 	title     string            // Display label text
 	icon      string            // Icon or emoji displayed next to the text label
+	icon_path string            // Custom image icon asset path
 	shortcut  string            // Keyboard shortcut indicator
 	on_select VoidEventCallback = unsafe { nil } // Callback function triggered upon clicking the menu item
 }
@@ -186,6 +189,8 @@ pub mut:
 	current_page    int = 1  // Active current page number (for Pagination control)
 	last_click_time i64      // Timestamp of last click (used for double-click detection)
 	tab_badges      map[int]string // Optional notification badges on tab titles (map of tab_index -> badge text)
+	tab_icons       map[int]string // Optional icon image paths on tab titles (map of tab_index -> icon path)
+	icon_path       string   // Custom icon asset path (for buttons, input fields, status bars, etc.)
 	search_query    string   // Active search filtering text query (for Search inputs/tables)
 	is_skeleton     bool     // Loading placeholder state (renders animated skeleton gray boxes)
 	// Event Callback Handlers

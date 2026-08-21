@@ -127,6 +127,14 @@ pub fn (mut win SimpleWindow) render_ui() {
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
 					btn_bg)
 
+				has_btn_icon := ctrl.icon_path.len > 0
+				btn_icon_sz := if has_btn_icon { f32(math.min(ctrl.h - 10.0, 20.0)) } else { f32(0.0) }
+				if has_btn_icon {
+					icon_x := ctrl.x + 10.0
+					icon_y := ctrl.y + (ctrl.h - btn_icon_sz) / 2.0
+					win.draw_image_fit(ctrl.icon_path, icon_x, icon_y, btn_icon_sz, btn_icon_sz, '')
+				}
+
 				btn_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 14 }
 				btn_tc := if ctrl.font_color.len > 0 {
 					parse_hex_color(ctrl.font_color)
@@ -134,7 +142,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 					gg.Color{ r: 255, g: 255, b: 255 }
 				}
 
-				max_chars := math.max(1, int((ctrl.w - 16.0) / (f32(btn_sz) * 0.55)))
+				btn_icon_offset := if has_btn_icon { btn_icon_sz + 8.0 } else { f32(0.0) }
+				max_chars := math.max(1, int((ctrl.w - 16.0 - btn_icon_offset) / (f32(btn_sz) * 0.55)))
 				raw_title := clean_text(ctrl.title)
 				disp_title := if raw_title.len > max_chars && max_chars > 3 {
 					raw_title[0..max_chars - 3] + '...'
@@ -143,12 +152,12 @@ pub fn (mut win SimpleWindow) render_ui() {
 				}
 
 				text_w := f32(disp_title.len) * (f32(btn_sz) * 0.55)
-				text_x := int(ctrl.x + (ctrl.w - text_w) / 2.0)
+				text_x := int(ctrl.x + btn_icon_offset + (ctrl.w - btn_icon_offset - text_w) / 2.0)
 				text_y := int(ctrl.y + (ctrl.h - f32(btn_sz)) / 2.0)
 
 				is_mono := ctrl.font_name.len > 0 && (ctrl.font_name.to_lower().contains('mono') || ctrl.font_name.to_lower().contains('courier'))
 				win.gg_ctx.draw_text2(
-					x:     math.max(int(ctrl.x + 8), text_x)
+					x:     math.max(int(ctrl.x + 8 + btn_icon_offset), text_x)
 					y:     text_y
 					text:  disp_title
 					color: btn_tc
@@ -200,6 +209,13 @@ pub fn (mut win SimpleWindow) render_ui() {
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
 					b_c)
 
+				has_in_icon := ctrl.icon_path.len > 0
+				in_icon_sz := if has_in_icon { f32(math.min(ctrl.h - 12.0, 18.0)) } else { f32(0.0) }
+				if has_in_icon {
+					win.draw_image_fit(ctrl.icon_path, ctrl.x + 8.0, ctrl.y + (ctrl.h - in_icon_sz) / 2.0, in_icon_sz, in_icon_sz, '')
+				}
+				in_offset_x := if has_in_icon { in_icon_sz + 8.0 } else { f32(0.0) }
+
 				if ctrl.kind == 'time_picker' {
 					draw_vector_clock_icon(win.gg_ctx, ctrl.x + ctrl.w - 18.0, ctrl.y + ctrl.h / 2.0, 5.0, fg)
 				}
@@ -232,7 +248,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 					fg
 				}
 
-				max_in_chars := math.max(1, int((ctrl.w - 24.0) / (f32(inp_sz) * 0.55)))
+				max_in_chars := math.max(1, int((ctrl.w - 24.0 - in_offset_x) / (f32(inp_sz) * 0.55)))
 				mut start_idx := 0
 				if ctrl.caret_pos > max_in_chars {
 					start_idx = ctrl.caret_pos - max_in_chars
@@ -258,8 +274,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 					if vis_s < vis_e {
 						prefix_s := clipped_txt[0..vis_s]
 						prefix_e := clipped_txt[0..vis_e]
-						sel_x1 := ctrl.x + 10.0 + f32(win.gg_ctx.text_width(prefix_s))
-						sel_x2 := ctrl.x + 10.0 + f32(win.gg_ctx.text_width(prefix_e))
+						sel_x1 := ctrl.x + 10.0 + in_offset_x + f32(win.gg_ctx.text_width(prefix_s))
+						sel_x2 := ctrl.x + 10.0 + in_offset_x + f32(win.gg_ctx.text_width(prefix_e))
 						sel_w := sel_x2 - sel_x1
 						if sel_w > 0 {
 							win.gg_ctx.draw_rect_filled(sel_x1, ctrl.y + 4.0, sel_w, ctrl.h - 8.0,
@@ -270,7 +286,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 
 				is_mono := ctrl.font_name.len > 0 && (ctrl.font_name.to_lower().contains('mono') || ctrl.font_name.to_lower().contains('courier'))
 				win.gg_ctx.draw_text2(
-					x:     int(ctrl.x + 10)
+					x:     int(ctrl.x + 10 + in_offset_x)
 					y:     int(ctrl.y + (ctrl.h - f32(inp_sz)) / 2.0)
 					text:  clipped_txt
 					color: txt_color
@@ -287,7 +303,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 						clipped_txt
 					}
 					caret_offset_x := f32(win.gg_ctx.text_width(prefix_txt))
-					caret_x := ctrl.x + 10.0 + caret_offset_x
+					caret_x := ctrl.x + 10.0 + in_offset_x + caret_offset_x
 					win.gg_ctx.draw_line(caret_x, ctrl.y + 6, caret_x, ctrl.y + ctrl.h - 6,
 						accent)
 				}
@@ -1114,8 +1130,21 @@ pub fn (mut win SimpleWindow) render_ui() {
 						} else {
 							fg
 						}
+
+						icon_p := ctrl.tab_icons[idx]
+						has_tab_icon := icon_p.len > 0
+						tab_icon_sz := f32(16.0)
+						text_w := f32(title.len * 7)
+						total_content_w := if has_tab_icon { text_w + tab_icon_sz + 6.0 } else { text_w }
+						mut start_x := tx + (tab_w - total_content_w) / 2.0
+
+						if has_tab_icon {
+							win.draw_image_fit(icon_p, start_x, ctrl.y + (ctrl.h - tab_icon_sz) / 2.0, tab_icon_sz, tab_icon_sz, '')
+							start_x += tab_icon_sz + 6.0
+						}
+
 						win.gg_ctx.draw_text2(
-							x:     int(tx + (tab_w - f32(title.len * 7)) / 2.0)
+							x:     int(start_x)
 							y:     int(ctrl.y + (ctrl.h - 16.0) / 2.0)
 							text:  title
 							color: txt_c
@@ -1717,7 +1746,16 @@ pub fn (mut win SimpleWindow) render_ui() {
 				win.gg_ctx.draw_rect_filled(ctrl.x, ctrl.y, ctrl.w, bar_h, surface)
 				win.gg_ctx.draw_line(ctrl.x, ctrl.y, ctrl.x + ctrl.w, ctrl.y, border_c)
 				status_txt := if ctrl.text_value.len > 0 { ctrl.text_value } else { 'Ready' }
-				win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(ctrl.y + 5), text: status_txt, color: fg, size: 11)
+
+				has_sb_icon := ctrl.icon_path.len > 0
+				sb_icon_sz := f32(16.0)
+				mut st_x := ctrl.x + 10.0
+				if has_sb_icon {
+					win.draw_image_fit(ctrl.icon_path, st_x, ctrl.y + (bar_h - sb_icon_sz) / 2.0, sb_icon_sz, sb_icon_sz, '')
+					st_x += sb_icon_sz + 6.0
+				}
+
+				win.gg_ctx.draw_text2(x: int(st_x), y: int(ctrl.y + 5), text: status_txt, color: fg, size: 11)
 				if ctrl.placeholder.len > 0 {
 					win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 90, ctrl.y + 3, 80.0, 20.0, 4.0, accent)
 					win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 82), y: int(ctrl.y + 5), text: ctrl.placeholder, color: gg.Color{r: 255, g: 255, b: 255}, size: 10)
@@ -2823,24 +2861,38 @@ fn (mut win SimpleWindow) render_toasts() {
 			continue
 		}
 
-		t_w := f32(280.0)
-		t_h := f32(54.0)
+		has_icon := toast.icon_path.len > 0
+		t_w := f32(math.min(320, win.width - 40))
+		t_h := f32(56.0)
 		tx := f32(win.width) - t_w - 20.0
 		
 		t_color := match toast.variant {
 			'success' { parse_hex_color('#10b981') }
 			'warning' { parse_hex_color('#f59e0b') }
 			'error' { parse_hex_color('#ef4444') }
+			'cloud' { parse_hex_color('#14b8a6') }
+			'security' { parse_hex_color('#f59e0b') }
+			'database' { parse_hex_color('#a855f7') }
 			else { parse_hex_color('#3b82f6') }
 		}
 
-		win.gg_ctx.draw_rounded_rect_filled(tx, ty, t_w, t_h, 8.0, gg.rgb(35, 38, 48))
+		// Dark glass backdrop card
+		win.gg_ctx.draw_rounded_rect_filled(tx, ty, t_w, t_h, 8.0, gg.rgb(32, 35, 46))
 		win.gg_ctx.draw_rounded_rect_empty(tx, ty, t_w, t_h, 8.0, t_color)
-		win.gg_ctx.draw_rect_filled(tx, ty, 6.0, t_h, t_color)
+		win.gg_ctx.draw_rect_filled(tx, ty, 4.0, t_h, t_color)
 
-		win.gg_ctx.draw_text2(x: int(tx + 16), y: int(ty + 8), text: clean_text(toast.title), color: gg.Color{r: 255, g: 255, b: 255}, size: 13)
-		win.gg_ctx.draw_text2(x: int(tx + 16), y: int(ty + 28), text: clean_text(toast.message), color: gg.rgb(200, 205, 215), size: 12)
-		win.gg_ctx.draw_text2(x: int(tx + t_w - 20), y: int(ty + 6), text: 'x', color: gg.rgb(180, 185, 200), size: 13)
+		text_left := if has_icon {
+			icon_sz := f32(34.0)
+			win.gg_ctx.draw_rounded_rect_filled(tx + 10.0, ty + 11.0, icon_sz, icon_sz, 6.0, gg.rgba(t_color.r, t_color.g, t_color.b, 35))
+			win.draw_image_fit(toast.icon_path, tx + 10.0, ty + 11.0, icon_sz, icon_sz, '')
+			tx + 52.0
+		} else {
+			tx + 16.0
+		}
+
+		win.gg_ctx.draw_text2(x: int(text_left), y: int(ty + 9), text: clean_text(toast.title), color: gg.Color{r: 255, g: 255, b: 255}, size: 13, bold: true)
+		win.gg_ctx.draw_text2(x: int(text_left), y: int(ty + 29), text: clean_text(toast.message), color: gg.rgb(200, 205, 215), size: 11)
+		win.gg_ctx.draw_text2(x: int(tx + t_w - 18), y: int(ty + 8), text: 'x', color: gg.rgb(180, 185, 200), size: 12, bold: true)
 
 		active_toasts << toast
 		ty += t_h + 10.0
@@ -2874,7 +2926,14 @@ fn (mut win SimpleWindow) render_command_palette() {
 		if idx == win.command_palette_sel {
 			win.gg_ctx.draw_rounded_rect_filled(bx + 8, item_y, box_w - 16, 28.0, 4.0, parse_hex_color(win.theme.accent_color))
 		}
-		win.gg_ctx.draw_text2(x: int(bx + 20), y: int(item_y + 6), text: item.title, color: gg.Color{r: 255, g: 255, b: 255}, size: 13)
+
+		mut title_x := bx + 20.0
+		if item.icon_path.len > 0 {
+			win.draw_image_fit(item.icon_path, bx + 16.0, item_y + 4.0, 20.0, 20.0, '')
+			title_x = bx + 42.0
+		}
+
+		win.gg_ctx.draw_text2(x: int(title_x), y: int(item_y + 6), text: item.title, color: gg.Color{r: 255, g: 255, b: 255}, size: 13)
 		if item.shortcut.len > 0 {
 			win.gg_ctx.draw_text2(x: int(bx + box_w - 80), y: int(item_y + 6), text: item.shortcut, color: gg.rgb(180, 185, 200), size: 11)
 		}
@@ -2884,7 +2943,7 @@ fn (mut win SimpleWindow) render_command_palette() {
 
 fn (mut win SimpleWindow) render_context_menu() {
 	if !win.context_menu_active { return }
-	menu_w := f32(180.0)
+	menu_w := f32(190.0)
 	menu_h := f32(win.context_menu_items.len * 30 + 10)
 	mx := win.context_menu_x
 	my := win.context_menu_y
@@ -2894,7 +2953,12 @@ fn (mut win SimpleWindow) render_context_menu() {
 
 	for idx, item in win.context_menu_items {
 		iy := my + f32(idx * 30 + 5)
-		win.gg_ctx.draw_text2(x: int(mx + 12), y: int(iy + 6), text: item.title, color: gg.Color{r: 255, g: 255, b: 255}, size: 13)
+		mut text_x := mx + 12.0
+		if item.icon_path.len > 0 {
+			win.draw_image_fit(item.icon_path, mx + 10.0, iy + 6.0, 16.0, 16.0, '')
+			text_x = mx + 32.0
+		}
+		win.gg_ctx.draw_text2(x: int(text_x), y: int(iy + 6), text: item.title, color: gg.Color{r: 255, g: 255, b: 255}, size: 13)
 		if item.shortcut.len > 0 {
 			win.gg_ctx.draw_text2(x: int(mx + menu_w - 60), y: int(iy + 6), text: item.shortcut, color: gg.rgb(160, 165, 180), size: 11)
 		}

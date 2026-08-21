@@ -4,23 +4,23 @@
 
 ---
 
-## 🎨 Visual Showcase & Snapshots of All Examples
+### 🎨 Visual Showcase & Snapshots of All Examples
 
 <p align="center">
+  <img src="snapshots/ex24.png" width="48%" alt="Custom 3D Image Dialogs Demo" />
   <img src="snapshots/ex23.png" width="48%" alt="Modern Image Controls Demo" />
+</p>
+<p align="center">
   <img src="snapshots/ex22.png" width="48%" alt="Super Controls Suite Demo" />
+  <img src="snapshots/ex14.png" width="48%" alt="RAD Controls Showcase" />
 </p>
 <p align="center">
   <img src="snapshots/ex1.png" width="48%" alt="Quickstart Demo" />
   <img src="snapshots/ex6.png" width="48%" alt="Dashboard App Demo" />
 </p>
-<p align="center">
-  <img src="snapshots/ex7.png" width="48%" alt="Advanced Controls Demo" />
-  <img src="snapshots/ex14.png" width="48%" alt="RAD Controls Showcase" />
-</p>
 
 <details>
-<summary><b>📸 Click to view all 23 example screenshots</b></summary>
+<summary><b>📸 Click to view all 24 example screenshots</b></summary>
 <br/>
 
 <p align="center">
@@ -69,6 +69,7 @@
 </p>
 <p align="center">
   <img src="snapshots/ex23.png" width="48%" alt="23 - Modern Image Controls Demo" />
+  <img src="snapshots/ex24.png" width="48%" alt="24 - RAD Custom 3D Image Dialogs Demo" />
 </p>
 
 </details>
@@ -143,6 +144,7 @@ The repository includes beginner-friendly example programs in the [`examples/`](
 | **[`21_extended_os_system_calls.v`](examples/21_extended_os_system_calls.v)** | Extended OS & Hardware: CPU/memory pressure, environment variables, audio beeps, zip. | `v run examples/21_extended_os_system_calls.v` | ![Snapshot 21](snapshots/ex21.png) |
 | **[`22_modern_super_controls_showcase.v`](examples/22_modern_super_controls_showcase.v)** | Super Controls Suite: Super Terminal, Code Studio, Smart Table, Kanban Board, Wizard Stepper, Floating Toolbar, Score Card, Sparklines, Donut Chart, Chip Input. | `v run examples/22_modern_super_controls_showcase.v` | ![Snapshot 22](snapshots/ex22.png) |
 | **[`23_modern_image_controls_showcase.v`](examples/23_modern_image_controls_showcase.v)** | Modern Image Controls: User Profile Cards, Product Cards, Multi-Image Showcase Gallery, 3D App Launcher Tiles, Media Player Card, Hero Banners, and Hardware Texture Caching. | `v run examples/23_modern_image_controls_showcase.v` | ![Snapshot 23](snapshots/ex23.png) |
+| **[`24_custom_image_dialogs_showcase.v`](examples/24_custom_image_dialogs_showcase.v)** | RAD Custom 3D Image Dialogs: 3D glossy icons (Success, Error, Warning, Info, Confirm, Danger, Security, Database, Cloud, Tip), 3-button actions, Checkboxes & Inline Input Prompts. | `v run examples/24_custom_image_dialogs_showcase.v` | ![Snapshot 24](snapshots/ex24.png) |
 
 
 ---

@@ -7,20 +7,20 @@ This directory contains beginner-friendly, well-commented examples demonstrating
 ### 🎨 Visual Showcase & Snapshots
 
 <p align="center">
+  <img src="../snapshots/ex24.png" width="48%" alt="Custom 3D Image Dialogs Demo" />
   <img src="../snapshots/ex23.png" width="48%" alt="Modern Image Controls Demo" />
+</p>
+<p align="center">
   <img src="../snapshots/ex22.png" width="48%" alt="Super Controls Suite Demo" />
+  <img src="../snapshots/ex14.png" width="48%" alt="RAD Controls Showcase" />
 </p>
 <p align="center">
   <img src="../snapshots/ex1.png" width="48%" alt="Quickstart Demo" />
   <img src="../snapshots/ex6.png" width="48%" alt="Dashboard App Demo" />
 </p>
-<p align="center">
-  <img src="../snapshots/ex7.png" width="48%" alt="Advanced Controls Demo" />
-  <img src="../snapshots/ex14.png" width="48%" alt="RAD Controls Showcase" />
-</p>
 
 <details>
-<summary><b>📸 Click to view all 23 example screenshots</b></summary>
+<summary><b>📸 Click to view all 24 example screenshots</b></summary>
 <br/>
 
 <p align="center">
@@ -69,6 +69,7 @@ This directory contains beginner-friendly, well-commented examples demonstrating
 </p>
 <p align="center">
   <img src="../snapshots/ex23.png" width="48%" alt="23 - Modern Image Controls Demo" />
+  <img src="../snapshots/ex24.png" width="48%" alt="24 - RAD Custom 3D Image Dialogs Demo" />
 </p>
 
 </details>

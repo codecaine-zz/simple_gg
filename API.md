@@ -932,21 +932,60 @@ win.add_pagination('my_pagination', 1, 10)
 // ↔️ Resizable Split View Container (pane divider with draggable handle)
 win.add_split_view('my_split', 0.5) // ratio 0.1 to 0.9
 
-// 🔔 Ephemeral Toast Stack (auto-dismissing notification alerts with click-to-close)
-win.push_toast('Success', 'File exported successfully!', 'success', 3000) // variants: info, success, warning, error
+// 🔔 Ephemeral Toast Stack (with automatic or custom 3D glowing icon badges)
+win.push_toast('Success', 'File exported successfully!', 'success', 3000) // auto-selects green check shield icon
+win.push_toast_with_icon('Cloud Sync', '1,280 files synced.', 'assets/images/dialog_icon_cloud.jpg', 'cloud', 3000)
 win.show_toast('Notice', 'Toast notification display')
 
-// 🔍 Command Palette Modal (Ctrl+K / Cmd+K quick search modal)
+// 🔘 Buttons with Embedded 3D Icons
+win.add_button_with_icon('btn_deploy', 'Deploy to Cluster', 'assets/images/dialog_icon_cloud.jpg')
+win.set_button_icon('btn_deploy', 'assets/images/dialog_icon_success.jpg')
+
+// 🗂️ Tabs with Embedded 3D Icons
+win.begin_tab_container('editor_tabs', ['Code Studio', 'Database', 'Cloud'])
+win.set_tab_icon('editor_tabs', 0, 'assets/images/dialog_icon_tip.jpg')
+win.set_tab_icon('editor_tabs', 1, 'assets/images/dialog_icon_database.jpg')
+win.set_tab_icon('editor_tabs', 2, 'assets/images/dialog_icon_cloud.jpg')
+win.end_tab_container()
+
+// 📝 Input Fields & Search with Leading Icons
+win.add_input_with_icon('input_repo', 'https://github.com/vlang/v', 'Enter Git remote...', 'assets/images/dialog_icon_cloud.jpg')
+win.set_input_icon('input_repo', 'assets/images/dialog_icon_security.jpg')
+
+// 🚦 Status Bar with Status Icon
+win.add_status_bar_with_icon('main_status', 'Connected to Cluster', 'ONLINE', 'assets/images/dialog_icon_success.jpg')
+win.set_status_bar_icon('main_status', 'assets/images/dialog_icon_warning.jpg')
+
+// 🔍 Command Palette Modal with Action Icons (Ctrl+K / Cmd+K)
 win.show_command_palette([
 	simplegui.CommandItem{
-		id: 'cmd_save'
-		title: 'Save Project State'
-		category: 'File'
-		shortcut: 'Ctrl+S'
-		on_execute: fn (mut win simplegui.SimpleWindow) { win.push_toast('Saved', 'Project saved', 'info', 2000) }
+		id: 'cmd_build'
+		title: 'Build Workspace & Run Tests'
+		category: 'Dev'
+		shortcut: 'Ctrl+B'
+		icon_path: 'assets/images/dialog_icon_success.jpg'
+		on_execute: fn (mut win simplegui.SimpleWindow) { win.push_toast('Build Started', 'Compiling modules...', 'success', 2000) }
+	},
+	simplegui.CommandItem{
+		id: 'cmd_migrate'
+		title: 'Execute Database Migrations'
+		category: 'Database'
+		shortcut: 'Ctrl+M'
+		icon_path: 'assets/images/dialog_icon_database.jpg'
+		on_execute: fn (mut win simplegui.SimpleWindow) { win.push_toast('DB Migration', 'Schema applied', 'database', 2000) }
 	}
 ])
 win.hide_command_palette()
+
+// 🖱️ Right-Click Context Menu with Icons
+win.show_context_menu(x, y, [
+	simplegui.ContextMenuItem{
+		id: 'ctx_sync'
+		title: 'Sync to Cloud'
+		icon_path: 'assets/images/dialog_icon_cloud.jpg'
+		on_select: fn (mut win simplegui.SimpleWindow) { win.push_toast('Sync', 'Syncing...', 'cloud', 2000) }
+	}
+])
 
 // 🎯 Auto-Complete ComboBox (editable input paired with quick option dropdown)
 win.add_combobox('my_combo', ['Option A', 'Option B', 'Option C'], 'Option A')

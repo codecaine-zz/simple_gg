@@ -7,12 +7,15 @@ fn main() {
 	mut win := simplegui.new_simple_window('RAD Custom Image Dialogs Showcase - SimpleGUI', 1140, 640)
 	win.set_theme('Apple Dark')
 
-	// Navigation Tabs
+	// Navigation Tabs with 3D Glossy Icons
 	win.begin_tab_container('dialog_tabs', [
 		'Standard Alerts & Prompts',
 		'Advanced RAD Developer Dialogs',
-		'Custom Dialogs & Input Prompts',
+		'Custom Dialogs & Icon Controls',
 	])
+	win.set_tab_icon('dialog_tabs', 0, 'assets/images/dialog_icon_info.jpg')
+	win.set_tab_icon('dialog_tabs', 1, 'assets/images/dialog_icon_cloud.jpg')
+	win.set_tab_icon('dialog_tabs', 2, 'assets/images/dialog_icon_security.jpg')
 
 	// =========================================================================
 	// TAB 1: Standard Alerts & Prompts
@@ -23,21 +26,21 @@ fn main() {
 	win.add_label('lbl_std_desc', 'Click any button below to trigger rich backdrop dialogs styled with custom rendered 3D glowing asset badges.')
 
 	win.begin_row('row_std_1')
-	win.add_button('btn_success', '[Success] Build Succeeded Dialog')
-	win.add_button('btn_error', '[Error] DB Connection Failed Dialog')
-	win.add_button('btn_warning', '[Warning] Unsaved Changes Dialog')
+	win.add_button_with_icon('btn_success', 'Build Succeeded Dialog', 'assets/images/dialog_icon_success.jpg')
+	win.add_button_with_icon('btn_error', 'DB Connection Error', 'assets/images/dialog_icon_error.jpg')
+	win.add_button_with_icon('btn_warning', 'Unsaved Changes Dialog', 'assets/images/dialog_icon_warning.jpg')
 	win.end_row()
 
 	win.begin_row('row_std_2')
-	win.add_button('btn_info', '[Info] Software Update Dialog')
-	win.add_button('btn_confirm', '[Confirm] Restart Engine Prompt')
-	win.add_button('btn_danger', '[Danger] Drop Table Destructive Dialog')
+	win.add_button_with_icon('btn_info', 'Software Update Dialog', 'assets/images/dialog_icon_info.jpg')
+	win.add_button_with_icon('btn_confirm', 'Restart Engine Prompt', 'assets/images/dialog_icon_question.jpg')
+	win.add_button_with_icon('btn_danger', 'Drop Table Danger', 'assets/images/dialog_icon_danger.jpg')
 	win.end_row()
 
 	win.add_divider('Live Telemetry')
 	win.add_heading('Live Action & Callback Telemetry')
 	win.add_badge('status_telemetry', 'Dialog Engine: Ready', 'success')
-	win.add_label('lbl_telemetry', 'No dialog action triggered yet.')
+	win.add_label('lbl_telemetry', 'No dialog action triggered yet. Press Ctrl+K for Command Palette or Right-Click for Context Menu.')
 
 	win.end_tab_page()
 
@@ -50,13 +53,13 @@ fn main() {
 	win.add_label('lbl_adv_desc', 'Specialized modal dialogs crafted for modern developer tools, cloud sync, databases, security, and onboarding.')
 
 	win.begin_row('row_adv_1')
-	win.add_button('btn_security', '[Security] Elevate Permissions Dialog')
-	win.add_button('btn_db', '[Database] Schema Migration Dialog')
+	win.add_button_with_icon('btn_security', 'Elevate Permissions', 'assets/images/dialog_icon_security.jpg')
+	win.add_button_with_icon('btn_db', 'Schema Migration', 'assets/images/dialog_icon_database.jpg')
 	win.end_row()
 
 	win.begin_row('row_adv_2')
-	win.add_button('btn_cloud', '[Cloud] Sync Remote Cluster Dialog')
-	win.add_button('btn_tip', '[Tip] Developer Productivity Shortcut')
+	win.add_button_with_icon('btn_cloud', 'Sync Remote Cluster', 'assets/images/dialog_icon_cloud.jpg')
+	win.add_button_with_icon('btn_tip', 'Developer Pro-Tip', 'assets/images/dialog_icon_tip.jpg')
 	win.end_row()
 
 	win.end_tab_page()
@@ -70,9 +73,14 @@ fn main() {
 	win.add_label('lbl_cust_desc', 'Create custom dialogs with custom image paths, detail traces, 3-button layouts (Confirm/Cancel/Neutral), and inline text inputs.')
 
 	win.begin_row('row_cust_1')
-	win.add_button('btn_input_dialog', '[Input] Prompt User for Branch Name')
-	win.add_button('btn_detail_dialog', '[Custom] Error with Stack Detail')
-	win.add_button('btn_three_btns', '[3-Button] Save, Discard & Cancel')
+	win.add_button_with_icon('btn_input_dialog', 'Prompt Branch Name', 'assets/images/dialog_icon_question.jpg')
+	win.add_button_with_icon('btn_detail_dialog', 'Error with Stack Trace', 'assets/images/dialog_icon_error.jpg')
+	win.add_button_with_icon('btn_three_btns', 'Save, Discard & Cancel', 'assets/images/dialog_icon_warning.jpg')
+	win.end_row()
+
+	win.add_divider('Inputs & Status with Icons')
+	win.add_input_with_icon('input_git_remote', 'https://github.com/vlang/v', 'Enter Git remote repository URL...', 'assets/images/dialog_icon_cloud.jpg')
+	win.add_status_bar_with_icon('sb_main', 'Git: main | 0 errors | Synchronized', 'CONNECTED', 'assets/images/dialog_icon_success.jpg')
 	win.end_row()
 
 	win.end_tab_page()
@@ -255,6 +263,81 @@ fn main() {
 				win.push_toast('Discarded', 'Changes reverted.', 'warning', 2500)
 			}
 		})
+	})
+
+	// 14. Pre-populate Command Palette (Ctrl+K) with Icon Items
+	win.show_command_palette([
+		simplegui.CommandItem{
+			id: 'cmd_build'
+			title: 'Build Workspace & Run Tests'
+			category: 'Dev'
+			shortcut: 'Ctrl+B'
+			icon_path: 'assets/images/dialog_icon_success.jpg'
+			on_execute: fn (mut win simplegui.SimpleWindow) {
+				win.push_toast('Build Started', 'Compiling modules...', 'success', 2000)
+			}
+		},
+		simplegui.CommandItem{
+			id: 'cmd_db_migrate'
+			title: 'Execute Database Migrations'
+			category: 'Database'
+			shortcut: 'Ctrl+M'
+			icon_path: 'assets/images/dialog_icon_database.jpg'
+			on_execute: fn (mut win simplegui.SimpleWindow) {
+				win.push_toast('DB Migration', 'Schema v42 applied.', 'database', 2000)
+			}
+		},
+		simplegui.CommandItem{
+			id: 'cmd_sync_cloud'
+			title: 'Sync Files with Remote Cloud Cluster'
+			category: 'Cloud'
+			shortcut: 'Ctrl+S'
+			icon_path: 'assets/images/dialog_icon_cloud.jpg'
+			on_execute: fn (mut win simplegui.SimpleWindow) {
+				win.push_toast('Cloud Sync', '1,280 files synced.', 'cloud', 2000)
+			}
+		},
+		simplegui.CommandItem{
+			id: 'cmd_security_auth'
+			title: 'Elevate Root Privileges'
+			category: 'Security'
+			shortcut: 'Ctrl+E'
+			icon_path: 'assets/images/dialog_icon_security.jpg'
+			on_execute: fn (mut win simplegui.SimpleWindow) {
+				win.push_toast('Security', 'Elevated permissions granted.', 'security', 2000)
+			}
+		},
+	])
+	win.hide_command_palette()
+
+	// 15. Right-Click Context Menu with Icons
+	win.on_right_click('lbl_std_desc', fn (mut win simplegui.SimpleWindow) {
+		win.show_context_menu(win.mouse_x, win.mouse_y, [
+			simplegui.ContextMenuItem{
+				id: 'ctx_success'
+				title: 'Trigger Success Notice'
+				icon_path: 'assets/images/dialog_icon_success.jpg'
+				on_select: fn (mut win simplegui.SimpleWindow) {
+					win.push_toast('Success', 'Context menu action executed!', 'success', 2000)
+				}
+			},
+			simplegui.ContextMenuItem{
+				id: 'ctx_cloud'
+				title: 'Sync to Cloud Storage'
+				icon_path: 'assets/images/dialog_icon_cloud.jpg'
+				on_select: fn (mut win simplegui.SimpleWindow) {
+					win.push_toast('Cloud', 'Syncing workspace...', 'cloud', 2000)
+				}
+			},
+			simplegui.ContextMenuItem{
+				id: 'ctx_tip'
+				title: 'Show Tip'
+				icon_path: 'assets/images/dialog_icon_tip.jpg'
+				on_select: fn (mut win simplegui.SimpleWindow) {
+					win.show_dialog_tip('Context Tip', 'Right-click context menus support icons!')
+				}
+			},
+		])
 	})
 
 	// Launch SimpleGUI Application Event Loop
