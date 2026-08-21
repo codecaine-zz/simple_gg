@@ -7,6 +7,10 @@
 ## 🎨 Visual Showcase & Snapshots of All Examples
 
 <p align="center">
+  <img src="snapshots/ex23.png" width="48%" alt="Modern Image Controls Demo" />
+  <img src="snapshots/ex22.png" width="48%" alt="Super Controls Suite Demo" />
+</p>
+<p align="center">
   <img src="snapshots/ex1.png" width="48%" alt="Quickstart Demo" />
   <img src="snapshots/ex6.png" width="48%" alt="Dashboard App Demo" />
 </p>
@@ -14,13 +18,9 @@
   <img src="snapshots/ex7.png" width="48%" alt="Advanced Controls Demo" />
   <img src="snapshots/ex14.png" width="48%" alt="RAD Controls Showcase" />
 </p>
-<p align="center">
-  <img src="snapshots/ex15.png" width="48%" alt="Modern UI Showcase" />
-  <img src="snapshots/ex17.png" width="48%" alt="Data & Event Binding" />
-</p>
 
 <details>
-<summary><b>📸 Click to view all 17 example screenshots</b></summary>
+<summary><b>📸 Click to view all 23 example screenshots</b></summary>
 <br/>
 
 <p align="center">
@@ -57,6 +57,18 @@
 </p>
 <p align="center">
   <img src="snapshots/ex17.png" width="48%" alt="17 - Data & Event Binding Demo" />
+  <img src="snapshots/ex18.png" width="48%" alt="18 - Custom Font Typography Demo" />
+</p>
+<p align="center">
+  <img src="snapshots/ex19.png" width="48%" alt="19 - Cross-Window Spy Demo" />
+  <img src="snapshots/ex20.png" width="48%" alt="20 - Stdlib Data Structures Demo" />
+</p>
+<p align="center">
+  <img src="snapshots/ex21.png" width="48%" alt="21 - Extended OS System Calls Demo" />
+  <img src="snapshots/ex22.png" width="48%" alt="22 - Modern Super Controls Demo" />
+</p>
+<p align="center">
+  <img src="snapshots/ex23.png" width="48%" alt="23 - Modern Image Controls Demo" />
 </p>
 
 </details>
@@ -125,6 +137,13 @@ The repository includes beginner-friendly example programs in the [`examples/`](
 | **[`15_modern_ui_features_showcase.v`](examples/15_modern_ui_features_showcase.v)** | Modern UI Showcase: Window controls, themes, layouts, forms, state store, system utilities. | `v run examples/15_modern_ui_features_showcase.v` | ![Snapshot 15](snapshots/ex15.png) |
 | **[`16_interval_timers.v`](examples/16_interval_timers.v)** | Interval Timers & Timeouts: Recurring timers, timeouts, clock, auto progress bar. | `v run examples/16_interval_timers.v` | ![Snapshot 16](snapshots/ex16.png) |
 | **[`17_data_and_event_binding.v`](examples/17_data_and_event_binding.v)** | Data & Event Binding: Two-way state binding (`bind_state`), click aliases, shortcut bindings. | `v run examples/17_data_and_event_binding.v` | ![Snapshot 17](snapshots/ex17.png) |
+| **[`18_custom_font_loading.v`](examples/18_custom_font_loading.v)** | Custom Font & Typography: Platform font resolution, custom TTF/OTF setting, font discovery. | `v run examples/18_custom_font_loading.v` | ![Snapshot 18](snapshots/ex18.png) |
+| **[`19_cross_window_spy_and_automation.v`](examples/19_cross_window_spy_and_automation.v)** | Cross-Window Spy++ & Automation: Global window registry, control inspection, event bus. | `v run examples/19_cross_window_spy_and_automation.v` | ![Snapshot 19](snapshots/ex19.png) |
+| **[`20_stdlib_data_structures_math_and_sockets.v`](examples/20_stdlib_data_structures_math_and_sockets.v)** | Collections, Math & Sockets: Stack, Queue, Set, MinHeap, BigInt, string distance metrics. | `v run examples/20_stdlib_data_structures_math_and_sockets.v` | ![Snapshot 20](snapshots/ex20.png) |
+| **[`21_extended_os_system_calls.v`](examples/21_extended_os_system_calls.v)** | Extended OS & Hardware: CPU/memory pressure, environment variables, audio beeps, zip. | `v run examples/21_extended_os_system_calls.v` | ![Snapshot 21](snapshots/ex21.png) |
+| **[`22_modern_super_controls_showcase.v`](examples/22_modern_super_controls_showcase.v)** | Super Controls Suite: Super Terminal, Code Studio, Smart Table, Kanban Board, Wizard Stepper, Floating Toolbar, Score Card, Sparklines, Donut Chart, Chip Input. | `v run examples/22_modern_super_controls_showcase.v` | ![Snapshot 22](snapshots/ex22.png) |
+| **[`23_modern_image_controls_showcase.v`](examples/23_modern_image_controls_showcase.v)** | Modern Image Controls: User Profile Cards, Product Cards, Multi-Image Showcase Gallery, 3D App Launcher Tiles, Media Player Card, Hero Banners, and Hardware Texture Caching. | `v run examples/23_modern_image_controls_showcase.v` | ![Snapshot 23](snapshots/ex23.png) |
+
 
 ---
 

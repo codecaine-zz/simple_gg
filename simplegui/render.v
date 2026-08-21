@@ -2286,6 +2286,479 @@ pub fn (mut win SimpleWindow) render_ui() {
 					}
 				}
 			}
+			'image', 'image_box' {
+				win.draw_image_fit(ctrl.text_value, ctrl.x, ctrl.y, ctrl.w, ctrl.h, ctrl.placeholder)
+				if ctrl.placeholder.len > 0 {
+					cap_h := f32(24.0)
+					cap_y := ctrl.y + ctrl.h - cap_h
+					win.gg_ctx.draw_rect_filled(ctrl.x, cap_y, ctrl.w, cap_h, gg.Color{ r: 15, g: 20, b: 30, a: 190 })
+					win.gg_ctx.draw_text2(
+						x: int(ctrl.x + 8)
+						y: int(cap_y + 5)
+						text: clean_text(ctrl.placeholder)
+						color: gg.rgb(240, 245, 255)
+						size: 11
+						bold: true
+					)
+				}
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
+			}
+			'user_profile_card' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 10.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 10.0, border_c)
+
+				// Avatar Box (68x68)
+				av_x := ctrl.x + 14.0
+				av_y := ctrl.y + 14.0
+				av_sz := f32(68.0)
+				win.draw_image_fit(ctrl.text_value, av_x, av_y, av_sz, av_sz, '')
+				win.gg_ctx.draw_rounded_rect_empty(av_x, av_y, av_sz, av_sz, 6.0, border_c)
+
+				// Online status indicator badge dot
+				dot_x := av_x + av_sz - 4.0
+				dot_y := av_y + av_sz - 4.0
+				dot_c := if ctrl.bool_value { gg.rgb(16, 185, 129) } else { gg.rgb(156, 163, 175) }
+				win.gg_ctx.draw_circle_filled(dot_x, dot_y, 7.0, surface)
+				win.gg_ctx.draw_circle_filled(dot_x, dot_y, 5.0, dot_c)
+
+				// Action button geometry on right
+				btn_txt := if ctrl.variant.len > 0 { ctrl.variant } else if ctrl.items.len > 2 { ctrl.items[2] } else { '[Message]' }
+				btn_w := f32(96.0)
+				btn_h := f32(30.0)
+				btn_x := ctrl.x + ctrl.w - btn_w - 14.0
+				btn_y := ctrl.y + 24.0
+
+				// Full Name & Handle
+				text_left := ctrl.x + 94.0
+				name_txt := if ctrl.title.len > 0 { ctrl.title } else { 'User Profile' }
+				max_name_w := btn_x - text_left - 8.0
+				disp_name := truncate_text_to_width(win, name_txt, max_name_w)
+				win.gg_ctx.draw_text2(
+					x: int(text_left)
+					y: int(ctrl.y + 14)
+					text: disp_name
+					color: fg
+					size: 15
+					bold: true
+				)
+
+				handle_txt := clean_text(ctrl.placeholder)
+				if handle_txt.len > 0 {
+					win.gg_ctx.draw_text2(
+						x: int(text_left)
+						y: int(ctrl.y + 34)
+						text: handle_txt
+						color: gg.rgb(148, 163, 184)
+						size: 12
+					)
+				}
+
+				// Role badge
+				role_txt := if ctrl.items.len > 0 && ctrl.items[0].len > 0 { ctrl.items[0] } else { 'Member' }
+				handle_w := measure_text_width(win, handle_txt)
+				mut badge_x := text_left + handle_w + 10.0
+				if handle_txt.len == 0 {
+					badge_x = text_left
+				}
+				max_role_w := btn_x - badge_x - 8.0
+				if max_role_w > 20.0 {
+					disp_role := truncate_text_to_width(win, role_txt, max_role_w - 14.0)
+					role_w := measure_text_width(win, disp_role) + 14.0
+					win.gg_ctx.draw_rounded_rect_filled(badge_x, ctrl.y + 32.0, role_w, 18.0, 4.0, if win.theme.is_dark { gg.rgb(30, 58, 138) } else { gg.rgb(219, 234, 254) })
+					win.gg_ctx.draw_text2(
+						x: int(badge_x + 7)
+						y: int(ctrl.y + 35)
+						text: disp_role
+						color: if win.theme.is_dark { gg.rgb(147, 197, 253) } else { gg.rgb(29, 78, 216) }
+						size: 10
+						bold: true
+					)
+				}
+
+				// Bio description
+				bio_txt := if ctrl.items.len > 1 { ctrl.items[1] } else { '' }
+				if bio_txt.len > 0 {
+					max_bio_w := ctrl.w - 104.0
+					disp_bio := truncate_text_to_width(win, bio_txt, max_bio_w)
+					win.gg_ctx.draw_text2(
+						x: int(text_left)
+						y: int(ctrl.y + 58)
+						text: disp_bio
+						color: if win.theme.is_dark { gg.rgb(203, 213, 225) } else { gg.rgb(71, 85, 105) }
+						size: 11
+					)
+				}
+
+				// Draw Action button
+				is_btn_hover := win.mouse_x >= btn_x && win.mouse_x <= btn_x + btn_w && win.mouse_y >= btn_y && win.mouse_y <= btn_y + btn_h
+				btn_bg := if is_btn_hover { hover_c } else { accent }
+				win.gg_ctx.draw_rounded_rect_filled(btn_x, btn_y, btn_w, btn_h, 6.0, btn_bg)
+				win.gg_ctx.draw_text2(
+					x: int(btn_x + 12)
+					y: int(btn_y + 8)
+					text: clean_text(btn_txt)
+					color: gg.Color{ r: 255, g: 255, b: 255 }
+					size: 11
+					bold: true
+				)
+			}
+			'product_card' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 10.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 10.0, border_c)
+
+				// Hero Image Top Box
+				img_pad := f32(8.0)
+				img_w := ctrl.w - img_pad * 2.0
+				img_h := f32(130.0)
+				win.draw_image_fit(ctrl.text_value, ctrl.x + img_pad, ctrl.y + img_pad, img_w, img_h, ctrl.title)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x + img_pad, ctrl.y + img_pad, img_w, img_h, 6.0, border_c)
+
+				// Badge Tag Overlay (e.g. 'PRO' / 'BESTSELLER')
+				badge_str := if ctrl.items.len > 1 && ctrl.items[1].len > 0 { ctrl.items[1] } else { 'PRO' }
+				badge_w := f32(badge_str.len * 7 + 16)
+				badge_x := ctrl.x + ctrl.w - img_pad - badge_w - 6.0
+				badge_y := ctrl.y + img_pad + 6.0
+				win.gg_ctx.draw_rounded_rect_filled(badge_x, badge_y, badge_w, 20.0, 4.0, gg.rgb(239, 68, 68))
+				win.gg_ctx.draw_text2(
+					x: int(badge_x + 8)
+					y: int(badge_y + 4)
+					text: clean_text(badge_str)
+					color: gg.Color{ r: 255, g: 255, b: 255 }
+					size: 10
+					bold: true
+				)
+
+				// Product Title
+				win.gg_ctx.draw_text2(
+					x: int(ctrl.x + 12)
+					y: int(ctrl.y + 146)
+					text: clean_text(ctrl.title)
+					color: fg
+					size: 14
+					bold: true
+				)
+
+				// Description / subtitle
+				if ctrl.placeholder.len > 0 {
+					win.gg_ctx.draw_text2(
+						x: int(ctrl.x + 12)
+						y: int(ctrl.y + 168)
+						text: clean_text(ctrl.placeholder)
+						color: gg.rgb(148, 163, 184)
+						size: 11
+					)
+				}
+
+				// Price & Rating
+				price_txt := if ctrl.items.len > 0 { ctrl.items[0] } else { '$49.00' }
+				rating_txt := if ctrl.items.len > 3 { ctrl.items[3] } else { '4.9 *' }
+				win.gg_ctx.draw_text2(
+					x: int(ctrl.x + 12)
+					y: int(ctrl.y + 204)
+					text: clean_text(price_txt)
+					color: accent
+					size: 16
+					bold: true
+				)
+				win.gg_ctx.draw_text2(
+					x: int(ctrl.x + 12 + price_txt.len * 9 + 10)
+					y: int(ctrl.y + 208)
+					text: clean_text(rating_txt)
+					color: gg.rgb(234, 179, 8)
+					size: 11
+					bold: true
+				)
+
+				// Action CTA Button
+				btn_txt := if ctrl.items.len > 2 { ctrl.items[2] } else { '[Buy Now]' }
+				btn_w := f32(92.0)
+				btn_h := f32(28.0)
+				btn_x := ctrl.x + ctrl.w - btn_w - 12.0
+				btn_y := ctrl.y + 200.0
+				is_btn_hover := win.mouse_x >= btn_x && win.mouse_x <= btn_x + btn_w && win.mouse_y >= btn_y && win.mouse_y <= btn_y + btn_h
+				btn_bg := if is_btn_hover { hover_c } else { accent }
+				win.gg_ctx.draw_rounded_rect_filled(btn_x, btn_y, btn_w, btn_h, 6.0, btn_bg)
+				win.gg_ctx.draw_text2(
+					x: int(btn_x + 12)
+					y: int(btn_y + 7)
+					text: clean_text(btn_txt)
+					color: gg.Color{ r: 255, g: 255, b: 255 }
+					size: 11
+					bold: true
+				)
+			}
+			'image_gallery' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 10.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 10.0, border_c)
+
+				pad := f32(8.0)
+				main_w := ctrl.w - pad * 2.0
+				main_h := f32(190.0)
+				curr_idx := if ctrl.items.len > 0 { math.max(0, math.min(ctrl.items.len - 1, ctrl.int_value)) } else { 0 }
+				curr_img := if curr_idx < ctrl.items.len { ctrl.items[curr_idx] } else { '' }
+
+				// Main Hero Preview Image
+				win.draw_image_fit(curr_img, ctrl.x + pad, ctrl.y + pad, main_w, main_h, '')
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x + pad, ctrl.y + pad, main_w, main_h, 6.0, border_c)
+
+				// Navigation Prev / Next overlay buttons
+				prev_btn_x := ctrl.x + pad + 8.0
+				prev_btn_y := ctrl.y + pad + (main_h / 2.0) - 16.0
+				next_btn_x := ctrl.x + ctrl.w - pad - 40.0
+				next_btn_y := prev_btn_y
+
+				win.gg_ctx.draw_rounded_rect_filled(prev_btn_x, prev_btn_y, 32.0, 32.0, 6.0, gg.Color{ r: 20, g: 25, b: 35, a: 210 })
+				draw_vector_chevron(win.gg_ctx, prev_btn_x + 16.0, prev_btn_y + 16.0, 10.0, 'left', gg.Color{ r: 255, g: 255, b: 255 })
+
+				win.gg_ctx.draw_rounded_rect_filled(next_btn_x, next_btn_y, 32.0, 32.0, 6.0, gg.Color{ r: 20, g: 25, b: 35, a: 210 })
+				draw_vector_chevron(win.gg_ctx, next_btn_x + 16.0, next_btn_y + 16.0, 10.0, 'right', gg.Color{ r: 255, g: 255, b: 255 })
+
+				// Caption overlay banner
+				caption_h := f32(28.0)
+				caption_y := ctrl.y + pad + main_h - caption_h
+				win.gg_ctx.draw_rect_filled(ctrl.x + pad, caption_y, main_w, caption_h, gg.Color{ r: 15, g: 20, b: 30, a: 210 })
+				cap_str := if curr_idx < ctrl.items_selected.len { ctrl.items_selected[curr_idx] } else { 'Image ${curr_idx + 1}' }
+				win.gg_ctx.draw_text2(
+					x: int(ctrl.x + pad + 10)
+					y: int(caption_y + 7)
+					text: clean_text(cap_str)
+					color: gg.Color{ r: 255, g: 255, b: 255 }
+					size: 11
+					bold: true
+				)
+				idx_str := '${curr_idx + 1} / ${ctrl.items.len}'
+				win.gg_ctx.draw_text2(
+					x: int(ctrl.x + ctrl.w - pad - 60)
+					y: int(caption_y + 7)
+					text: idx_str
+					color: gg.rgb(186, 230, 253)
+					size: 11
+				)
+
+				// Bottom Thumbnail Strip (66x50 thumbs)
+				thumb_strip_y := ctrl.y + pad + main_h + 10.0
+				thumb_w := f32(66.0)
+				thumb_h := f32(50.0)
+				for t_i in 0 .. ctrl.items.len {
+					tx := ctrl.x + pad + f32(t_i) * (thumb_w + 8.0)
+					if tx + thumb_w > ctrl.x + ctrl.w {
+						break
+					}
+					win.draw_image_fit(ctrl.items[t_i], tx, thumb_strip_y, thumb_w, thumb_h, '')
+					if t_i == curr_idx {
+						win.gg_ctx.draw_rounded_rect_empty(tx, thumb_strip_y, thumb_w, thumb_h, 4.0, accent)
+						win.gg_ctx.draw_rounded_rect_empty(tx - 1.0, thumb_strip_y - 1.0, thumb_w + 2.0, thumb_h + 2.0, 4.0, accent)
+					} else {
+						win.gg_ctx.draw_rounded_rect_empty(tx, thumb_strip_y, thumb_w, thumb_h, 4.0, border_c)
+					}
+				}
+			}
+			'app_launcher_tile' {
+				is_hov := ctrl.is_hovered
+				tile_bg := if is_hov { surface_hover } else { surface }
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, tile_bg)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, if is_hov { accent } else { border_c })
+
+				// Icon Box (48x48)
+				icon_sz := f32(48.0)
+				icon_y := ctrl.y + (ctrl.h - icon_sz) / 2.0
+				win.draw_image_fit(ctrl.text_value, ctrl.x + 12.0, icon_y, icon_sz, icon_sz, '')
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x + 12.0, icon_y, icon_sz, icon_sz, 6.0, border_c)
+
+				// Status Pill at Top-Right
+				stat_txt := if ctrl.items.len > 0 { ctrl.items[0] } else { 'ONLINE' }
+				stat_w := f32(stat_txt.len * 7 + 16)
+				stat_x := ctrl.x + ctrl.w - stat_w - 10.0
+				stat_y := ctrl.y + 10.0
+				stat_bg := match stat_txt.to_upper() {
+					'ONLINE', 'READY' { if win.theme.is_dark { gg.rgb(6, 78, 59) } else { gg.rgb(209, 250, 229) } }
+					'DEPLOYING', 'BUSY' { if win.theme.is_dark { gg.rgb(120, 53, 15) } else { gg.rgb(254, 243, 199) } }
+					'ERROR', 'OFFLINE' { if win.theme.is_dark { gg.rgb(127, 29, 29) } else { gg.rgb(254, 226, 226) } }
+					else { if win.theme.is_dark { gg.rgb(30, 58, 138) } else { gg.rgb(219, 234, 254) } }
+				}
+				stat_fg := match stat_txt.to_upper() {
+					'ONLINE', 'READY' { if win.theme.is_dark { gg.rgb(110, 231, 183) } else { gg.rgb(5, 150, 105) } }
+					'DEPLOYING', 'BUSY' { if win.theme.is_dark { gg.rgb(252, 211, 77) } else { gg.rgb(217, 119, 6) } }
+					'ERROR', 'OFFLINE' { if win.theme.is_dark { gg.rgb(252, 165, 165) } else { gg.rgb(220, 38, 38) } }
+					else { if win.theme.is_dark { gg.rgb(147, 197, 253) } else { gg.rgb(37, 99, 235) } }
+				}
+				win.gg_ctx.draw_rounded_rect_filled(stat_x, stat_y, stat_w, 20.0, 4.0, stat_bg)
+				win.gg_ctx.draw_text2(
+					x: int(stat_x + 8)
+					y: int(stat_y + 4)
+					text: clean_text(stat_txt)
+					color: stat_fg
+					size: 10
+					bold: true
+				)
+
+				// Title (truncated so it never overlaps the status badge)
+				max_title_w := stat_x - (ctrl.x + 68.0) - 6.0
+				disp_title := truncate_text_to_width(win, ctrl.title, max_title_w)
+				win.gg_ctx.draw_text2(
+					x: int(ctrl.x + 68)
+					y: int(ctrl.y + 14)
+					text: disp_title
+					color: fg
+					size: 13
+					bold: true
+				)
+
+				// Category / Subtitle (truncated to fit card width)
+				if ctrl.placeholder.len > 0 {
+					max_sub_w := ctrl.w - 78.0
+					disp_sub := truncate_text_to_width(win, ctrl.placeholder, max_sub_w)
+					win.gg_ctx.draw_text2(
+						x: int(ctrl.x + 68)
+						y: int(ctrl.y + 38)
+						text: disp_sub
+						color: gg.rgb(148, 163, 184)
+						size: 11
+					)
+				}
+			}
+			'media_player' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 10.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 10.0, border_c)
+
+				// Cover Art Image Box (72x72)
+				cov_sz := f32(72.0)
+				win.draw_image_fit(ctrl.text_value, ctrl.x + 14.0, ctrl.y + 16.0, cov_sz, cov_sz, '')
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x + 14.0, ctrl.y + 16.0, cov_sz, cov_sz, 6.0, border_c)
+
+				// Track Title & Artist
+				track_left := ctrl.x + 98.0
+				win.gg_ctx.draw_text2(
+					x: int(track_left)
+					y: int(ctrl.y + 14)
+					text: clean_text(ctrl.title)
+					color: fg
+					size: 14
+					bold: true
+				)
+				win.gg_ctx.draw_text2(
+					x: int(track_left)
+					y: int(ctrl.y + 32)
+					text: clean_text(ctrl.placeholder)
+					color: gg.rgb(148, 163, 184)
+					size: 11
+				)
+
+				// Progress Bar Track
+				bar_x := track_left
+				bar_y := ctrl.y + 54.0
+				bar_w := ctrl.w - 112.0
+				bar_h := f32(6.0)
+				win.gg_ctx.draw_rounded_rect_filled(bar_x, bar_y, bar_w, bar_h, 3.0, if win.theme.is_dark { gg.rgb(55, 65, 81) } else { gg.rgb(209, 213, 219) })
+				
+				tot_sec := if ctrl.int_value > 0 { ctrl.int_value } else { 180 }
+				elapsed_sec := int(ctrl.min_val)
+				progress_pct := math.max(0.0, math.min(1.0, f64(elapsed_sec) / f64(tot_sec)))
+				elapsed_w := bar_w * f32(progress_pct)
+				if elapsed_w > 0 {
+					win.gg_ctx.draw_rounded_rect_filled(bar_x, bar_y, elapsed_w, bar_h, 3.0, accent)
+					win.gg_ctx.draw_circle_filled(bar_x + elapsed_w, bar_y + 3.0, 5.0, gg.rgb(255, 255, 255))
+				}
+
+				// Timestamps
+				time_txt := '${elapsed_sec / 60:02d}:${elapsed_sec % 60:02d} / ${tot_sec / 60:02d}:${tot_sec % 60:02d}'
+				win.gg_ctx.draw_text2(
+					x: int(bar_x)
+					y: int(ctrl.y + 68)
+					text: time_txt
+					color: gg.rgb(148, 163, 184)
+					size: 10
+				)
+
+				// Play/Pause & Skip Buttons
+				play_txt := if ctrl.bool_value { '|| PAUSE' } else { '> PLAY' }
+				play_btn_x := ctrl.x + ctrl.w - 88.0
+				play_btn_y := ctrl.y + 66.0
+				win.gg_ctx.draw_rounded_rect_filled(play_btn_x, play_btn_y, 74.0, 24.0, 4.0, accent)
+				win.gg_ctx.draw_text2(
+					x: int(play_btn_x + 10)
+					y: int(play_btn_y + 5)
+					text: play_txt
+					color: gg.Color{ r: 255, g: 255, b: 255 }
+					size: 10
+					bold: true
+				)
+			}
+			'hero_banner' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 12.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 12.0, border_c)
+
+				// Right Hero Illustration (210x148)
+				ill_pad := f32(10.0)
+				ill_w := f32(210.0)
+				ill_h := ctrl.h - ill_pad * 2.0
+				ill_x := ctrl.x + ctrl.w - ill_w - ill_pad
+				ill_y := ctrl.y + ill_pad
+				win.draw_image_fit(ctrl.text_value, ill_x, ill_y, ill_w, ill_h, '')
+				win.gg_ctx.draw_rounded_rect_empty(ill_x, ill_y, ill_w, ill_h, 8.0, border_c)
+
+				// Left Content
+				badge_str := if ctrl.items.len > 2 { ctrl.items[2] } else { 'FEATURED' }
+				badge_w := f32(badge_str.len * 7 + 14)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 16.0, ctrl.y + 14.0, badge_w, 18.0, 4.0, accent)
+				win.gg_ctx.draw_text2(
+					x: int(ctrl.x + 23)
+					y: int(ctrl.y + 17)
+					text: clean_text(badge_str)
+					color: gg.Color{ r: 255, g: 255, b: 255 }
+					size: 10
+					bold: true
+				)
+
+				// Title
+				win.gg_ctx.draw_text2(
+					x: int(ctrl.x + 16)
+					y: int(ctrl.y + 40)
+					text: clean_text(ctrl.title)
+					color: fg
+					size: 18
+					bold: true
+				)
+
+				// Subtitle
+				if ctrl.placeholder.len > 0 {
+					win.gg_ctx.draw_text2(
+						x: int(ctrl.x + 16)
+						y: int(ctrl.y + 68)
+						text: clean_text(ctrl.placeholder)
+						color: gg.rgb(148, 163, 184)
+						size: 12
+					)
+				}
+
+				// Primary CTA & Secondary Button
+				cta1 := if ctrl.items.len > 0 { ctrl.items[0] } else { '[Get Started]' }
+				cta2 := if ctrl.items.len > 1 { ctrl.items[1] } else { '[Learn More]' }
+
+				btn1_x := ctrl.x + 16.0
+				btn1_y := ctrl.y + 112.0
+				win.gg_ctx.draw_rounded_rect_filled(btn1_x, btn1_y, 118.0, 32.0, 6.0, accent)
+				win.gg_ctx.draw_text2(
+					x: int(btn1_x + 12)
+					y: int(btn1_y + 8)
+					text: clean_text(cta1)
+					color: gg.Color{ r: 255, g: 255, b: 255 }
+					size: 11
+					bold: true
+				)
+
+				btn2_x := ctrl.x + 144.0
+				btn2_y := btn1_y
+				win.gg_ctx.draw_rounded_rect_empty(btn2_x, btn2_y, 118.0, 32.0, 6.0, border_c)
+				win.gg_ctx.draw_text2(
+					x: int(btn2_x + 12)
+					y: int(btn2_y + 8)
+					text: clean_text(cta2)
+					color: fg
+					size: 11
+					bold: true
+				)
+			}
 			else {}
 		}
 	}
@@ -2666,3 +3139,79 @@ fn clean_text(s string) string {
 	}
 	return res.string().trim_space()
 }
+
+// truncate_text_to_width truncates a string with '...' if its rendered width exceeds max_width.
+fn truncate_text_to_width(win &SimpleWindow, text string, max_width f32) string {
+	if text.len == 0 || max_width <= 0 {
+		return text
+	}
+	clean := clean_text(text)
+	w := measure_text_width(win, clean)
+	if w <= max_width {
+		return clean
+	}
+	mut low := 0
+	mut high := clean.len
+	mut best := 0
+	for low <= high {
+		mid := (low + high) / 2
+		candidate := clean[0..mid] + '...'
+		cw := measure_text_width(win, candidate)
+		if cw <= max_width {
+			best = mid
+			low = mid + 1
+		} else {
+			high = mid - 1
+		}
+	}
+	if best <= 0 {
+		return '...'
+	}
+	return clean[0..best] + '...'
+}
+
+// draw_image_fit draws an image scaled to fit inside the specified (x, y, w, h) bounds.
+// If the image file does not exist or fails to load, it gracefully renders a modern vector placeholder.
+fn (mut win SimpleWindow) draw_image_fit(file_path string, x f32, y f32, w f32, h f32, fallback_label string) {
+	if win.gg_ctx == unsafe { nil } {
+		return
+	}
+	if file_path.len > 0 {
+		if mut img := win.get_or_load_image(file_path) {
+			if !img.simg_ok {
+				img.init_sokol_image()
+			}
+			if img.simg_ok {
+				win.gg_ctx.draw_image(x, y, w, h, img)
+				return
+			}
+		}
+	}
+
+
+	// Fallback vector placeholder card if file is missing or loading
+	surface := if win.theme.is_dark { gg.rgb(35, 38, 50) } else { gg.rgb(230, 234, 242) }
+	border_c := if win.theme.is_dark { gg.rgb(65, 70, 85) } else { gg.rgb(200, 205, 215) }
+	muted_fg := if win.theme.is_dark { gg.rgb(130, 135, 155) } else { gg.rgb(120, 125, 140) }
+	win.gg_ctx.draw_rounded_rect_filled(x, y, w, h, 6.0, surface)
+	win.gg_ctx.draw_rounded_rect_empty(x, y, w, h, 6.0, border_c)
+
+	cx := x + w / 2.0
+	cy := y + h / 2.0
+	if w >= 32.0 && h >= 32.0 {
+		win.gg_ctx.draw_rounded_rect_empty(cx - 14.0, cy - 10.0, 28.0, 20.0, 3.0, muted_fg)
+		win.gg_ctx.draw_circle_filled(cx - 6.0, cy - 4.0, 3.0, muted_fg)
+		win.gg_ctx.draw_triangle_filled(cx - 10.0, cy + 8.0, cx - 2.0, cy, cx + 4.0, cy + 8.0, muted_fg)
+		win.gg_ctx.draw_triangle_filled(cx + 1.0, cy + 8.0, cx + 6.0, cy + 3.0, cx + 11.0, cy + 8.0, muted_fg)
+	}
+	if fallback_label.len > 0 && h >= 50.0 {
+		win.gg_ctx.draw_text2(
+			x:     int(x + 6)
+			y:     int(y + h - 18)
+			text:  clean_text(fallback_label)
+			color: muted_fg
+			size:  11
+		)
+	}
+}
+

@@ -76,9 +76,8 @@ fn main() {
 		['103', 'Grace Hopper', 'Computer Scientist', 'Offline'],
 	]
 	win.add_table('tbl_search', headers, rows)
+	win.set_control_width('tbl_search', 660)
 	win.set_table_search_filter('tbl_search', 'Ada')
 
-	win.fit_to_content()
-	println('Launching window event loop...')
 	win.run()
 }

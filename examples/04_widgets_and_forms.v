@@ -4,7 +4,7 @@ module main
 import simplegui
 
 fn main() {
-	mut win := simplegui.new_simple_window('04 - Widgets & Form Controls', 620, 680)
+	mut win := simplegui.new_simple_window('04 - Widgets & Form Controls', 620, 630)
 	win.set_theme('Dracula')
 
 	win.add_heading('Form Controls & Component Gallery')

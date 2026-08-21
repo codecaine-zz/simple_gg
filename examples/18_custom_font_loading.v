@@ -54,7 +54,7 @@ fn apply_typography_styles(mut win simplegui.SimpleWindow, font_size int, is_bol
 }
 
 fn main() {
-	mut win := simplegui.new_simple_window('Dynamic Font Changing & Cross-Platform Typography', 740, 680)
+	mut win := simplegui.new_simple_window('Dynamic Font Changing & Cross-Platform Typography', 780, 640)
 	win.set_theme('Apple Dark')
 
 	// Initial font path resolution
@@ -112,135 +112,83 @@ fn main() {
 		win.add_label('lbl_style_status', 'Active: Arial.ttf | 18px | Bold | #0a84ff')
 
 		// Row 1: Font Size Steppers & Weight Toggle
-		win.begin_row('row_size_controls')
-		win.add_button('btn_size_14', '14px')
-		win.bind_click('btn_size_14', fn (mut win simplegui.SimpleWindow) {
-			win.set_state_int('font_size', 14)
-			apply_typography_styles(mut win, 14, win.get_state_bool('font_bold'), win.get_state('font_color'))
-		})
+		win.grid('grid_size_controls', 4, 8, fn (mut win simplegui.SimpleWindow) {
+			win.add_button('btn_size_14', '14px')
+			win.bind_click('btn_size_14', fn (mut win simplegui.SimpleWindow) {
+				win.set_state_int('font_size', 14)
+				apply_typography_styles(mut win, 14, win.get_state_bool('font_bold'), win.get_state('font_color'))
+			})
 
-		win.add_button('btn_size_18', '18px')
-		win.bind_click('btn_size_18', fn (mut win simplegui.SimpleWindow) {
-			win.set_state_int('font_size', 18)
-			apply_typography_styles(mut win, 18, win.get_state_bool('font_bold'), win.get_state('font_color'))
-		})
+			win.add_button('btn_size_18', '18px')
+			win.bind_click('btn_size_18', fn (mut win simplegui.SimpleWindow) {
+				win.set_state_int('font_size', 18)
+				apply_typography_styles(mut win, 18, win.get_state_bool('font_bold'), win.get_state('font_color'))
+			})
 
-		win.add_button('btn_size_24', '24px')
-		win.bind_click('btn_size_24', fn (mut win simplegui.SimpleWindow) {
-			win.set_state_int('font_size', 24)
-			apply_typography_styles(mut win, 24, win.get_state_bool('font_bold'), win.get_state('font_color'))
-		})
+			win.add_button('btn_size_24', '24px')
+			win.bind_click('btn_size_24', fn (mut win simplegui.SimpleWindow) {
+				win.set_state_int('font_size', 24)
+				apply_typography_styles(mut win, 24, win.get_state_bool('font_bold'), win.get_state('font_color'))
+			})
 
-		win.add_button('btn_size_32', '32px')
-		win.bind_click('btn_size_32', fn (mut win simplegui.SimpleWindow) {
-			win.set_state_int('font_size', 32)
-			apply_typography_styles(mut win, 32, win.get_state_bool('font_bold'), win.get_state('font_color'))
+			win.add_button('btn_toggle_weight', 'Toggle Bold')
+			win.bind_click('btn_toggle_weight', fn (mut win simplegui.SimpleWindow) {
+				is_bold := win.toggle_state_bool('font_bold')
+				apply_typography_styles(mut win, win.get_state_int('font_size'), is_bold, win.get_state('font_color'))
+			})
 		})
-
-		win.add_button('btn_size_dec', '[-] Size')
-		win.bind_click('btn_size_dec', fn (mut win simplegui.SimpleWindow) {
-			curr := win.get_state_int('font_size')
-			next_sz := if curr > 10 { curr - 2 } else { 10 }
-			win.set_state_int('font_size', next_sz)
-			apply_typography_styles(mut win, next_sz, win.get_state_bool('font_bold'), win.get_state('font_color'))
-		})
-
-		win.add_button('btn_size_inc', '[+] Size')
-		win.bind_click('btn_size_inc', fn (mut win simplegui.SimpleWindow) {
-			curr := win.get_state_int('font_size')
-			next_sz := if curr < 44 { curr + 2 } else { 44 }
-			win.set_state_int('font_size', next_sz)
-			apply_typography_styles(mut win, next_sz, win.get_state_bool('font_bold'), win.get_state('font_color'))
-		})
-
-		win.add_button('btn_toggle_weight', 'Toggle Bold')
-		win.bind_click('btn_toggle_weight', fn (mut win simplegui.SimpleWindow) {
-			is_bold := win.toggle_state_bool('font_bold')
-			apply_typography_styles(mut win, win.get_state_int('font_size'), is_bold, win.get_state('font_color'))
-		})
-		win.end_row()
 
 		// Row 2: Color Swatches & Style Presets
-		win.begin_row('row_colors_presets')
-		win.add_button('btn_color_blue', 'Blue')
-		win.control('btn_color_blue').set_bg_color('#0a84ff').set_font_color('#ffffff')
-		win.bind_click('btn_color_blue', fn (mut win simplegui.SimpleWindow) {
-			win.set_state('font_color', '#0a84ff')
-			apply_typography_styles(mut win, win.get_state_int('font_size'), win.get_state_bool('font_bold'), '#0a84ff')
-		})
+		win.grid('grid_colors_presets', 4, 8, fn (mut win simplegui.SimpleWindow) {
+			win.add_button('btn_color_blue', 'Blue')
+			win.control('btn_color_blue').set_bg_color('#0a84ff').set_font_color('#ffffff')
+			win.bind_click('btn_color_blue', fn (mut win simplegui.SimpleWindow) {
+				win.set_state('font_color', '#0a84ff')
+				apply_typography_styles(mut win, win.get_state_int('font_size'), win.get_state_bool('font_bold'), '#0a84ff')
+			})
 
-		win.add_button('btn_color_green', 'Green')
-		win.control('btn_color_green').set_bg_color('#30d158').set_font_color('#ffffff')
-		win.bind_click('btn_color_green', fn (mut win simplegui.SimpleWindow) {
-			win.set_state('font_color', '#30d158')
-			apply_typography_styles(mut win, win.get_state_int('font_size'), win.get_state_bool('font_bold'), '#30d158')
-		})
+			win.add_button('btn_color_green', 'Green')
+			win.control('btn_color_green').set_bg_color('#30d158').set_font_color('#ffffff')
+			win.bind_click('btn_color_green', fn (mut win simplegui.SimpleWindow) {
+				win.set_state('font_color', '#30d158')
+				apply_typography_styles(mut win, win.get_state_int('font_size'), win.get_state_bool('font_bold'), '#30d158')
+			})
 
-		win.add_button('btn_color_orange', 'Orange')
-		win.control('btn_color_orange').set_bg_color('#ff9f0a').set_font_color('#ffffff')
-		win.bind_click('btn_color_orange', fn (mut win simplegui.SimpleWindow) {
-			win.set_state('font_color', '#ff9f0a')
-			apply_typography_styles(mut win, win.get_state_int('font_size'), win.get_state_bool('font_bold'), '#ff9f0a')
-		})
+			win.add_button('btn_color_orange', 'Orange')
+			win.control('btn_color_orange').set_bg_color('#ff9f0a').set_font_color('#ffffff')
+			win.bind_click('btn_color_orange', fn (mut win simplegui.SimpleWindow) {
+				win.set_state('font_color', '#ff9f0a')
+				apply_typography_styles(mut win, win.get_state_int('font_size'), win.get_state_bool('font_bold'), '#ff9f0a')
+			})
 
-		win.add_button('btn_color_purple', 'Purple')
-		win.control('btn_color_purple').set_bg_color('#bf5af2').set_font_color('#ffffff')
-		win.bind_click('btn_color_purple', fn (mut win simplegui.SimpleWindow) {
-			win.set_state('font_color', '#bf5af2')
-			apply_typography_styles(mut win, win.get_state_int('font_size'), win.get_state_bool('font_bold'), '#bf5af2')
+			win.add_button('btn_color_purple', 'Purple')
+			win.control('btn_color_purple').set_bg_color('#bf5af2').set_font_color('#ffffff')
+			win.bind_click('btn_color_purple', fn (mut win simplegui.SimpleWindow) {
+				win.set_state('font_color', '#bf5af2')
+				apply_typography_styles(mut win, win.get_state_int('font_size'), win.get_state_bool('font_bold'), '#bf5af2')
+			})
 		})
-
-		win.add_button('btn_preset_hero', 'Hero Preset')
-		win.bind_click('btn_preset_hero', fn (mut win simplegui.SimpleWindow) {
-			win.set_state_int('font_size', 26)
-			win.set_state_bool('font_bold', true)
-			win.set_state('font_color', '#0a84ff')
-			apply_typography_styles(mut win, 26, true, '#0a84ff')
-		})
-
-		win.add_button('btn_preset_accent', 'Accent Preset')
-		win.bind_click('btn_preset_accent', fn (mut win simplegui.SimpleWindow) {
-			win.set_state_int('font_size', 18)
-			win.set_state_bool('font_bold', true)
-			win.set_state('font_color', '#30d158')
-			apply_typography_styles(mut win, 18, true, '#30d158')
-		})
-
-		win.add_button('btn_preset_code', 'Monospace Code')
-		win.bind_click('btn_preset_code', fn (mut win simplegui.SimpleWindow) {
-			win.set_state_int('font_size', 16)
-			win.set_state_bool('font_bold', false)
-			win.set_state('font_color', '#bf5af2')
-
-			win.set_control_font_name('lbl_preview_headline', 'Monaco')
-			win.set_control_font_name('lbl_preview_body', 'Monaco')
-			win.set_control_font_name('btn_preview_cta', 'Monaco')
-			win.set_control_font_name('inp_preview_sample', 'Monaco')
-			win.set_state('active_font_name', 'Monaco.ttf')
-			apply_typography_styles(mut win, 16, false, '#bf5af2')
-		})
-		win.end_row()
 	})
 
 	// 3. Live Typography Preview Canvas
 	win.group('grp_preview_canvas', 'Live Canvas Preview', fn (mut win simplegui.SimpleWindow) {
 		win.add_label('lbl_preview_headline', 'Dynamic Headline Text Preview')
 		win.control('lbl_preview_headline')
-			.set_font_size(24)
+			.set_font_size(22)
 			.set_font_bold(true)
 			.set_font_color('#0a84ff')
 
 		win.add_label('lbl_preview_body', 'Sample Body Text: Sphinx of black quartz, judge my vow 0123456789')
 		win.control('lbl_preview_body')
-			.set_font_size(18)
+			.set_font_size(15)
 			.set_font_bold(true)
 			.set_font_color('#0a84ff')
 
 		win.add_button('btn_preview_cta', '[Aa] Styled Typography Button')
 		win.control('btn_preview_cta')
-			.set_width(320)
-			.set_height(40)
-			.set_font_size(18)
+			.set_width(280)
+			.set_height(34)
+			.set_font_size(16)
 			.set_font_bold(true)
 			.set_bg_color('#5e5ce6')
 			.set_font_color('#ffffff')
@@ -249,7 +197,7 @@ fn main() {
 		win.set_control_placeholder('inp_preview_sample', 'Type custom text here to preview live rendering...')
 		win.control('inp_preview_sample')
 			.set_width(420)
-			.set_font_size(18)
+			.set_font_size(15)
 
 		// Live-sync text typing to preview labels
 		win.bind_change('inp_preview_sample', fn (mut win simplegui.SimpleWindow) {
@@ -264,12 +212,6 @@ fn main() {
 				win.set_text('btn_preview_cta', '[Aa] Styled Typography Button')
 			}
 		})
-	})
-
-	// 4. Instructions & Platform Guide
-	win.group('grp_instructions', 'Platform Font Setup Instructions', fn (mut win simplegui.SimpleWindow) {
-		win.add_label('lbl_mac_info', 'macOS: Searches /System/Library/Fonts/Supplemental & /Library/Fonts')
-		win.add_label('lbl_prog_info', 'Programmatic: win.set_font_path("/path/to/font.ttf") dynamically changes active font')
 	})
 
 	win.run()

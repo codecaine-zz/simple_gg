@@ -6,7 +6,7 @@ module main
 import simplegui
 
 fn main() {
-	mut win := simplegui.new_simple_window('07 - Advanced Controls & Window Shortcuts', 720, 680)
+	mut win := simplegui.new_simple_window('07 - Advanced Controls & Window Shortcuts', 640, 540)
 	win.set_theme('Apple Dark')
 
 	// Set window close listener callback
@@ -41,6 +41,7 @@ fn main() {
 		['103', 'Grace Hopper', 'System Architect', 'Away'],
 		['104', 'Linus Torvalds', 'Core Developer', 'Busy'],
 	])
+	win.set_control_width('user_table', 580)
 	win.on_row_click('user_table', fn (mut win simplegui.SimpleWindow) {
 		selected := win.get_table_selected_row('user_table')
 		println('Clicked table row #${selected}')

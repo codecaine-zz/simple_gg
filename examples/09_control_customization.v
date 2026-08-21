@@ -3,7 +3,7 @@ module main
 import simplegui
 
 fn main() {
-	mut win := simplegui.new_simple_window('Control Customization & Geometry Demo', 720, 600)
+	mut win := simplegui.new_simple_window('Control Customization & Geometry Demo', 580, 360)
 	win.set_theme('Apple Dark')
 
 	win.add_heading('Control Customization & Geometry Demo')

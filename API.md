@@ -31,7 +31,8 @@ Whether you are building a 5-minute utility tool, a multi-tab admin panel, or an
 18. [Data & Event Binding (`bind`)](#18-data--event-binding-bind)
 19. [Cross-Window Spy++ & External App Automation](#19-cross-window-spy--external-app-automation)
 20. [Modern Super Controls (Developer Heaven Catalog)](#20-modern-super-controls-developer-heaven-catalog)
-21. [Type & Struct Reference Index](#21-type--struct-reference-index)
+21. [Modern Image Super Controls & Developer Asset Catalog](#21-modern-image-super-controls--developer-asset-catalog)
+22. [Type & Struct Reference Index](#22-type--struct-reference-index)
 
 
 ---
@@ -2614,7 +2615,238 @@ win.add_score_card(
 
 ---
 
-## 21. Type & Struct Reference Index
+## 21. Modern Image Super Controls & Developer Asset Catalog
+
+`simplegui` includes a powerful hardware-accelerated image rendering engine with automatic GPU texture caching, graceful vector fallbacks, and a collection of high-impact image controls that modern desktop applications demand.
+
+### Bundled Developer Asset Catalog (`assets/images/`)
+
+`simplegui` bundles high-resolution developer and user image assets ready for instant use:
+
+| Asset Path                                      | Dimensions | Category       | Description / Intended Use Cases                                      |
+| ----------------------------------------------- | ---------- | -------------- | --------------------------------------------------------------------- |
+| `assets/images/avatar_ada_lovelace.jpg`         | 1024x1024  | Avatar         | Professional 3D female software architect avatar portrait (Ada).      |
+| `assets/images/avatar_alex_chen.jpg`             | 1024x1024  | Avatar         | Friendly 3D male full-stack developer / SRE avatar portrait (Alex).   |
+| `assets/images/banner_cloud_devops.jpg`         | 1792x1024  | Hero / Banner  | Cybernetic cloud datacenter & telemetry data stream infrastructure.   |
+| `assets/images/banner_ai_code_studio.jpg`       | 1792x1024  | Hero / Banner  | Neural AI code studio workstation with holographic syntax windows.    |
+| `assets/images/banner_cyber_security.jpg`       | 1792x1024  | Hero / Banner  | Global cyber defense operations center with active holographic shield.|
+| `assets/images/icon_db_engine.jpg`              | 1024x1024  | 3D App Icon    | High-performance distributed SQL / Key-Value database cylinder icon.  |
+| `assets/images/icon_rocket_deploy.jpg`          | 1024x1024  | 3D App Icon    | Futuristic spacecraft rocket launching for continuous cloud deploy.   |
+| `assets/images/icon_terminal_cli.jpg`           | 1024x1024  | 3D App Icon    | Interactive developer terminal CLI console with glowing prompts.      |
+| `assets/images/cover_lofi_beats.jpg`            | 1024x1024  | Media / Cover  | Synthwave & Lo-Fi developer coding music album cover art.             |
+| `assets/images/product_dev_station.jpg`         | 1792x1024  | Product / Shop | Luxury custom mechanical keyboard with walnut finish and RGB glow.    |
+
+---
+
+### 1. User Profile Card (`add_user_profile_card` / `user_profile`)
+
+A modern user/developer profile card featuring an avatar image, online/offline status indicator dot, full name, username handle (`@dev`), role pill badge, bio description, and interactive action button.
+
+```v
+// Add User Profile Card:
+win.add_user_profile_card(
+    'prof_ada',                             // Control ID
+    'assets/images/avatar_ada_lovelace.jpg',// Avatar image path
+    'Ada Lovelace',                         // Full Name
+    '@ada_lovelace',                        // Username handle
+    'Lead Systems Architect',               // Role Badge
+    'Pioneering computing visionary and V language enthusiast.', // Bio
+    true,                                   // Online status (true = green dot)
+    '[Connect]'                             // Action button label
+)
+
+// Dynamic status mutation:
+win.set_user_online_status('prof_ada', false) // Sets status dot to gray
+
+// Method chaining setter:
+win.control('prof_ada').set_user_profile(
+    'assets/images/avatar_alex_chen.jpg',
+    'Alex Chen',
+    '@alex_dev',
+    'Senior SRE',
+    'Cloud distributed systems developer.',
+    true
+)
+
+// Event listener on action button click:
+win.on_click('prof_ada', fn (mut win simplegui.SimpleWindow) {
+    win.show_toast('Profile', 'Opened communication channel!')
+})
+
+// Quick Nameless Shortcut:
+win.user_profile('assets/images/avatar_ada_lovelace.jpg', 'Ada Lovelace', '@ada', 'Architect', 'Systems Lead')
+```
+
+---
+
+### 2. Modern Product Card (`add_product_card` / `product_card`)
+
+An e-commerce, store, or SaaS tier showcase card featuring a top hero image, floating badge tag (`BESTSELLER`, `PRO`, `SALE`), product title, subtitle, formatted price tag, star rating, and CTA action button.
+
+```v
+// Add Product Card:
+win.add_product_card(
+    'prod_keyboard',                         // Control ID
+    'assets/images/product_dev_station.jpg', // Product hero image
+    'Custom Macro Station',                  // Title
+    'Premium mechanical keyboard with walnut finish & RGB underglow', // Description
+    '$189.00',                               // Price tag
+    'BESTSELLER',                            // Floating Badge Tag
+    '[Buy Now]'                              // Action Button text
+)
+
+// Event listener:
+win.on_click('prod_keyboard', fn (mut win simplegui.SimpleWindow) {
+    win.show_toast('Cart', 'Added product to your checkout cart!')
+})
+
+// Quick Nameless Shortcut:
+win.product_card('assets/images/product_dev_station.jpg', 'Macro Keypad', '$89.00')
+```
+
+---
+
+### 3. Interactive Image Gallery (`add_image_gallery` / `gallery`)
+
+A multi-image carousel and photo viewer featuring a large hero preview, `< Prev` and `Next >` navigation buttons, slide caption banner, slide counter (`2 / 3`), and a clickable thumbnail navigation strip at the bottom.
+
+```v
+gallery_images := [
+    'assets/images/banner_cloud_devops.jpg',
+    'assets/images/banner_ai_code_studio.jpg',
+    'assets/images/banner_cyber_security.jpg',
+]
+gallery_captions := [
+    'Cybernetic Cloud Datacenter Infrastructure',
+    'Neural AI Code Studio Workstation',
+    'Global Cyber Defense Operations Center',
+]
+
+// Add Image Gallery:
+win.add_image_gallery('showcase_gallery', gallery_images, gallery_captions, 0)
+
+// Programmatic Slide Navigation:
+win.next_gallery_image('showcase_gallery') // Advance to next slide
+win.prev_gallery_image('showcase_gallery') // Go to previous slide
+win.set_gallery_index('showcase_gallery', 2) // Jump directly to slide index 2
+
+// Event listener on slide change:
+win.on_click('showcase_gallery', fn (mut win simplegui.SimpleWindow) {
+    ctrl := win.control('showcase_gallery')
+    println('Active gallery slide index: ${ctrl.int_value}')
+})
+
+// Quick Nameless Shortcut:
+win.gallery(gallery_images)
+```
+
+---
+
+### 4. 3D App / Tool Launcher Tile (`add_app_launcher_tile` / `app_tile`)
+
+An application or tool tile featuring a 3D isometric app icon, title, category/tagline, status pill indicator (`ONLINE`, `DEPLOYING`, `READY`), and hover elevation effects.
+
+```v
+// Add App Launcher Tiles:
+win.add_app_launcher_tile(
+    'tool_db',
+    'assets/images/icon_db_engine.jpg',
+    'Cyber DB Engine',
+    'High-Performance Key-Value & SQL',
+    'ONLINE'
+)
+win.add_app_launcher_tile(
+    'tool_deploy',
+    'assets/images/icon_rocket_deploy.jpg',
+    'Continuous Delivery',
+    'Zero-Downtime Cloud Pipeline',
+    'DEPLOYING'
+)
+
+// Event listener:
+win.on_click('tool_db', fn (mut win simplegui.SimpleWindow) {
+    win.show_toast('Launcher', 'Connected to database cluster.')
+})
+
+// Quick Nameless Shortcut:
+win.app_tile('assets/images/icon_terminal_cli.jpg', 'DevStudio CLI', 'READY')
+```
+
+---
+
+### 5. Audio & Media Player Card (`add_media_player` / `media_player`)
+
+A music and podcast streaming player card featuring square album cover art, track title, artist subtitle, interactive playback track scrubber with formatted timestamps (`01:18 / 04:00`), and play/pause toggle controls.
+
+```v
+// Add Media Player:
+win.add_media_player(
+    'synth_player',
+    'assets/images/cover_lofi_beats.jpg',
+    'Lo-Fi Code & Beats (Synthwave Journey)',
+    'Cybernetic Waves Presents • 198X High-Fidelity',
+    240,    // Track duration in seconds (4:00)
+    78,     // Elapsed time in seconds (1:18)
+    true    // Is playing (true = playing, false = paused)
+)
+
+// Programmatic Media Controls:
+win.toggle_media_player('synth_player')             // Toggle play / pause
+win.set_media_player_progress('synth_player', 120)  // Seek to 2:00 (120 seconds)
+
+// Event listener:
+win.on_click('synth_player', fn (mut win simplegui.SimpleWindow) {
+    ctrl := win.control('synth_player')
+    println('Player state - Playing: ${ctrl.bool_value}, Elapsed: ${ctrl.min_val}s')
+})
+
+// Quick Nameless Shortcut:
+win.media_player('assets/images/cover_lofi_beats.jpg', 'Coding Focus', 'Cybernetic Waves')
+```
+
+---
+
+### 6. Hero Introduction Banner (`add_hero_banner` / `hero_banner`)
+
+A high-impact promotional or welcome card featuring a hero illustration graphic on the right, bold headline, descriptive tagline, and primary/secondary CTA buttons.
+
+```v
+// Add Hero Banner:
+win.add_hero_banner(
+    'hero_cloud',
+    'assets/images/banner_cloud_devops.jpg',
+    'Cloud Infrastructure & DevOps Suite',
+    'Deploy microservices, inspect live telemetry streams, and manage clusters with native 60 FPS performance.',
+    '[Launch Cluster]'
+)
+
+// Event listener:
+win.on_click('hero_cloud', fn (mut win simplegui.SimpleWindow) {
+    win.show_toast('Hero Action', 'Initializing cloud infrastructure...')
+})
+
+// Quick Nameless Shortcut:
+win.hero_banner('assets/images/banner_ai_code_studio.jpg', 'AI Code Studio Pro', 'Next-generation intelligent code generation.')
+```
+
+---
+
+### 7. Standalone Image Box (`add_image_box` / `image_box`)
+
+A standalone image container with custom width/height, automatic texture caching, rounded border corners, and optional bottom caption banner.
+
+```v
+// Add Image Box with dimensions (320px width x 240px height):
+win.add_image_box('sec_preview', 'assets/images/banner_cyber_security.jpg', 320, 240)
+
+// Quick Nameless Shortcut:
+win.image_box('assets/images/icon_rocket_deploy.jpg', 64, 64)
+```
+
+---
+
+## 22. Type & Struct Reference Index
+
 
 
 A reference index of core data structures, callback aliases, and configuration structs across `simplegui`.

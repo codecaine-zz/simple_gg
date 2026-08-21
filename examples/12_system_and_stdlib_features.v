@@ -3,8 +3,7 @@ module main
 import simplegui
 
 fn main() {
-	mut win := simplegui.new_simple_window('System Call & Standard Library Toolkit', 960, 760)
-	win.set_fullscreen(true)
+	mut win := simplegui.new_simple_window('System Call & Standard Library Toolkit', 740, 520)
 	win.set_theme('Apple Dark')
 
 	win.add_heading('System Calls & Standard Library (sys.v / stdlib.v)')
@@ -38,6 +37,7 @@ fn main() {
 		win.add_button('btn_http', 'Fetch HTTP IP')
 		win.end_row()
 		win.add_input('input_stdlib_out', 'Results will appear here...')
+		win.set_control_width('input_stdlib_out', 660)
 	})
 
 	// Event Handlers

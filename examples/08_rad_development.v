@@ -3,24 +3,16 @@ module main
 import simplegui
 
 fn main() {
-	mut win := simplegui.new_window('RAD Rapid Application Development - simple_gg', 800, 600)
+	mut win := simplegui.new_window('RAD Rapid Application Development - simple_gg', 820, 520)
 	win.set_theme('nord')
 
 	win.add_header('RAD Desktop App Builder')
 	win.add_text('Leveraging fluent batch operations, typed accessors, form JSON export, and OS system shortcuts!')
 
 	win.begin_group('User Profile Form')
-
-	win.begin_row('row_names')
-	win.add_form_input('txt_name', 'Full Name', 'Ada Lovelace')
-	win.add_form_input('txt_email', 'Email Address', 'ada@lovelace.dev')
-	win.end_row()
-
-	win.begin_row('row_role')
-	win.add_form_dropdown('dd_role', 'System Role', ['Administrator', 'Security Engineer', 'Core Developer', 'Auditor'], 'Administrator')
-	win.add_form_file_picker('fp_config', 'Config File', win.get_system_path('documents'))
-	win.end_row()
-
+	win.add_form_field('Full Name:', 'txt_name', 'Ada Lovelace')
+	win.add_form_field('Email Address:', 'txt_email', 'ada@lovelace.dev')
+	win.add_form_dropdown('System Role:', 'dd_role', ['Administrator', 'Security Engineer', 'Core Developer', 'Auditor'], 'Administrator')
 	win.end_group()
 
 	win.begin_group('Batch & Form Operations')
@@ -28,14 +20,14 @@ fn main() {
 
 	win.add_button('btn_save', 'Batch Read Form & Save')
 	win.on_click('btn_save', fn (mut win simplegui.SimpleWindow) {
-		form_map := win.get_all(['txt_name', 'txt_email', 'dd_role', 'fp_config'])
-		json_data := win.export_form_json(['txt_name', 'txt_email', 'dd_role', 'fp_config'])
+		form_map := win.get_all(['txt_name', 'txt_email', 'dd_role'])
+		json_data := win.export_form_json(['txt_name', 'txt_email', 'dd_role'])
 		win.info('Form Saved', 'Saved ${form_map.len} fields successfully!\nJSON: ${json_data}')
 	})
 
 	win.add_button('btn_clear', 'Clear Form')
 	win.on_click('btn_clear', fn (mut win simplegui.SimpleWindow) {
-		win.clear_all(['txt_name', 'txt_email', 'fp_config'])
+		win.clear_all(['txt_name', 'txt_email'])
 		win.info('Form Cleared', 'Reset input fields.')
 	})
 
@@ -43,10 +35,10 @@ fn main() {
 	win.on_click('btn_toggle', fn (mut win simplegui.SimpleWindow) {
 		is_dis := win.get_control_enabled('txt_name')
 		if is_dis {
-			win.disable_controls(['txt_name', 'txt_email', 'dd_role', 'fp_config'])
+			win.disable_controls(['txt_name', 'txt_email', 'dd_role'])
 			win.warn('Form Locked', 'Inputs disabled.')
 		} else {
-			win.enable_controls(['txt_name', 'txt_email', 'dd_role', 'fp_config'])
+			win.enable_controls(['txt_name', 'txt_email', 'dd_role'])
 			win.info('Form Unlocked', 'Inputs enabled.')
 		}
 	})

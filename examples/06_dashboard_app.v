@@ -6,7 +6,7 @@ module main
 import simplegui
 
 fn main() {
-	mut win := simplegui.new_simple_window('06 - Application Dashboard', 680, 600)
+	mut win := simplegui.new_simple_window('06 - Application Dashboard', 680, 500)
 	win.set_theme('Apple Dark')
 
 	win.add_heading('Analytics & System Dashboard')

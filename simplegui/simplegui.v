@@ -98,16 +98,18 @@ pub mut:
 	font_path         string // Custom font file path override (defaults to auto-detected system TTF on Linux)
 	is_selecting_text  bool   // Mouse drag text selection active flag
 	text_select_anchor int    // Mouse drag initial caret anchor index
+	image_cache       map[string]int // GPU texture cache map of image file paths to gg image cache indices
 }
 
 // new_simple_window creates and initializes a new `SimpleWindow` instance with specified title, width, and height.
 pub fn new_simple_window(title string, width int, height int) &SimpleWindow {
 	mut win := &SimpleWindow{
-		title:  title
-		width:  width
-		height: height
-		theme:  get_theme('Apple Light')
-		timers: map[string]&IntervalTimer{}
+		title:       title
+		width:       width
+		height:      height
+		theme:       get_theme('Apple Light')
+		timers:      map[string]&IntervalTimer{}
+		image_cache: map[string]int{}
 	}
 	return win
 }
@@ -2103,6 +2105,261 @@ pub fn (mut win SimpleWindow) add_score_card(name string, title string, score f6
 	win.add_control(c)
 	return win
 }
+
+// -----------------------------------------------------------------------------
+// Modern Image-Enabled Super Controls & GPU Texture Cache
+// -----------------------------------------------------------------------------
+
+// get_or_load_image loads an image from disk and caches it in GPU memory, returning a reference to the gg.Image.
+pub fn (mut win SimpleWindow) get_or_load_image(file_path string) ?&gg.Image {
+	if win.gg_ctx == unsafe { nil } || file_path.len == 0 {
+		return none
+	}
+	if !os.exists(file_path) {
+		return none
+	}
+	if file_path in win.image_cache {
+		idx := win.image_cache[file_path]
+		mut cached := win.gg_ctx.get_cached_image_by_idx(idx)
+		if cached.id >= 0 {
+			if !cached.simg_ok && cached.ok {
+				cached.init_sokol_image()
+			}
+			if cached.simg_ok {
+				return cached
+			}
+		}
+		return none
+	}
+	if mut img := win.gg_ctx.create_image(file_path) {
+		id := img.id
+		win.image_cache[file_path] = id
+		mut cached := win.gg_ctx.get_cached_image_by_idx(id)
+		if !cached.simg_ok && cached.ok {
+			cached.init_sokol_image()
+		}
+		if cached.simg_ok {
+			return cached
+		}
+		return &img
+	}
+	return none
+}
+
+
+// add_image_box adds a standalone image widget with explicit width, height, and optional caption.
+pub fn (mut win SimpleWindow) add_image_box(name string, file_path string, w int, h int) &SimpleWindow {
+	mut c := Control{
+		name:       name
+		kind:       'image_box'
+		text_value: file_path
+		w:          if w > 0 { f32(w) } else { 240.0 }
+		h:          if h > 0 { f32(h) } else { 160.0 }
+	}
+	win.add_control(c)
+	return win
+}
+
+// add_user_profile_card adds a modern developer/user profile card with avatar, role badge, handle, bio, and action button.
+pub fn (mut win SimpleWindow) add_user_profile_card(name string, avatar_path string, full_name string, handle string, role string, bio string, is_online bool, action_btn string) &SimpleWindow {
+	btn_txt := if action_btn.len > 0 { action_btn } else { '[Message]' }
+	mut c := Control{
+		name:        name
+		kind:        'user_profile_card'
+		text_value:  avatar_path
+		title:       full_name
+		placeholder: handle
+		bool_value:  is_online
+		variant:     btn_txt
+		items:       [role, bio, btn_txt]
+		expand_fill: true
+		h:           114.0
+	}
+	win.add_control(c)
+	return win
+}
+
+// add_product_card adds a modern product or media card with hero image, badge tag, title, description, price, and CTA button.
+pub fn (mut win SimpleWindow) add_product_card(name string, image_path string, title string, desc string, price string, badge string, action_text string) &SimpleWindow {
+	act_txt := if action_text.len > 0 { action_text } else { '[Buy Now]' }
+	mut c := Control{
+		name:        name
+		kind:        'product_card'
+		text_value:  image_path
+		title:       title
+		placeholder: desc
+		items:       [price, badge, act_txt, '4.9 *']
+		w:           280.0
+		h:           270.0
+	}
+	win.add_control(c)
+	return win
+}
+
+// add_image_gallery adds an interactive multi-image showcase with large preview, navigation buttons, and bottom thumbnail strip.
+pub fn (mut win SimpleWindow) add_image_gallery(name string, image_paths []string, captions []string, active_idx int) &SimpleWindow {
+	mut c := Control{
+		name:           name
+		kind:           'image_gallery'
+		items:          image_paths.clone()
+		items_selected: captions.clone()
+		int_value:      if image_paths.len > 0 { math.max(0, math.min(image_paths.len - 1, active_idx)) } else { 0 }
+		expand_fill:    true
+		h:              290.0
+	}
+	win.add_control(c)
+	return win
+}
+
+// set_gallery_index sets the active image index in an image gallery.
+pub fn (mut win SimpleWindow) set_gallery_index(name string, idx int) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		if ctrl.items.len > 0 {
+			ctrl.int_value = math.max(0, math.min(ctrl.items.len - 1, idx))
+			if ctrl.on_change != unsafe { nil } {
+				ctrl.on_change(mut win)
+			}
+		}
+	}
+	return win
+}
+
+// next_gallery_image advances to the next image in an image gallery (with wrap-around).
+pub fn (mut win SimpleWindow) next_gallery_image(name string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		if ctrl.items.len > 0 {
+			ctrl.int_value = (ctrl.int_value + 1) % ctrl.items.len
+			if ctrl.on_change != unsafe { nil } {
+				ctrl.on_change(mut win)
+			}
+		}
+	}
+	return win
+}
+
+// prev_gallery_image moves to the previous image in an image gallery (with wrap-around).
+pub fn (mut win SimpleWindow) prev_gallery_image(name string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		if ctrl.items.len > 0 {
+			ctrl.int_value = (ctrl.int_value - 1 + ctrl.items.len) % ctrl.items.len
+			if ctrl.on_change != unsafe { nil } {
+				ctrl.on_change(mut win)
+			}
+		}
+	}
+	return win
+}
+
+// add_app_launcher_tile adds a modern 3D icon tool / app launcher tile with status indicator.
+pub fn (mut win SimpleWindow) add_app_launcher_tile(name string, icon_path string, title string, category string, status string) &SimpleWindow {
+	mut c := Control{
+		name:        name
+		kind:        'app_launcher_tile'
+		text_value:  icon_path
+		title:       title
+		placeholder: category
+		items:       [if status.len > 0 { status } else { 'ONLINE' }]
+		w:           280.0
+		h:           72.0
+	}
+	win.add_control(c)
+	return win
+}
+
+// add_media_player adds an audio / podcast media player card with album art, track info, progress scrubber, and playback controls.
+pub fn (mut win SimpleWindow) add_media_player(name string, cover_path string, track_title string, artist string, duration_sec int, elapsed_sec int, is_playing bool) &SimpleWindow {
+	mut c := Control{
+		name:        name
+		kind:        'media_player'
+		text_value:  cover_path
+		title:       track_title
+		placeholder: artist
+		int_value:   duration_sec
+		min_val:     f64(elapsed_sec)
+		bool_value:  is_playing
+		expand_fill: true
+		h:           106.0
+	}
+	win.add_control(c)
+	return win
+}
+
+// toggle_media_player toggles play/pause state for a media player.
+pub fn (mut win SimpleWindow) toggle_media_player(name string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.bool_value = !ctrl.bool_value
+		if ctrl.on_change != unsafe { nil } {
+			ctrl.on_change(mut win)
+		}
+	}
+	return win
+}
+
+// set_media_player_progress sets the elapsed playback progress in seconds for a media player.
+pub fn (mut win SimpleWindow) set_media_player_progress(name string, elapsed_sec int) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.min_val = f64(math.max(0, math.min(ctrl.int_value, elapsed_sec)))
+		if ctrl.on_change != unsafe { nil } {
+			ctrl.on_change(mut win)
+		}
+	}
+	return win
+}
+
+// set_user_online_status updates online status indicator for a User Profile Card.
+pub fn (mut win SimpleWindow) set_user_online_status(name string, is_online bool) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.bool_value = is_online
+	}
+	return win
+}
+
+// add_hero_banner adds a high-impact hero introduction banner with illustration, headline, subtitle, and CTA buttons.
+pub fn (mut win SimpleWindow) add_hero_banner(name string, banner_path string, title string, subtitle string, cta_text string) &SimpleWindow {
+	mut c := Control{
+		name:        name
+		kind:        'hero_banner'
+		text_value:  banner_path
+		title:       title
+		placeholder: subtitle
+		items:       [if cta_text.len > 0 { cta_text } else { '[Get Started]' }, '[Learn More]', 'FEATURED']
+		expand_fill: true
+		h:           168.0
+	}
+	win.add_control(c)
+	return win
+}
+
+// Nameless Shortcuts for Modern Image Controls
+
+pub fn (mut win SimpleWindow) image_box(file_path string, w int, h int) &SimpleWindow {
+	return win.add_image_box(win.gen_id('img'), file_path, w, h)
+}
+
+pub fn (mut win SimpleWindow) user_profile(avatar_path string, full_name string, handle string, role string, bio string) &SimpleWindow {
+	return win.add_user_profile_card(win.gen_id('profile'), avatar_path, full_name, handle, role, bio, true, '[Message]')
+}
+
+pub fn (mut win SimpleWindow) product_card(image_path string, title string, price string) &SimpleWindow {
+	return win.add_product_card(win.gen_id('prod'), image_path, title, '', price, 'PRO', '[Buy Now]')
+}
+
+pub fn (mut win SimpleWindow) gallery(image_paths []string) &SimpleWindow {
+	return win.add_image_gallery(win.gen_id('gallery'), image_paths, []string{}, 0)
+}
+
+pub fn (mut win SimpleWindow) app_tile(icon_path string, title string, status string) &SimpleWindow {
+	return win.add_app_launcher_tile(win.gen_id('app_tile'), icon_path, title, '', status)
+}
+
+pub fn (mut win SimpleWindow) media_player(cover_path string, track_title string, artist string) &SimpleWindow {
+	return win.add_media_player(win.gen_id('player'), cover_path, track_title, artist, 210, 45, false)
+}
+
+pub fn (mut win SimpleWindow) hero_banner(banner_path string, title string, subtitle string) &SimpleWindow {
+	return win.add_hero_banner(win.gen_id('hero'), banner_path, title, subtitle, '[Get Started]')
+}
+
 
 
 pub fn (win &SimpleWindow) get_menu_selected(name string) string {

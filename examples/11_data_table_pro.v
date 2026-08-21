@@ -8,25 +8,30 @@ module main
 import simplegui
 
 fn main() {
-	mut win := simplegui.new_simple_window('11 - Data Table Pro', 860, 370)
+	// Widen window to 880 x 450 so all 4 action buttons have generous margins
+	mut win := simplegui.new_simple_window('11 - Data Table Pro', 880, 450)
 	win.set_theme('Apple Dark')
 
 	win.add_heading('Data Table Pro')
-	win.add_label('lbl_hint', 'Click a header to sort. Scroll the wheel over the table to scroll rows.')
+	win.add_label('lbl_sub', 'Click a column header to sort. Scroll the wheel over the table to scroll rows.')
 
-	mut rows := [][]string{}
-	names := ['Ada Lovelace', 'Alan Turing', 'Grace Hopper', 'Linus Torvalds', 'Margaret Hamilton',
-		'Dennis Ritchie', 'Barbara Liskov', 'Ken Thompson', 'Radia Perlman', 'Guido van Rossum',
-		'James Gosling', 'Anita Borg', 'John Backus', 'Katherine Johnson', 'Tim Berners-Lee']
-	for idx, n in names {
-		rows << [(idx + 1).str(), n, '${(idx * 7 + 3) % 60 + 20}', if idx % 3 == 0 {
-			'Active'
-		} else {
-			'Away'
-		}]
-	}
+	// 1. Interactive Sortable / Scrollable Data Table
+	headers := ['ID', 'Name', 'Age', 'Status']
+	rows := [
+		['1', 'Ada Lovelace', '23', 'Active'],
+		['2', 'Alan Turing', '30', 'Away'],
+		['3', 'Grace Hopper', '37', 'Away'],
+		['4', 'Linus Torvalds', '44', 'Active'],
+		['5', 'Margaret Hamilton', '51', 'Away'],
+		['6', 'Dennis Ritchie', '58', 'Away'],
+		['7', 'Barbara Liskov', '65', 'Active'],
+		['8', 'Ken Thompson', '72', 'Away'],
+		['9', 'Guido van Rossum', '67', 'Active'],
+		['10', 'Bjarne Stroustrup', '73', 'Away'],
+	]
 
 	win.add_table('staff_table', ['ID', 'Name', 'Age', 'Status'], rows)
+	win.set_control_width('staff_table', 840)
 	win.set_control_height('staff_table', 220)
 
 	win.on_row_click('staff_table', fn (mut win simplegui.SimpleWindow) {

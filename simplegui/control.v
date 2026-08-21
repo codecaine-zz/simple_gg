@@ -664,3 +664,89 @@ pub fn (c &Control) set_progress_pct(pct f64) &Control {
 	}
 	return c
 }
+
+// set_image_path updates the primary image or avatar file path of the control.
+pub fn (c &Control) set_image_path(path string) &Control {
+	unsafe {
+		mut ptr := &Control(c)
+		ptr.text_value = path
+	}
+	return c
+}
+
+// set_image_paths updates the list of image file paths for image gallery or carousel controls.
+pub fn (c &Control) set_image_paths(paths []string) &Control {
+	unsafe {
+		mut ptr := &Control(c)
+		ptr.items = paths.clone()
+	}
+	return c
+}
+
+// set_captions updates the list of captions for image gallery controls.
+pub fn (c &Control) set_captions(captions []string) &Control {
+	unsafe {
+		mut ptr := &Control(c)
+		ptr.items_selected = captions.clone()
+	}
+	return c
+}
+
+// set_user_profile updates avatar, display name, handle, role, bio, and online status for User Profile cards.
+pub fn (c &Control) set_user_profile(avatar string, name string, handle string, role string, bio string, is_online bool) &Control {
+	unsafe {
+		mut ptr := &Control(c)
+		ptr.text_value = avatar
+		ptr.title = name
+		ptr.placeholder = handle
+		ptr.bool_value = is_online
+		if ptr.items.len >= 3 {
+			ptr.items[0] = role
+			ptr.items[1] = bio
+		} else {
+			ptr.items = [role, bio, '[Message]']
+		}
+	}
+	return c
+}
+
+// set_product_info updates product image, title, description, price, and badge tag.
+pub fn (c &Control) set_product_info(image string, title string, desc string, price string, badge string) &Control {
+	unsafe {
+		mut ptr := &Control(c)
+		ptr.text_value = image
+		ptr.title = title
+		ptr.placeholder = desc
+		if ptr.items.len >= 4 {
+			ptr.items[0] = price
+			ptr.items[1] = badge
+		} else {
+			ptr.items = [price, badge, '[Buy Now]', '4.9 *']
+		}
+	}
+	return c
+}
+
+// set_media_track updates media player track information and playback state.
+pub fn (c &Control) set_media_track(cover string, title string, artist string, duration_sec int, elapsed_sec int, is_playing bool) &Control {
+	unsafe {
+		mut ptr := &Control(c)
+		ptr.text_value = cover
+		ptr.title = title
+		ptr.placeholder = artist
+		ptr.int_value = duration_sec
+		ptr.min_val = f64(elapsed_sec)
+		ptr.bool_value = is_playing
+	}
+	return c
+}
+
+// set_is_playing updates the active playback state (true = playing, false = paused) for media players.
+pub fn (c &Control) set_is_playing(playing bool) &Control {
+	unsafe {
+		mut ptr := &Control(c)
+		ptr.bool_value = playing
+	}
+	return c
+}
+

@@ -3,8 +3,7 @@ module main
 import simplegui
 
 fn main() {
-	mut win := simplegui.new_simple_window('Reactive State Management & Persistence', 960, 760)
-	win.set_fullscreen(true)
+	mut win := simplegui.new_simple_window('Reactive State Management & Persistence', 740, 520)
 	win.set_theme('Nord')
 
 	win.add_heading('Reactive State Store & Persistence (state.v)')

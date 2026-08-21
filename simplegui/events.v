@@ -816,6 +816,72 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 									if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
 								}
 							}
+						} else if ctrl.kind == 'image' || ctrl.kind == 'image_box' {
+							// Handled on mouse_up
+						} else if ctrl.kind == 'user_profile_card' {
+							btn_w := f32(96.0)
+							btn_h := f32(30.0)
+							btn_x := ctrl.x + ctrl.w - btn_w - 14.0
+							btn_y := ctrl.y + 24.0
+							if win.mouse_x >= btn_x && win.mouse_x <= btn_x + btn_w && win.mouse_y >= btn_y && win.mouse_y <= btn_y + btn_h {
+								ctrl.text_value = if ctrl.variant.len > 0 { ctrl.variant } else { '[Message]' }
+							}
+						} else if ctrl.kind == 'product_card' {
+							// Handled on mouse_up
+						} else if ctrl.kind == 'image_gallery' {
+							pad := f32(8.0)
+							main_h := f32(190.0)
+							prev_btn_x := ctrl.x + pad + 8.0
+							prev_btn_y := ctrl.y + pad + (main_h / 2.0) - 16.0
+							next_btn_x := ctrl.x + ctrl.w - pad - 40.0
+							next_btn_y := prev_btn_y
+
+							if win.mouse_x >= prev_btn_x && win.mouse_x <= prev_btn_x + 32.0 && win.mouse_y >= prev_btn_y && win.mouse_y <= prev_btn_y + 32.0 {
+								if ctrl.items.len > 0 {
+									ctrl.int_value = (ctrl.int_value - 1 + ctrl.items.len) % ctrl.items.len
+									if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
+								}
+							} else if win.mouse_x >= next_btn_x && win.mouse_x <= next_btn_x + 32.0 && win.mouse_y >= next_btn_y && win.mouse_y <= next_btn_y + 32.0 {
+								if ctrl.items.len > 0 {
+									ctrl.int_value = (ctrl.int_value + 1) % ctrl.items.len
+									if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
+								}
+							} else {
+								thumb_strip_y := ctrl.y + pad + main_h + 10.0
+								thumb_w := f32(66.0)
+								thumb_h := f32(50.0)
+								if win.mouse_y >= thumb_strip_y && win.mouse_y <= thumb_strip_y + thumb_h {
+									for t_i in 0 .. ctrl.items.len {
+										tx := ctrl.x + pad + f32(t_i) * (thumb_w + 8.0)
+										if win.mouse_x >= tx && win.mouse_x <= tx + thumb_w {
+											ctrl.int_value = t_i
+											if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
+											break
+										}
+									}
+								}
+							}
+						} else if ctrl.kind == 'app_launcher_tile' {
+							// Handled on mouse_up
+						} else if ctrl.kind == 'media_player' {
+							play_btn_x := ctrl.x + ctrl.w - 88.0
+							play_btn_y := ctrl.y + 66.0
+							if win.mouse_x >= play_btn_x && win.mouse_x <= play_btn_x + 74.0 && win.mouse_y >= play_btn_y && win.mouse_y <= play_btn_y + 24.0 {
+								ctrl.bool_value = !ctrl.bool_value
+								if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
+							} else {
+								track_left := ctrl.x + 98.0
+								bar_y := ctrl.y + 50.0
+								bar_w := ctrl.w - 112.0
+								if win.mouse_x >= track_left && win.mouse_x <= track_left + bar_w && win.mouse_y >= bar_y && win.mouse_y <= bar_y + 16.0 {
+									rel_pct := math.max(0.0, math.min(1.0, f64((win.mouse_x - track_left) / bar_w)))
+									tot_sec := if ctrl.int_value > 0 { ctrl.int_value } else { 180 }
+									ctrl.min_val = f64(int(rel_pct * f64(tot_sec)))
+									if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
+								}
+							}
+						} else if ctrl.kind == 'hero_banner' {
+							// Handled on mouse_up
 						}
 
 					} else {

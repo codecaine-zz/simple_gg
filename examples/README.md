@@ -4,8 +4,12 @@ This directory contains beginner-friendly, well-commented examples demonstrating
 
 ---
 
-## 🎨 Visual Showcase & Snapshots
+### 🎨 Visual Showcase & Snapshots
 
+<p align="center">
+  <img src="../snapshots/ex23.png" width="48%" alt="Modern Image Controls Demo" />
+  <img src="../snapshots/ex22.png" width="48%" alt="Super Controls Suite Demo" />
+</p>
 <p align="center">
   <img src="../snapshots/ex1.png" width="48%" alt="Quickstart Demo" />
   <img src="../snapshots/ex6.png" width="48%" alt="Dashboard App Demo" />
@@ -14,13 +18,9 @@ This directory contains beginner-friendly, well-commented examples demonstrating
   <img src="../snapshots/ex7.png" width="48%" alt="Advanced Controls Demo" />
   <img src="../snapshots/ex14.png" width="48%" alt="RAD Controls Showcase" />
 </p>
-<p align="center">
-  <img src="../snapshots/ex15.png" width="48%" alt="Modern UI Showcase" />
-  <img src="../snapshots/ex17.png" width="48%" alt="Data & Event Binding" />
-</p>
 
 <details>
-<summary><b>📸 Click to view all 17 example screenshots</b></summary>
+<summary><b>📸 Click to view all 23 example screenshots</b></summary>
 <br/>
 
 <p align="center">
@@ -57,6 +57,18 @@ This directory contains beginner-friendly, well-commented examples demonstrating
 </p>
 <p align="center">
   <img src="../snapshots/ex17.png" width="48%" alt="17 - Data & Event Binding Demo" />
+  <img src="../snapshots/ex18.png" width="48%" alt="18 - Custom Font Typography Demo" />
+</p>
+<p align="center">
+  <img src="../snapshots/ex19.png" width="48%" alt="19 - Cross-Window Spy Demo" />
+  <img src="../snapshots/ex20.png" width="48%" alt="20 - Stdlib Data Structures Demo" />
+</p>
+<p align="center">
+  <img src="../snapshots/ex21.png" width="48%" alt="21 - Extended OS System Calls Demo" />
+  <img src="../snapshots/ex22.png" width="48%" alt="22 - Modern Super Controls Demo" />
+</p>
+<p align="center">
+  <img src="../snapshots/ex23.png" width="48%" alt="23 - Modern Image Controls Demo" />
 </p>
 
 </details>
@@ -85,9 +97,11 @@ This directory contains beginner-friendly, well-commented examples demonstrating
 | **[`16_interval_timers.v`](16_interval_timers.v)**                     | Interval timers & timeouts       | Recurring timers (`set_interval`), one-shot delays (`set_timeout`), clock polling, auto-incrementing progress, and timer control APIs.                    | ![Snapshot 16](../snapshots/ex16.png)  |
 | **[`17_data_and_event_binding.v`](17_data_and_event_binding.v)**       | Two-way data & event binding     | Control-to-state binding (`bind_state`), fluent event aliases (`bind_click`), keyboard key & shortcut binding (`bind_key`, `bind_shortcut`).               | ![Snapshot 17](../snapshots/ex17.png)  |
 | **[`18_custom_font_loading.v`](18_custom_font_loading.v)**             | Custom font & typography        | Platform font resolution (`simplegui.resolve_window_font_path`), custom TTF/OTF setting (`win.set_font_path`), macOS/Linux font discovery & env overrides. | ![Snapshot 18](../snapshots/ex18.png)  |
-| **[`19_cross_window_spy_and_automation.v`](19_cross_window_spy_and_automation.v)** | Cross-Window Spy++ & Automation | Global window registry (`sys_register_window`), control inspection (`sys_spy_window`), live event bus, external macOS app scanning. | N/A |
-| **[`20_stdlib_data_structures_math_and_sockets.v`](20_stdlib_data_structures_math_and_sockets.v)** | Collections, Math & Sockets | Generic Stack, Queue, Set, MinHeap, BigInt, Complex math, string distance metrics (Levenshtein, Jaro-Winkler), thread sync (Mutex/WaitGroup). | N/A |
-| **[`21_extended_os_system_calls.v`](21_extended_os_system_calls.v)**     | Extended OS & Hardware Subsystem | Live CPU & Memory pressure metrics, environment variables, system audio beeps, speech synthesis, temp files & zip archives. | N/A |
+| **[`19_cross_window_spy_and_automation.v`](19_cross_window_spy_and_automation.v)** | Cross-Window Spy++ & Automation | Global window registry (`sys_register_window`), control inspection (`sys_spy_window`), live event bus, external macOS app scanning. | ![Snapshot 19](../snapshots/ex19.png)  |
+| **[`20_stdlib_data_structures_math_and_sockets.v`](20_stdlib_data_structures_math_and_sockets.v)** | Collections, Math & Sockets | Generic Stack, Queue, Set, MinHeap, BigInt, Complex math, string distance metrics (Levenshtein, Jaro-Winkler), thread sync (Mutex/WaitGroup). | ![Snapshot 20](../snapshots/ex20.png)  |
+| **[`21_extended_os_system_calls.v`](21_extended_os_system_calls.v)**     | Extended OS & Hardware Subsystem | Live CPU & Memory pressure metrics, environment variables, system audio beeps, speech synthesis, temp files & zip archives. | ![Snapshot 21](../snapshots/ex21.png)  |
+| **[`22_modern_super_controls_showcase.v`](22_modern_super_controls_showcase.v)** | Modern Super Controls Suite      | Super Terminal, Code Studio, Smart Table, Kanban Board, Wizard Stepper, Floating Toolbar, Score Card, Sparklines, Donut Chart, Chip Input. | ![Snapshot 22](../snapshots/ex22.png)  |
+| **[`23_modern_image_controls_showcase.v`](23_modern_image_controls_showcase.v)** | Modern Image Super Controls      | User Profile Cards, Product Cards, Multi-Image Showcase Gallery, 3D App Launcher Tiles, Media Player Card, Hero Banners, and GPU Texture Caching. | ![Snapshot 23](../snapshots/ex23.png)  |
 
 ---
 
@@ -136,8 +150,17 @@ v run examples/13_reactive_state_store.v
 # Run RAD Controls Suite Showcase Demo
 v run examples/14_rad_controls_showcase.v
 
+# Run Modern UI Features Showcase Demo
+v run examples/15_modern_ui_features_showcase.v
+
 # Run Interval Timers & Timeouts Showcase Demo
 v run examples/16_interval_timers.v
+
+# Run Two-Way Data & Event Binding Demo
+v run examples/17_data_and_event_binding.v
+
+# Run Custom Font Loading & Typography Demo
+v run examples/18_custom_font_loading.v
 
 # Run Cross-Window Spy++ & Automation Demo
 v run examples/19_cross_window_spy_and_automation.v
@@ -150,5 +173,8 @@ v run examples/21_extended_os_system_calls.v
 
 # Run Modern Super Controls Suite Showcase Demo
 v run examples/22_modern_super_controls_showcase.v
+
+# Run Modern Image Controls & Asset Gallery Showcase Demo
+v run examples/23_modern_image_controls_showcase.v
 ```
 

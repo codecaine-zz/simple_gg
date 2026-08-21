@@ -4,7 +4,7 @@ import simplegui
 import time
 
 fn main() {
-	mut win := simplegui.new_simple_window('Interval Timers Showcase', 680, 650)
+	mut win := simplegui.new_simple_window('Interval Timers Showcase', 720, 500)
 	win.set_theme('Nord')
 
 	win.add_heading('Interval Timers & Delayed Timeouts')
