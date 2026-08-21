@@ -2951,50 +2951,202 @@ fn calc_table_col_widths(ctrl &Control) []f32 {
 
 fn (mut win SimpleWindow) render_modal() {
 	if !win.modal_active { return }
-	win.gg_ctx.draw_rect_filled(0, 0, f32(win.width), f32(win.height), gg.rgba(0, 0, 0, 160))
+	// Semi-transparent backdrop overlay
+	win.gg_ctx.draw_rect_filled(0, 0, f32(win.width), f32(win.height), gg.rgba(0, 0, 0, 175))
 
-	box_w := f32(math.min(460, win.width - 40))
-	box_h := f32(180.0)
-	bx := (f32(win.width) - box_w) / 2.0
-	by := (f32(win.height) - box_h) / 2.0
+	layout := win.get_modal_layout()
 
-	modal_bg := if win.theme.is_dark { gg.rgb(28, 30, 42) } else { gg.rgb(255, 255, 255) }
-	accent := parse_hex_color(win.theme.accent_color)
+	modal_bg := if win.theme.is_dark { gg.rgb(24, 27, 36) } else { gg.rgb(255, 255, 255) }
+	accent := win.get_dialog_accent_color()
 	fg := parse_hex_color(win.theme.font_color)
-	border_c := if win.theme.is_dark { gg.rgb(65, 68, 82) } else { gg.rgb(210, 215, 220) }
+	border_c := if win.theme.is_dark { gg.rgb(55, 60, 75) } else { gg.rgb(215, 220, 230) }
+	muted_fg := if win.theme.is_dark { gg.rgb(150, 155, 175) } else { gg.rgb(115, 120, 135) }
 
-	win.gg_ctx.draw_rounded_rect_filled(bx, by, box_w, box_h, 12.0, modal_bg)
-	win.gg_ctx.draw_rounded_rect_empty(bx, by, box_w, box_h, 12.0, accent)
+	// Main Card Background
+	win.gg_ctx.draw_rounded_rect_filled(layout.bx, layout.by, layout.bw, layout.bh, 14.0, modal_bg)
+	win.gg_ctx.draw_rounded_rect_empty(layout.bx, layout.by, layout.bw, layout.bh, 14.0, accent)
 
-	win.gg_ctx.draw_text2(x: int(bx + 20), y: int(by + 16), text: win.modal_title, color: fg, size: 16)
-	win.gg_ctx.draw_line(bx, by + 46, bx + box_w, by + 46, border_c)
+	// Top accent strip
+	win.gg_ctx.draw_rounded_rect_filled(layout.bx + 20.0, layout.by, layout.bw - 40.0, 3.0, 1.5, accent)
 
-	win.gg_ctx.draw_text2(x: int(bx + 20), y: int(by + 62), text: win.modal_message, color: fg, size: 13)
+	// Close 'X' Button in Top-Right
+	is_close_hov := win.mouse_x >= layout.close_x && win.mouse_x <= layout.close_x + layout.close_sz
+		&& win.mouse_y >= layout.close_y && win.mouse_y <= layout.close_y + layout.close_sz
+	if is_close_hov {
+		win.gg_ctx.draw_rounded_rect_filled(layout.close_x - 3.0, layout.close_y - 3.0, layout.close_sz + 6.0, layout.close_sz + 6.0, 4.0, if win.theme.is_dark { gg.rgb(45, 48, 62) } else { gg.rgb(235, 238, 245) })
+	}
+	win.gg_ctx.draw_text2(
+		x: int(layout.close_x + 3)
+		y: int(layout.close_y)
+		text: 'x'
+		color: if is_close_hov { fg } else { muted_fg }
+		size: 14
+		bold: true
+	)
 
-	btn_w := f32(100.0)
-	btn_h := f32(36.0)
-	confirm_x := bx + box_w - btn_w - 20.0
-	cancel_x := confirm_x - btn_w - 12.0
-	btn_y := by + box_h - btn_h - 18.0
+	// Left Image Icon (if present)
+	if layout.has_image {
+		win.gg_ctx.draw_rounded_rect_filled(layout.img_x - 3.0, layout.img_y - 3.0, layout.img_sz + 6.0, layout.img_sz + 6.0, 12.0, gg.rgba(accent.r, accent.g, accent.b, 40))
+		win.draw_image_fit(win.modal_image_path, layout.img_x, layout.img_y, layout.img_sz, layout.img_sz, '')
+	}
 
-	if win.modal_cancel_txt.len > 0 {
-		win.gg_ctx.draw_rounded_rect_filled(cancel_x, btn_y, btn_w, btn_h, 6.0, border_c)
+	// Title & Divider
+	win.gg_ctx.draw_text2(
+		x: int(layout.content_x)
+		y: int(layout.by + 16)
+		text: clean_text(win.modal_title)
+		color: fg
+		size: 16
+		bold: true
+	)
+	win.gg_ctx.draw_line(layout.content_x, layout.by + 42, layout.bx + layout.bw - 20.0, layout.by + 42, border_c)
+
+	// Message lines
+	msg_lines := win.modal_message.split('\n')
+	mut my := layout.by + 52.0
+	for line in msg_lines {
+		if line.len <= 44 {
+			win.gg_ctx.draw_text2(x: int(layout.content_x), y: int(my), text: clean_text(line), color: fg, size: 13)
+			my += 18.0
+		} else {
+			// Wrap longer strings
+			mut remaining := line
+			for remaining.len > 0 {
+				chunk_len := math.min(44, remaining.len)
+				chunk := remaining[0..chunk_len]
+				win.gg_ctx.draw_text2(x: int(layout.content_x), y: int(my), text: clean_text(chunk), color: fg, size: 13)
+				my += 18.0
+				remaining = remaining[chunk_len..]
+			}
+		}
+	}
+
+	// Optional Detail text callout
+	if win.modal_detail.len > 0 {
+		chip_bg := if win.theme.is_dark { gg.rgb(32, 35, 48) } else { gg.rgb(238, 242, 248) }
+		win.gg_ctx.draw_rounded_rect_filled(layout.content_x, layout.detail_y, layout.content_w, 24.0, 4.0, chip_bg)
+		win.gg_ctx.draw_rounded_rect_empty(layout.content_x, layout.detail_y, layout.content_w, 24.0, 4.0, border_c)
 		win.gg_ctx.draw_text2(
-			x: int(cancel_x + (btn_w - f32(win.modal_cancel_txt.len * 7)) / 2.0)
-			y: int(btn_y + 10)
-			text: win.modal_cancel_txt
+			x: int(layout.content_x + 8)
+			y: int(layout.detail_y + 5)
+			text: clean_text(win.modal_detail)
+			color: muted_fg
+			size: 11
+			mono: true
+		)
+	}
+
+	// Optional Input Mode Text Box
+	if win.modal_input_mode {
+		input_bg := if win.theme.is_dark { gg.rgb(18, 20, 28) } else { gg.rgb(248, 250, 252) }
+		win.gg_ctx.draw_rounded_rect_filled(layout.content_x, layout.input_y, layout.input_w, layout.input_h, 6.0, input_bg)
+		win.gg_ctx.draw_rounded_rect_empty(layout.content_x, layout.input_y, layout.input_w, layout.input_h, 6.0, accent)
+
+		if win.modal_input_val.len > 0 {
+			win.gg_ctx.draw_text2(
+				x: int(layout.content_x + 10)
+				y: int(layout.input_y + 8)
+				text: clean_text(win.modal_input_val)
+				color: fg
+				size: 13
+			)
+			// Blinking cursor
+			cursor_x := int(layout.content_x + 10 + f32(win.modal_input_val.len * 8))
+			if (time.now().unix_milli() / 500) % 2 == 0 {
+				win.gg_ctx.draw_line(f32(cursor_x), layout.input_y + 6, f32(cursor_x), layout.input_y + layout.input_h - 6, accent)
+			}
+		} else if win.modal_input_holder.len > 0 {
+			win.gg_ctx.draw_text2(
+				x: int(layout.content_x + 10)
+				y: int(layout.input_y + 8)
+				text: clean_text(win.modal_input_holder)
+				color: muted_fg
+				size: 13
+			)
+		}
+	}
+
+	// Optional Checkbox
+	if win.modal_checkbox_txt.len > 0 {
+		chk_bg := if win.modal_checkbox_val { accent } else { if win.theme.is_dark { gg.rgb(35, 38, 50) } else { gg.rgb(230, 234, 240) } }
+		win.gg_ctx.draw_rounded_rect_filled(layout.content_x, layout.check_y, 16.0, 16.0, 4.0, chk_bg)
+		win.gg_ctx.draw_rounded_rect_empty(layout.content_x, layout.check_y, 16.0, 16.0, 4.0, if win.modal_checkbox_val { accent } else { border_c })
+		if win.modal_checkbox_val {
+			win.gg_ctx.draw_text2(
+				x: int(layout.content_x + 3)
+				y: int(layout.check_y + 1)
+				text: 'v'
+				color: gg.rgb(255, 255, 255)
+				size: 11
+				bold: true
+			)
+		}
+		win.gg_ctx.draw_text2(
+			x: int(layout.content_x + 24)
+			y: int(layout.check_y + 1)
+			text: clean_text(win.modal_checkbox_txt)
+			color: fg
+			size: 12
+		)
+	}
+
+	// Neutral Button (if present)
+	if win.modal_neutral_txt.len > 0 {
+		is_neu_hov := win.mouse_x >= layout.neutral_x && win.mouse_x <= layout.neutral_x + layout.neutral_w
+			&& win.mouse_y >= layout.btn_y && win.mouse_y <= layout.btn_y + layout.btn_h
+		neu_bg := if is_neu_hov { if win.theme.is_dark { gg.rgb(45, 48, 62) } else { gg.rgb(225, 230, 238) } } else { if win.theme.is_dark { gg.rgb(32, 35, 46) } else { gg.rgb(240, 243, 248) } }
+		win.gg_ctx.draw_rounded_rect_filled(layout.neutral_x, layout.btn_y, layout.neutral_w, layout.btn_h, 6.0, neu_bg)
+		win.gg_ctx.draw_rounded_rect_empty(layout.neutral_x, layout.btn_y, layout.neutral_w, layout.btn_h, 6.0, border_c)
+		win.gg_ctx.draw_text2(
+			x: int(layout.neutral_x + (layout.neutral_w - f32(win.modal_neutral_txt.len * 7)) / 2.0)
+			y: int(layout.btn_y + 9)
+			text: clean_text(win.modal_neutral_txt)
 			color: fg
 			size: 13
 		)
 	}
 
-	win.gg_ctx.draw_rounded_rect_filled(confirm_x, btn_y, btn_w, btn_h, 6.0, accent)
+	// Cancel Button (if present)
+	if win.modal_cancel_txt.len > 0 {
+		is_can_hov := win.mouse_x >= layout.cancel_x && win.mouse_x <= layout.cancel_x + layout.cancel_w
+			&& win.mouse_y >= layout.btn_y && win.mouse_y <= layout.btn_y + layout.btn_h
+		can_bg := if is_can_hov { if win.theme.is_dark { gg.rgb(48, 52, 68) } else { gg.rgb(220, 225, 235) } } else { if win.theme.is_dark { gg.rgb(35, 38, 50) } else { gg.rgb(235, 238, 245) } }
+		win.gg_ctx.draw_rounded_rect_filled(layout.cancel_x, layout.btn_y, layout.cancel_w, layout.btn_h, 6.0, can_bg)
+		win.gg_ctx.draw_rounded_rect_empty(layout.cancel_x, layout.btn_y, layout.cancel_w, layout.btn_h, 6.0, border_c)
+		win.gg_ctx.draw_text2(
+			x: int(layout.cancel_x + (layout.cancel_w - f32(win.modal_cancel_txt.len * 7)) / 2.0)
+			y: int(layout.btn_y + 9)
+			text: clean_text(win.modal_cancel_txt)
+			color: fg
+			size: 13
+		)
+	}
+
+	// Confirm Button
+	is_cnf_hov := win.mouse_x >= layout.confirm_x && win.mouse_x <= layout.confirm_x + layout.confirm_w
+		&& win.mouse_y >= layout.btn_y && win.mouse_y <= layout.btn_y + layout.btn_h
+	confirm_bg := if win.modal_is_destructive {
+		if is_cnf_hov { gg.rgb(255, 75, 75) } else { gg.rgb(225, 45, 45) }
+	} else {
+		if is_cnf_hov {
+			gg.rgb(
+				u8(math.min(255, int(accent.r) + 25)),
+				u8(math.min(255, int(accent.g) + 25)),
+				u8(math.min(255, int(accent.b) + 25)),
+			)
+		} else {
+			accent
+		}
+	}
+	win.gg_ctx.draw_rounded_rect_filled(layout.confirm_x, layout.btn_y, layout.confirm_w, layout.btn_h, 6.0, confirm_bg)
+	confirm_txt := if win.modal_confirm_txt.len > 0 { win.modal_confirm_txt } else { 'OK' }
 	win.gg_ctx.draw_text2(
-		x: int(confirm_x + (btn_w - f32(win.modal_confirm_txt.len * 7)) / 2.0)
-		y: int(btn_y + 10)
-		text: win.modal_confirm_txt
+		x: int(layout.confirm_x + (layout.confirm_w - f32(confirm_txt.len * 7)) / 2.0)
+		y: int(layout.btn_y + 9)
+		text: clean_text(confirm_txt)
 		color: gg.rgb(255, 255, 255)
 		size: 13
+		bold: true
 	)
 }
 

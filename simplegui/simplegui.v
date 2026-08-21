@@ -87,13 +87,24 @@ pub mut:
 	state_listeners map[string][]StringEventCallback // Reactive listener callbacks for state keys
 	fullscreen      bool // Fullscreen borderless display state
 	// Modal Dialog Overlay State
-	modal_active      bool   // Modal confirm dialog popup visibility
-	modal_title       string // Modal dialog headline text
-	modal_message     string // Modal dialog message body text
-	modal_confirm_txt string = 'OK'     // Confirm button text label
-	modal_cancel_txt  string = 'Cancel' // Cancel button text label
-	modal_on_confirm  VoidEventCallback = unsafe { nil } // Callback when confirm button clicked
-	modal_on_cancel   VoidEventCallback = unsafe { nil } // Callback when cancel button clicked
+	modal_active         bool              // Modal confirm dialog popup visibility
+	modal_title          string            // Modal dialog headline text
+	modal_message        string            // Modal dialog message body text
+	modal_detail         string            // Secondary detail or error code/stack
+	modal_image_path     string            // Custom or preset icon image path
+	modal_kind           DialogKind        // Dialog kind (.info, .success, .warning, .error, etc.)
+	modal_confirm_txt    string = 'OK'     // Confirm button text label
+	modal_cancel_txt     string = 'Cancel' // Cancel button text label
+	modal_neutral_txt    string            // Optional 3rd neutral button text label
+	modal_is_destructive bool              // Destructive styling for confirm button
+	modal_checkbox_txt   string            // Optional checkbox label text
+	modal_checkbox_val   bool              // State of modal checkbox
+	modal_input_mode     bool              // If true, enables input box inside dialog
+	modal_input_val      string            // Text value in input box
+	modal_input_holder   string            // Placeholder for input box
+	modal_on_confirm     VoidEventCallback = unsafe { nil } // Callback when confirm button clicked
+	modal_on_cancel      VoidEventCallback = unsafe { nil } // Callback when cancel button clicked
+	modal_on_neutral     VoidEventCallback = unsafe { nil } // Callback when neutral button clicked
 	timers            map[string]&IntervalTimer // Map of scheduled interval and timeout timers
 	font_path         string // Custom font file path override (defaults to auto-detected system TTF on Linux)
 	is_selecting_text  bool   // Mouse drag text selection active flag
@@ -3119,20 +3130,397 @@ pub fn (mut win SimpleWindow) bind_shortcut(shortcut_str string, cb fn (mut win 
 
 // Modal Dialog & Overlay API
 
-pub fn (mut win SimpleWindow) show_modal(title string, message string, confirm_txt string, cancel_txt string, on_confirm VoidEventCallback) &SimpleWindow {
+pub enum DialogKind {
+	info
+	success
+	warning
+	error
+	confirm
+	danger
+	security
+	database
+	cloud
+	tip
+	custom
+}
+
+pub struct DialogConfig {
+pub mut:
+	kind              DialogKind        = .info
+	title             string            = 'Notification'
+	message           string
+	detail            string
+	image_path        string // Custom image path or empty for auto-selected icon
+	confirm_txt       string = 'OK'
+	cancel_txt        string
+	neutral_txt       string
+	is_destructive    bool
+	checkbox_txt      string
+	checkbox_checked  bool
+	input_mode        bool
+	input_val         string
+	input_placeholder string
+	on_confirm        VoidEventCallback = unsafe { nil }
+	on_cancel         VoidEventCallback = unsafe { nil }
+	on_neutral        VoidEventCallback = unsafe { nil }
+}
+
+pub fn resolve_dialog_icon(kind DialogKind, custom_path string) string {
+	if custom_path.len > 0 {
+		return custom_path
+	}
+	return match kind {
+		.info { 'assets/images/dialog_icon_info.jpg' }
+		.success { 'assets/images/dialog_icon_success.jpg' }
+		.warning { 'assets/images/dialog_icon_warning.jpg' }
+		.error { 'assets/images/dialog_icon_error.jpg' }
+		.confirm { 'assets/images/dialog_icon_question.jpg' }
+		.danger { 'assets/images/dialog_icon_danger.jpg' }
+		.security { 'assets/images/dialog_icon_security.jpg' }
+		.database { 'assets/images/dialog_icon_database.jpg' }
+		.cloud { 'assets/images/dialog_icon_cloud.jpg' }
+		.tip { 'assets/images/dialog_icon_tip.jpg' }
+		.custom { custom_path }
+	}
+}
+
+pub fn (win &SimpleWindow) get_dialog_accent_color() gg.Color {
+	return match win.modal_kind {
+		.success { gg.rgb(46, 204, 113) }
+		.error { gg.rgb(235, 60, 60) }
+		.warning { gg.rgb(243, 156, 18) }
+		.info { gg.rgb(41, 128, 185) }
+		.confirm { gg.rgb(155, 89, 182) }
+		.danger { gg.rgb(231, 76, 60) }
+		.security { gg.rgb(241, 196, 15) }
+		.database { gg.rgb(142, 68, 173) }
+		.cloud { gg.rgb(26, 188, 156) }
+		.tip { gg.rgb(243, 180, 20) }
+		.custom { parse_hex_color(win.theme.accent_color) }
+	}
+}
+
+pub struct ModalLayout {
+pub mut:
+	bx            f32
+	by            f32
+	bw            f32
+	bh            f32
+	has_image     bool
+	img_x         f32
+	img_y         f32
+	img_sz        f32
+	content_x     f32
+	content_w     f32
+	close_x       f32
+	close_y       f32
+	close_sz      f32
+	detail_y      f32
+	input_y       f32
+	input_w       f32
+	input_h       f32
+	check_y       f32
+	btn_y         f32
+	btn_h         f32
+	btn_w         f32
+	confirm_x     f32
+	confirm_w     f32
+	cancel_x      f32
+	cancel_w      f32
+	neutral_x     f32
+	neutral_w     f32
+}
+
+pub fn (win &SimpleWindow) get_modal_layout() ModalLayout {
+	bw := f32(math.min(520, win.width - 40))
+	has_image := win.modal_image_path.len > 0
+	img_sz := f32(56.0)
+
+	content_x_offset := if has_image { f32(84.0) } else { f32(24.0) }
+	content_w_offset := if has_image { f32(108.0) } else { f32(48.0) }
+
+	msg_lines := int(math.max(1, (win.modal_message.len / 44) + 1))
+	msg_h := f32(msg_lines * 18)
+
+	mut extra_h := f32(0.0)
+	if win.modal_detail.len > 0 {
+		extra_h += 32.0
+	}
+	if win.modal_input_mode {
+		extra_h += 42.0
+	}
+	if win.modal_checkbox_txt.len > 0 {
+		extra_h += 26.0
+	}
+
+	bh := f32(math.max(185.0, 110.0 + msg_h + extra_h))
+	bx := f32((f32(win.width) - bw) / 2.0)
+	by := f32((f32(win.height) - bh) / 2.0)
+
+	content_x := bx + content_x_offset
+	content_w := bw - content_w_offset
+
+	mut curr_y := by + 50.0 + msg_h
+
+	mut detail_y := f32(0.0)
+	if win.modal_detail.len > 0 {
+		detail_y = curr_y
+		curr_y += 32.0
+	}
+
+	mut input_y := f32(0.0)
+	input_w := content_w
+	input_h := f32(32.0)
+	if win.modal_input_mode {
+		input_y = curr_y
+		curr_y += 42.0
+	}
+
+	mut check_y := f32(0.0)
+	if win.modal_checkbox_txt.len > 0 {
+		check_y = curr_y
+		curr_y += 26.0
+	}
+
+	btn_h := f32(34.0)
+	btn_y := f32(by + bh - btn_h - 18.0)
+
+	confirm_label := if win.modal_confirm_txt.len > 0 { win.modal_confirm_txt } else { 'OK' }
+	confirm_w := f32(math.max(90.0, f32(confirm_label.len * 8 + 24)))
+	confirm_x := f32(bx + bw - confirm_w - 20.0)
+
+	cancel_w := f32(math.max(84.0, f32(win.modal_cancel_txt.len * 8 + 20)))
+	cancel_x := if win.modal_cancel_txt.len > 0 { f32(confirm_x - cancel_w - 10.0) } else { f32(0.0) }
+
+	neutral_w := f32(math.max(90.0, f32(win.modal_neutral_txt.len * 8 + 20)))
+	neutral_x := if win.modal_neutral_txt.len > 0 { f32(bx + 20.0) } else { f32(0.0) }
+
+	return ModalLayout{
+		bx: bx
+		by: by
+		bw: bw
+		bh: bh
+		has_image: has_image
+		img_x: bx + 18.0
+		img_y: by + 20.0
+		img_sz: img_sz
+		content_x: content_x
+		content_w: content_w
+		close_x: bx + bw - 32.0
+		close_y: by + 14.0
+		close_sz: 18.0
+		detail_y: detail_y
+		input_y: input_y
+		input_w: input_w
+		input_h: input_h
+		check_y: check_y
+		btn_y: btn_y
+		btn_h: btn_h
+		btn_w: confirm_w
+		confirm_x: confirm_x
+		confirm_w: confirm_w
+		cancel_x: cancel_x
+		cancel_w: cancel_w
+		neutral_x: neutral_x
+		neutral_w: neutral_w
+	}
+}
+
+// show_custom_dialog displays a fully customized dialog overlay with icon, buttons, checkbox, and optional text input.
+pub fn (mut win SimpleWindow) show_custom_dialog(cfg DialogConfig) &SimpleWindow {
 	win.modal_active = true
-	win.modal_title = title
-	win.modal_message = message
-	win.modal_confirm_txt = if confirm_txt.len > 0 { confirm_txt } else { 'OK' }
-	win.modal_cancel_txt = cancel_txt
-	win.modal_on_confirm = on_confirm
+	win.modal_kind = cfg.kind
+	win.modal_title = cfg.title
+	win.modal_message = cfg.message
+	win.modal_detail = cfg.detail
+	win.modal_image_path = resolve_dialog_icon(cfg.kind, cfg.image_path)
+	win.modal_confirm_txt = if cfg.confirm_txt.len > 0 { cfg.confirm_txt } else { 'OK' }
+	win.modal_cancel_txt = cfg.cancel_txt
+	win.modal_neutral_txt = cfg.neutral_txt
+	win.modal_is_destructive = cfg.is_destructive
+	win.modal_checkbox_txt = cfg.checkbox_txt
+	win.modal_checkbox_val = cfg.checkbox_checked
+	win.modal_input_mode = cfg.input_mode
+	win.modal_input_val = cfg.input_val
+	win.modal_input_holder = cfg.input_placeholder
+	win.modal_on_confirm = cfg.on_confirm
+	win.modal_on_cancel = cfg.on_cancel
+	win.modal_on_neutral = cfg.on_neutral
 	return win
+}
+
+// show_dialog displays a custom dialog using DialogConfig.
+pub fn (mut win SimpleWindow) show_dialog(cfg DialogConfig) &SimpleWindow {
+	return win.show_custom_dialog(cfg)
+}
+
+// show_dialog_success displays a modern Success modal dialog with a glossy green check shield icon.
+pub fn (mut win SimpleWindow) show_dialog_success(title string, message string, on_confirm VoidEventCallback) &SimpleWindow {
+	return win.show_custom_dialog(DialogConfig{
+		kind: .success
+		title: title
+		message: message
+		confirm_txt: 'OK'
+		on_confirm: on_confirm
+	})
+}
+
+// show_dialog_error displays a modern Error modal dialog with a glossy red 'X' icon.
+pub fn (mut win SimpleWindow) show_dialog_error(title string, message string, on_confirm VoidEventCallback) &SimpleWindow {
+	return win.show_custom_dialog(DialogConfig{
+		kind: .error
+		title: title
+		message: message
+		confirm_txt: 'Dismiss'
+		on_confirm: on_confirm
+	})
+}
+
+// show_dialog_warning displays a Warning modal dialog with a glossy golden triangle icon and confirm/cancel actions.
+pub fn (mut win SimpleWindow) show_dialog_warning(title string, message string, confirm_txt string, cancel_txt string, on_confirm VoidEventCallback) &SimpleWindow {
+	return win.show_custom_dialog(DialogConfig{
+		kind: .warning
+		title: title
+		message: message
+		confirm_txt: if confirm_txt.len > 0 { confirm_txt } else { 'Proceed' }
+		cancel_txt: if cancel_txt.len > 0 { cancel_txt } else { 'Cancel' }
+		on_confirm: on_confirm
+	})
+}
+
+// show_dialog_info displays an Information modal dialog with a glossy cyan info badge icon.
+pub fn (mut win SimpleWindow) show_dialog_info(title string, message string) &SimpleWindow {
+	return win.show_custom_dialog(DialogConfig{
+		kind: .info
+		title: title
+		message: message
+		confirm_txt: 'Got it'
+	})
+}
+
+// show_dialog_confirm displays a question confirmation modal dialog with Confirm and Cancel buttons.
+pub fn (mut win SimpleWindow) show_dialog_confirm(title string, message string, on_confirm VoidEventCallback, on_cancel VoidEventCallback) &SimpleWindow {
+	return win.show_custom_dialog(DialogConfig{
+		kind: .confirm
+		title: title
+		message: message
+		confirm_txt: 'Confirm'
+		cancel_txt: 'Cancel'
+		on_confirm: on_confirm
+		on_cancel: on_cancel
+	})
+}
+
+// show_dialog_danger displays a high-hazard/destructive modal dialog with a fire hazard badge and red action button.
+pub fn (mut win SimpleWindow) show_dialog_danger(title string, message string, confirm_txt string, on_confirm VoidEventCallback) &SimpleWindow {
+	return win.show_custom_dialog(DialogConfig{
+		kind: .danger
+		title: title
+		message: message
+		confirm_txt: if confirm_txt.len > 0 { confirm_txt } else { 'Delete' }
+		cancel_txt: 'Cancel'
+		is_destructive: true
+		on_confirm: on_confirm
+	})
+}
+
+// show_dialog_security displays a security / authentication modal dialog with a gold padlock shield icon.
+pub fn (mut win SimpleWindow) show_dialog_security(title string, message string, on_confirm VoidEventCallback) &SimpleWindow {
+	return win.show_custom_dialog(DialogConfig{
+		kind: .security
+		title: title
+		message: message
+		confirm_txt: 'Authenticate'
+		cancel_txt: 'Cancel'
+		on_confirm: on_confirm
+	})
+}
+
+// show_dialog_database displays a database / storage operation modal dialog with a violet database stack icon.
+pub fn (mut win SimpleWindow) show_dialog_database(title string, message string, on_confirm VoidEventCallback) &SimpleWindow {
+	return win.show_custom_dialog(DialogConfig{
+		kind: .database
+		title: title
+		message: message
+		confirm_txt: 'Run Migration'
+		cancel_txt: 'Abort'
+		on_confirm: on_confirm
+	})
+}
+
+// show_dialog_cloud displays a cloud sync / remote network modal dialog with a turquoise cloud icon.
+pub fn (mut win SimpleWindow) show_dialog_cloud(title string, message string, on_confirm VoidEventCallback) &SimpleWindow {
+	return win.show_custom_dialog(DialogConfig{
+		kind: .cloud
+		title: title
+		message: message
+		confirm_txt: 'Sync Now'
+		cancel_txt: 'Work Offline'
+		on_confirm: on_confirm
+	})
+}
+
+// show_dialog_tip displays a helpful developer tip / guide dialog with an incandescent lightbulb icon.
+pub fn (mut win SimpleWindow) show_dialog_tip(title string, message string) &SimpleWindow {
+	return win.show_custom_dialog(DialogConfig{
+		kind: .tip
+		title: title
+		message: message
+		confirm_txt: 'Understood'
+	})
+}
+
+// show_dialog_input displays an input prompt modal dialog with an inline text field.
+pub fn (mut win SimpleWindow) show_dialog_input(title string, message string, default_val string, placeholder string, on_confirm VoidEventCallback) &SimpleWindow {
+	return win.show_custom_dialog(DialogConfig{
+		kind: .custom
+		title: title
+		message: message
+		input_mode: true
+		input_val: default_val
+		input_placeholder: placeholder
+		confirm_txt: 'Submit'
+		cancel_txt: 'Cancel'
+		on_confirm: on_confirm
+	})
+}
+
+// get_dialog_input returns the current text inside the active or last modal dialog input box.
+pub fn (win &SimpleWindow) get_dialog_input() string {
+	return win.modal_input_val
+}
+
+// get_dialog_checkbox returns whether the modal dialog checkbox was checked.
+pub fn (win &SimpleWindow) get_dialog_checkbox() bool {
+	return win.modal_checkbox_val
+}
+
+// is_dialog_active returns true if a modal dialog is currently being displayed.
+pub fn (win &SimpleWindow) is_dialog_active() bool {
+	return win.modal_active
+}
+
+// hide_dialog dismisses the active modal dialog.
+pub fn (mut win SimpleWindow) hide_dialog() &SimpleWindow {
+	return win.hide_modal()
+}
+
+pub fn (mut win SimpleWindow) show_modal(title string, message string, confirm_txt string, cancel_txt string, on_confirm VoidEventCallback) &SimpleWindow {
+	return win.show_custom_dialog(DialogConfig{
+		kind: .info
+		title: title
+		message: message
+		confirm_txt: if confirm_txt.len > 0 { confirm_txt } else { 'OK' }
+		cancel_txt: cancel_txt
+		on_confirm: on_confirm
+	})
 }
 
 pub fn (mut win SimpleWindow) hide_modal() &SimpleWindow {
 	win.modal_active = false
 	win.modal_on_confirm = unsafe { nil }
 	win.modal_on_cancel = unsafe { nil }
+	win.modal_on_neutral = unsafe { nil }
 	return win
 }
 

@@ -102,6 +102,7 @@ This directory contains beginner-friendly, well-commented examples demonstrating
 | **[`21_extended_os_system_calls.v`](21_extended_os_system_calls.v)**     | Extended OS & Hardware Subsystem | Live CPU & Memory pressure metrics, environment variables, system audio beeps, speech synthesis, temp files & zip archives. | ![Snapshot 21](../snapshots/ex21.png)  |
 | **[`22_modern_super_controls_showcase.v`](22_modern_super_controls_showcase.v)** | Modern Super Controls Suite      | Super Terminal, Code Studio, Smart Table, Kanban Board, Wizard Stepper, Floating Toolbar, Score Card, Sparklines, Donut Chart, Chip Input. | ![Snapshot 22](../snapshots/ex22.png)  |
 | **[`23_modern_image_controls_showcase.v`](23_modern_image_controls_showcase.v)** | Modern Image Super Controls      | User Profile Cards, Product Cards, Multi-Image Showcase Gallery, 3D App Launcher Tiles, Media Player Card, Hero Banners, and GPU Texture Caching. | ![Snapshot 23](../snapshots/ex23.png)  |
+| **[`24_custom_image_dialogs_showcase.v`](24_custom_image_dialogs_showcase.v)**   | RAD Custom 3D Image Dialogs      | Custom 3D glowing dialog icons (Success, Error, Warning, Info, Confirm, Danger, Security, Database, Cloud, Tip), 3-button actions, Checkboxes & Inline Input Prompts. | ![Snapshot 24](../snapshots/ex24.png)  |
 
 ---
 
@@ -176,5 +177,8 @@ v run examples/22_modern_super_controls_showcase.v
 
 # Run Modern Image Controls & Asset Gallery Showcase Demo
 v run examples/23_modern_image_controls_showcase.v
+
+# Run RAD Custom 3D Image Dialogs Showcase Demo
+v run examples/24_custom_image_dialogs_showcase.v
 ```
 

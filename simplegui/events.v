@@ -159,27 +159,46 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 			is_shift := (e.modifiers & u32(gg.Modifier.shift)) != 0
 
 			if win.modal_active {
-				box_w := f32(math.min(460, win.width - 40))
-				box_h := f32(180.0)
-				bx := (f32(win.width) - box_w) / 2.0
-				by := (f32(win.height) - box_h) / 2.0
+				layout := win.get_modal_layout()
 
-				btn_w := f32(100.0)
-				btn_h := f32(36.0)
-				confirm_x := bx + box_w - btn_w - 20.0
-				cancel_x := confirm_x - btn_w - 12.0
-				btn_y := by + box_h - btn_h - 18.0
+				// 1. Close 'X' button click
+				if win.mouse_x >= layout.close_x - 4.0 && win.mouse_x <= layout.close_x + layout.close_sz + 4.0
+					&& win.mouse_y >= layout.close_y - 4.0 && win.mouse_y <= layout.close_y + layout.close_sz + 4.0 {
+					cb := win.modal_on_cancel
+					win.hide_modal()
+					if cb != unsafe { nil } {
+						cb(mut win)
+					}
+					return
+				}
 
-				if win.mouse_y >= btn_y && win.mouse_y <= btn_y + btn_h {
-					if win.mouse_x >= confirm_x && win.mouse_x <= confirm_x + btn_w {
+				// 2. Checkbox toggle click
+				if win.modal_checkbox_txt.len > 0 {
+					if win.mouse_x >= layout.content_x && win.mouse_x <= layout.content_x + layout.content_w
+						&& win.mouse_y >= layout.check_y - 2.0 && win.mouse_y <= layout.check_y + 20.0 {
+						win.modal_checkbox_val = !win.modal_checkbox_val
+						return
+					}
+				}
+
+				// 3. Action Buttons Click (Confirm, Cancel, Neutral)
+				if win.mouse_y >= layout.btn_y && win.mouse_y <= layout.btn_y + layout.btn_h {
+					if win.mouse_x >= layout.confirm_x && win.mouse_x <= layout.confirm_x + layout.confirm_w {
 						cb := win.modal_on_confirm
 						win.hide_modal()
 						if cb != unsafe { nil } {
 							cb(mut win)
 						}
 						return
-					} else if win.modal_cancel_txt.len > 0 && win.mouse_x >= cancel_x && win.mouse_x <= cancel_x + btn_w {
+					} else if win.modal_cancel_txt.len > 0 && win.mouse_x >= layout.cancel_x && win.mouse_x <= layout.cancel_x + layout.cancel_w {
 						cb := win.modal_on_cancel
+						win.hide_modal()
+						if cb != unsafe { nil } {
+							cb(mut win)
+						}
+						return
+					} else if win.modal_neutral_txt.len > 0 && win.mouse_x >= layout.neutral_x && win.mouse_x <= layout.neutral_x + layout.neutral_w {
+						cb := win.modal_on_neutral
 						win.hide_modal()
 						if cb != unsafe { nil } {
 							cb(mut win)
@@ -936,6 +955,12 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 			if is_super || is_ctrl {
 				return
 			}
+			if win.modal_active {
+				if win.modal_input_mode && e.char_code >= 32 && e.char_code <= 126 {
+					win.modal_input_val += u8(e.char_code).ascii_str()
+				}
+				return
+			}
 			if win.command_palette_active {
 				if e.char_code >= 32 && e.char_code <= 126 {
 					win.command_palette_query += u8(e.char_code).ascii_str()
@@ -972,6 +997,30 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 			is_ctrl := (e.modifiers & u32(gg.Modifier.ctrl)) != 0
 			is_alt := (e.modifiers & u32(gg.Modifier.alt)) != 0
 			is_shift := (e.modifiers & u32(gg.Modifier.shift)) != 0
+
+			if win.modal_active {
+				if e.key_code == .escape {
+					cb := win.modal_on_cancel
+					win.hide_modal()
+					if cb != unsafe { nil } {
+						cb(mut win)
+					}
+					return
+				} else if e.key_code == .enter {
+					cb := win.modal_on_confirm
+					win.hide_modal()
+					if cb != unsafe { nil } {
+						cb(mut win)
+					}
+					return
+				} else if win.modal_input_mode && e.key_code == .backspace {
+					if win.modal_input_val.len > 0 {
+						win.modal_input_val = win.modal_input_val[0..win.modal_input_val.len - 1]
+					}
+					return
+				}
+				return
+			}
 
 			if e.key_code == .escape {
 				if win.command_palette_active {

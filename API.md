@@ -2121,19 +2121,96 @@ win.add_button('btn_save', 'Save Document')
 win.set_control_tooltip('btn_save', 'Click to save your file state')
 ```
 
-### 2. Backdrop Modal Dialogs (`show_modal`)
+### 2. Backdrop Modal Dialogs & Custom 3D Image Dialogs
+
+SimpleGUI features an extensible, beautiful modal dialog system equipped with custom 3D glossy glowing icon badges, dynamic multiline wrapping, 1 to 3 button actions, checkboxes, and inline text input prompts.
+
+#### Standard Dialog Helpers
 
 ```v
-win.show_modal(
-	'Confirm Action',
-	'Are you sure you want to reset all fields?',
-	'Reset',
-	'Cancel',
-	fn (mut win simplegui.SimpleWindow) {
-		win.push_toast('Reset', 'All fields cleared', 'info', 2000)
+// 1. Success Dialog (Green Shield Badge)
+win.show_dialog_success('Build Succeeded', 'All 64 unit tests passed successfully.', fn (mut win simplegui.SimpleWindow) {
+	win.push_toast('Deployed', 'Artifact published.', 'success', 2000)
+})
+
+// 2. Error Dialog (Red X Badge)
+win.show_dialog_error('Database Error', 'Connection timed out to Postgres at 127.0.0.1:5432.', fn (mut win simplegui.SimpleWindow) {
+	// Dismiss callback
+})
+
+// 3. Warning Dialog (Amber Triangle Badge)
+win.show_dialog_warning('Unsaved Changes', 'You have uncommitted modifications.', 'Proceed Anyway', 'Cancel', fn (mut win simplegui.SimpleWindow) {
+	// Proceed callback
+})
+
+// 4. Information Dialog (Cyan Info Badge)
+win.show_dialog_info('Update Ready', 'SimpleGUI v2.5 is available for install.')
+
+// 5. Question / Confirm Dialog (Purple Question Badge)
+win.show_dialog_confirm('Restart Runtime?', 'Close active terminals and reload plugins?', fn (mut win simplegui.SimpleWindow) {
+	// Confirm callback
+}, fn (mut win simplegui.SimpleWindow) {
+	// Cancel callback
+})
+
+// 6. Danger / Destructive Dialog (Fire Hazard Badge & Crimson Action Button)
+win.show_dialog_danger('Drop Database?', 'Permanently delete all schemas and tables.', 'Permanently Drop', fn (mut win simplegui.SimpleWindow) {
+	// Destructive action
+})
+
+// 7. Security / Authentication Dialog (Gold Padlock Shield)
+win.show_dialog_security('Elevation Required', 'Root administrator permissions required.', fn (mut win simplegui.SimpleWindow) {
+	// Authenticated callback
+})
+
+// 8. Database Migration Dialog (Violet Database Discs)
+win.show_dialog_database('Run Migration', 'Apply schema changes to version #0042.', fn (mut win simplegui.SimpleWindow) {
+	// Migration callback
+})
+
+// 9. Cloud Sync Dialog (Turquoise Cloud Badge)
+win.show_dialog_cloud('Sync Workspace', 'Upload 1,280 assets to remote cluster storage.', fn (mut win simplegui.SimpleWindow) {
+	// Sync callback
+})
+
+// 10. Developer Tip Dialog (Golden Lightbulb Badge)
+win.show_dialog_tip('Pro-Tip: Shortcuts', 'Press Ctrl+K or Cmd+K to open Command Palette.')
+
+// 11. Text Input Dialog Prompt (Inline Text Input Field)
+win.show_dialog_input('Create Branch', 'Enter name for your git branch:', 'feature/auth', 'e.g. feature/my-feature', fn (mut win simplegui.SimpleWindow) {
+	branch := win.get_dialog_input()
+	win.push_toast('Branch Created', 'Switched to: ${branch}', 'success', 2500)
+})
+```
+
+#### Full Custom Dialog Configuration (`show_custom_dialog`)
+
+```v
+win.show_custom_dialog(simplegui.DialogConfig{
+	kind: .warning
+	title: 'Save Project Modifications?'
+	message: 'Do you want to save changes to "main_pipeline.v" before closing?'
+	detail: 'Last saved: 12 minutes ago [Unsaved diff: 42 lines]'
+	image_path: 'assets/images/dialog_icon_warning.jpg' // Custom or preset image
+	confirm_txt: 'Save Changes'
+	cancel_txt: 'Cancel'
+	neutral_txt: 'Discard Changes'
+	checkbox_txt: 'Remember my choice for all files'
+	checkbox_checked: false
+	on_confirm: fn (mut win simplegui.SimpleWindow) {
+		remember := win.get_dialog_checkbox()
+		win.push_toast('Saved', 'File saved. Remember: ${remember}', 'success', 2000)
 	}
-)
-win.hide_modal()
+	on_neutral: fn (mut win simplegui.SimpleWindow) {
+		win.push_toast('Discarded', 'Modifications reverted.', 'warning', 2000)
+	}
+})
+
+// Query active dialog state
+is_open := win.is_dialog_active()
+input_val := win.get_dialog_input()
+chk_val := win.get_dialog_checkbox()
+win.hide_dialog() // or win.hide_modal()
 ```
 
 ### 3. Live Form Validation Badges (`set_validation_error`)
