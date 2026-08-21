@@ -111,6 +111,16 @@ pub mut:
 	is_selecting_text  bool   // Mouse drag text selection active flag
 	text_select_anchor int    // Mouse drag initial caret anchor index
 	image_cache       map[string]int // GPU texture cache map of image file paths to gg image cache indices
+	// Modern UI & UX Window States
+	ui_scale          f32 = 1.0 // Global UI scaling / DPI zoom factor
+	drawer_active     bool      // Slide-over drawer visibility
+	drawer_title      string    // Slide-over drawer header title
+	drawer_subtitle   string    // Slide-over drawer subheader
+	drawer_width      f32 = 340.0 // Slide-over drawer width in pixels
+	drawer_side       string = 'right' // Drawer position side ('right' or 'left')
+	drawer_controls   []&Control // Controls contained within drawer panel
+	drawer_items      []DrawerItem // Structured items / navigation links within drawer
+	focused_ctrl_idx  int = -1  // Index for keyboard Tab navigation
 }
 
 // new_simple_window creates and initializes a new `SimpleWindow` instance with specified title, width, and height.
@@ -122,6 +132,7 @@ pub fn new_simple_window(title string, width int, height int) &SimpleWindow {
 		theme:       get_theme('Apple Light')
 		timers:      map[string]&IntervalTimer{}
 		image_cache: map[string]int{}
+		ui_scale:    1.0
 	}
 	return win
 }
@@ -4008,6 +4019,418 @@ pub fn (mut win SimpleWindow) process_timers() {
 	for id in finished_ids {
 		win.timers.delete(id)
 	}
+}
+
+// -----------------------------------------------------------------------------
+// Modern UI & UX Window Operations & Super Factory Methods
+// -----------------------------------------------------------------------------
+
+// set_ui_scale sets the global UI scaling / DPI zoom factor (e.g. 1.0, 1.25, 1.5, 2.0).
+pub fn (mut win SimpleWindow) set_ui_scale(scale f32) &SimpleWindow {
+	if scale > 0.1 {
+		win.ui_scale = scale
+	}
+	return win
+}
+
+// get_ui_scale returns the current global UI scale factor.
+pub fn (win &SimpleWindow) get_ui_scale() f32 {
+	return win.ui_scale
+}
+
+// set_zoom is an alias for set_ui_scale.
+pub fn (mut win SimpleWindow) set_zoom(zoom f32) &SimpleWindow {
+	return win.set_ui_scale(zoom)
+}
+
+// add_vector_icon adds a standalone procedural vector icon glyph widget.
+pub fn (mut win SimpleWindow) add_vector_icon(name string, glyph string, size int) &Control {
+	sz := if size > 0 { f32(size) } else { 20.0 }
+	win.add_control(Control{
+		name:        name
+		kind:        'vector_icon'
+		icon_vector: glyph
+		w:           sz
+		h:           sz
+	})
+	return win.control(name)
+}
+
+// add_sidebar adds a collapsible vertical navigation sidebar with vector icons, labels, and active indicator.
+pub fn (mut win SimpleWindow) add_sidebar(name string, items []SidebarItem) &Control {
+	win.add_control(Control{
+		name:          name
+		kind:          'sidebar'
+		sidebar_items: items.clone()
+		w:             220.0
+		h:             f32(items.len * 44 + 48)
+		is_collapsed:  false
+	})
+	return win.control(name)
+}
+
+// add_nav_rail adds a slim icon-only vertical navigation rail.
+pub fn (mut win SimpleWindow) add_nav_rail(name string, items []SidebarItem) &Control {
+	win.add_control(Control{
+		name:          name
+		kind:          'nav_rail'
+		sidebar_items: items.clone()
+		w:             64.0
+		h:             f32(items.len * 52 + 32)
+		is_collapsed:  true
+	})
+	return win.control(name)
+}
+
+// toggle_sidebar toggles between expanded wide mode and slim collapsed rail mode.
+pub fn (mut win SimpleWindow) toggle_sidebar(name string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.is_collapsed = !ctrl.is_collapsed
+		ctrl.w = if ctrl.is_collapsed { f32(64.0) } else { f32(220.0) }
+	}
+	return win
+}
+
+// set_sidebar_active selects the active navigation destination item in a sidebar or nav rail.
+pub fn (mut win SimpleWindow) set_sidebar_active(name string, item_id string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		for mut item in ctrl.sidebar_items {
+			item.is_active = (item.id == item_id)
+		}
+	}
+	return win
+}
+
+// vstack organizes nested child controls in a vertical stack layout with alignment and spacing.
+pub fn (mut win SimpleWindow) vstack(name string, alignment string, spacing int, builder VoidEventCallback) &SimpleWindow {
+	win.add_control(Control{
+		name:      '${name}_vstart'
+		kind:      'vstack_start'
+		alignment: alignment
+		int_value: spacing
+		visible:   false
+	})
+	if builder != unsafe { nil } {
+		builder(mut win)
+	}
+	win.add_control(Control{
+		name:    '${name}_vend'
+		kind:    'vstack_end'
+		visible: false
+	})
+	return win
+}
+
+// hstack organizes nested child controls in a horizontal stack layout with alignment and spacing.
+pub fn (mut win SimpleWindow) hstack(name string, alignment string, spacing int, builder VoidEventCallback) &SimpleWindow {
+	win.add_control(Control{
+		name:      '${name}_hstart'
+		kind:      'hstack_start'
+		alignment: alignment
+		int_value: spacing
+		visible:   false
+	})
+	if builder != unsafe { nil } {
+		builder(mut win)
+	}
+	win.add_control(Control{
+		name:    '${name}_hend'
+		kind:    'hstack_end'
+		visible: false
+	})
+	return win
+}
+
+// begin_flow_layout starts an auto-wrapping flow layout container where items wrap to the next line when width overflows.
+pub fn (mut win SimpleWindow) begin_flow_layout(name string, gap int) &SimpleWindow {
+	win.add_control(Control{
+		name:      name
+		kind:      'flow_start'
+		int_value: if gap > 0 { gap } else { 8 }
+		visible:   false
+	})
+	return win
+}
+
+// end_flow_layout closes an open flow layout container.
+pub fn (mut win SimpleWindow) end_flow_layout() &SimpleWindow {
+	win.add_control(Control{
+		name:    win.gen_id('flow_end')
+		kind:    'flow_end'
+		visible: false
+	})
+	return win
+}
+
+// show_drawer displays a smooth slide-over drawer panel from the right or left edge.
+pub fn (mut win SimpleWindow) show_drawer(title string, width int, side string, builder VoidEventCallback) &SimpleWindow {
+	win.drawer_active = true
+	win.drawer_title = title
+	win.drawer_width = if width > 0 { f32(width) } else { 340.0 }
+	win.drawer_side = if side == 'left' { 'left' } else { 'right' }
+	win.drawer_items.clear()
+	win.drawer_controls.clear()
+	if builder != unsafe { nil } {
+		builder(mut win)
+	}
+	return win
+}
+
+// add_drawer_item appends an interactive menu item to the drawer panel.
+pub fn (mut win SimpleWindow) add_drawer_item(item DrawerItem) &SimpleWindow {
+	win.drawer_items << item
+	return win
+}
+
+// add_drawer_section appends a styled category divider header to the drawer panel.
+pub fn (mut win SimpleWindow) add_drawer_section(title string) &SimpleWindow {
+	win.drawer_items << DrawerItem{
+		title: title
+		is_header: true
+	}
+	return win
+}
+
+// set_drawer_active_item highlights a drawer item by its id.
+pub fn (mut win SimpleWindow) set_drawer_active_item(id string) &SimpleWindow {
+	for mut item in win.drawer_items {
+		item.is_active = (item.id == id)
+	}
+	return win
+}
+
+// hide_drawer dismisses the active slide-over drawer panel.
+pub fn (mut win SimpleWindow) hide_drawer() &SimpleWindow {
+	win.drawer_active = false
+	win.drawer_items.clear()
+	win.drawer_controls.clear()
+	return win
+}
+
+// is_drawer_active returns true if a slide-over drawer is currently displayed.
+pub fn (win &SimpleWindow) is_drawer_active() bool {
+	return win.drawer_active
+}
+
+// add_area_chart adds a smooth gradient spline area chart.
+pub fn (mut win SimpleWindow) add_area_chart(name string, title string, data []f64) &Control {
+	win.add_control(Control{
+		name:     name
+		kind:     'area_chart'
+		title:    title
+		f64_list: data.clone()
+		w:        320.0
+		h:        140.0
+	})
+	return win.control(name)
+}
+
+// add_spline_chart is an alias for add_area_chart with smooth Bézier interpolation.
+pub fn (mut win SimpleWindow) add_spline_chart(name string, title string, data []f64) &Control {
+	return win.add_area_chart(name, title, data)
+}
+
+// add_activity_heatmap adds a GitHub-style 7-day x N-weeks contribution activity matrix.
+pub fn (mut win SimpleWindow) add_activity_heatmap(name string, title string, weeks int, data [][]int) &Control {
+	w_count := if weeks > 0 { weeks } else { 26 }
+	win.add_control(Control{
+		name:           name
+		kind:           'activity_heatmap'
+		title:          title
+		int_value:      w_count
+		heatmap_data:   data.clone()
+		heatmap_levels: ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353']
+		w:              f32(w_count * 14 + 40)
+		h:              140.0
+	})
+	return win.control(name)
+}
+
+// add_contribution_grid is an alias for add_activity_heatmap.
+pub fn (mut win SimpleWindow) add_contribution_grid(name string, title string, weeks int, data [][]int) &Control {
+	return win.add_activity_heatmap(name, title, weeks, data)
+}
+
+// add_tree_table adds a hierarchical data table with expandable/collapsible nested sub-rows.
+pub fn (mut win SimpleWindow) add_tree_table(name string, headers []string, nodes []TreeTableRow) &Control {
+	win.add_control(Control{
+		name:             name
+		kind:             'tree_table'
+		headers:          headers.clone()
+		tree_table_nodes: nodes.clone()
+		w:                400.0
+		h:                220.0
+	})
+	return win.control(name)
+}
+
+// add_calendar adds an interactive Month Calendar grid view.
+pub fn (mut win SimpleWindow) add_calendar(name string, year int, month int, selected_day int) &Control {
+	y := if year > 0 { year } else { 2026 }
+	m := if month >= 1 && month <= 12 { month } else { 8 }
+	d := if selected_day >= 1 && selected_day <= 31 { selected_day } else { 1 }
+	win.add_control(Control{
+		name:             name
+		kind:             'calendar'
+		cal_year:         y
+		cal_month:        m
+		cal_selected_day: d
+		w:                280.0
+		h:                240.0
+	})
+	return win.control(name)
+}
+
+// set_calendar_date updates the active date in a Month Calendar.
+pub fn (mut win SimpleWindow) set_calendar_date(name string, year int, month int, day int) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.cal_year = year
+		ctrl.cal_month = month
+		ctrl.cal_selected_day = day
+	}
+	return win
+}
+
+// get_calendar_date queries the active (year, month, day) in a Month Calendar.
+pub fn (mut win SimpleWindow) get_calendar_date(name string) (int, int, int) {
+	if ctrl := win.get_control_ptr(name) {
+		return ctrl.cal_year, ctrl.cal_month, ctrl.cal_selected_day
+	}
+	return 2026, 8, 1
+}
+
+// add_markdown_view adds a native rendered Markdown document viewer.
+pub fn (mut win SimpleWindow) add_markdown_view(name string, markdown_text string) &Control {
+	win.add_control(Control{
+		name:             name
+		kind:             'markdown_view'
+		markdown_content: markdown_text
+		w:                400.0
+		h:                200.0
+	})
+	return win.control(name)
+}
+
+// set_markdown updates markdown content dynamically.
+pub fn (mut win SimpleWindow) set_markdown(name string, markdown_text string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.markdown_content = markdown_text
+	}
+	return win
+}
+
+// add_masked_input adds an auto-formatting masked input field (e.g. phone number, IP, credit card).
+pub fn (mut win SimpleWindow) add_masked_input(name string, mask_pattern string, initial_text string) &Control {
+	win.add_control(Control{
+		name:         name
+		kind:         'masked_input'
+		mask_pattern: mask_pattern
+		text_value:   initial_text
+		w:            200.0
+		h:            32.0
+	})
+	return win.control(name)
+}
+
+// add_inline_editable_label adds a click-to-edit inline text label.
+pub fn (mut win SimpleWindow) add_inline_editable_label(name string, initial_text string) &Control {
+	win.add_control(Control{
+		name:       name
+		kind:       'inline_label'
+		title:      initial_text
+		text_value: initial_text
+		w:          200.0
+		h:          30.0
+	})
+	return win.control(name)
+}
+
+// focus_next_control advances keyboard focus to the next interactive control (Tab key navigation).
+pub fn (mut win SimpleWindow) focus_next_control() &SimpleWindow {
+	mut focusables := []int{}
+	for idx, ctrl in win.controls {
+		if ctrl.visible && !ctrl.disabled && ctrl.kind in ['textbox', 'input', 'password', 'masked_input', 'textarea', 'search_bar', 'search_field', 'button', 'checkbox', 'switch', 'slider', 'list_box', 'combobox', 'number'] {
+			focusables << idx
+		}
+	}
+	if focusables.len == 0 {
+		return win
+	}
+
+	mut cur_pos := -1
+	for pos, idx in focusables {
+		if win.controls[idx].is_focused {
+			cur_pos = pos
+			break
+		}
+	}
+
+	for mut ctrl in win.controls {
+		ctrl.is_focused = false
+	}
+
+	next_pos := (cur_pos + 1) % focusables.len
+	target_idx := focusables[next_pos]
+	win.controls[target_idx].is_focused = true
+	win.focused_ctrl_idx = target_idx
+	return win
+}
+
+// focus_prev_control reverses keyboard focus to the previous interactive control (Shift+Tab key navigation).
+pub fn (mut win SimpleWindow) focus_prev_control() &SimpleWindow {
+	mut focusables := []int{}
+	for idx, ctrl in win.controls {
+		if ctrl.visible && !ctrl.disabled && ctrl.kind in ['textbox', 'input', 'password', 'masked_input', 'textarea', 'search_bar', 'search_field', 'button', 'checkbox', 'switch', 'slider', 'list_box', 'combobox', 'number'] {
+			focusables << idx
+		}
+	}
+	if focusables.len == 0 {
+		return win
+	}
+
+	mut cur_pos := -1
+	for pos, idx in focusables {
+		if win.controls[idx].is_focused {
+			cur_pos = pos
+			break
+		}
+	}
+
+	for mut ctrl in win.controls {
+		ctrl.is_focused = false
+	}
+
+	prev_pos := if cur_pos <= 0 { focusables.len - 1 } else { cur_pos - 1 }
+	target_idx := focusables[prev_pos]
+	win.controls[target_idx].is_focused = true
+	win.focused_ctrl_idx = target_idx
+	return win
+}
+
+// focus_control sets focus specifically on a target control by name.
+pub fn (mut win SimpleWindow) focus_control(name string) &SimpleWindow {
+	for mut ctrl in win.controls {
+		ctrl.is_focused = (ctrl.name == name)
+	}
+	return win
+}
+
+// Animation Easing Helpers
+
+// ease_out_cubic provides smooth cubic deceleration easing curve.
+pub fn ease_out_cubic(t f32) f32 {
+	p := t - 1.0
+	return p * p * p + 1.0
+}
+
+// ease_in_out_quad provides smooth quadratic acceleration and deceleration easing curve.
+pub fn ease_in_out_quad(t f32) f32 {
+	return if t < 0.5 { 2.0 * t * t } else { -1.0 + (4.0 - 2.0 * t) * t }
+}
+
+// ease_out_quad provides smooth quadratic deceleration easing curve.
+pub fn ease_out_quad(t f32) f32 {
+	return -t * (t - 2.0)
 }
 
 // Execution Loop

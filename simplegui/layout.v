@@ -38,342 +38,363 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 	mut i := 0
 
 	for i < win.controls.len {
-		mut ctrl := win.controls[i]
 		// Skip hidden/invisible controls during layout positioning
-		if !ctrl.visible {
+		if !win.controls[i].visible {
 			i++
 			continue
 		}
 
+		kind := win.controls[i].kind
+
 		// Calculate positioning based on control kind or container wrapper
-		match ctrl.kind {
+		match kind {
 			'row_start' {
-				// Collect all sibling controls inside this horizontal row block
-				mut row_controls := []&Control{}
+				mut row_indices := []int{}
 				i++
 				for i < win.controls.len && win.controls[i].kind != 'row_end' {
 					if win.controls[i].visible {
-						row_controls << win.controls[i]
+						row_indices << i
 					}
 					i++
 				}
 
-				// Position row controls side-by-side horizontally
-				if row_controls.len > 0 {
-					row_count := f32(row_controls.len)
-					avail_w := content_w - (row_count - 1.0) * sp
-					item_w := avail_w / row_count
+				if row_indices.len > 0 {
+					mut fixed_w := f32(0.0)
+					mut auto_count := 0
+					for idx in row_indices {
+						r_w := win.controls[idx].w
+						if !win.controls[idx].expand_fill && r_w > 0 && r_w < content_w * 0.75 {
+							fixed_w += r_w
+						} else {
+							auto_count++
+						}
+					}
+					gaps_w := (f32(row_indices.len) - 1.0) * sp
+					remaining_w := f32(math.max(10.0, content_w - fixed_w - gaps_w))
+					item_w := if auto_count > 0 { remaining_w / f32(auto_count) } else { remaining_w }
 					mut max_h := f32(0.0)
 
 					mut cur_x := pad
-					for mut r_ctrl in row_controls {
-						r_ctrl.x = cur_x
-						r_ctrl.y = cur_y
-						if r_ctrl.expand_fill || r_ctrl.w <= 0 {
-							r_ctrl.w = item_w
+					for idx in row_indices {
+						win.controls[idx].x = cur_x
+						win.controls[idx].y = cur_y
+						if win.controls[idx].expand_fill || win.controls[idx].w <= 0 || win.controls[idx].w >= content_w * 0.75 {
+							win.controls[idx].w = item_w
 						}
-						if r_ctrl.h > max_h {
-							max_h = r_ctrl.h
+						if win.controls[idx].h > max_h {
+							max_h = win.controls[idx].h
 						}
-						cur_x += r_ctrl.w + sp
+						cur_x += win.controls[idx].w + sp
 					}
-					// Advance vertical cursor by tallest element in the row
 					cur_y += max_h + sp
 				}
 			}
 			'grid_start' {
-				// Read column count (default 2) and grid gap spacing
-				cols := if ctrl.int_value > 0 { ctrl.int_value } else { 2 }
-				grid_sp := if ctrl.f64_value > 0 { f32(ctrl.f64_value) } else { sp }
+				cols := if win.controls[i].int_value > 0 { win.controls[i].int_value } else { 2 }
+				grid_sp := if win.controls[i].min_val > 0 { f32(win.controls[i].min_val) } else { sp }
 
-				// Collect controls inside grid container
-				mut grid_controls := []&Control{}
+				mut grid_indices := []int{}
 				i++
 				for i < win.controls.len && win.controls[i].kind != 'grid_end' {
 					if win.controls[i].visible {
-						grid_controls << win.controls[i]
+						grid_indices << i
 					}
 					i++
 				}
 
-				// Arrange controls into uniform grid columns and rows
-				if grid_controls.len > 0 {
+				if grid_indices.len > 0 {
 					f_cols := f32(cols)
 					col_w := (content_w - (f_cols - 1.0) * grid_sp) / f_cols
 					mut row_max_h := f32(0.0)
 
-					for idx, mut g_ctrl in grid_controls {
-						col_idx := idx % cols
-						// Wrap to next grid row when column limit is reached
-						if col_idx == 0 && idx > 0 {
+					for c_i, idx in grid_indices {
+						col_idx := c_i % cols
+						if col_idx == 0 && c_i > 0 {
 							cur_y += row_max_h + grid_sp
 							row_max_h = 0.0
 						}
 
-						g_ctrl.x = pad + f32(col_idx) * (col_w + grid_sp)
-						g_ctrl.y = cur_y
-						g_ctrl.w = col_w
-						if g_ctrl.h > row_max_h {
-							row_max_h = g_ctrl.h
+						win.controls[idx].x = pad + f32(col_idx) * (col_w + grid_sp)
+						win.controls[idx].y = cur_y
+						win.controls[idx].w = col_w
+						if win.controls[idx].h > row_max_h {
+							row_max_h = win.controls[idx].h
 						}
 					}
 					cur_y += row_max_h + sp
 				}
 			}
 			'flex_start' {
-				// Flex layout distributes available width equally among all visible flex children
-				mut flex_controls := []&Control{}
+				mut flex_indices := []int{}
 				i++
 				for i < win.controls.len && win.controls[i].kind != 'flex_end' {
 					if win.controls[i].visible {
-						flex_controls << win.controls[i]
+						flex_indices << i
 					}
 					i++
 				}
 
-				if flex_controls.len > 0 {
-					count := f32(flex_controls.len)
+				if flex_indices.len > 0 {
+					count := f32(flex_indices.len)
 					avail_w := content_w - (count - 1.0) * sp
 					item_w := avail_w / count
 					mut max_h := f32(0.0)
 
 					mut cur_x := pad
-					for mut f_ctrl in flex_controls {
-						f_ctrl.x = cur_x
-						f_ctrl.y = cur_y
-						f_ctrl.w = item_w
-						if f_ctrl.h > max_h {
-							max_h = f_ctrl.h
+					for idx in flex_indices {
+						win.controls[idx].x = cur_x
+						win.controls[idx].y = cur_y
+						if win.controls[idx].expand_fill || win.controls[idx].w <= 0 {
+							win.controls[idx].w = item_w
 						}
-						cur_x += item_w + sp
+						if win.controls[idx].h > max_h {
+							max_h = win.controls[idx].h
+						}
+						cur_x += win.controls[idx].w + sp
 					}
 					cur_y += max_h + sp
 				}
 			}
 			'group_start' {
-				// Group box container frame calculation
-				group_title := ctrl.title
-				has_title := group_title.len > 0
-				header_h := if has_title { f32(24.0) } else { f32(10.0) }
+				win.controls[i].x = pad
+				win.controls[i].y = cur_y
+				win.controls[i].w = content_w
 
-				ctrl.x = pad
-				ctrl.y = cur_y
-				ctrl.w = content_w
-
-				group_start_y := cur_y + header_h + 8.0
-				mut inner_y := group_start_y
-				grp_content_w := content_w - 24.0
-				grp_pad := pad + 12.0
-
+				group_inner_pad := f32(12.0)
+				mut inner_y := cur_y + 28.0
+				group_start_idx := i
 				i++
-				// Position inner child controls inside group box border
-				for i < win.controls.len && win.controls[i].kind != 'group_end' {
-					mut child := win.controls[i]
-					if !child.visible {
-						i++
-						continue
-					}
 
-					match child.kind {
-						'row_start' {
-							mut row_controls := []&Control{}
-							i++
-							for i < win.controls.len && win.controls[i].kind != 'row_end' {
-								if win.controls[i].visible {
-									row_controls << win.controls[i]
-								}
+				for i < win.controls.len && win.controls[i].kind != 'group_end' {
+					if win.controls[i].visible {
+						c_kind := win.controls[i].kind
+						match c_kind {
+							'row_start' {
+								mut row_indices := []int{}
 								i++
-							}
-							if row_controls.len > 0 {
-								row_count := f32(row_controls.len)
-								avail_w := grp_content_w - (row_count - 1.0) * sp
-								item_w := avail_w / row_count
-								mut max_h := f32(0.0)
-								mut cur_x := grp_pad
-								for mut r_ctrl in row_controls {
-									r_ctrl.x = cur_x
-									r_ctrl.y = inner_y
-									if r_ctrl.expand_fill || r_ctrl.w <= 0 {
-										r_ctrl.w = item_w
+								for i < win.controls.len && win.controls[i].kind != 'row_end' {
+									if win.controls[i].visible {
+										row_indices << i
 									}
-									if r_ctrl.h > max_h {
-										max_h = r_ctrl.h
+									i++
+								}
+								if row_indices.len > 0 {
+									row_count := f32(row_indices.len)
+									inner_content_w := content_w - group_inner_pad * 2.0
+									avail_w := inner_content_w - (row_count - 1.0) * sp
+									item_w := avail_w / row_count
+									mut max_h := f32(0.0)
+
+									mut cur_x := pad + group_inner_pad
+									for idx in row_indices {
+										win.controls[idx].x = cur_x
+										win.controls[idx].y = inner_y
+										if win.controls[idx].expand_fill || win.controls[idx].w <= 0 {
+											win.controls[idx].w = item_w
+										}
+										if win.controls[idx].h > max_h {
+											max_h = win.controls[idx].h
+										}
+										cur_x += win.controls[idx].w + sp
 									}
-									cur_x += r_ctrl.w + sp
+									inner_y += max_h + sp
 								}
-								inner_y += max_h + sp
 							}
-						}
-						'grid_start' {
-							cols := if child.int_value > 0 { child.int_value } else { 2 }
-							grid_sp := if child.f64_value > 0 { f32(child.f64_value) } else { sp }
-							mut grid_controls := []&Control{}
-							i++
-							for i < win.controls.len && win.controls[i].kind != 'grid_end' {
-								if win.controls[i].visible {
-									grid_controls << win.controls[i]
+							else {
+								win.controls[i].x = pad + group_inner_pad + win.controls[i].margin_left
+								win.controls[i].y = inner_y + win.controls[i].margin_top
+								avail_w := content_w - group_inner_pad * 2.0 - win.controls[i].margin_left - win.controls[i].margin_right
+								if win.controls[i].expand_fill || win.controls[i].w <= 0 {
+									win.controls[i].w = f32(math.max(10.0, avail_w))
 								}
-								i++
+								inner_y += win.controls[i].margin_top + win.controls[i].h + win.controls[i].margin_bottom + sp
 							}
-							if grid_controls.len > 0 {
-								f_cols := f32(cols)
-								col_w := (grp_content_w - (f_cols - 1.0) * grid_sp) / f_cols
-								mut row_max_h := f32(0.0)
-								for idx, mut g_ctrl in grid_controls {
-									col_idx := idx % cols
-									if col_idx == 0 && idx > 0 {
-										inner_y += row_max_h + grid_sp
-										row_max_h = 0.0
-									}
-									g_ctrl.x = grp_pad + f32(col_idx) * (col_w + grid_sp)
-									g_ctrl.y = inner_y
-									g_ctrl.w = col_w
-									if g_ctrl.h > row_max_h {
-										row_max_h = g_ctrl.h
-									}
-								}
-								inner_y += row_max_h + sp
-							}
-						}
-						'flex_start' {
-							mut flex_controls := []&Control{}
-							i++
-							for i < win.controls.len && win.controls[i].kind != 'flex_end' {
-								if win.controls[i].visible {
-									flex_controls << win.controls[i]
-								}
-								i++
-							}
-							if flex_controls.len > 0 {
-								count := f32(flex_controls.len)
-								avail_w := grp_content_w - (count - 1.0) * sp
-								item_w := avail_w / count
-								mut max_h := f32(0.0)
-								mut cur_x := grp_pad
-								for mut f_ctrl in flex_controls {
-									f_ctrl.x = cur_x
-									f_ctrl.y = inner_y
-									f_ctrl.w = item_w
-									if f_ctrl.h > max_h {
-										max_h = f_ctrl.h
-									}
-									cur_x += item_w + sp
-								}
-								inner_y += max_h + sp
-							}
-						}
-						else {
-							child.x = grp_pad + child.margin_left
-							child.y = inner_y + child.margin_top
-							avail_w := grp_content_w - child.margin_left - child.margin_right
-							if child.expand_fill || child.w <= 0 {
-								child.w = f32(math.max(10.0, avail_w))
-							}
-							inner_y += child.margin_top + child.h + child.margin_bottom + sp
 						}
 					}
 					i++
 				}
 
-				// Adjust outer group box height to neatly enclose all children
 				group_height := (inner_y - cur_y) + 8.0
-				ctrl.h = group_height
+				win.controls[group_start_idx].h = group_height
 				cur_y += group_height + sp
 			}
 			'tab_container_start' {
-				// Tab container header bar
-				ctrl.x = pad
-				ctrl.y = cur_y
-				ctrl.w = content_w
-				ctrl.h = 32.0
+				win.controls[i].x = pad
+				win.controls[i].y = cur_y
+				win.controls[i].w = content_w
+				win.controls[i].h = 32.0
 
-				active_tab := ctrl.int_value
+				active_tab := win.controls[i].int_value
 				cur_y += 36.0
 
-				// Toggle visibility of controls depending on which tab page is currently active
 				mut inner_idx := i + 1
 				mut in_active := false
 				for inner_idx < win.controls.len && win.controls[inner_idx].kind != 'tab_container_end' {
-					mut c_ctrl := win.controls[inner_idx]
-					if c_ctrl.kind == 'tab_page_start' {
-						in_active = (c_ctrl.int_value == active_tab)
-						c_ctrl.visible = false
-					} else if c_ctrl.kind == 'tab_page_end' {
+					if win.controls[inner_idx].kind == 'tab_page_start' {
+						in_active = (win.controls[inner_idx].int_value == active_tab)
+						win.controls[inner_idx].visible = false
+					} else if win.controls[inner_idx].kind == 'tab_page_end' {
 						in_active = false
-						c_ctrl.visible = false
+						win.controls[inner_idx].visible = false
 					} else {
-						c_ctrl.visible = in_active
+						win.controls[inner_idx].visible = in_active
 					}
 					inner_idx++
 				}
 			}
 			'split_start' {
-				// Split pane divides container into two side-by-side panes by split_ratio percentage
-				split_pct := if ctrl.int_value > 0 { f32(ctrl.int_value) / 100.0 } else { f32(0.5) }
+				split_pct := if win.controls[i].int_value > 0 { f32(win.controls[i].int_value) / 100.0 } else { f32(0.5) }
 				left_w := (content_w - sp) * split_pct
 				right_w := (content_w - sp) * (1.0 - split_pct)
 
-				ctrl.x = pad
-				ctrl.y = cur_y
-				ctrl.w = content_w
+				win.controls[i].x = pad
+				win.controls[i].y = cur_y
+				win.controls[i].w = content_w
 
-				mut split_children := []&Control{}
+				mut split_indices := []int{}
 				i++
 				for i < win.controls.len && win.controls[i].kind != 'split_end' {
 					if win.controls[i].visible {
-						split_children << win.controls[i]
+						split_indices << i
 					}
 					i++
 				}
 
-				if split_children.len >= 2 {
-					split_children[0].x = pad
-					split_children[0].y = cur_y
-					split_children[0].w = left_w
+				if split_indices.len >= 2 {
+					idx0 := split_indices[0]
+					idx1 := split_indices[1]
+					win.controls[idx0].x = pad
+					win.controls[idx0].y = cur_y
+					win.controls[idx0].w = left_w
 
-					split_children[1].x = pad + left_w + sp
-					split_children[1].y = cur_y
-					split_children[1].w = right_w
+					win.controls[idx1].x = pad + left_w + sp
+					win.controls[idx1].y = cur_y
+					win.controls[idx1].w = right_w
 
-					max_h := math.max(split_children[0].h, split_children[1].h)
+					max_h := math.max(win.controls[idx0].h, win.controls[idx1].h)
 					cur_y += max_h + sp
 				}
 			}
-			'row_end', 'grid_end', 'flex_end', 'group_end', 'tab_container_end', 'tab_page_start', 'tab_page_end', 'split_end' {
+			'flow_start' {
+				gap := if win.controls[i].int_value > 0 { f32(win.controls[i].int_value) } else { f32(8.0) }
+				mut flow_indices := []int{}
+				i++
+				for i < win.controls.len && win.controls[i].kind != 'flow_end' {
+					if win.controls[i].visible {
+						flow_indices << i
+					}
+					i++
+				}
+
+				if flow_indices.len > 0 {
+					mut line_x := pad
+					mut line_max_h := f32(32.0)
+					for idx in flow_indices {
+						calc_w := f32(measure_text_width(win, win.controls[idx].title) + 48.0)
+						item_w := if calc_w > 80.0 { calc_w } else { f32(90.0) }
+						item_h := if win.controls[idx].h > 0 { win.controls[idx].h } else { f32(32.0) }
+						if line_x + item_w > pad + content_w && line_x > pad {
+							cur_y += line_max_h + gap
+							line_x = pad
+							line_max_h = item_h
+						}
+						win.controls[idx].x = line_x
+						win.controls[idx].y = cur_y
+						win.controls[idx].w = item_w
+						win.controls[idx].h = item_h
+						if item_h > line_max_h {
+							line_max_h = item_h
+						}
+						line_x += item_w + gap
+					}
+					cur_y += line_max_h + sp
+				}
+			}
+			'vstack_start' {
+				gap := if win.controls[i].int_value > 0 { f32(win.controls[i].int_value) } else { sp }
+				align := if win.controls[i].alignment.len > 0 { win.controls[i].alignment } else { 'left' }
+				mut v_indices := []int{}
+				i++
+				for i < win.controls.len && win.controls[i].kind != 'vstack_end' {
+					if win.controls[i].visible {
+						v_indices << i
+					}
+					i++
+				}
+				for idx in v_indices {
+					win.controls[idx].y = cur_y
+					if align == 'center' {
+						win.controls[idx].x = pad + (content_w - win.controls[idx].w) / 2.0
+					} else if align == 'right' {
+						win.controls[idx].x = pad + content_w - win.controls[idx].w
+					} else {
+						win.controls[idx].x = pad
+					}
+					cur_y += win.controls[idx].h + gap
+				}
+			}
+			'hstack_start' {
+				gap := if win.controls[i].int_value > 0 { f32(win.controls[i].int_value) } else { sp }
+				mut h_indices := []int{}
+				i++
+				for i < win.controls.len && win.controls[i].kind != 'hstack_end' {
+					if win.controls[i].visible {
+						h_indices << i
+					}
+					i++
+				}
+				if h_indices.len > 0 {
+					h_count := f32(h_indices.len)
+					avail_w := content_w - (h_count - 1.0) * gap
+					item_w := avail_w / h_count
+					mut max_h := f32(0.0)
+					mut cur_x := pad
+					for idx in h_indices {
+						win.controls[idx].x = cur_x
+						win.controls[idx].y = cur_y
+						if win.controls[idx].expand_fill || win.controls[idx].w <= 0 {
+							win.controls[idx].w = item_w
+						}
+						if win.controls[idx].h > max_h {
+							max_h = win.controls[idx].h
+						}
+						cur_x += win.controls[idx].w + gap
+					}
+					cur_y += max_h + sp
+				}
+			}
+			'row_end', 'grid_end', 'flex_end', 'group_end', 'tab_container_end', 'tab_page_start', 'tab_page_end', 'split_end', 'flow_end', 'vstack_end', 'hstack_end' {
 				// End tags are processed in container blocks above, ignore loose end tags
 			}
 			'spacer' {
-				// Blank vertical space buffer
-				spacer_h := if ctrl.h > 0 { ctrl.h } else { f32(20.0) }
-				ctrl.x = pad
-				ctrl.y = cur_y
-				ctrl.w = content_w
-				ctrl.h = spacer_h
+				spacer_h := if win.controls[i].h > 0 { win.controls[i].h } else { f32(20.0) }
+				win.controls[i].x = pad
+				win.controls[i].y = cur_y
+				win.controls[i].w = content_w
+				win.controls[i].h = spacer_h
 				cur_y += spacer_h + sp
 			}
 			'separator' {
-				// Thin horizontal divider line
-				ctrl.x = pad
-				ctrl.y = cur_y
-				ctrl.w = content_w
-				ctrl.h = 2.0
+				win.controls[i].x = pad
+				win.controls[i].y = cur_y
+				win.controls[i].w = content_w
+				win.controls[i].h = 2.0
 				cur_y += 2.0 + sp
 			}
 			else {
-				// Standard standalone widget layout with margin calculations
-				ctrl.x = pad + ctrl.margin_left
-				ctrl.y = cur_y + ctrl.margin_top
+				win.controls[i].x = pad + win.controls[i].margin_left
+				win.controls[i].y = cur_y + win.controls[i].margin_top
 
-				avail_w := content_w - ctrl.margin_left - ctrl.margin_right
-				if ctrl.expand_fill || ctrl.w <= 0 {
-					ctrl.w = f32(math.max(10.0, avail_w))
-				} else if ctrl.alignment == 'center' {
-					ctrl.x = pad + ctrl.margin_left + (avail_w - ctrl.w) / 2.0
-				} else if ctrl.alignment == 'right' {
-					ctrl.x = pad + content_w - ctrl.margin_right - ctrl.w
+				avail_w := content_w - win.controls[i].margin_left - win.controls[i].margin_right
+				if win.controls[i].expand_fill || win.controls[i].w <= 0 {
+					win.controls[i].w = f32(math.max(10.0, avail_w))
+				} else if win.controls[i].alignment == 'center' {
+					win.controls[i].x = pad + win.controls[i].margin_left + (avail_w - win.controls[i].w) / 2.0
+				} else if win.controls[i].alignment == 'right' {
+					win.controls[i].x = pad + content_w - win.controls[i].margin_right - win.controls[i].w
 				}
 
-				cur_y += ctrl.margin_top + ctrl.h + ctrl.margin_bottom + sp
+				cur_y += win.controls[i].margin_top + win.controls[i].h + win.controls[i].margin_bottom + sp
 			}
 		}
 		i++

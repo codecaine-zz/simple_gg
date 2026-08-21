@@ -256,6 +256,49 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 				return
 			}
 
+			if win.drawer_active {
+				dr_w := win.drawer_width
+				dr_x := if win.drawer_side == 'left' { f32(0.0) } else { f32(win.width) - dr_w }
+				close_x := dr_x + dr_w - 36.0
+				close_y := f32(16.0)
+				if win.mouse_x >= close_x - 8.0 && win.mouse_x <= close_x + 24.0
+					&& win.mouse_y >= close_y - 8.0 && win.mouse_y <= close_y + 24.0 {
+					win.hide_drawer()
+					return
+				}
+				// Click outside closes drawer
+				if (win.drawer_side == 'left' && win.mouse_x > dr_w) || (win.drawer_side == 'right' && win.mouse_x < dr_x) {
+					win.hide_drawer()
+					return
+				}
+
+				// Click inside drawer items
+				if (win.drawer_side == 'left' && win.mouse_x <= dr_w) || (win.drawer_side == 'right' && win.mouse_x >= dr_x) {
+					item_pad_x := dr_x + 14.0
+					item_w := dr_w - 28.0
+					mut cur_item_y := f32(52.0 + 12.0)
+					for mut item in win.drawer_items {
+						if item.is_header {
+							cur_item_y += 30.0
+							continue
+						}
+						item_h := if item.subtitle.len > 0 { f32(48.0) } else { f32(36.0) }
+						if win.mouse_x >= item_pad_x && win.mouse_x <= item_pad_x + item_w
+							&& win.mouse_y >= cur_item_y && win.mouse_y <= cur_item_y + item_h {
+							for mut other in win.drawer_items {
+								other.is_active = false
+							}
+							item.is_active = true
+							if item.on_click != unsafe { nil } {
+								item.on_click(mut win)
+							}
+							return
+						}
+						cur_item_y += item_h + 4.0
+					}
+				}
+			}
+
 			if e.mouse_button == .right {
 				for mut ctrl in win.controls {
 					if ctrl.visible && !ctrl.disabled {
@@ -938,6 +981,122 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 							}
 						} else if ctrl.kind == 'hero_banner' {
 							// Handled on mouse_up
+						} else if ctrl.kind in ['sidebar', 'nav_rail'] {
+							tgl_x := ctrl.x + ctrl.w - 30.0
+							tgl_y := ctrl.y + 12.0
+							if win.mouse_x >= tgl_x - 4.0 && win.mouse_x <= tgl_x + 20.0
+								&& win.mouse_y >= tgl_y - 4.0 && win.mouse_y <= tgl_y + 20.0 {
+								ctrl.is_collapsed = !ctrl.is_collapsed
+								ctrl.w = if ctrl.is_collapsed { f32(64.0) } else { f32(220.0) }
+								win.recalculate_layout()
+							} else {
+								mut item_y := ctrl.y + 48.0
+								item_h := f32(36.0)
+								for mut item in ctrl.sidebar_items {
+									if win.mouse_y >= item_y && win.mouse_y <= item_y + item_h {
+										for mut other_item in ctrl.sidebar_items {
+											other_item.is_active = (other_item.id == item.id)
+										}
+										if item.on_click != unsafe { nil } {
+											item.on_click(mut win)
+										}
+										if ctrl.on_click != unsafe { nil } {
+											ctrl.on_click(mut win)
+										}
+										break
+									}
+									item_y += item_h + 4.0
+								}
+							}
+						} else if ctrl.kind == 'calendar' {
+							prev_x := ctrl.x + ctrl.w - 56.0
+							next_x := ctrl.x + ctrl.w - 28.0
+							arr_y := ctrl.y + 10.0
+							if win.mouse_x >= prev_x - 4.0 && win.mouse_x <= prev_x + 20.0
+								&& win.mouse_y >= arr_y - 4.0 && win.mouse_y <= arr_y + 20.0 {
+								ctrl.cal_month--
+								if ctrl.cal_month < 1 {
+									ctrl.cal_month = 12
+									ctrl.cal_year--
+								}
+								if ctrl.on_change != unsafe { nil } {
+									ctrl.on_change(mut win)
+								}
+							} else if win.mouse_x >= next_x - 4.0 && win.mouse_x <= next_x + 20.0
+								&& win.mouse_y >= arr_y - 4.0 && win.mouse_y <= arr_y + 20.0 {
+								ctrl.cal_month++
+								if ctrl.cal_month > 12 {
+									ctrl.cal_month = 1
+									ctrl.cal_year++
+								}
+								if ctrl.on_change != unsafe { nil } {
+									ctrl.on_change(mut win)
+								}
+							} else {
+								hdr_h := f32(36.0)
+								grid_top := ctrl.y + hdr_h + 24.0
+								cell_h := (ctrl.h - hdr_h - 32.0) / 6.0
+								day_w := (ctrl.w - 16.0) / 7.0
+								if win.mouse_y >= grid_top {
+									row := int((win.mouse_y - grid_top) / cell_h)
+									col := int((win.mouse_x - (ctrl.x + 8.0)) / day_w)
+									if row >= 0 && row < 6 && col >= 0 && col < 7 {
+										start_offset := (ctrl.cal_month * 2 + ctrl.cal_year) % 7
+										slot := row * 7 + col
+										day_num := slot - start_offset + 1
+										days_in_m := if ctrl.cal_month in [1, 3, 5, 7, 8, 10, 12] {
+											31
+										} else if ctrl.cal_month == 2 {
+											28
+										} else {
+											30
+										}
+										if day_num >= 1 && day_num <= days_in_m {
+											ctrl.cal_selected_day = day_num
+											if ctrl.on_change != unsafe { nil } {
+												ctrl.on_change(mut win)
+											}
+										}
+									}
+								}
+							}
+						} else if ctrl.kind == 'tree_table' {
+							hdr_h := f32(30.0)
+							row_h := f32(28.0)
+							if win.mouse_y >= ctrl.y + hdr_h {
+								mut row_y := ctrl.y + hdr_h
+								for mut node in ctrl.tree_table_nodes {
+									if win.mouse_y >= row_y && win.mouse_y <= row_y + row_h {
+										node.is_expanded = !node.is_expanded
+										if ctrl.on_row_click != unsafe { nil } {
+											ctrl.on_row_click(mut win)
+										}
+										break
+									}
+									row_y += row_h
+									if node.is_expanded {
+										for _ in node.children {
+											row_y += row_h
+										}
+									}
+								}
+							}
+						} else if ctrl.kind == 'inline_label' {
+							if !ctrl.is_editing {
+								ctrl.is_editing = true
+							} else {
+								chk_x := ctrl.x + ctrl.w - 36.0
+								if win.mouse_x >= chk_x && win.mouse_x <= chk_x + 16.0 {
+									ctrl.title = ctrl.text_value
+									ctrl.is_editing = false
+									if ctrl.on_change != unsafe { nil } {
+										ctrl.on_change(mut win)
+									}
+								} else if win.mouse_x >= chk_x + 18.0 && win.mouse_x <= chk_x + 34.0 {
+									ctrl.text_value = ctrl.title
+									ctrl.is_editing = false
+								}
+							}
 						}
 
 					} else {
@@ -1040,6 +1199,20 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 			is_ctrl := (e.modifiers & u32(gg.Modifier.ctrl)) != 0
 			is_alt := (e.modifiers & u32(gg.Modifier.alt)) != 0
 			is_shift := (e.modifiers & u32(gg.Modifier.shift)) != 0
+
+			if win.drawer_active && e.key_code == .escape {
+				win.hide_drawer()
+				return
+			}
+
+			if e.key_code == .tab {
+				if is_shift {
+					win.focus_prev_control()
+				} else {
+					win.focus_next_control()
+				}
+				return
+			}
 
 			if win.modal_active {
 				if e.key_code == .escape {

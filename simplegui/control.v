@@ -98,6 +98,47 @@ pub mut:
 	on_select VoidEventCallback = unsafe { nil } // Callback function triggered upon clicking the menu item
 }
 
+// SidebarItem represents an individual navigation destination in a Collapsible Sidebar or Nav Rail.
+pub struct SidebarItem {
+pub mut:
+	id        string            // Unique item identifier
+	title     string            // Navigation label text
+	icon      string            // Vector icon glyph name or emoji
+	badge     string            // Optional pill badge text (e.g. '5', 'NEW')
+	is_active bool              // Whether item is the currently selected active view
+	on_click  VoidEventCallback = unsafe { nil } // Click callback
+}
+
+// TreeTableRow represents a row in a hierarchical Tree Table data grid with nested children.
+pub struct TreeTableRow {
+pub mut:
+	id          string         // Unique row identifier
+	values      []string       // Column cell values
+	children    []TreeTableRow // Nested sub-rows
+	is_expanded bool           // Expansion state
+}
+
+// CalendarEvent represents an event marker in a Month Calendar view.
+pub struct CalendarEvent {
+pub mut:
+	date  string // Date string format YYYY-MM-DD
+	title string // Event title
+	color string // Dot highlight color hex
+}
+
+// DrawerItem represents an interactive menu option or section header in a slide-over Drawer panel.
+pub struct DrawerItem {
+pub mut:
+	id        string            // Unique identifier
+	title     string            // Primary item label
+	subtitle  string            // Optional secondary description text
+	icon      string            // Vector icon glyph name (e.g. 'search', 'gear', 'database', 'bell')
+	badge     string            // Optional badge text (e.g. '12', 'PRO')
+	is_active bool              // Active state highlight
+	is_header bool              // Section header divider
+	on_click  VoidEventCallback = unsafe { nil } // Click callback handler
+}
+
 // Control is the unified structure for every GUI element in SimpleGUI.
 // Whether it's a simple button, slider, text input, checkbox, or complex widget,
 // its state, dimensions, styling properties, and event handlers are stored in this struct.
@@ -193,6 +234,24 @@ pub mut:
 	icon_path       string   // Custom icon asset path (for buttons, input fields, status bars, etc.)
 	search_query    string   // Active search filtering text query (for Search inputs/tables)
 	is_skeleton     bool     // Loading placeholder state (renders animated skeleton gray boxes)
+	// Modern UI & UX Enhancements State
+	icon_vector       string             // Vector icon glyph name (e.g. 'search', 'gear', 'check', 'close')
+	is_collapsed      bool               // Collapse state for Sidebars or panels
+	sidebar_items     []SidebarItem      // Items list for Sidebar or NavRail
+	cal_year          int = 2026         // Year for Month Calendar
+	cal_month         int = 8            // Month (1-12) for Month Calendar
+	cal_selected_day  int = 1            // Selected day of month (1-31)
+	cal_events        []CalendarEvent    // Marked events for Month Calendar
+	heatmap_data      [][]int            // 2D intensity matrix (7 days x N weeks) for Activity Heatmap
+	heatmap_levels    []string           // Color hex scale levels for Heatmap
+	tree_table_nodes  []TreeTableRow     // Nested rows for Tree Table
+	mask_pattern      string             // Mask formatting template (e.g. '(###) ###-####')
+	is_editing        bool               // Active edit mode flag for Inline Editable Label
+	show_clear        bool = true        // Show (x) clear button on search/input fields
+	show_pwd_toggle   bool = true        // Show [Show/Hide] toggle eye button on password fields
+	pwd_revealed      bool               // Plain text reveal state for password fields
+	markdown_content  string             // Raw markdown document string for Markdown Viewer
+	elevation         int                // Soft drop shadow elevation level (0..4)
 	// Event Callback Handlers
 	on_click       VoidEventCallback = unsafe { nil } // Triggered on single left click
 	on_change      VoidEventCallback = unsafe { nil } // Triggered when value/text changes
@@ -751,6 +810,51 @@ pub fn (c &Control) set_is_playing(playing bool) &Control {
 	unsafe {
 		mut ptr := &Control(c)
 		ptr.bool_value = playing
+	}
+	return c
+}
+
+// set_elevation sets the soft drop shadow elevation level (0 to 4).
+pub fn (c &Control) set_elevation(elevation int) &Control {
+	unsafe {
+		mut ptr := &Control(c)
+		ptr.elevation = elevation
+	}
+	return c
+}
+
+// set_vector_icon sets a procedural vector icon glyph name (e.g. 'search', 'gear', 'check').
+pub fn (c &Control) set_vector_icon(icon string) &Control {
+	unsafe {
+		mut ptr := &Control(c)
+		ptr.icon_vector = icon
+	}
+	return c
+}
+
+// set_collapsed sets the collapsed state of the control (e.g. Sidebar or Accordion).
+pub fn (c &Control) set_collapsed(collapsed bool) &Control {
+	unsafe {
+		mut ptr := &Control(c)
+		ptr.is_collapsed = collapsed
+	}
+	return c
+}
+
+// set_mask_pattern sets the mask formatting template string for masked inputs.
+pub fn (c &Control) set_mask_pattern(pattern string) &Control {
+	unsafe {
+		mut ptr := &Control(c)
+		ptr.mask_pattern = pattern
+	}
+	return c
+}
+
+// set_markdown_content sets the markdown document content string.
+pub fn (c &Control) set_markdown_content(md string) &Control {
+	unsafe {
+		mut ptr := &Control(c)
+		ptr.markdown_content = md
 	}
 	return c
 }

@@ -33,6 +33,7 @@ Whether you are building a 5-minute utility tool, a multi-tab admin panel, or an
 20. [Modern Super Controls (Developer Heaven Catalog)](#20-modern-super-controls-developer-heaven-catalog)
 21. [Modern Image Super Controls & Developer Asset Catalog](#21-modern-image-super-controls--developer-asset-catalog)
 22. [Type & Struct Reference Index](#22-type--struct-reference-index)
+23. [Modern UI Suite & Ergonomic Enhancements](#23-modern-ui-suite--ergonomic-enhancements)
 
 
 ---
@@ -3156,14 +3157,198 @@ Min-priority queue wrapper around V's heap implementation.
 Advanced numeric helper objects.
 
 - `SimpleBigInt`: `add`, `sub`, `mul`, `div`, `mod`, `str()`; constructors `big_int_from_int`, `big_int_from_str`
-- `SimpleComplex`: `add`, `sub`, `mul`, `div`, `abs()`, `arg()`, `conj()`, `exp()`, `str()`; constructor `complex_new(re, im)`
-
-#### `simplegui.SimpleMutex`, `SimpleWaitGroup`
-
-Thread synchronization wrappers.
-
 - `SimpleMutex`: `lock()`, `unlock()`; constructor `new_mutex()`
 - `SimpleWaitGroup`: `add(delta)`, `done()`, `wait()`; constructor `new_wait_group()`
+
+---
+
+## 23. Modern UI Suite & Ergonomic Enhancements
+
+`simplegui` includes a suite of modern desktop UI components, navigation systems, layout containers, and keyboard accessibility features built natively using V's vector rendering engine.
+
+### 1. Procedural Vector Icon System & Soft Elevation Shadows
+
+Render 28+ vector glyphs crisp at any DPI scaling without external asset files:
+
+```v
+// Add standalone vector icon widget
+win.add_vector_icon('ic_search', 'search', 24)
+
+// Set elevation shadow tier (0 to 4) and custom vector glyph on any control
+win.add_button('btn_save', 'Save Document')
+   .set_elevation(2)
+   .set_vector_icon('check')
+```
+
+Available vector glyph names: `search`, `close`, `check`, `gear`, `copy`, `chevron_down`, `chevron_up`, `chevron_left`, `chevron_right`, `trash`, `folder`, `refresh`, `arrow_right`, `star`, `heart`, `eye`, `eye_off`, `lock`, `cloud`, `database`, `bell`, `home`, `user`, `plus`, `minus`, `info`, `warning`, `help`.
+
+---
+
+### 2. Collapsible Sidebar & Slim Navigation Rail
+
+```v
+// 1. Define navigation destination items
+nav_items := [
+    simplegui.SidebarItem{ id: 'dash', title: 'Dashboard', icon: 'home', is_active: true },
+    simplegui.SidebarItem{ id: 'projects', title: 'Projects', icon: 'folder', badge: '12' },
+    simplegui.SidebarItem{ id: 'cluster', title: 'Cloud Cluster', icon: 'cloud' },
+    simplegui.SidebarItem{ id: 'settings', title: 'Preferences', icon: 'gear' },
+]
+
+// 2. Add Sidebar (wide mode) or Navigation Rail (slim mode)
+win.add_sidebar('app_nav', nav_items)
+win.add_nav_rail('slim_rail', nav_items)
+
+// 3. Toggle between wide and slim collapsed states
+win.toggle_sidebar('app_nav')
+
+// 4. Programmatically switch active view
+win.set_sidebar_active('app_nav', 'cluster')
+```
+
+---
+
+### 3. Stacks & Auto-Wrapping Flow Layout
+
+```v
+// Vertical Stack (VStack) with alignment and spacing
+win.vstack('hero_stack', 'center', 12, fn (mut win simplegui.SimpleWindow) {
+    win.add_heading('Welcome to SimpleGUI')
+    win.add_caption('Next-generation desktop toolkit for V')
+    win.add_button('btn_start', 'Get Started')
+})
+
+// Horizontal Stack (HStack)
+win.hstack('actions_hstack', 'left', 8, fn (mut win simplegui.SimpleWindow) {
+    win.add_button('btn_ok', 'Confirm')
+    win.add_button('btn_cancel', 'Cancel')
+})
+
+// Auto-wrapping Flow Layout (chips wrap dynamically across lines)
+win.begin_flow_layout('tags_flow', 8)
+win.add_button('tag1', 'Compiler')
+win.add_button('tag2', 'Graphics')
+win.add_button('tag3', 'Networking')
+win.add_button('tag4', 'Concurrency')
+win.end_flow_layout()
+```
+
+---
+
+### 4. Slide-Over Drawer Panel
+
+Display a slide-over panel from the right or left edge with semi-transparent backdrop dimming:
+
+```v
+// Open slide-over drawer with structured items and sections
+win.show_drawer('Workspace Services', 380, 'right', fn (mut win simplegui.SimpleWindow) {
+    win.add_drawer_section('Cloud Infrastructure')
+    win.add_drawer_item(simplegui.DrawerItem{
+        id: 'dr_cluster'
+        title: 'Database Clusters'
+        subtitle: '3 Active nodes running v16.2'
+        icon: 'database'
+        badge: 'PRO'
+        is_active: true
+        on_click: fn (mut win simplegui.SimpleWindow) {
+            win.push_toast('Database', 'Selected primary cluster.', 'info', 2000)
+        }
+    })
+    win.add_drawer_item(simplegui.DrawerItem{
+        id: 'dr_deploy'
+        title: 'Cloud Deployments'
+        subtitle: 'us-east-1 & eu-central-1 regions'
+        icon: 'cloud'
+        badge: 'LIVE'
+    })
+    win.add_drawer_section('Workspace Tools')
+    win.add_drawer_item(simplegui.DrawerItem{
+        id: 'dr_logs'
+        title: 'Repository Logs'
+        icon: 'folder'
+        badge: '24'
+    })
+})
+
+// Programmatically inspect or dismiss drawer
+is_open := win.is_drawer_active()
+win.set_drawer_active_item('dr_deploy')
+win.hide_drawer()
+```
+
+---
+
+### 5. Gradient Spline Area Charts & Activity Heatmaps
+
+```v
+// Smooth Spline Area Chart with gradient fill
+win.add_area_chart('chart_growth', 'ARR Growth ($k)', [12.0, 24.0, 32.0, 58.0, 72.0, 94.0])
+win.add_spline_chart('chart_spline', 'CPU Utilization', [15.0, 45.0, 30.0, 80.0, 65.0])
+
+// GitHub-Style 7-Day x N-Week Activity Heatmap
+mut matrix := [][]int{len: 7, init: []int{len: 26, init: 0}}
+matrix[1][4] = 3 // Day 1 (Mon), Week 4 = 3 commits
+matrix[3][10] = 5
+win.add_activity_heatmap('gh_commits', 'Annual Contributions', 26, matrix)
+```
+
+---
+
+### 6. Hierarchical Tree Table & Month Calendar View
+
+```v
+// Hierarchical Tree Table with expandable nested sub-rows
+headers := ['Item Name', 'Size', 'Type']
+tree_nodes := [
+    simplegui.TreeTableRow{
+        id: 'root'
+        values: ['src', '--', 'Folder']
+        is_expanded: true
+        children: [
+            simplegui.TreeTableRow{ id: 'm1', values: ['main.v', '4.2 KB', 'Source File'] },
+            simplegui.TreeTableRow{ id: 'u1', values: ['utils.v', '2.8 KB', 'Source File'] },
+        ]
+    }
+]
+win.add_tree_table('project_tree', headers, tree_nodes)
+
+// Interactive Month Calendar Grid
+win.add_calendar('event_cal', 2026, 8, 21)
+year, month, day := win.get_calendar_date('event_cal')
+win.set_calendar_date('event_cal', 2026, 9, 1)
+```
+
+---
+
+### 7. Native Markdown Viewport
+
+```v
+md_content := '# Release Notes v2.5\n> Seamless vector graphics and animations.\n- Added Stacks and Flow Layout\n- Added Spline Charts and Heatmaps\n```v\nwin.run()\n```'
+win.add_markdown_view('doc_viewer', md_content)
+win.set_markdown('doc_viewer', '## Updated Content')
+```
+
+---
+
+### 8. Masked Inputs & Click-to-Edit Inline Labels
+
+```v
+// Masked text input with auto-formatting template
+win.add_masked_input('phone_field', '(###) ###-####', '5551234567')
+win.add_masked_input('ip_field', '###.###.###.###', '192168001001')
+
+// Click-to-edit inline text label
+win.add_inline_editable_label('proj_title', 'Untitled Workspace')
+```
+
+---
+
+### 9. Keyboard Navigation (Tab Cycling) & Global UI Scaling
+
+* **Tab / Shift+Tab Navigation**: Pressing `Tab` cycles focus sequentially forward through all interactive controls; `Shift+Tab` cycles backwards.
+* **Escape Key Dismissal**: Pressing `Escape` automatically dismisses active Drawers, Modals, or Command Palettes.
+* **Global UI Scaling Factor**: Set `win.set_ui_scale(1.25)` or `win.set_zoom(1.5)` for high-DPI scaling.
+* **Smooth Easing Curves**: Use `simplegui.ease_out_cubic(t)`, `simplegui.ease_in_out_quad(t)`, and `simplegui.ease_out_quad(t)` for fluid UI transitions.
 
 ---
 

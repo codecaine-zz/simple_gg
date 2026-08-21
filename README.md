@@ -7,25 +7,25 @@
 ### 🎨 Visual Showcase & Snapshots of All Examples
 
 <p align="center">
+  <img src="snapshots/ex25.png" width="48%" alt="Modern UI Suite & Ergonomic Enhancements Demo" />
   <img src="snapshots/ex24.png" width="48%" alt="Custom 3D Image Dialogs Demo" />
+</p>
+<p align="center">
   <img src="snapshots/ex23.png" width="48%" alt="Modern Image Controls Demo" />
-</p>
-<p align="center">
   <img src="snapshots/ex22.png" width="48%" alt="Super Controls Suite Demo" />
-  <img src="snapshots/ex14.png" width="48%" alt="RAD Controls Showcase" />
 </p>
 <p align="center">
-  <img src="snapshots/ex1.png" width="48%" alt="Quickstart Demo" />
+  <img src="snapshots/ex14.png" width="48%" alt="RAD Controls Showcase" />
   <img src="snapshots/ex6.png" width="48%" alt="Dashboard App Demo" />
 </p>
 
 <details>
-<summary><b>📸 Click to view remaining example screenshots (18 more)</b></summary>
+<summary><b>📸 Click to view remaining example screenshots (19 more)</b></summary>
 <br/>
 
 <p align="center">
+  <img src="snapshots/ex1.png" width="48%" alt="Quickstart Demo" />
   <img src="snapshots/ex2.png" width="48%" alt="02 - Theme Gallery Demo" />
-  <img src="snapshots/ex3.png" width="48%" alt="03 - Layout Containers Demo" />
 </p>
 <p align="center">
   <img src="snapshots/ex4.png" width="48%" alt="04 - Component Gallery Demo" />
@@ -133,6 +133,7 @@ The repository includes beginner-friendly example programs in the [`examples/`](
 | **[`22_modern_super_controls_showcase.v`](examples/22_modern_super_controls_showcase.v)** | Super Controls Suite: Super Terminal, Code Studio, Smart Table, Kanban Board, Wizard Stepper, Floating Toolbar, Score Card, Sparklines, Donut Chart, Chip Input. | `v run examples/22_modern_super_controls_showcase.v` | [📸 Snapshot](snapshots/ex22.png) |
 | **[`23_modern_image_controls_showcase.v`](examples/23_modern_image_controls_showcase.v)** | Modern Image Controls: User Profile Cards, Product Cards, Multi-Image Showcase Gallery, 3D App Launcher Tiles, Media Player Card, Hero Banners, and Hardware Texture Caching. | `v run examples/23_modern_image_controls_showcase.v` | [📸 Snapshot](snapshots/ex23.png) |
 | **[`24_custom_image_dialogs_showcase.v`](examples/24_custom_image_dialogs_showcase.v)** | RAD Custom 3D Image Dialogs: 3D glossy icons (Success, Error, Warning, Info, Confirm, Danger, Security, Database, Cloud, Tip), 3-button actions, Checkboxes & Inline Input Prompts. | `v run examples/24_custom_image_dialogs_showcase.v` | [📸 Snapshot](snapshots/ex24.png) |
+| **[`25_modern_ui_suite_and_ergonomics.v`](examples/25_modern_ui_suite_and_ergonomics.v)** | Modern UI Suite & Ergonomic Enhancements: Slide-over Drawer, Collapsible Nav Rail, Spline Area Chart, Activity Heatmap, Dynamic Flow Chips, Tree Grid, Month Calendar, Masked Inputs & Markdown Viewer. | `v run examples/25_modern_ui_suite_and_ergonomics.v` | [📸 Snapshot](snapshots/ex25.png) |
 
 
 ---

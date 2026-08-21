@@ -2797,6 +2797,290 @@ pub fn (mut win SimpleWindow) render_ui() {
 					bold: true
 				)
 			}
+			'vector_icon' {
+				v_color := if ctrl.accent_color.len > 0 { parse_hex_color(ctrl.accent_color) } else { fg }
+				sz := math.min(ctrl.w, ctrl.h)
+				draw_vector_icon_glyph(win.gg_ctx, ctrl.icon_vector, ctrl.x, ctrl.y, sz, v_color)
+			}
+			'sidebar', 'nav_rail' {
+				is_rail := ctrl.is_collapsed || ctrl.kind == 'nav_rail'
+				sb_w := if is_rail { f32(64.0) } else { f32(220.0) }
+				ctrl.w = sb_w
+				draw_elevation_shadow(win.gg_ctx, ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, 2, win.theme.is_dark)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, border_c)
+
+				hdr_h := f32(40.0)
+				hdr_txt := if is_rail { '' } else { if ctrl.title.len > 0 { ctrl.title } else { 'Navigation' } }
+				if hdr_txt.len > 0 {
+					win.gg_ctx.draw_text2(x: int(ctrl.x + 14), y: int(ctrl.y + 12), text: hdr_txt, color: fg, size: 14, bold: true)
+				}
+				tgl_x := ctrl.x + ctrl.w - 30.0
+				tgl_y := ctrl.y + 12.0
+				draw_vector_icon_glyph(win.gg_ctx, if is_rail { 'chevron_right' } else { 'chevron_left' }, tgl_x, tgl_y, 16.0, border_c)
+				win.gg_ctx.draw_line(ctrl.x, ctrl.y + hdr_h, ctrl.x + ctrl.w, ctrl.y + hdr_h, border_c)
+
+				mut item_y := ctrl.y + hdr_h + 8.0
+				item_h := f32(36.0)
+				for item in ctrl.sidebar_items {
+					is_hov := win.mouse_x >= ctrl.x + 6.0 && win.mouse_x <= ctrl.x + ctrl.w - 6.0 && win.mouse_y >= item_y && win.mouse_y <= item_y + item_h
+					if item.is_active {
+						win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 6.0, item_y, ctrl.w - 12.0, item_h, 6.0, accent)
+						win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 8.0, item_y + 6.0, 3.0, item_h - 12.0, 2.0, gg.rgb(255, 255, 255))
+					} else if is_hov {
+						win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 6.0, item_y, ctrl.w - 12.0, item_h, 6.0, surface_hover)
+					}
+
+					item_color := if item.is_active { gg.rgb(255, 255, 255) } else { fg }
+					icon_name := if item.icon.len > 0 { item.icon } else { 'star' }
+					icon_x := if is_rail { ctrl.x + (ctrl.w - 18.0) / 2.0 } else { ctrl.x + 16.0 }
+					draw_vector_icon_glyph(win.gg_ctx, icon_name, icon_x, item_y + 9.0, 18.0, item_color)
+
+					if !is_rail {
+						win.gg_ctx.draw_text2(x: int(ctrl.x + 44), y: int(item_y + 10), text: clean_text(item.title), color: item_color, size: 13, bold: item.is_active)
+						if item.badge.len > 0 {
+							bdg_w := measure_text_width(win, item.badge) + 10.0
+							bdg_x := ctrl.x + ctrl.w - bdg_w - 14.0
+							win.gg_ctx.draw_rounded_rect_filled(bdg_x, item_y + 8.0, bdg_w, 20.0, 10.0, if item.is_active { gg.Color{r: 255, g: 255, b: 255, a: 80} } else { accent })
+							win.gg_ctx.draw_text2(x: int(bdg_x + 5), y: int(item_y + 11), text: item.badge, color: gg.rgb(255, 255, 255), size: 11, bold: true)
+						}
+					}
+					item_y += item_h + 4.0
+				}
+			}
+			'area_chart', 'spline_chart' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, border_c)
+				if ctrl.title.len > 0 {
+					win.gg_ctx.draw_text2(x: int(ctrl.x + 12), y: int(ctrl.y + 10), text: clean_text(ctrl.title), color: fg, size: 13, bold: true)
+				}
+				chart_y := ctrl.y + 36.0
+				chart_h := ctrl.h - 48.0
+				chart_x := ctrl.x + 16.0
+				chart_w := ctrl.w - 32.0
+				if ctrl.f64_list.len >= 2 {
+					mut max_val := f64(0.001)
+					mut min_val := f64(0.0)
+					for v in ctrl.f64_list {
+						if v > max_val { max_val = v }
+						if v < min_val { min_val = v }
+					}
+					val_range := if max_val - min_val > 0.0 { max_val - min_val } else { 1.0 }
+					pts_count := ctrl.f64_list.len
+					step_x := chart_w / f32(pts_count - 1)
+					mut pts := []f32{}
+					for idx, v in ctrl.f64_list {
+						px := chart_x + f32(idx) * step_x
+						norm := f32((v - min_val) / val_range)
+						py := chart_y + chart_h - (norm * chart_h)
+						pts << px
+						pts << py
+					}
+					for seg := 0; seg < pts.len - 2; seg += 2 {
+						x1 := pts[seg]
+						y1 := pts[seg+1]
+						x2 := pts[seg+2]
+						y2 := pts[seg+3]
+						bottom_y := chart_y + chart_h
+						area_color := gg.Color{ r: accent.r, g: accent.g, b: accent.b, a: 45 }
+						win.gg_ctx.draw_triangle_filled(x1, y1, x2, y2, x1, bottom_y, area_color)
+						win.gg_ctx.draw_triangle_filled(x2, y2, x2, bottom_y, x1, bottom_y, area_color)
+						win.gg_ctx.draw_line(x1, y1, x2, y2, accent)
+						win.gg_ctx.draw_circle_filled(x1, y1, 3.0, accent)
+					}
+					if pts.len >= 2 {
+						last_x := pts[pts.len-2]
+						last_y := pts[pts.len-1]
+						win.gg_ctx.draw_circle_filled(last_x, last_y, 3.5, accent)
+					}
+				}
+			}
+			'activity_heatmap', 'contribution_grid' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, border_c)
+				if ctrl.title.len > 0 {
+					win.gg_ctx.draw_text2(x: int(ctrl.x + 12), y: int(ctrl.y + 10), text: clean_text(ctrl.title), color: fg, size: 13, bold: true)
+				}
+				grid_x := ctrl.x + 36.0
+				grid_y := ctrl.y + 34.0
+				cell_sz := f32(11.0)
+				cell_gap := f32(3.0)
+				weeks_count := if ctrl.int_value > 0 { ctrl.int_value } else { 20 }
+				day_labels := ['M', 'W', 'F']
+				day_indices := [1, 3, 5]
+				for d_i, d_lbl in day_labels {
+					ly := grid_y + f32(day_indices[d_i]) * (cell_sz + cell_gap) + 1.0
+					win.gg_ctx.draw_text2(x: int(ctrl.x + 14), y: int(ly), text: d_lbl, color: border_c, size: 10)
+				}
+				levels := if ctrl.heatmap_levels.len >= 5 { ctrl.heatmap_levels } else { ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'] }
+				for w_i in 0 .. weeks_count {
+					for d_i in 0 .. 7 {
+						cx := grid_x + f32(w_i) * (cell_sz + cell_gap)
+						cy := grid_y + f32(d_i) * (cell_sz + cell_gap)
+						mut val := 0
+						if d_i < ctrl.heatmap_data.len && w_i < ctrl.heatmap_data[d_i].len {
+							val = ctrl.heatmap_data[d_i][w_i]
+						}
+						lvl_idx := if val <= 0 { 0 } else if val == 1 { 1 } else if val == 2 { 2 } else if val <= 4 { 3 } else { 4 }
+						lvl_c := parse_hex_color(levels[lvl_idx])
+						win.gg_ctx.draw_rounded_rect_filled(cx, cy, cell_sz, cell_sz, 2.0, lvl_c)
+					}
+				}
+			}
+			'tree_table' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
+				hdr_h := f32(30.0)
+				win.gg_ctx.draw_rect_filled(ctrl.x, ctrl.y, ctrl.w, hdr_h, if win.theme.is_dark { gg.rgb(30, 32, 42) } else { gg.rgb(230, 235, 240) })
+				win.gg_ctx.draw_line(ctrl.x, ctrl.y + hdr_h, ctrl.x + ctrl.w, ctrl.y + hdr_h, border_c)
+				col_count := f32(math.max(1, ctrl.headers.len))
+				col_w := ctrl.w / col_count
+				for h_i, h_txt in ctrl.headers {
+					hx := ctrl.x + f32(h_i) * col_w + 10.0
+					win.gg_ctx.draw_text2(x: int(hx), y: int(ctrl.y + 7), text: clean_text(h_txt), color: fg, size: 12, bold: true)
+				}
+				mut row_y := ctrl.y + hdr_h
+				row_h := f32(28.0)
+				for node in ctrl.tree_table_nodes {
+					if row_y + row_h > ctrl.y + ctrl.h { break }
+					is_hov := win.mouse_x >= ctrl.x && win.mouse_x <= ctrl.x + ctrl.w && win.mouse_y >= row_y && win.mouse_y <= row_y + row_h
+					if is_hov {
+						win.gg_ctx.draw_rect_filled(ctrl.x, row_y, ctrl.w, row_h, surface_hover)
+					}
+					arrow_x := ctrl.x + 8.0
+					arrow_y := row_y + 8.0
+					if node.children.len > 0 {
+						draw_vector_icon_glyph(win.gg_ctx, if node.is_expanded { 'chevron_down' } else { 'chevron_right' }, arrow_x, arrow_y, 12.0, border_c)
+					} else {
+						win.gg_ctx.draw_circle_filled(arrow_x + 6.0, arrow_y + 6.0, 2.0, border_c)
+					}
+					for v_i, val in node.values {
+						vx := if v_i == 0 { ctrl.x + 24.0 } else { ctrl.x + f32(v_i) * col_w + 8.0 }
+						win.gg_ctx.draw_text2(x: int(vx), y: int(row_y + 6), text: clean_text(val), color: fg, size: 12)
+					}
+					win.gg_ctx.draw_line(ctrl.x, row_y + row_h, ctrl.x + ctrl.w, row_y + row_h, border_c)
+					row_y += row_h
+					if node.is_expanded {
+						for child in node.children {
+							if row_y + row_h > ctrl.y + ctrl.h { break }
+							c_arrow_x := ctrl.x + 26.0
+							c_arrow_y := row_y + 8.0
+							win.gg_ctx.draw_circle_filled(c_arrow_x + 6.0, c_arrow_y + 6.0, 2.0, border_c)
+							for cv_i, cval in child.values {
+								cvx := if cv_i == 0 { ctrl.x + 42.0 } else { ctrl.x + f32(cv_i) * col_w + 8.0 }
+								win.gg_ctx.draw_text2(x: int(cvx), y: int(row_y + 6), text: clean_text(cval), color: fg, size: 12)
+							}
+							win.gg_ctx.draw_line(ctrl.x, row_y + row_h, ctrl.x + ctrl.w, row_y + row_h, border_c)
+							row_y += row_h
+						}
+					}
+				}
+			}
+			'calendar' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, border_c)
+				hdr_h := f32(36.0)
+				month_names := ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+				m_idx := if ctrl.cal_month >= 1 && ctrl.cal_month <= 12 { ctrl.cal_month - 1 } else { 0 }
+				m_name := '${month_names[m_idx]} ${ctrl.cal_year}'
+				win.gg_ctx.draw_text2(x: int(ctrl.x + 14), y: int(ctrl.y + 10), text: m_name, color: fg, size: 14, bold: true)
+				prev_x := ctrl.x + ctrl.w - 56.0
+				next_x := ctrl.x + ctrl.w - 28.0
+				arr_y := ctrl.y + 10.0
+				draw_vector_icon_glyph(win.gg_ctx, 'chevron_left', prev_x, arr_y, 16.0, border_c)
+				draw_vector_icon_glyph(win.gg_ctx, 'chevron_right', next_x, arr_y, 16.0, border_c)
+				win.gg_ctx.draw_line(ctrl.x, ctrl.y + hdr_h, ctrl.x + ctrl.w, ctrl.y + hdr_h, border_c)
+
+				weekdays := ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
+				day_w := (ctrl.w - 16.0) / 7.0
+				mut day_x := ctrl.x + 8.0
+				for wd in weekdays {
+					win.gg_ctx.draw_text2(x: int(day_x + (day_w - 14.0) / 2.0), y: int(ctrl.y + hdr_h + 6), text: wd, color: border_c, size: 11, bold: true)
+					day_x += day_w
+				}
+				grid_top := ctrl.y + hdr_h + 24.0
+				cell_h := (ctrl.h - hdr_h - 32.0) / 6.0
+				days_in_m := if ctrl.cal_month in [1, 3, 5, 7, 8, 10, 12] { 31 } else if ctrl.cal_month == 2 { 28 } else { 30 }
+				start_offset := (ctrl.cal_month * 2 + ctrl.cal_year) % 7
+				for day := 1; day <= days_in_m; day++ {
+					slot := day - 1 + start_offset
+					row := slot / 7
+					col := slot % 7
+					dx := ctrl.x + 8.0 + f32(col) * day_w
+					dy := grid_top + f32(row) * cell_h
+					is_selected := (day == ctrl.cal_selected_day)
+					if is_selected {
+						win.gg_ctx.draw_rounded_rect_filled(dx + 2.0, dy + 2.0, day_w - 4.0, cell_h - 4.0, 6.0, accent)
+					}
+					txt_c := if is_selected { gg.rgb(255, 255, 255) } else { fg }
+					d_str := '${day}'
+					tw := measure_text_width(win, d_str)
+					win.gg_ctx.draw_text2(x: int(dx + (day_w - tw) / 2.0), y: int(dy + (cell_h - 12.0) / 2.0), text: d_str, color: txt_c, size: 12, bold: is_selected)
+				}
+			}
+			'markdown_view' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
+				lines := ctrl.markdown_content.split('\n')
+				mut my := ctrl.y + 10.0
+				for line in lines {
+					if my + 18.0 > ctrl.y + ctrl.h { break }
+					trimmed := line.trim_space()
+					if trimmed.starts_with('# ') {
+						h_txt := clean_text(trimmed[2..])
+						win.gg_ctx.draw_text2(x: int(ctrl.x + 12), y: int(my), text: h_txt, color: fg, size: 16, bold: true)
+						my += 22.0
+					} else if trimmed.starts_with('## ') {
+						h_txt := clean_text(trimmed[3..])
+						win.gg_ctx.draw_text2(x: int(ctrl.x + 12), y: int(my), text: h_txt, color: accent, size: 14, bold: true)
+						my += 20.0
+					} else if trimmed.starts_with('> ') {
+						q_txt := clean_text(trimmed[2..])
+						win.gg_ctx.draw_line(ctrl.x + 12, my, ctrl.x + 12, my + 16, accent)
+						win.gg_ctx.draw_text2(x: int(ctrl.x + 20), y: int(my), text: q_txt, color: border_c, size: 12)
+						my += 18.0
+					} else if trimmed.starts_with('- ') || trimmed.starts_with('* ') {
+						b_txt := clean_text(trimmed[2..])
+						win.gg_ctx.draw_circle_filled(ctrl.x + 16, my + 6, 2.5, accent)
+						win.gg_ctx.draw_text2(x: int(ctrl.x + 24), y: int(my), text: b_txt, color: fg, size: 12)
+						my += 18.0
+					} else if trimmed.starts_with('```') {
+						win.gg_ctx.draw_rect_filled(ctrl.x + 12, my, ctrl.w - 24, 20.0, if win.theme.is_dark { gg.rgb(20, 22, 30) } else { gg.rgb(220, 225, 230) })
+						my += 22.0
+					} else if trimmed.len > 0 {
+						win.gg_ctx.draw_text2(x: int(ctrl.x + 12), y: int(my), text: clean_text(trimmed), color: fg, size: 12)
+						my += 18.0
+					} else {
+						my += 8.0
+					}
+				}
+			}
+			'masked_input' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, if ctrl.is_focused { accent } else { border_c })
+				if ctrl.is_focused {
+					draw_focus_ring(win.gg_ctx, ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, accent)
+				}
+				disp_text := if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.mask_pattern }
+				txt_color := if ctrl.text_value.len > 0 { fg } else { border_c }
+				win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(ctrl.y + 8), text: clean_text(disp_text), color: txt_color, size: 13)
+			}
+			'inline_label' {
+				if ctrl.is_editing {
+					win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 4.0, surface)
+					win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 4.0, accent)
+					draw_focus_ring(win.gg_ctx, ctrl.x, ctrl.y, ctrl.w, ctrl.h, 4.0, accent)
+					win.gg_ctx.draw_text2(x: int(ctrl.x + 6), y: int(ctrl.y + 6), text: clean_text(ctrl.text_value), color: fg, size: 13)
+					chk_x := ctrl.x + ctrl.w - 36.0
+					draw_vector_icon_glyph(win.gg_ctx, 'check', chk_x, ctrl.y + 6.0, 14.0, parse_hex_color('#10b981'))
+					draw_vector_icon_glyph(win.gg_ctx, 'close', chk_x + 18.0, ctrl.y + 6.0, 14.0, parse_hex_color('#ef4444'))
+				} else {
+					lbl_txt := if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.title }
+					win.gg_ctx.draw_text2(x: int(ctrl.x), y: int(ctrl.y + 6), text: clean_text(lbl_txt), color: fg, size: 13)
+					tw := measure_text_width(win, lbl_txt)
+					draw_vector_icon_glyph(win.gg_ctx, 'gear', ctrl.x + tw + 8.0, ctrl.y + 8.0, 12.0, border_c)
+				}
+			}
 			else {}
 		}
 	}
@@ -2843,6 +3127,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 		win.gg_ctx.draw_text2(x: 10, y: int(footer_y + 4), text: st_text, color: fg, size: 12)
 	}
 
+	win.render_drawer()
 	win.render_toasts()
 	win.render_modal()
 	win.render_tooltip()
@@ -3481,6 +3766,368 @@ fn (mut win SimpleWindow) draw_image_fit(file_path string, x f32, y f32, w f32, 
 			color: muted_fg
 			size:  11
 		)
+	}
+}
+
+// draw_elevation_shadow renders multi-pass soft ambient drop shadow simulation.
+fn draw_elevation_shadow(gg_ctx &gg.Context, x f32, y f32, w f32, h f32, radius f32, elevation int, is_dark bool) {
+	if elevation <= 0 || gg_ctx == unsafe { nil } {
+		return
+	}
+	layers := if elevation > 4 { 4 } else { elevation }
+	for layer in 1 .. layers + 1 {
+		offset := f32(layer) * 2.0
+		spread := f32(layer) * 1.5
+		alpha := if is_dark { u8(15 + layer * 8) } else { u8(8 + layer * 6) }
+		shadow_color := gg.Color{
+			r: 0
+			g: 0
+			b: 0
+			a: alpha
+		}
+		gg_ctx.draw_rounded_rect_filled(x - spread, y + offset, w + spread * 2.0, h + spread * 2.0,
+			radius + spread, shadow_color)
+	}
+}
+
+// draw_focus_ring renders an accessible glowing focus ring around active controls.
+fn draw_focus_ring(gg_ctx &gg.Context, x f32, y f32, w f32, h f32, radius f32, accent gg.Color) {
+	if gg_ctx == unsafe { nil } {
+		return
+	}
+	ring_color := gg.Color{
+		r: accent.r
+		g: accent.g
+		b: accent.b
+		a: 160
+	}
+	gg_ctx.draw_rounded_rect_empty(x - 2.0, y - 2.0, w + 4.0, h + 4.0, radius + 2.0,
+		ring_color)
+}
+
+// draw_vector_icon_glyph draws crisp procedural vector glyphs without image assets.
+fn draw_vector_icon_glyph(gg_ctx &gg.Context, glyph string, x f32, y f32, sz f32, color gg.Color) {
+	if gg_ctx == unsafe { nil } {
+		return
+	}
+	cx := x + sz / 2.0
+	cy := y + sz / 2.0
+	r := sz / 2.0
+
+	match glyph.to_lower() {
+		'search' {
+			cr := r * 0.55
+			ccx := cx - r * 0.2
+			ccy := cy - r * 0.2
+			gg_ctx.draw_circle_empty(ccx, ccy, cr, color)
+			gg_ctx.draw_line(ccx + cr * 0.7, ccy + cr * 0.7, cx + r * 0.85, cy + r * 0.85,
+				color)
+		}
+		'close', 'x' {
+			pad := sz * 0.25
+			gg_ctx.draw_line(x + pad, y + pad, x + sz - pad, y + sz - pad, color)
+			gg_ctx.draw_line(x + sz - pad, y + pad, x + pad, y + sz - pad, color)
+		}
+		'check' {
+			gg_ctx.draw_line(x + sz * 0.2, cy, cx - sz * 0.1, y + sz * 0.75, color)
+			gg_ctx.draw_line(cx - sz * 0.1, y + sz * 0.75, x + sz * 0.8, y + sz * 0.25,
+				color)
+		}
+		'gear', 'settings' {
+			gg_ctx.draw_circle_empty(cx, cy, r * 0.55, color)
+			gg_ctx.draw_circle_filled(cx, cy, r * 0.25, color)
+			for i in 0 .. 8 {
+				ang := f64(i) * math.pi / 4.0
+				gx1 := cx + f32(r * 0.55 * math.cos(ang))
+				gy1 := cy + f32(r * 0.55 * math.sin(ang))
+				gx2 := cx + f32(r * 0.88 * math.cos(ang))
+				gy2 := cy + f32(r * 0.88 * math.sin(ang))
+				gg_ctx.draw_line(gx1, gy1, gx2, gy2, color)
+			}
+		}
+		'copy' {
+			w_box := sz * 0.55
+			h_box := sz * 0.6
+			gg_ctx.draw_rounded_rect_empty(x + sz * 0.1, y + sz * 0.1, w_box, h_box, 2.0,
+				color)
+			gg_ctx.draw_rounded_rect_filled(x + sz * 0.35, y + sz * 0.3, w_box, h_box,
+				2.0, gg.Color{
+				r: color.r
+				g: color.g
+				b: color.b
+				a: 60
+			})
+			gg_ctx.draw_rounded_rect_empty(x + sz * 0.35, y + sz * 0.3, w_box, h_box,
+				2.0, color)
+		}
+		'chevron_down', 'down' {
+			pad := sz * 0.3
+			gg_ctx.draw_line(x + pad, cy - sz * 0.1, cx, cy + sz * 0.2, color)
+			gg_ctx.draw_line(cx, cy + sz * 0.2, x + sz - pad, cy - sz * 0.1, color)
+		}
+		'chevron_up', 'up' {
+			pad := sz * 0.3
+			gg_ctx.draw_line(x + pad, cy + sz * 0.2, cx, cy - sz * 0.1, color)
+			gg_ctx.draw_line(cx, cy - sz * 0.1, x + sz - pad, cy + sz * 0.2, color)
+		}
+		'chevron_right', 'right' {
+			pad := sz * 0.3
+			gg_ctx.draw_line(cx - sz * 0.1, y + pad, cx + sz * 0.2, cy, color)
+			gg_ctx.draw_line(cx + sz * 0.2, cy, cx - sz * 0.1, y + sz - pad, color)
+		}
+		'chevron_left', 'left' {
+			pad := sz * 0.3
+			gg_ctx.draw_line(cx + sz * 0.2, y + pad, cx - sz * 0.1, cy, color)
+			gg_ctx.draw_line(cx - sz * 0.1, cy, cx + sz * 0.2, y + sz - pad, color)
+		}
+		'trash', 'delete' {
+			gg_ctx.draw_line(x + sz * 0.2, y + sz * 0.25, x + sz * 0.8, y + sz * 0.25,
+				color)
+			gg_ctx.draw_rect_empty(x + sz * 0.28, y + sz * 0.25, sz * 0.44, sz * 0.58,
+				color)
+			gg_ctx.draw_line(cx, y + sz * 0.35, cx, y + sz * 0.7, color)
+		}
+		'folder' {
+			draw_vector_folder_icon(gg_ctx, x, y, color)
+		}
+		'refresh' {
+			gg_ctx.draw_circle_empty(cx, cy, r * 0.65, color)
+			gg_ctx.draw_triangle_filled(cx + r * 0.5, cy - r * 0.7, cx + r * 0.9, cy - r * 0.2,
+				cx + r * 0.2, cy - r * 0.2, color)
+		}
+		'arrow_right' {
+			gg_ctx.draw_line(x + sz * 0.15, cy, x + sz * 0.8, cy, color)
+			gg_ctx.draw_line(x + sz * 0.55, cy - sz * 0.25, x + sz * 0.8, cy, color)
+			gg_ctx.draw_line(x + sz * 0.55, cy + sz * 0.25, x + sz * 0.8, cy, color)
+		}
+		'star' {
+			gg_ctx.draw_circle_filled(cx, cy, r * 0.3, color)
+			for i in 0 .. 5 {
+				ang := f64(i) * 2.0 * math.pi / 5.0 - math.pi / 2.0
+				sx := cx + f32(r * 0.85 * math.cos(ang))
+				sy := cy + f32(r * 0.85 * math.sin(ang))
+				gg_ctx.draw_line(cx, cy, sx, sy, color)
+			}
+		}
+		'heart' {
+			gg_ctx.draw_circle_filled(cx - r * 0.3, cy - r * 0.2, r * 0.35, color)
+			gg_ctx.draw_circle_filled(cx + r * 0.3, cy - r * 0.2, r * 0.35, color)
+			gg_ctx.draw_triangle_filled(cx - r * 0.65, cy - r * 0.1, cx + r * 0.65,
+				cy - r * 0.1, cx, cy + r * 0.8, color)
+		}
+		'eye' {
+			gg_ctx.draw_circle_empty(cx, cy, r * 0.65, color)
+			gg_ctx.draw_circle_filled(cx, cy, r * 0.3, color)
+		}
+		'eye_off' {
+			gg_ctx.draw_circle_empty(cx, cy, r * 0.65, color)
+			gg_ctx.draw_circle_filled(cx, cy, r * 0.3, color)
+			gg_ctx.draw_line(x + sz * 0.15, y + sz * 0.15, x + sz * 0.85, y + sz * 0.85,
+				color)
+		}
+		'lock' {
+			gg_ctx.draw_rounded_rect_filled(x + sz * 0.2, cy - sz * 0.05, sz * 0.6,
+				sz * 0.5, 3.0, color)
+			gg_ctx.draw_circle_empty(cx, cy - sz * 0.15, sz * 0.22, color)
+		}
+		'cloud' {
+			gg_ctx.draw_circle_filled(cx - r * 0.3, cy + r * 0.1, r * 0.45, color)
+			gg_ctx.draw_circle_filled(cx + r * 0.3, cy + r * 0.15, r * 0.35, color)
+			gg_ctx.draw_circle_filled(cx, cy - r * 0.2, r * 0.45, color)
+		}
+		'database' {
+			gg_ctx.draw_rounded_rect_empty(x + sz * 0.2, y + sz * 0.15, sz * 0.6, sz * 0.22,
+				3.0, color)
+			gg_ctx.draw_rounded_rect_empty(x + sz * 0.2, y + sz * 0.42, sz * 0.6, sz * 0.22,
+				3.0, color)
+			gg_ctx.draw_rounded_rect_empty(x + sz * 0.2, y + sz * 0.69, sz * 0.6, sz * 0.22,
+				3.0, color)
+		}
+		'bell' {
+			gg_ctx.draw_circle_filled(cx, cy - r * 0.1, r * 0.55, color)
+			gg_ctx.draw_rect_filled(x + sz * 0.2, cy + r * 0.2, sz * 0.6, sz * 0.15,
+				color)
+			gg_ctx.draw_circle_filled(cx, cy + r * 0.55, r * 0.18, color)
+		}
+		'home' {
+			gg_ctx.draw_triangle_filled(cx, y + sz * 0.15, x + sz * 0.15, cy + sz * 0.1,
+				x + sz * 0.85, cy + sz * 0.1, color)
+			gg_ctx.draw_rect_filled(x + sz * 0.25, cy + sz * 0.05, sz * 0.5, sz * 0.45,
+				color)
+		}
+		'user' {
+			gg_ctx.draw_circle_filled(cx, cy - r * 0.3, r * 0.35, color)
+			gg_ctx.draw_rounded_rect_filled(x + sz * 0.2, cy + r * 0.15, sz * 0.6, sz * 0.35,
+				4.0, color)
+		}
+		'plus', 'add' {
+			gg_ctx.draw_line(cx, y + sz * 0.2, cx, y + sz * 0.8, color)
+			gg_ctx.draw_line(x + sz * 0.2, cy, x + sz * 0.8, cy, color)
+		}
+		'minus' {
+			gg_ctx.draw_line(x + sz * 0.2, cy, x + sz * 0.8, cy, color)
+		}
+		'info' {
+			gg_ctx.draw_circle_empty(cx, cy, r * 0.8, color)
+			gg_ctx.draw_circle_filled(cx, cy - r * 0.35, 2.0, color)
+			gg_ctx.draw_line(cx, cy - r * 0.05, cx, cy + r * 0.45, color)
+		}
+		'warning' {
+			gg_ctx.draw_triangle_empty(cx, y + sz * 0.15, x + sz * 0.1, y + sz * 0.85,
+				x + sz * 0.9, y + sz * 0.85, color)
+			gg_ctx.draw_line(cx, cy - r * 0.1, cx, cy + r * 0.2, color)
+			gg_ctx.draw_circle_filled(cx, cy + r * 0.45, 1.8, color)
+		}
+		else {
+			gg_ctx.draw_circle_filled(cx, cy, r * 0.5, color)
+		}
+	}
+}
+
+// render_drawer renders the active slide-over drawer panel overlay.
+fn (mut win SimpleWindow) render_drawer() {
+	if !win.drawer_active {
+		return
+	}
+	// Semi-transparent backdrop
+	win.gg_ctx.draw_rect_filled(0, 0, f32(win.width), f32(win.height), gg.Color{
+		r: 0
+		g: 0
+		b: 0
+		a: 140
+	})
+	dr_w := win.drawer_width
+	dr_h := f32(win.height)
+	dr_x := if win.drawer_side == 'left' { f32(0.0) } else { f32(win.width) - dr_w }
+	dr_y := f32(0.0)
+
+	surface := if win.theme.is_dark { gg.rgb(24, 27, 36) } else { gg.rgb(255, 255, 255) }
+	border_c := if win.theme.is_dark { gg.rgb(55, 60, 75) } else { gg.rgb(215, 220, 230) }
+	fg := parse_hex_color(win.theme.font_color)
+	muted_fg := if win.theme.is_dark { gg.rgb(140, 145, 165) } else { gg.rgb(120, 125, 140) }
+	accent := parse_hex_color(win.theme.accent_color)
+	hover_bg := if win.theme.is_dark { gg.rgb(36, 40, 54) } else { gg.rgb(240, 243, 250) }
+	active_bg := gg.Color{
+		r: accent.r
+		g: accent.g
+		b: accent.b
+		a: if win.theme.is_dark { u8(50) } else { u8(35) }
+	}
+
+	draw_elevation_shadow(win.gg_ctx, dr_x, dr_y, dr_w, dr_h, 0.0, 4, win.theme.is_dark)
+	win.gg_ctx.draw_rect_filled(dr_x, dr_y, dr_w, dr_h, surface)
+	win.gg_ctx.draw_line(if win.drawer_side == 'left' { dr_x + dr_w } else { dr_x },
+		0, if win.drawer_side == 'left' { dr_x + dr_w } else { dr_x }, dr_h, border_c)
+
+	// Drawer Header
+	hdr_h := f32(52.0)
+	win.gg_ctx.draw_text2(
+		x:     int(dr_x + 20)
+		y:     int(dr_y + 16)
+		text:  clean_text(win.drawer_title)
+		color: fg
+		size:  16
+		bold:  true
+	)
+
+	// Close Button
+	close_x := dr_x + dr_w - 36.0
+	close_y := dr_y + 16.0
+	is_close_hov := win.mouse_x >= close_x - 6.0 && win.mouse_x <= close_x + 22.0
+		&& win.mouse_y >= close_y - 6.0 && win.mouse_y <= close_y + 22.0
+	if is_close_hov {
+		win.gg_ctx.draw_rounded_rect_filled(close_x - 4.0, close_y - 4.0, 24.0, 24.0, 4.0, hover_bg)
+	}
+	draw_vector_icon_glyph(win.gg_ctx, 'close', close_x, close_y, 16.0, if is_close_hov { accent } else { muted_fg })
+	win.gg_ctx.draw_line(dr_x, hdr_h, dr_x + dr_w, hdr_h, border_c)
+
+	// Drawer Items Content
+	mut item_y := hdr_h + 12.0
+	item_pad_x := dr_x + 14.0
+	item_w := dr_w - 28.0
+
+	for item in win.drawer_items {
+		if item.is_header {
+			item_y += 6.0
+			win.gg_ctx.draw_text2(
+				x:     int(item_pad_x + 4)
+				y:     int(item_y)
+				text:  item.title.to_upper()
+				color: muted_fg
+				size:  10
+				bold:  true
+			)
+			item_y += 18.0
+			win.gg_ctx.draw_line(item_pad_x + 4, item_y, item_pad_x + item_w - 4, item_y, border_c)
+			item_y += 6.0
+			continue
+		}
+
+		item_h := if item.subtitle.len > 0 { f32(48.0) } else { f32(36.0) }
+		is_hov := win.mouse_x >= item_pad_x && win.mouse_x <= item_pad_x + item_w
+			&& win.mouse_y >= item_y && win.mouse_y <= item_y + item_h
+
+		if item.is_active {
+			win.gg_ctx.draw_rounded_rect_filled(item_pad_x, item_y, item_w, item_h, 6.0, active_bg)
+			win.gg_ctx.draw_rounded_rect_empty(item_pad_x, item_y, item_w, item_h, 6.0, accent)
+		} else if is_hov {
+			win.gg_ctx.draw_rounded_rect_filled(item_pad_x, item_y, item_w, item_h, 6.0, hover_bg)
+		}
+
+		// Icon
+		icon_sz := f32(16.0)
+		icon_color := if item.is_active { accent } else if is_hov { fg } else { muted_fg }
+		if item.icon.len > 0 {
+			draw_vector_icon_glyph(win.gg_ctx, item.icon, item_pad_x + 12.0, item_y + (item_h - icon_sz) / 2.0, icon_sz, icon_color)
+		}
+
+		// Title & Subtitle
+		txt_x := if item.icon.len > 0 { item_pad_x + 36.0 } else { item_pad_x + 12.0 }
+		txt_color := if item.is_active { fg } else { fg }
+		if item.subtitle.len > 0 {
+			win.gg_ctx.draw_text2(
+				x:     int(txt_x)
+				y:     int(item_y + 8)
+				text:  item.title
+				color: txt_color
+				size:  13
+				bold:  item.is_active
+			)
+			win.gg_ctx.draw_text2(
+				x:     int(txt_x)
+				y:     int(item_y + 26)
+				text:  item.subtitle
+				color: muted_fg
+				size:  11
+			)
+		} else {
+			win.gg_ctx.draw_text2(
+				x:     int(txt_x)
+				y:     int(item_y + (item_h - 14.0) / 2.0)
+				text:  item.title
+				color: txt_color
+				size:  13
+				bold:  item.is_active
+			)
+		}
+
+		// Badge Pill
+		if item.badge.len > 0 {
+			badge_w := f32(item.badge.len * 7 + 14)
+			badge_x := item_pad_x + item_w - badge_w - 8.0
+			badge_y := item_y + (item_h - 20.0) / 2.0
+			win.gg_ctx.draw_rounded_rect_filled(badge_x, badge_y, badge_w, 20.0, 10.0, if item.is_active { accent } else { hover_bg })
+			win.gg_ctx.draw_text2(
+				x:     int(badge_x + 7)
+				y:     int(badge_y + 3)
+				text:  item.badge
+				color: if item.is_active { gg.rgb(255, 255, 255) } else { muted_fg }
+				size:  10
+				bold:  true
+			)
+		}
+
+		item_y += item_h + 4.0
 	}
 }
 
