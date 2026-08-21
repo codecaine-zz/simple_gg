@@ -617,4 +617,50 @@ pub fn (mut ctrl Control) redo() bool {
 	return false
 }
 
+// set_stat updates stat card title, value, delta text and trend polarity.
+pub fn (c &Control) set_stat(title string, val string, delta string, is_pos bool) &Control {
+	unsafe {
+		mut ptr := &Control(c)
+		ptr.title = title
+		ptr.text_value = val
+		ptr.placeholder = delta
+		ptr.bool_value = is_pos
+	}
+	return c
+}
 
+// set_sparkline sets numeric data points for the trend graph.
+pub fn (c &Control) set_sparkline(data []f64) &Control {
+	unsafe {
+		mut ptr := &Control(c)
+		ptr.f64_list = data.clone()
+	}
+	return c
+}
+
+// set_code_lang sets the syntax highlighting language for Code Studio.
+pub fn (c &Control) set_code_lang(lang string) &Control {
+	unsafe {
+		mut ptr := &Control(c)
+		ptr.code_lang = lang
+	}
+	return c
+}
+
+// set_current_step sets the active step index for Wizard Stepper.
+pub fn (c &Control) set_current_step(step int) &Control {
+	unsafe {
+		mut ptr := &Control(c)
+		ptr.int_value = step
+	}
+	return c
+}
+
+// set_progress_pct sets the numeric percentage value (0.0 to 100.0) for Radial Gauges / Donut Charts.
+pub fn (c &Control) set_progress_pct(pct f64) &Control {
+	unsafe {
+		mut ptr := &Control(c)
+		ptr.f64_value = pct
+	}
+	return c
+}

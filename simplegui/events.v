@@ -126,9 +126,9 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 					}
 
 					if win.is_selecting_text && win.mouse_down && ctrl.is_focused
-						&& ctrl.kind in ['input', 'password', 'textarea', 'search_field', 'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
+						&& ctrl.kind in ['input', 'password', 'textarea', 'search_field', 'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor', 'code_studio'] {
 						mut best_idx := 0
-						if ctrl.kind in ['textarea', 'code_editor'] {
+						if ctrl.kind in ['textarea', 'code_editor', 'code_studio'] {
 							best_idx = get_multiline_text_index(win, ctrl, win.mouse_x, win.mouse_y)
 						} else {
 							left_pad := if ctrl.kind == 'search_bar' { f32(32.0) } else { f32(10.0) }
@@ -267,9 +267,9 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 						clicked_ctrl = ctrl.name
 
 						if ctrl.kind in ['input', 'password', 'textarea', 'search_field',
-							'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
+							'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor', 'code_studio'] {
 							mut best_idx := 0
-							if ctrl.kind in ['textarea', 'code_editor'] {
+							if ctrl.kind in ['textarea', 'code_editor', 'code_studio'] {
 								best_idx = get_multiline_text_index(win, ctrl, win.mouse_x, win.mouse_y)
 							} else {
 								left_pad := if ctrl.kind == 'search_bar' { f32(32.0) } else { f32(10.0) }
@@ -700,7 +700,124 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 									}
 								}
 							}
+						} else if ctrl.kind == 'super_terminal' {
+							if win.mouse_y >= ctrl.y && win.mouse_y <= ctrl.y + 26.0 {
+								// Clear button
+								if win.mouse_x >= ctrl.x + ctrl.w - 64.0 && win.mouse_x <= ctrl.x + ctrl.w - 6.0 {
+									ctrl.items_selected.clear()
+									if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
+								} else {
+									// Tab bar
+									mut tab_x := ctrl.x + 8.0
+									for idx, tab_name in ctrl.items {
+										t_w := f32(tab_name.len * 7 + 18)
+										if win.mouse_x >= tab_x && win.mouse_x <= tab_x + t_w {
+											ctrl.int_value = idx
+											if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
+											break
+										}
+										tab_x += t_w + 6.0
+									}
+								}
+							}
+						} else if ctrl.kind == 'code_studio' {
+							// Copy button in header
+							if win.mouse_y >= ctrl.y + 2.0 && win.mouse_y <= ctrl.y + 24.0 {
+								if win.mouse_x >= ctrl.x + ctrl.w - 64.0 && win.mouse_x <= ctrl.x + ctrl.w - 8.0 {
+									win.copy_to_clipboard(ctrl.text_value)
+									win.show_toast('[COPIED]', '${ctrl.title} copied to clipboard')
+								}
+							}
+						} else if ctrl.kind == 'smart_table' {
+							hdr_top := ctrl.y + 32.0
+							hdr_bot := hdr_top + 26.0
+							footer_top := ctrl.y + ctrl.h - 26.0
+							if win.mouse_y >= hdr_top && win.mouse_y <= hdr_bot && ctrl.headers.len > 0 {
+								col_w := ctrl.w / f32(ctrl.headers.len)
+								c_idx := int((win.mouse_x - ctrl.x) / col_w)
+								if c_idx >= 0 && c_idx < ctrl.headers.len {
+									if ctrl.sort_col == c_idx {
+										ctrl.sort_asc = !ctrl.sort_asc
+									} else {
+										ctrl.sort_col = c_idx
+										ctrl.sort_asc = true
+									}
+									sort_table_rows(ctrl, c_idx, ctrl.sort_asc)
+									if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
+								}
+							} else if win.mouse_y >= footer_top && win.mouse_y <= ctrl.y + ctrl.h {
+								// Prev button
+								if win.mouse_x >= ctrl.x + ctrl.w - 115.0 && win.mouse_x <= ctrl.x + ctrl.w - 65.0 {
+									if ctrl.current_page > 1 {
+										ctrl.current_page--
+										if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
+									}
+								} else if win.mouse_x >= ctrl.x + ctrl.w - 60.0 && win.mouse_x <= ctrl.x + ctrl.w - 10.0 {
+									if ctrl.current_page < ctrl.total_pages {
+										ctrl.current_page++
+										if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
+									}
+								}
+							} else if win.mouse_y > hdr_bot && win.mouse_y < footer_top {
+								page_size := 5
+								start_idx := (ctrl.current_page - 1) * page_size
+								rel_row := int((win.mouse_y - hdr_bot) / 26.0)
+								target_row := start_idx + rel_row
+								if target_row >= 0 && target_row < ctrl.rows.len {
+									ctrl.selected_row = target_row
+									if ctrl.on_row_click != unsafe { nil } { ctrl.on_row_click(mut win) }
+									if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
+								}
+							}
+						} else if ctrl.kind == 'wizard_stepper' {
+							if ctrl.items.len > 0 {
+								step_w := ctrl.w / f32(ctrl.items.len)
+								s_idx := int((win.mouse_x - ctrl.x) / step_w)
+								if s_idx >= 0 && s_idx < ctrl.items.len {
+									ctrl.int_value = s_idx
+									if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
+								}
+							}
+						} else if ctrl.kind == 'floating_toolbar' {
+							if ctrl.items.len > 0 {
+								mut ax := ctrl.x + f32(ctrl.title.len * 7 + 24)
+								for idx, act in ctrl.items {
+									act_w := f32(act.len * 7 + 20)
+									if win.mouse_x >= ax && win.mouse_x <= ax + act_w {
+										ctrl.int_value = idx
+										ctrl.text_value = act
+										if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
+										break
+									}
+									ax += act_w + 8.0
+								}
+							}
+						} else if ctrl.kind == 'chip_cloud' {
+							mut cx := ctrl.x + 6.0
+							for idx, tag in ctrl.tags {
+								t_w := f32(tag.len * 7 + 24)
+								if win.mouse_x >= cx + t_w - 16.0 && win.mouse_x <= cx + t_w && win.mouse_y >= ctrl.y + 4.0 && win.mouse_y <= ctrl.y + 28.0 {
+									mut n_tags := []string{}
+									for i, t in ctrl.tags {
+										if i != idx { n_tags << t }
+									}
+									ctrl.tags = n_tags
+									if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
+									break
+								}
+								cx += t_w + 8.0
+							}
+						} else if ctrl.kind == 'kanban_board' {
+							if ctrl.items.len > 0 {
+								col_w := (ctrl.w - f32(ctrl.items.len - 1) * 8.0) / f32(ctrl.items.len)
+								c_idx := int((win.mouse_x - ctrl.x) / (col_w + 8.0))
+								if c_idx >= 0 && c_idx < ctrl.items.len {
+									ctrl.int_value = c_idx
+									if ctrl.on_change != unsafe { nil } { ctrl.on_change(mut win) }
+								}
+							}
 						}
+
 					} else {
 						ctrl.is_focused = false
 					}
@@ -733,7 +850,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 						is_dbl := ctrl.last_click_time > 0 && (now - ctrl.last_click_time) <= 400
 						ctrl.last_click_time = now
 
-						if is_dbl && ctrl.kind in ['input', 'password', 'textarea', 'search_field', 'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
+						if is_dbl && ctrl.kind in ['input', 'password', 'textarea', 'search_field', 'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor', 'code_studio'] {
 							ctrl.select_all()
 						}
 
@@ -762,7 +879,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 			if win.focused_control.len > 0 {
 				if mut ctrl := win.get_control_ptr(win.focused_control) {
 					if ctrl.kind in ['input', 'password', 'textarea', 'search_field', 'search_bar',
-						'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
+						'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor', 'code_studio'] {
 						if e.char_code >= 32 && e.char_code <= 126 {
 							ch := u8(e.char_code).ascii_str()
 							if ctrl.has_selection() {
@@ -854,13 +971,13 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 				if mut ctrl := win.get_control_ptr(win.focused_control) {
 					if (is_ctrl || is_super) && e.key_code == .a {
 						if ctrl.kind in ['input', 'password', 'textarea', 'search_field',
-							'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
+							'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor', 'code_studio'] {
 							ctrl.select_all()
 							return
 						}
 					} else if (is_ctrl || is_super) && e.key_code == .c {
 						if ctrl.kind in ['input', 'password', 'textarea', 'search_field',
-							'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
+							'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor', 'code_studio'] {
 							if ctrl.has_selection() {
 								win.copy_to_clipboard(ctrl.selected_text())
 							}
@@ -868,7 +985,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 						}
 					} else if (is_ctrl || is_super) && e.key_code == .x {
 						if ctrl.kind in ['input', 'password', 'textarea', 'search_field',
-							'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
+							'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor', 'code_studio'] {
 							if ctrl.has_selection() {
 								win.copy_to_clipboard(ctrl.selected_text())
 								ctrl.delete_selected_text()
@@ -880,7 +997,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 						}
 					} else if (is_ctrl || is_super) && e.key_code == .v {
 						if ctrl.kind in ['input', 'password', 'textarea', 'search_field',
-							'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
+							'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor', 'code_studio'] {
 							clip_txt := win.get_clipboard_text()
 							if clip_txt.len > 0 {
 								if ctrl.has_selection() {
@@ -902,7 +1019,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 						}
 					} else if (is_ctrl || is_super) && e.key_code == .z {
 						if ctrl.kind in ['input', 'password', 'textarea', 'search_field',
-							'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
+							'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor', 'code_studio'] {
 							if is_shift {
 								if ctrl.redo() {
 									if ctrl.on_change != unsafe { nil } {
@@ -920,7 +1037,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 						}
 					} else if (is_ctrl || is_super) && e.key_code == .y {
 						if ctrl.kind in ['input', 'password', 'textarea', 'search_field',
-							'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
+							'search_bar', 'file_picker', 'color_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor', 'code_studio'] {
 							if ctrl.redo() {
 								if ctrl.on_change != unsafe { nil } {
 									ctrl.on_change(mut win)
@@ -932,7 +1049,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 
 					if e.key_code == .space {
 						if ctrl.kind in ['input', 'password', 'textarea', 'search_field',
-							'search_bar', 'file_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor'] {
+							'search_bar', 'file_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor', 'code_studio'] {
 							if ctrl.has_selection() {
 								ctrl.delete_selected_text()
 							} else {
@@ -955,7 +1072,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 							if ctrl.on_change != unsafe { nil } {
 								ctrl.on_change(mut win)
 							}
-						} else if ctrl.kind in ['textarea', 'code_editor'] {
+						} else if ctrl.kind in ['textarea', 'code_editor', 'code_studio'] {
 							if ctrl.has_selection() {
 								ctrl.delete_selected_text()
 							} else {
@@ -1044,7 +1161,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 						}
 					} else if e.key_code == .home {
 						mut target_pos := 0
-						if ctrl.kind in ['textarea', 'code_editor'] && !is_ctrl && !is_super {
+						if ctrl.kind in ['textarea', 'code_editor', 'code_studio'] && !is_ctrl && !is_super {
 							lines := ctrl.text_value.split('\n')
 							mut line_start_idx := 0
 							for i, line in lines {
@@ -1068,7 +1185,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 						}
 					} else if e.key_code == .end {
 						mut target_pos := ctrl.text_value.len
-						if ctrl.kind in ['textarea', 'code_editor'] && !is_ctrl && !is_super {
+						if ctrl.kind in ['textarea', 'code_editor', 'code_studio'] && !is_ctrl && !is_super {
 							lines := ctrl.text_value.split('\n')
 							mut line_start_idx := 0
 							for i, line in lines {
@@ -1096,7 +1213,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 							if ctrl.on_change != unsafe { nil } {
 								ctrl.on_change(mut win)
 							}
-						} else if ctrl.kind in ['textarea', 'code_editor'] {
+						} else if ctrl.kind in ['textarea', 'code_editor', 'code_studio'] {
 							lines := ctrl.text_value.split('\n')
 							mut curr_line := 0
 							mut curr_col := 0
@@ -1136,7 +1253,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 							if ctrl.on_change != unsafe { nil } {
 								ctrl.on_change(mut win)
 							}
-						} else if ctrl.kind in ['textarea', 'code_editor'] {
+						} else if ctrl.kind in ['textarea', 'code_editor', 'code_studio'] {
 							lines := ctrl.text_value.split('\n')
 							mut curr_line := 0
 							mut curr_col := 0

@@ -276,3 +276,48 @@ pub fn (mut win SimpleWindow) import_form_json(json_str string) &SimpleWindow {
 	return win
 }
 
+// =============================================================================
+// 5. Super Controls Ergonomic Shortcuts
+// =============================================================================
+
+// stat creates a quick nameless super stat card with sparkline.
+pub fn (mut win SimpleWindow) stat(title string, value string, delta string, is_pos bool, sparkline []f64) &SimpleWindow {
+	id := win.gen_id('stat')
+	return win.add_stat_card(id, title, value, delta, is_pos, sparkline)
+}
+
+// code_box creates a quick nameless Code Studio widget.
+pub fn (mut win SimpleWindow) code_box(filename string, lang string, code string) &SimpleWindow {
+	id := win.gen_id('code_studio')
+	return win.add_code_studio(id, filename, lang, code)
+}
+
+// kanban creates a quick nameless Kanban Board.
+pub fn (mut win SimpleWindow) kanban(columns []string) &SimpleWindow {
+	id := win.gen_id('kanban')
+	return win.add_kanban_board(id, columns)
+}
+
+// terminal creates a quick nameless Terminal Console.
+pub fn (mut win SimpleWindow) terminal(tabs []string) &SimpleWindow {
+	id := win.gen_id('terminal')
+	return win.add_terminal_console(id, tabs)
+}
+
+// donut creates a quick nameless Donut Chart gauge.
+pub fn (mut win SimpleWindow) donut(title string, percentage f64) &SimpleWindow {
+	id := win.gen_id('donut')
+	return win.add_donut_chart(id, title, percentage)
+}
+
+// wizard creates a quick nameless Wizard Stepper.
+pub fn (mut win SimpleWindow) wizard(steps []string, current_step int) &SimpleWindow {
+	id := win.gen_id('wizard')
+	return win.add_wizard_stepper(id, steps, current_step)
+}
+
+// chips creates a quick nameless Chip Input.
+pub fn (mut win SimpleWindow) chips(tags []string) &SimpleWindow {
+	id := win.gen_id('chips')
+	return win.add_chip_input(id, tags)
+}

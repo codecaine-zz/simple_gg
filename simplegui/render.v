@@ -1803,6 +1803,489 @@ pub fn (mut win SimpleWindow) render_ui() {
 					log_y += 20.0
 				}
 			}
+			'super_stat_card' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, if ctrl.is_hovered { accent } else { border_c })
+
+				// Title
+				max_title_chars := math.max(6, int((ctrl.w - 60.0) / 6.5))
+				disp_title := if ctrl.title.len > max_title_chars { ctrl.title[0..max_title_chars - 3] + '...' } else { ctrl.title }
+				win.gg_ctx.draw_text2(x: int(ctrl.x + 14), y: int(ctrl.y + 10), text: disp_title, color: gg.rgb(156, 163, 175), size: 12)
+
+				// Value
+				val_c := if ctrl.font_color.len > 0 { parse_hex_color(ctrl.font_color) } else { fg }
+				win.gg_ctx.draw_text2(x: int(ctrl.x + 14), y: int(ctrl.y + 28), text: ctrl.text_value, color: val_c, size: 20, bold: true)
+
+				// Delta Pill
+				if ctrl.placeholder.len > 0 {
+					delta_c := if ctrl.bool_value { gg.rgb(52, 211, 153) } else { gg.rgb(248, 113, 113) }
+					pill_bg := if ctrl.bool_value { gg.rgba(16, 185, 129, 35) } else { gg.rgba(239, 68, 68, 35) }
+					pill_txt := if ctrl.bool_value { '[+] ' + ctrl.placeholder } else { '[-] ' + ctrl.placeholder }
+					pill_w := f32(pill_txt.len * 6 + 12)
+					win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 14, ctrl.y + 54, pill_w, 18.0, 4.0, pill_bg)
+					win.gg_ctx.draw_text2(x: int(ctrl.x + 20), y: int(ctrl.y + 56), text: pill_txt, color: delta_c, size: 10, bold: true)
+				}
+
+				// Mini Sparkline
+				if ctrl.f64_list.len >= 2 {
+					sp_x := ctrl.x + ctrl.w - f32(100.0)
+					sp_y := ctrl.y + f32(18.0)
+					sp_w := f32(86.0)
+					sp_h := f32(48.0)
+					mut min_v := ctrl.f64_list[0]
+					mut max_v := ctrl.f64_list[0]
+					for v in ctrl.f64_list {
+						if v < min_v { min_v = v }
+						if v > max_v { max_v = v }
+					}
+					range_v := if max_v > min_v { max_v - min_v } else { 1.0 }
+					step_x := sp_w / f32(ctrl.f64_list.len - 1)
+					sp_color := if ctrl.bool_value { gg.rgb(52, 211, 153) } else { accent }
+					for i in 0 .. (ctrl.f64_list.len - 1) {
+						x1 := sp_x + f32(i) * step_x
+						y1 := sp_y + sp_h - f32((ctrl.f64_list[i] - min_v) / range_v) * sp_h
+						x2 := sp_x + f32(i + 1) * step_x
+						y2 := sp_y + sp_h - f32((ctrl.f64_list[i + 1] - min_v) / range_v) * sp_h
+						win.gg_ctx.draw_line(x1, y1, x2, y2, sp_color)
+						win.gg_ctx.draw_circle_filled(x1, y1, f32(2.0), sp_color)
+					}
+					last_i := ctrl.f64_list.len - 1
+					last_x := sp_x + f32(last_i) * step_x
+					last_y := sp_y + sp_h - f32((ctrl.f64_list[last_i] - min_v) / range_v) * sp_h
+					win.gg_ctx.draw_circle_filled(last_x, last_y, f32(3.0), sp_color)
+				}
+			}
+			'code_studio' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, gg.rgb(18, 20, 28))
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, border_c)
+
+				// Header bar
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, 28.0, 8.0, gg.rgb(26, 29, 42))
+				win.gg_ctx.draw_rect_filled(ctrl.x, ctrl.y + 14.0, ctrl.w, 14.0, gg.rgb(26, 29, 42))
+				win.gg_ctx.draw_line(ctrl.x, ctrl.y + 28.0, ctrl.x + ctrl.w, ctrl.y + 28.0, border_c)
+
+				// Window dots
+				win.gg_ctx.draw_circle_filled(ctrl.x + 12.0, ctrl.y + 14.0, 4.0, gg.rgb(239, 68, 68))
+				win.gg_ctx.draw_circle_filled(ctrl.x + 24.0, ctrl.y + 14.0, 4.0, gg.rgb(245, 158, 11))
+				win.gg_ctx.draw_circle_filled(ctrl.x + 36.0, ctrl.y + 14.0, 4.0, gg.rgb(16, 185, 129))
+
+				// Filename
+				win.gg_ctx.draw_text2(x: int(ctrl.x + 50), y: int(ctrl.y + 7), text: ctrl.title, color: gg.Color{r: 255, g: 255, b: 255}, size: 12, bold: true)
+
+				// Language pill badge
+				lang_txt := if ctrl.code_lang.len > 0 { '[' + ctrl.code_lang.to_upper() + ']' } else { '[V]' }
+				lang_w := f32(lang_txt.len * 7 + 10)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 126.0, ctrl.y + 5.0, lang_w, 18.0, 4.0, gg.rgb(40, 44, 62))
+				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 122.0), y: int(ctrl.y + 7), text: lang_txt, color: accent, size: 10, bold: true)
+
+				// Copy Button
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 60.0, ctrl.y + 5.0, 52.0, 18.0, 4.0, accent)
+				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 52.0), y: int(ctrl.y + 7), text: 'Copy', color: gg.Color{r: 255, g: 255, b: 255}, size: 11, bold: true)
+
+				// Gutter
+				win.gg_ctx.draw_rect_filled(ctrl.x, ctrl.y + 28.0, 36.0, ctrl.h - 48.0, gg.rgb(14, 16, 23))
+				win.gg_ctx.draw_line(ctrl.x + 36.0, ctrl.y + 28.0, ctrl.x + 36.0, ctrl.y + ctrl.h - 20.0, border_c)
+
+				// Text Lines with Syntax Highlight
+				lines := ctrl.text_value.split('\n')
+				mut code_y := ctrl.y + 34.0
+				for idx, raw_line in lines {
+					if code_y + 18.0 > ctrl.y + ctrl.h - 20.0 { break }
+					// Gutter number
+					win.gg_ctx.draw_text2(x: int(ctrl.x + 8), y: int(code_y), text: '${idx + 1:2d}', color: gg.rgb(90, 95, 115), size: 11, mono: true)
+
+					// Expand tabs into 4 spaces for crisp rendering
+					line := raw_line.replace('\t', '    ')
+					words := line.split(' ')
+					mut word_x := ctrl.x + 44.0
+					for w in words {
+						if word_x > ctrl.x + ctrl.w - 14.0 { break }
+						if w.len == 0 {
+							word_x += 6.5
+							continue
+						}
+						w_clean := w.trim_space()
+						w_c := if w_clean in ['fn', 'mut', 'pub', 'struct', 'return', 'if', 'else', 'for', 'match', 'import', 'module', 'type', 'const', 'true', 'false', 'nil', 'int', 'string', 'bool', 'f64', 'def', 'class', 'let', 'var', 'SELECT', 'FROM', 'WHERE'] {
+							gg.rgb(192, 132, 252) // purple
+						} else if w_clean.starts_with('//') || w_clean.starts_with('#') {
+							gg.rgb(100, 116, 139) // slate comment
+						} else if w_clean.starts_with('\'') || w_clean.starts_with('"') {
+							gg.rgb(74, 222, 128) // green string
+						} else if w_clean.len > 0 && w_clean[0].is_digit() {
+							gg.rgb(251, 146, 60) // orange number
+						} else {
+							gg.rgb(241, 245, 249) // light white
+						}
+						win.gg_ctx.draw_text2(x: int(word_x), y: int(code_y), text: w + ' ', color: w_c, size: 12, mono: true)
+						word_x += f32((w.len + 1) * 7)
+					}
+					code_y += 18.0
+				}
+
+				// Status footer bar
+				win.gg_ctx.draw_rect_filled(ctrl.x, ctrl.y + ctrl.h - 20.0, ctrl.w, 20.0, gg.rgb(22, 25, 36))
+				win.gg_ctx.draw_line(ctrl.x, ctrl.y + ctrl.h - 20.0, ctrl.x + ctrl.w, ctrl.y + ctrl.h - 20.0, border_c)
+				win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(ctrl.y + ctrl.h - 16.0), text: 'Ln ${lines.len}, Col 1', color: gg.rgb(148, 163, 184), size: 10)
+				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 140), y: int(ctrl.y + ctrl.h - 16.0), text: 'UTF-8 | Spaces: 4 | ${ctrl.code_lang.to_upper()}', color: gg.rgb(148, 163, 184), size: 10)
+			}
+			'kanban_board' {
+				num_cols := math.max(1, ctrl.items.len)
+				gap := f32(8.0)
+				col_w := (ctrl.w - f32(num_cols - 1) * gap) / f32(num_cols)
+
+				for c_idx, col_name in ctrl.items {
+					col_x := ctrl.x + f32(c_idx) * (col_w + gap)
+					win.gg_ctx.draw_rounded_rect_filled(col_x, ctrl.y, col_w, ctrl.h, 6.0, gg.rgb(24, 27, 38))
+					win.gg_ctx.draw_rounded_rect_empty(col_x, ctrl.y, col_w, ctrl.h, 6.0, border_c)
+
+					// Top header accent line
+					col_accent := match c_idx % 4 {
+						0 { gg.rgb(59, 130, 246) }
+						1 { gg.rgb(245, 158, 11) }
+						2 { gg.rgb(168, 85, 247) }
+						else { gg.rgb(16, 185, 129) }
+					}
+					win.gg_ctx.draw_rect_filled(col_x + 2, ctrl.y + 2, col_w - 4, 3.0, col_accent)
+
+					// Count matching cards
+					prefix := '${c_idx}:'
+					mut card_list := []string{}
+					for item in ctrl.items_selected {
+						if item.starts_with(prefix) {
+							card_list << item[prefix.len..]
+						}
+					}
+
+					// Header text & count badge
+					max_hdr_chars := math.max(3, int((col_w - 38.0) / 7.0))
+					disp_hdr := if col_name.len > max_hdr_chars { col_name[0..max_hdr_chars - 2] + '..' } else { col_name }
+					win.gg_ctx.draw_text2(x: int(col_x + 8), y: int(ctrl.y + 10), text: disp_hdr, color: fg, size: 11, bold: true)
+					win.gg_ctx.draw_rounded_rect_filled(col_x + col_w - 26, ctrl.y + 8, 20.0, 16.0, 4.0, gg.rgb(40, 44, 60))
+					win.gg_ctx.draw_text2(x: int(col_x + col_w - 21), y: int(ctrl.y + 10), text: '${card_list.len}', color: accent, size: 10, bold: true)
+
+					// Cards
+					mut card_y := ctrl.y + 32.0
+					for card in card_list {
+						if card_y + 44.0 > ctrl.y + ctrl.h { break }
+						win.gg_ctx.draw_rounded_rect_filled(col_x + 6, card_y, col_w - 12, 42.0, 4.0, surface)
+						win.gg_ctx.draw_rounded_rect_empty(col_x + 6, card_y, col_w - 12, 42.0, 4.0, border_c)
+
+						// Render card details (support tag|priority|title or title)
+						c_parts := card.split('|')
+						card_title := if c_parts.len >= 3 { c_parts[2] } else { card }
+						max_title_chars := math.max(4, int((col_w - 20.0) / 6.5))
+						disp_title := if card_title.len > max_title_chars { card_title[0..max_title_chars - 3] + '...' } else { card_title }
+						win.gg_ctx.draw_text2(x: int(col_x + 10), y: int(card_y + 6), text: disp_title, color: fg, size: 10, bold: true)
+
+						if c_parts.len >= 2 {
+							tag_name := c_parts[0]
+							prio := c_parts[1]
+							prio_c := match prio.to_upper() {
+								'HIGH' { gg.rgb(239, 68, 68) }
+								'MED' { gg.rgb(245, 158, 11) }
+								else { gg.rgb(59, 130, 246) }
+							}
+							win.gg_ctx.draw_rounded_rect_filled(col_x + 10, card_y + 24, 34.0, 14.0, 3.0, prio_c)
+							win.gg_ctx.draw_text2(x: int(col_x + 13), y: int(card_y + 25), text: prio, color: gg.Color{r: 255, g: 255, b: 255}, size: 9, bold: true)
+							win.gg_ctx.draw_text2(x: int(col_x + 50), y: int(card_y + 25), text: tag_name, color: gg.rgb(156, 163, 175), size: 9)
+						}
+						card_y += 48.0
+					}
+				}
+			}
+			'activity_feed' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, border_c)
+
+				// Header
+				win.gg_ctx.draw_text2(x: int(ctrl.x + 14), y: int(ctrl.y + 10), text: 'Activity Timeline Feed', color: fg, size: 12, bold: true)
+				win.gg_ctx.draw_line(ctrl.x + 14, ctrl.y + 28.0, ctrl.x + ctrl.w - 14, ctrl.y + 28.0, border_c)
+
+				// Vertical track line
+				track_x := ctrl.x + 24.0
+				win.gg_ctx.draw_line(track_x, ctrl.y + 36.0, track_x, ctrl.y + ctrl.h - 14.0, border_c)
+
+				mut ev_y := ctrl.y + 36.0
+				for item in ctrl.items {
+					if ev_y + 28.0 > ctrl.y + ctrl.h { break }
+					parts := item.split('|')
+					tag := if parts.len > 0 { parts[0] } else { 'INFO' }
+					time_ago := if parts.len > 1 { parts[1] } else { 'now' }
+					desc := if parts.len > 2 { parts[2] } else { item }
+
+					dot_c := match tag.to_upper() {
+						'OK', 'DEPLOY', 'SUCCESS' { gg.rgb(52, 211, 153) }
+						'WARN', 'ALERT' { gg.rgb(251, 191, 36) }
+						'ERR', 'ERROR', 'FAIL' { gg.rgb(248, 113, 113) }
+						else { gg.rgb(56, 189, 248) }
+					}
+
+					win.gg_ctx.draw_circle_filled(track_x, ev_y + 8.0, 4.0, dot_c)
+
+					// Truncate description so it never collides with time_ago badge
+					max_chars := math.max(4, int((ctrl.w - 110.0) / 6.5))
+					disp_desc := if desc.len > max_chars { desc[0..max_chars - 3] + '...' } else { desc }
+					win.gg_ctx.draw_text2(x: int(ctrl.x + 38), y: int(ev_y + 2), text: disp_desc, color: fg, size: 11, bold: true)
+
+					time_w := f32(time_ago.len * 6 + 10)
+					win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - time_w - 8.0), y: int(ev_y + 2), text: time_ago, color: gg.rgb(148, 163, 184), size: 10)
+
+					ev_y += 28.0
+				}
+			}
+			'donut_chart' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, border_c)
+
+				cx := ctrl.x + ctrl.w / 2.0
+				cy := ctrl.y + 48.0
+				r_out := f32(36.0)
+				r_in := f32(26.0)
+
+				// Background ring
+				win.gg_ctx.draw_circle_empty(cx, cy, (r_out + r_in) / 2.0, border_c)
+
+				// Progress arc
+				pct := math.max(0.0, math.min(100.0, ctrl.f64_value))
+				num_pts := int(pct * 0.36)
+				for i in 0 .. num_pts {
+					angle := -math.pi / 2.0 + f64(i) * (2.0 * math.pi / 36.0)
+					ax := cx + f32(math.cos(angle)) * ((r_out + r_in) / 2.0)
+					ay := cy + f32(math.sin(angle)) * ((r_out + r_in) / 2.0)
+					win.gg_ctx.draw_circle_filled(ax, ay, 3.5, accent)
+				}
+
+				// Center percentage
+				pct_txt := '${int(pct)}%'
+				win.gg_ctx.draw_text2(x: int(cx - f32(pct_txt.len * 5)), y: int(cy - 7), text: pct_txt, color: fg, size: 15, bold: true)
+
+				// Title & Caption
+				title_w := f32(ctrl.title.len * 6)
+				win.gg_ctx.draw_text2(x: int(cx - title_w / 2.0), y: int(ctrl.y + ctrl.h - 22), text: ctrl.title, color: fg, size: 11, bold: true)
+			}
+			'super_terminal' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, gg.rgb(13, 16, 23))
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, border_c)
+
+				// Top tab bar
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, 26.0, 8.0, gg.rgb(22, 27, 38))
+				win.gg_ctx.draw_rect_filled(ctrl.x, ctrl.y + 14.0, ctrl.w, 12.0, gg.rgb(22, 27, 38))
+				win.gg_ctx.draw_line(ctrl.x, ctrl.y + 26.0, ctrl.x + ctrl.w, ctrl.y + 26.0, border_c)
+
+				mut tab_x := ctrl.x + 8.0
+				for idx, tab_name in ctrl.items {
+					t_w := f32(tab_name.len * 7 + 18)
+					is_active := idx == ctrl.int_value
+					if is_active {
+						win.gg_ctx.draw_rounded_rect_filled(tab_x, ctrl.y + 4.0, t_w, 20.0, 4.0, gg.rgb(35, 41, 58))
+						win.gg_ctx.draw_line(tab_x + 4.0, ctrl.y + 24.0, tab_x + t_w - 4.0, ctrl.y + 24.0, accent)
+					}
+					win.gg_ctx.draw_text2(x: int(tab_x + 8), y: int(ctrl.y + 6), text: tab_name, color: if is_active { gg.Color{r: 255, g: 255, b: 255} } else { gg.rgb(156, 163, 175) }, size: 11, bold: is_active)
+					tab_x += t_w + 6.0
+				}
+
+				// Running green pulse indicator dot
+				win.gg_ctx.draw_circle_filled(ctrl.x + ctrl.w - 120.0, ctrl.y + 13.0, 3.5, gg.rgb(52, 211, 153))
+				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 110.0), y: int(ctrl.y + 7), text: 'LIVE', color: gg.rgb(52, 211, 153), size: 10, bold: true)
+
+				// Clear button
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 60.0, ctrl.y + 4.0, 52.0, 18.0, 4.0, gg.rgb(40, 45, 62))
+				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 50.0), y: int(ctrl.y + 6), text: 'Clear', color: gg.rgb(200, 205, 220), size: 10)
+
+				// Log outputs
+				mut log_y := ctrl.y + 32.0
+				for idx, line in ctrl.items_selected {
+					if log_y + 18.0 > ctrl.y + ctrl.h { break }
+					line_c := if line.contains('[ERR]') || line.contains('[ERROR]') {
+						gg.rgb(248, 113, 113)
+					} else if line.contains('[WARN]') {
+						gg.rgb(251, 191, 36)
+					} else if line.contains('[OK]') || line.contains('[SUCCESS]') {
+						gg.rgb(52, 211, 153)
+					} else if line.contains('[INFO]') {
+						gg.rgb(56, 189, 248)
+					} else {
+						gg.rgb(226, 232, 240)
+					}
+					win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(log_y), text: '${idx + 1:2d} | ${line}', color: line_c, size: 11, mono: true)
+					log_y += 18.0
+				}
+			}
+			'smart_table' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, border_c)
+
+				// Search filter bar
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 8.0, ctrl.y + 6.0, ctrl.w - 16.0, 22.0, 4.0, gg.rgb(24, 27, 38))
+				draw_vector_search_icon(win.gg_ctx, ctrl.x + 18.0, ctrl.y + 17.0, 3.5, gg.rgb(156, 163, 175))
+				search_txt := if ctrl.search_query.len > 0 { ctrl.search_query } else { 'Filter ${ctrl.rows.len} records...' }
+				win.gg_ctx.draw_text2(x: int(ctrl.x + 32), y: int(ctrl.y + 10), text: search_txt, color: if ctrl.search_query.len > 0 { fg } else { gg.rgb(148, 163, 184) }, size: 11)
+
+				// Column Headers
+				hdr_y := ctrl.y + 32.0
+				win.gg_ctx.draw_rect_filled(ctrl.x + 1, hdr_y, ctrl.w - 2, 24.0, gg.rgb(30, 34, 48))
+				win.gg_ctx.draw_line(ctrl.x, hdr_y + 24.0, ctrl.x + ctrl.w, hdr_y + 24.0, border_c)
+
+				num_cols := math.max(1, ctrl.headers.len)
+				col_w := (ctrl.w - 16.0) / f32(num_cols)
+				for c_idx, hdr in ctrl.headers {
+					hx := ctrl.x + 8.0 + f32(c_idx) * col_w
+					sort_sym := if ctrl.sort_col == c_idx { if ctrl.sort_asc { ' ^' } else { ' v' } } else { '' }
+					win.gg_ctx.draw_text2(x: int(hx), y: int(hdr_y + 5), text: hdr + sort_sym, color: if ctrl.sort_col == c_idx { accent } else { fg }, size: 11, bold: true)
+				}
+
+				// Data Rows (Paginated 5 items)
+				page_size := 5
+				start_idx := (ctrl.current_page - 1) * page_size
+				mut row_y := hdr_y + 26.0
+				for r_i in start_idx .. math.min(ctrl.rows.len, start_idx + page_size) {
+					row := ctrl.rows[r_i]
+					is_sel := ctrl.selected_row == r_i
+					row_bg := if is_sel { gg.rgba(59, 130, 246, 50) } else if r_i % 2 == 1 { gg.rgba(255, 255, 255, 6) } else { surface }
+					win.gg_ctx.draw_rect_filled(ctrl.x + 2, row_y, ctrl.w - 4, 24.0, row_bg)
+
+					for c_idx, cell in row {
+						cx := ctrl.x + 8.0 + f32(c_idx) * col_w
+						// Check status badge
+						if cell in ['Active', 'Done', 'Paid', 'Completed', 'Success'] {
+							win.gg_ctx.draw_rounded_rect_filled(cx, row_y + 3.0, 56.0, 18.0, 3.0, gg.rgba(16, 185, 129, 40))
+							win.gg_ctx.draw_text2(x: int(cx + 6), y: int(row_y + 5), text: cell, color: gg.rgb(52, 211, 153), size: 10, bold: true)
+						} else if cell in ['Pending', 'Warning', 'Review'] {
+							win.gg_ctx.draw_rounded_rect_filled(cx, row_y + 3.0, 56.0, 18.0, 3.0, gg.rgba(245, 158, 11, 40))
+							win.gg_ctx.draw_text2(x: int(cx + 6), y: int(row_y + 5), text: cell, color: gg.rgb(251, 191, 36), size: 10, bold: true)
+						} else {
+							win.gg_ctx.draw_text2(x: int(cx), y: int(row_y + 5), text: cell, color: fg, size: 11)
+						}
+					}
+					row_y += 26.0
+				}
+
+				// Footer Pagination Bar
+				footer_y := ctrl.y + ctrl.h - 26.0
+				win.gg_ctx.draw_line(ctrl.x, footer_y, ctrl.x + ctrl.w, footer_y, border_c)
+				win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(footer_y + 6), text: 'Page ${ctrl.current_page} of ${ctrl.total_pages} (${ctrl.rows.len} items)', color: gg.rgb(156, 163, 175), size: 10)
+
+				// Prev / Next buttons
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 115.0, footer_y + 3.0, 50.0, 20.0, 3.0, gg.rgb(35, 40, 55))
+				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 105.0), y: int(footer_y + 6), text: '< Prev', color: fg, size: 10)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 60.0, footer_y + 3.0, 50.0, 20.0, 3.0, gg.rgb(35, 40, 55))
+				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 50.0), y: int(footer_y + 6), text: 'Next >', color: fg, size: 10)
+			}
+			'wizard_stepper' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, border_c)
+
+				if ctrl.items.len > 0 {
+					step_w := (ctrl.w - 40.0) / f32(ctrl.items.len)
+					cy := ctrl.y + 24.0
+
+					for idx, step_title in ctrl.items {
+						cx := ctrl.x + 20.0 + f32(idx) * step_w + step_w / 2.0
+
+						// Connecting line to next step
+						if idx < ctrl.items.len - 1 {
+							next_cx := ctrl.x + 20.0 + f32(idx + 1) * step_w + step_w / 2.0
+							line_c := if idx < ctrl.int_value { accent } else { border_c }
+							win.gg_ctx.draw_line(cx + 12.0, cy, next_cx - 12.0, cy, line_c)
+						}
+
+						// Step node circle
+						if idx < ctrl.int_value {
+							win.gg_ctx.draw_circle_filled(cx, cy, 11.0, gg.rgb(52, 211, 153))
+							win.gg_ctx.draw_text2(x: int(cx - 4), y: int(cy - 6), text: 'v', color: gg.Color{r: 255, g: 255, b: 255}, size: 10, bold: true)
+						} else if idx == ctrl.int_value {
+							win.gg_ctx.draw_circle_filled(cx, cy, 12.0, accent)
+							win.gg_ctx.draw_text2(x: int(cx - 3), y: int(cy - 6), text: '${idx + 1}', color: gg.Color{r: 255, g: 255, b: 255}, size: 11, bold: true)
+						} else {
+							win.gg_ctx.draw_circle_empty(cx, cy, 10.0, border_c)
+							win.gg_ctx.draw_text2(x: int(cx - 3), y: int(cy - 6), text: '${idx + 1}', color: gg.rgb(156, 163, 175), size: 10)
+						}
+
+						// Step title label
+						step_txt_w := f32(step_title.len) * 5.5
+						win.gg_ctx.draw_text2(x: int(cx - step_txt_w / 2.0), y: int(cy + 18), text: step_title, color: if idx == ctrl.int_value { fg } else { gg.rgb(156, 163, 175) }, size: 10, bold: idx == ctrl.int_value)
+					}
+				}
+			}
+			'floating_toolbar' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 20.0, gg.rgb(25, 29, 42))
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 20.0, border_c)
+
+				// Title with accent dot
+				win.gg_ctx.draw_circle_filled(ctrl.x + 16.0, ctrl.y + ctrl.h / 2.0, 4.0, accent)
+				win.gg_ctx.draw_text2(x: int(ctrl.x + 26), y: int(ctrl.y + (ctrl.h - 14.0) / 2.0), text: ctrl.title, color: fg, size: 12, bold: true)
+
+				// Action pills
+				mut ax := ctrl.x + f32(ctrl.title.len * 7 + 36)
+				for idx, act in ctrl.items {
+					act_w := f32(act.len * 7 + 20)
+					is_sel := idx == ctrl.int_value
+					if is_sel {
+						win.gg_ctx.draw_rounded_rect_filled(ax, ctrl.y + 6.0, act_w, ctrl.h - 12.0, 14.0, accent)
+					} else {
+						win.gg_ctx.draw_rounded_rect_filled(ax, ctrl.y + 6.0, act_w, ctrl.h - 12.0, 14.0, gg.rgb(38, 43, 60))
+					}
+					win.gg_ctx.draw_text2(x: int(ax + 10), y: int(ctrl.y + 13), text: act, color: if is_sel { gg.Color{r: 255, g: 255, b: 255} } else { fg }, size: 11, bold: is_sel)
+					ax += act_w + 8.0
+				}
+			}
+			'chip_cloud' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, border_c)
+
+				mut cx := ctrl.x + 8.0
+				for idx, tag in ctrl.tags {
+					t_w := f32(tag.len * 7 + 24)
+					if cx + t_w > ctrl.x + ctrl.w - 50.0 { break }
+					chip_c := match idx % 4 {
+						0 { gg.rgb(59, 130, 246) }
+						1 { gg.rgb(16, 185, 129) }
+						2 { gg.rgb(168, 85, 247) }
+						else { gg.rgb(245, 158, 11) }
+					}
+					win.gg_ctx.draw_rounded_rect_filled(cx, ctrl.y + 8.0, t_w, 26.0, 13.0, chip_c)
+					win.gg_ctx.draw_text2(x: int(cx + 8), y: int(ctrl.y + 14), text: tag, color: gg.Color{r: 255, g: 255, b: 255}, size: 11, bold: true)
+					win.gg_ctx.draw_text2(x: int(cx + t_w - 14), y: int(ctrl.y + 14), text: 'x', color: gg.rgb(230, 230, 240), size: 11)
+					cx += t_w + 8.0
+				}
+
+				// + Add tag button
+				win.gg_ctx.draw_rounded_rect_empty(cx, ctrl.y + 8.0, 52.0, 26.0, 13.0, accent)
+				win.gg_ctx.draw_text2(x: int(cx + 8), y: int(ctrl.y + 14), text: '+ Tag', color: accent, size: 11, bold: true)
+			}
+			'score_card' {
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, border_c)
+
+				// Left Column: Score & Stars
+				score_txt := '${ctrl.f64_value:3.1f}'
+				win.gg_ctx.draw_text2(x: int(ctrl.x + 16), y: int(ctrl.y + 14), text: score_txt, color: fg, size: 24, bold: true)
+				win.gg_ctx.draw_text2(x: int(ctrl.x + 72), y: int(ctrl.y + 18), text: '/ 5.0', color: gg.rgb(156, 163, 175), size: 13)
+
+				// Stars
+				for s in 0 .. 5 {
+					draw_vector_star(win.gg_ctx, ctrl.x + 22.0 + f32(s * 16), ctrl.y + 54.0, 6.0, 3.0, s < int(ctrl.f64_value), gg.rgb(245, 158, 11), gg.rgb(245, 158, 11))
+				}
+				win.gg_ctx.draw_text2(x: int(ctrl.x + 16), y: int(ctrl.y + 72), text: '${ctrl.int_value} reviews', color: gg.rgb(156, 163, 175), size: 10)
+
+				// Divider
+				win.gg_ctx.draw_line(ctrl.x + 115.0, ctrl.y + 12.0, ctrl.x + 115.0, ctrl.y + ctrl.h - 12.0, border_c)
+
+				// Right Column: Breakdown Bars
+				bar_x := ctrl.x + 145.0
+				bar_w := ctrl.w - 165.0
+				for b_i in 0 .. 5 {
+					by := ctrl.y + 12.0 + f32(b_i * 18)
+					star_num := 5 - b_i
+					win.gg_ctx.draw_text2(x: int(ctrl.x + 124), y: int(by + 1), text: '${star_num}*', color: gg.rgb(156, 163, 175), size: 10)
+					win.gg_ctx.draw_rounded_rect_filled(bar_x, by + 4.0, bar_w, 8.0, 4.0, gg.rgb(35, 40, 55))
+					pct := if b_i < ctrl.f64_list.len { ctrl.f64_list[b_i] } else { 0.0 }
+					if pct > 0 {
+						fill_w := bar_w * f32(pct / 100.0)
+						win.gg_ctx.draw_rounded_rect_filled(bar_x, by + 4.0, math.max(f32(4.0), fill_w), 8.0, 4.0, accent)
+					}
+				}
+			}
 			else {}
 		}
 	}

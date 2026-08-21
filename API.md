@@ -30,7 +30,9 @@ Whether you are building a 5-minute utility tool, a multi-tab admin panel, or an
 17. [Modern UI & RAD UX Enhancements](#17-modern-ui--rad-ux-enhancements)
 18. [Data & Event Binding (`bind`)](#18-data--event-binding-bind)
 19. [Cross-Window Spy++ & External App Automation](#19-cross-window-spy--external-app-automation)
-20. [Type & Struct Reference Index](#20-type--struct-reference-index)
+20. [Modern Super Controls (Developer Heaven Catalog)](#20-modern-super-controls-developer-heaven-catalog)
+21. [Type & Struct Reference Index](#21-type--struct-reference-index)
+
 
 ---
 
@@ -2350,7 +2352,270 @@ if external_apps.len > 0 {
 
 ---
 
-## 20. Type & Struct Reference Index
+## 20. Modern Super Controls (Developer Heaven Catalog)
+
+The **Modern Super Controls** suite provides next-generation, high-productivity UI components designed specifically to give developers an effortless, state-of-the-art experience when building modern dashboards, developer tools, administration panels, and interactive desktop apps.
+
+Every super control is optimized with responsive vector graphics, zero external dependencies, seamless theme adaptation (Nord, Dracula, Apple Dark/Light, Cyberpunk, Emerald, etc.), and fluent chaining support.
+
+### Super Controls Quick Reference Table
+
+| Widget Method | Description | Primary Use Case |
+|---|---|---|
+| **`add_stat_card`** / **`add_metric_trend`** | KPI card with bold value, delta pill, and mini vector sparkline | Financial metrics, real-time KPI monitoring |
+| **`add_code_studio`** | Code editor with window controls, language badge, line gutter & syntax colors | Dev tools, script runners, config editors |
+| **`add_kanban_board`** / **`add_kanban_card`** | Multi-column Agile/Kanban task board with priority badges | Project management, task tracking workflows |
+| **`add_activity_feed`** / **`add_feed_event`** | Real-time event timeline stream with status dots & time badges | Audit trails, deployment logs, system streams |
+| **`add_donut_chart`** / **`add_radial_gauge`** | Circular donut gauge with smooth arc and percentage display | Resource gauges, memory/CPU meters, goals |
+| **`add_terminal_console`** / **`log_terminal`** | Multi-tab developer terminal with live pulse indicator & log levels | Build output, logs, REPL consoles |
+| **`add_smart_table`** | Data grid with built-in search filter, sortable headers & pagination | Customer databases, orders, analytics tables |
+| **`add_wizard_stepper`** / **`wizard_next`** | Multi-step onboarding and checkout workflow with checkmarks | Multi-page setup wizards, checkout flows |
+| **`add_floating_toolbar`** | Glassmorphic capsule bar with title badge and action buttons | Header bars, floating action overlays |
+| **`add_chip_input`** / **`add_chip`** | Interactive removable category chips with add button | Tag filtering, skill selectors, labels |
+| **`add_score_card`** | Rating score card with 5-star distribution breakdown bars | Product reviews, user feedback analytics |
+
+---
+
+### 1. Super Stat Card (`add_stat_card` / `stat`)
+
+Displays high-impact business metrics with a formatted value, delta trend pill (`+18.4%`), and mini vector sparkline trend graph.
+
+```v
+// Full Factory Syntax:
+win.add_stat_card(
+    'kpi_mrr',                          // Control Name / ID
+    'Monthly Recurring Revenue',        // Metric Title
+    '$184,520',                         // Large Formatted Value
+    '+22.4% vs last mo',               // Delta Badge Text
+    true,                               // is_positive trend (true = green, false = red)
+    [20.0, 35.0, 30.0, 50.0, 45.0, 70.0, 85.0, 95.0] // Sparkline Data Points
+)
+
+// Update Values at Runtime:
+win.set_stat_card('kpi_mrr', 'MRR', '$210,000', '+28.0%', true)
+
+// Quick Nameless RAD Shortcut:
+win.stat('Daily Active Users', '48,290', '+12.5%', true, [10.0, 15.0, 25.0, 40.0])
+```
+
+---
+
+### 2. Super Code Studio (`add_code_studio` / `code_box`)
+
+An interactive code studio with window action dots, filename header, language badge, line numbers gutter column, syntax-highlighted tokens, and one-click copy button.
+
+```v
+// Add Code Studio:
+win.add_code_studio(
+    'editor',                           // Control Name
+    'server.v',                         // Filename
+    'v',                                // Syntax Language ('v', 'json', 'sql', 'python', etc.)
+    'module main\n\nimport simplegui\n\nfn main() {\n\tprintln(\'Hello Super Controls!\')\n}'
+)
+
+// Update Code Contents:
+win.set_code_studio('editor', 'main.v', 'v', 'fn main() { println("Updated!") }')
+
+// Quick Nameless RAD Shortcut:
+win.code_box('query.sql', 'sql', 'SELECT id, name, email FROM users WHERE active = true;')
+```
+
+---
+
+### 3. Super Kanban Board (`add_kanban_board` / `add_kanban_card` / `kanban`)
+
+An Agile/Kanban board supporting multi-column layouts, task counts, and colored priority cards.
+
+```v
+// 1. Initialize Board with Columns:
+win.add_kanban_board('task_board', ['Backlog', 'In Progress', 'Review', 'Done'])
+
+// 2. Add Cards to Specific Columns (0-indexed column, format: 'TAG|PRIORITY|Title'):
+win.add_kanban_card('task_board', 0, 'UI|HIGH|Design Super Controls')
+win.add_kanban_card('task_board', 0, 'DOCS|MED|Write Developer Guide')
+win.add_kanban_card('task_board', 1, 'CORE|HIGH|Implement Vector Render Engine')
+win.add_kanban_card('task_board', 2, 'TEST|MED|Run Automated Unit Tests')
+win.add_kanban_card('task_board', 3, 'PERF|LOW|Zero-Allocation Benchmarks')
+
+// 3. Quick Nameless Shortcut:
+win.kanban(['To Do', 'Doing', 'Done'])
+```
+
+---
+
+### 4. Super Activity Feed (`add_activity_feed` / `add_feed_event`)
+
+A real-time audit log and event stream featuring vertical connecting tracks, glowing status nodes (`[OK]`, `[WARN]`, `[ERR]`, `[INFO]`), and relative time stamps.
+
+```v
+// Initialize Activity Feed:
+win.add_activity_feed('system_feed', [
+    'DEPLOY|2m ago|Release v2.8 deployed to production',
+    'OK|8m ago|All 42 automated tests passed in 1.4s',
+    'WARN|22m ago|High memory watermark at 84%',
+    'INFO|45m ago|Automated daily backup completed (2.4 GB)',
+])
+
+// Push New Events Dynamically:
+win.add_feed_event('system_feed', 'New user registered: ada@vlang.io', 'just now', 'INFO')
+```
+
+---
+
+### 5. Super Donut & Radial Gauge (`add_donut_chart` / `add_radial_gauge` / `donut`)
+
+A circular progress meter and resource utilization gauge with smooth vector arc rendering and central percentage text.
+
+```v
+// Add Donut Chart / Radial Gauge:
+win.add_donut_chart('cpu_gauge', 'CPU Core Load', 78.5)
+
+// Alias:
+win.add_radial_gauge('memory_gauge', 'RAM Usage', 62.0)
+
+// Update Percentage at Runtime:
+win.set_donut_percentage('cpu_gauge', 91.0)
+
+// Quick Nameless Shortcut:
+win.donut('Storage Free', 85.0)
+```
+
+---
+
+### 6. Super Developer Terminal (`add_terminal_console` / `log_terminal` / `terminal`)
+
+A full-featured developer console emulator with tabbed outputs (`Output`, `Build`, `Terminal`), live glowing pulse status dot, `[Clear]` button, and ANSI/log level color highlighting.
+
+```v
+// Initialize Terminal Console:
+win.add_terminal_console('dev_term', ['Output', 'Build Server', 'Audit Log', 'Debug Console'])
+
+// Append Color-Coded Log Messages:
+win.log_terminal('dev_term', '[INFO] SimpleGUI v1.0.0 initializing graphics context...')
+win.log_terminal('dev_term', '[OK] Metal / OpenGL acceleration active (60 FPS)')
+win.log_terminal('dev_term', '[WARN] Cache miss for user session')
+win.log_terminal('dev_term', '[ERR] Connection timeout on worker #3')
+win.log_terminal('dev_term', '[SUCCESS] All systems operational!')
+
+// Clear Terminal Logs:
+win.clear_terminal('dev_term')
+
+// Quick Nameless Shortcut:
+win.terminal(['Logs', 'Server'])
+```
+
+---
+
+### 7. Super Smart Table (`add_smart_table`)
+
+A next-generation data table featuring integrated search filter inputs, sortable column headers (`▲`/`▼`), status badge cell renderers, and pagination navigation.
+
+```v
+headers := ['ID', 'Customer', 'Status', 'MRR', 'Plan']
+rows := [
+    ['#101', 'Ada Lovelace', 'Active', '$1,450', 'Enterprise'],
+    ['#102', 'Grace Hopper', 'Done', '$899', 'Pro'],
+    ['#103', 'Alan Turing', 'Pending', '$499', 'Team'],
+    ['#104', 'Margaret Hamilton', 'Active', '$2,200', 'Enterprise'],
+    ['#105', 'Claude Shannon', 'Review', '$299', 'Starter'],
+]
+
+// Add Smart Table:
+win.add_smart_table('customers_grid', headers, rows)
+
+// Event Listener on Row Selection:
+win.on_row_click('customers_grid', fn (mut win simplegui.SimpleWindow) {
+    ctrl := win.control('customers_grid')
+    println('Selected row index: ${ctrl.selected_row}')
+})
+```
+
+---
+
+### 8. Super Wizard Stepper (`add_wizard_stepper` / `wizard_next` / `wizard`)
+
+A multi-step configuration, setup, and onboarding stepper with progress track lines, completion checkmarks, and active glowing indicators.
+
+```v
+// Initialize Wizard Stepper:
+win.add_wizard_stepper('deploy_wizard', [
+    'Configuration',
+    'Build & Test',
+    'Security Audit',
+    'Cloud Deploy',
+], 1) // Active Step Index: 1 (Build & Test)
+
+// Programmatic Navigation:
+win.wizard_next('deploy_wizard')        // Advance to step 2
+win.wizard_prev('deploy_wizard')        // Back to step 1
+win.set_wizard_step('deploy_wizard', 3) // Jump directly to step 3
+
+// Quick Nameless Shortcut:
+win.wizard(['Step 1', 'Step 2', 'Step 3'], 0)
+```
+
+---
+
+### 9. Super Floating Action Bar (`add_floating_toolbar`)
+
+A glassmorphic capsule floating toolbar with brand title and interactive action pills.
+
+```v
+// Add Floating Toolbar:
+win.add_floating_toolbar('hero_bar', 'DevStudio Pro', [
+    'Dashboard',
+    'Code Studio',
+    'Kanban',
+    'Terminal',
+    'Settings',
+])
+
+// Event Listener on Action Click:
+win.on_click('hero_bar', fn (mut win simplegui.SimpleWindow) {
+    selected_action := win.control('hero_bar').text_value
+    win.show_toast('Action Selected', 'Switched to view: ${selected_action}')
+})
+```
+
+---
+
+### 10. Super Chip Input Cloud (`add_chip_input` / `add_chip` / `chips`)
+
+An interactive tag/chip cloud with removable category badges and quick add button.
+
+```v
+// Add Chip Cloud:
+win.add_chip_input('tags_cloud', ['VLang', 'Native UI', 'Fast', 'Zero Dependencies'])
+
+// Add / Remove Chips Dynamically:
+win.add_chip('tags_cloud', 'SuperControls')
+win.remove_chip('tags_cloud', 'Fast')
+
+// Quick Nameless Shortcut:
+win.chips(['Frontend', 'Backend', 'Security', 'Performance'])
+```
+
+---
+
+### 11. Super Score Card (`add_score_card`)
+
+A feature review & rating scorecard with large formatted score (`4.9 / 5.0`), vector stars, review count, and 5-star breakdown distribution bars.
+
+```v
+// Add Score Card:
+win.add_score_card(
+    'score_happiness',                  // Control Name
+    'Developer Satisfaction',           // Title Header
+    4.95,                               // Numeric Score (out of 5.0)
+    3840,                               // Total Reviews Count
+    [92.0, 6.0, 1.2, 0.5, 0.3]          // Percentage Breakdown for [5★, 4★, 3★, 2★, 1★]
+)
+```
+
+---
+
+## 21. Type & Struct Reference Index
+
 
 A reference index of core data structures, callback aliases, and configuration structs across `simplegui`.
 

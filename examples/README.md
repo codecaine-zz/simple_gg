@@ -147,4 +147,8 @@ v run examples/20_stdlib_data_structures_math_and_sockets.v
 
 # Run Extended OS & Hardware Subsystem Demo
 v run examples/21_extended_os_system_calls.v
+
+# Run Modern Super Controls Suite Showcase Demo
+v run examples/22_modern_super_controls_showcase.v
 ```
+

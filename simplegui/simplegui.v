@@ -1799,6 +1799,312 @@ pub fn (mut win SimpleWindow) add_menu_button(name string, title string, items [
 	return win
 }
 
+// =============================================================================
+// Modern Super Controls (Developer Heaven Suite)
+// =============================================================================
+
+// add_stat_card adds a modern high-impact KPI metric card with value, delta trend pill (+14.8%), and mini vector sparkline.
+pub fn (mut win SimpleWindow) add_stat_card(name string, title string, value string, delta string, is_pos bool, sparkline []f64) &SimpleWindow {
+	mut c := Control{
+		name:        name
+		kind:        'super_stat_card'
+		title:       title
+		text_value:  value
+		placeholder: delta
+		bool_value:  is_pos
+		f64_list:    sparkline.clone()
+		h:           84.0
+	}
+	win.add_control(c)
+	return win
+}
+
+// add_metric_trend is an alias for add_stat_card.
+pub fn (mut win SimpleWindow) add_metric_trend(name string, title string, value string, delta string, is_pos bool, sparkline []f64) &SimpleWindow {
+	return win.add_stat_card(name, title, value, delta, is_pos, sparkline)
+}
+
+// set_stat_card updates the displayed values on a super stat card.
+pub fn (mut win SimpleWindow) set_stat_card(name string, title string, value string, delta string, is_pos bool) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.title = title
+		ctrl.text_value = value
+		ctrl.placeholder = delta
+		ctrl.bool_value = is_pos
+	}
+	return win
+}
+
+// add_code_studio adds an interactive code editor & studio widget with language badge, copy action, line gutter, and syntax highlighting.
+pub fn (mut win SimpleWindow) add_code_studio(name string, filename string, lang string, initial_code string) &SimpleWindow {
+	mut c := Control{
+		name:        name
+		kind:        'code_studio'
+		title:       filename
+		code_lang:   lang
+		text_value:  initial_code
+		expand_fill: true
+		h:           220.0
+	}
+	win.add_control(c)
+	return win
+}
+
+// set_code_studio updates the code contents, filename and language of a Code Studio control.
+pub fn (mut win SimpleWindow) set_code_studio(name string, filename string, lang string, code string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.title = filename
+		ctrl.code_lang = lang
+		ctrl.text_value = code
+	}
+	return win
+}
+
+// add_kanban_board adds an Agile / Kanban board with columns, card counts, and cards.
+pub fn (mut win SimpleWindow) add_kanban_board(name string, columns []string) &SimpleWindow {
+	mut c := Control{
+		name:        name
+		kind:        'kanban_board'
+		items:       columns.clone()
+		expand_fill: true
+		h:           260.0
+	}
+	win.add_control(c)
+	return win
+}
+
+// add_kanban_card adds a card item to a specific column index (0-based) on a Kanban board.
+// Format: col_idx (e.g. 0), card_text (e.g. "UI|HIGH|Design Super Controls" or "Fix bug")
+pub fn (mut win SimpleWindow) add_kanban_card(name string, col_idx int, card_text string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.items_selected << '${col_idx}:${card_text}'
+	}
+	return win
+}
+
+// add_activity_feed adds a real-time event timeline and activity stream with status dots and time stamps.
+pub fn (mut win SimpleWindow) add_activity_feed(name string, items []string) &SimpleWindow {
+	mut c := Control{
+		name:        name
+		kind:        'activity_feed'
+		items:       items.clone()
+		expand_fill: true
+		h:           200.0
+	}
+	win.add_control(c)
+	return win
+}
+
+// add_feed_event pushes a new event item onto an activity feed.
+pub fn (mut win SimpleWindow) add_feed_event(name string, title string, time_ago string, tag string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.items << '${tag}|${time_ago}|${title}'
+	}
+	return win
+}
+
+// add_donut_chart adds a modern circular progress / donut gauge with central percentage label.
+pub fn (mut win SimpleWindow) add_donut_chart(name string, title string, percentage f64) &SimpleWindow {
+	mut c := Control{
+		name:      name
+		kind:      'donut_chart'
+		title:     title
+		f64_value: percentage
+		h:         140.0
+	}
+	win.add_control(c)
+	return win
+}
+
+// add_radial_gauge is an alias for add_donut_chart.
+pub fn (mut win SimpleWindow) add_radial_gauge(name string, title string, percentage f64) &SimpleWindow {
+	return win.add_donut_chart(name, title, percentage)
+}
+
+// set_donut_percentage updates the percentage on a donut chart / radial gauge.
+pub fn (mut win SimpleWindow) set_donut_percentage(name string, percentage f64) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.f64_value = percentage
+	}
+	return win
+}
+
+// add_terminal_console adds an interactive developer terminal emulator with tabbed outputs and syntax color levels.
+pub fn (mut win SimpleWindow) add_terminal_console(name string, tabs []string) &SimpleWindow {
+	mut c := Control{
+		name:        name
+		kind:        'super_terminal'
+		items:       tabs.clone()
+		int_value:   0
+		expand_fill: true
+		h:           200.0
+	}
+	win.add_control(c)
+	return win
+}
+
+// log_terminal appends a log line to a terminal console control.
+pub fn (mut win SimpleWindow) log_terminal(name string, line string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.items_selected << line
+		if ctrl.items_selected.len > 200 {
+			ctrl.items_selected = ctrl.items_selected[ctrl.items_selected.len - 200..].clone()
+		}
+	}
+	return win
+}
+
+// clear_terminal clears all log lines in a terminal console control.
+pub fn (mut win SimpleWindow) clear_terminal(name string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.items_selected.clear()
+	}
+	return win
+}
+
+// add_smart_table adds a modern data table with built-in search filtering, sorting, and pagination.
+pub fn (mut win SimpleWindow) add_smart_table(name string, headers []string, rows [][]string) &SimpleWindow {
+	page_size := 5
+	tot_pages := if rows.len > 0 { int(math.ceil(f64(rows.len) / f64(page_size))) } else { 1 }
+	mut c := Control{
+		name:         name
+		kind:         'smart_table'
+		headers:      headers.clone()
+		rows:         rows.clone()
+		current_page: 1
+		total_pages:  math.max(1, tot_pages)
+		expand_fill:  true
+		h:            240.0
+	}
+	win.add_control(c)
+	return win
+}
+
+// add_wizard_stepper adds a multi-step configuration / onboarding wizard stepper with progress indicators.
+pub fn (mut win SimpleWindow) add_wizard_stepper(name string, steps []string, current_step int) &SimpleWindow {
+	mut c := Control{
+		name:        name
+		kind:        'wizard_stepper'
+		items:       steps.clone()
+		int_value:   current_step
+		expand_fill: true
+		h:           68.0
+	}
+	win.add_control(c)
+	return win
+}
+
+// set_wizard_step sets the active step index for a wizard stepper control.
+pub fn (mut win SimpleWindow) set_wizard_step(name string, step int) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.int_value = math.max(0, math.min(ctrl.items.len - 1, step))
+		if ctrl.on_change != unsafe { nil } {
+			ctrl.on_change(mut win)
+		}
+	}
+	return win
+}
+
+// wizard_next advances the wizard stepper to the next step.
+pub fn (mut win SimpleWindow) wizard_next(name string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		if ctrl.int_value < ctrl.items.len - 1 {
+			ctrl.int_value++
+			if ctrl.on_change != unsafe { nil } {
+				ctrl.on_change(mut win)
+			}
+		}
+	}
+	return win
+}
+
+// wizard_prev moves the wizard stepper to the previous step.
+pub fn (mut win SimpleWindow) wizard_prev(name string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		if ctrl.int_value > 0 {
+			ctrl.int_value--
+			if ctrl.on_change != unsafe { nil } {
+				ctrl.on_change(mut win)
+			}
+		}
+	}
+	return win
+}
+
+// add_floating_toolbar adds a modern rounded floating capsule action bar with action buttons.
+pub fn (mut win SimpleWindow) add_floating_toolbar(name string, title string, actions []string) &SimpleWindow {
+	mut c := Control{
+		name:        name
+		kind:        'floating_toolbar'
+		title:       title
+		items:       actions.clone()
+		expand_fill: true
+		h:           42.0
+	}
+	win.add_control(c)
+	return win
+}
+
+// add_chip_input adds an interactive tag/chip cloud with removable category badges and add button.
+pub fn (mut win SimpleWindow) add_chip_input(name string, tags []string) &SimpleWindow {
+	mut c := Control{
+		name:        name
+		kind:        'chip_cloud'
+		tags:        tags.clone()
+		expand_fill: true
+		h:           44.0
+	}
+	win.add_control(c)
+	return win
+}
+
+// add_chip adds a new chip tag to a chip cloud control.
+pub fn (mut win SimpleWindow) add_chip(name string, tag string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		if tag !in ctrl.tags && tag.len > 0 {
+			ctrl.tags << tag
+			if ctrl.on_change != unsafe { nil } {
+				ctrl.on_change(mut win)
+			}
+		}
+	}
+	return win
+}
+
+// remove_chip removes a chip tag from a chip cloud control.
+pub fn (mut win SimpleWindow) remove_chip(name string, tag string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		mut new_tags := []string{}
+		for t in ctrl.tags {
+			if t != tag {
+				new_tags << t
+			}
+		}
+		ctrl.tags = new_tags
+		if ctrl.on_change != unsafe { nil } {
+			ctrl.on_change(mut win)
+		}
+	}
+	return win
+}
+
+// add_score_card adds a product / feature rating scorecard with star distributions and overall rating.
+pub fn (mut win SimpleWindow) add_score_card(name string, title string, score f64, total_reviews int, breakdown []f64) &SimpleWindow {
+	mut c := Control{
+		name:        name
+		kind:        'score_card'
+		title:       title
+		f64_value:   score
+		int_value:   total_reviews
+		f64_list:    breakdown.clone()
+		expand_fill: true
+		h:           140.0
+	}
+	win.add_control(c)
+	return win
+}
+
+
 pub fn (win &SimpleWindow) get_menu_selected(name string) string {
 	if ctrl := win.control_map[name] {
 		return ctrl.text_value
