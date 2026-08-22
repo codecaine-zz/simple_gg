@@ -4,6 +4,26 @@ Native macOS GUI applications built with **SimpleGUI**for V, providing high-perf
 
 ---
 
+## 📦 Automatic Homebrew Dependencies Installation
+
+To inspect your system and automatically install any missing CLI tools used across the 43 applications:
+
+```bash
+# Scan and inspect dependencies health (dry run)
+./install_dependencies.vsh --check
+
+# Inspect and interactively prompt to install missing packages
+./install_dependencies.vsh
+
+# Automatically install all missing Homebrew formulas non-interactively
+./install_dependencies.vsh -y
+
+# Include optional cross-compiler toolchains (zig, mingw-w64)
+./install_dependencies.vsh --all -y
+```
+
+---
+
 # Complete Applications Suite (43 Workstations)
 
 | Application | Source File | Snapshot | Description |
@@ -153,22 +173,59 @@ v run applications/text_editor.v
 
 ---
 
-## 🔨 Batch Compiling All Applications to Native Binaries
+## 🔨 Batch Compiling Applications (macOS .app Bundles, Linux & Windows)
 
-You can compile all 43 applications into standalone executable binaries in `bin/` using the multi-threaded V script:
+You can compile all 43 applications into standalone macOS `.app` bundles with native icons, or cross-compile for Linux and Windows binaries using the multi-threaded V script `compile_apps.vsh`:
 
 ```bash
-# Compile all 43 applications in parallel batches (Default: 6 parallel jobs)
+# macOS Native (.app bundles with high-resolution .icns icons)
 ./compile_apps.vsh
 # or: v run compile_apps.vsh
 
-# Set custom parallel batch concurrency (e.g. 8 parallel jobs)
-./compile_apps.vsh -j 8
+# Production optimized build (-prod -gc none)
+./compile_apps.vsh -prod
 
-# Compile all applications with production optimizations in parallel (-prod)
-./compile_apps.vsh -prod -j 8
+# Compile / Cross-compile for Linux (ELF binaries in bin/)
+./compile_apps.vsh --linux
 
-# Compile a specific target or pattern
-./compile_apps.vsh nmap_studio
+# Compile / Cross-compile for Windows (.exe binaries in bin/)
+./compile_apps.vsh --windows
+# or with Zig cross-compiler:
+./compile_apps.vsh --windows -cc zig
+
+# Windows Subsystem for Linux (WSL / WSLg)
+./compile_apps.vsh --wsl
+./compile_apps.vsh --wsl --c-only
+
+# Target CPU architectures (ARM64 / Apple Silicon or x86_64 / Intel)
+./compile_apps.vsh --arm64
+./compile_apps.vsh --x86_64
+
+# Export standalone C source files (.c) for compiling anywhere without V
+./compile_apps.vsh --linux --c-only
+./compile_apps.vsh --windows --c-only
+
+# Compile raw CLI binaries on macOS (without .app wrapper)
+./compile_apps.vsh --raw
+
+# Compile a specific application target
+./compile_apps.vsh crypto_studio
+
+# Custom concurrency (e.g. 8 parallel jobs) and custom output folder
+./compile_apps.vsh -j 8 -o dist/
+```
+
+### Running Graphical Applications on WSL2 / WSLg
+Windows 11 and Windows 10 (WSL2) natively support graphical Linux applications out-of-the-box via **WSLg**.
+
+1. Inside your WSL terminal (e.g. Ubuntu), install the development packages:
+```bash
+sudo apt update && sudo apt install -y libx11-dev libxi-dev libxcursor-dev libgl-dev libegl1-mesa-dev libasound2-dev
+```
+
+2. Compile and run any application directly inside WSL:
+```bash
+./compile_apps.vsh --wsl
+./bin/wsl_x86_64/crypto_studio
 ```
 
