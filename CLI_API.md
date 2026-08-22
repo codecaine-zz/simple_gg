@@ -465,6 +465,90 @@ app.reveal_in_file_manager('~/data/config.json')
 app.open_in_browser('https://vlang.io')
 ```
 
+### Overwrite & Persistence Behavior Matrix
+
+| Method | Default Behavior | Parent Dirs Created? | Safe Non-Overwrite Alternative |
+| :--- | :--- | :--- | :--- |
+| `app.write_file(path, content)` | **Always Overwrites** (truncates target) | ✅ Yes | Guard with `if !app.file_exists(path)` |
+| `app.append_file(path, content)` | **Appends** (preserves existing content) | ✅ Yes | N/A (non-destructive) |
+| `app.copy_file(src, dst)!` | **Overwrites** destination if present | ✅ Yes | Guard with `if !app.file_exists(dst)` |
+| `app.move_file(src, dst)!` | **Overwrites** / replaces destination | ❌ No | Guard with `if !app.file_exists(dst)` |
+| `app.http_download(url, dst)!` | **Always Overwrites** destination | ✅ Yes | Guard with `if !app.file_exists(dst)` |
+| `app.save_state(path)!` | **Always Overwrites** JSON state file | ✅ Yes | Check existence or create `.bak` |
+
+### Practical Overwrite & File Safety Patterns
+
+#### 1. Default Overwriting (Auto-creating Parent Directories)
+```v
+// Overwrites target file if it already exists; creates all necessary parent directories automatically
+app.write_file('~/data/export/report.json', '{"status": "ok"}')
+```
+
+#### 2. Guarded Non-Overwriting
+```v
+target_path := '~/data/config.json'
+if app.file_exists(target_path) {
+	app.log_warn('File already exists: ${target_path}. Skipping write to prevent data loss.')
+} else {
+	app.write_file(target_path, default_config)
+	app.log_info('Config initialized at ${target_path}')
+}
+```
+
+#### 3. CLI Flag-Controlled Overwrite (`--overwrite` / `--force`)
+```v
+app.add_flag_bool('overwrite', 'f', false, 'Force overwrite existing target files')
+app.parse_cli() or { return }
+
+target_path := '~/data/output.csv'
+if app.file_exists(target_path) && !app.get_flag_bool('overwrite') {
+	app.log_error('Destination ${target_path} already exists. Pass --overwrite or -f to replace.')
+	return
+}
+app.write_file(target_path, csv_payload)
+```
+
+#### 4. Interactive User Confirmation Before Overwrite
+```v
+target_path := '~/data/production.db'
+if app.file_exists(target_path) {
+	if !app.prompt_confirm('File "${target_path}" already exists. Overwrite?', false) {
+		app.log_info('Operation cancelled by user.')
+		return
+	}
+}
+app.write_file(target_path, new_db_data)
+```
+
+#### 5. Safe Backup Before Overwrite
+```v
+file_path := '~/data/important.json'
+if app.file_exists(file_path) {
+	backup_path := '${file_path}.bak'
+	app.copy_file(file_path, backup_path)!
+	app.log_info('Created safety backup at ${backup_path}')
+}
+app.write_file(file_path, updated_payload)
+```
+
+#### 6. Non-Destructive Log Appending
+```v
+// Append logs or streaming outputs without truncating previous contents
+app.append_file('~/logs/audit.log', '[${app.now()}] Job processed\n')
+```
+
+#### 7. Copy & Move Safety Guards
+```v
+src := '~/data/input.raw'
+dst := '~/data/archive/input.raw'
+
+if app.file_exists(dst) {
+	app.log_warn('Destination already exists: ${dst}')
+} else {
+	app.copy_file(src, dst)!
+}
+```
+
 ---
 
 ## 11. Network, Wi-Fi & TCP Port Diagnostics
