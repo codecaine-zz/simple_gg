@@ -46,6 +46,7 @@ struct TaskResult {
 fn get_app_maps() map[string]AppConfig {
 	mut m := map[string]AppConfig{}
 	m['api_studio.v'] = AppConfig{'API Studio', 'api_client.png', 'com.simplegui.apistudio'}
+	m['app_bundler_studio.v'] = AppConfig{'App Bundler Studio', 'package_manager.png', 'com.simplegui.appbundlerstudio'}
 	m['audiotag_studio.v'] = AppConfig{'Audio Tag Studio', 'audio_editor.png', 'com.simplegui.audiotagstudio'}
 	m['brew_studio.v'] = AppConfig{'Brew Studio', 'package_manager.png', 'com.simplegui.brewstudio'}
 	m['crypto_studio.v'] = AppConfig{'Crypto Studio', 'security.png', 'com.simplegui.cryptostudio'}

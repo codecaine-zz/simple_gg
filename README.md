@@ -140,23 +140,34 @@ The repository includes beginner-friendly example programs in the [`examples/`](
 
 ---
 
-# Production Workstations & Studio Applications
+# Production Workstations & Studio Applications (44 Workstations)
 
-`simple_gg` includes 43 desktop applications in the [`applications/`](applications) directory, covering devtools, media studios, network utilities, data converters, and security workstations:
+`simple_gg` includes 44 desktop applications in the [`applications/`](applications) directory, covering devtools, media studios, network utilities, data converters, and security workstations:
 
-| Application | Category | Description | Run Command |
-| :--- | :--- | :--- | :--- |
-| **[`api_studio.v`](applications/api_studio.v)**| DevTools | Modern API testing client & HTTP request builder. | `v run applications/api_studio.v` |
-| **[`ffmpeg_studio.v`](applications/ffmpeg_studio.v)**| Media | Video/audio encoding, trimming, and format transcoding. | `v run applications/ffmpeg_studio.v` |
-| **[`sqlite_studio.v`](applications/sqlite_studio.v)**| Database | Interactive SQLite schema inspector & query executor. | `v run applications/sqlite_studio.v` |
-| **[`docker_studio.v`](applications/docker_studio.v)**| DevOps | Container inspector, logs viewer, and lifecycle manager. | `v run applications/docker_studio.v` |
-| **[`task_manager.v`](applications/task_manager.v)**| System | Real-time process monitor with CPU/memory telemetry. | `v run applications/task_manager.v` |
-| **[`text_editor.v`](applications/text_editor.v)**| Productivity | Full-featured code & markdown text editor. | `v run applications/text_editor.v` |
-| **[`regex_studio.v`](applications/regex_studio.v)**| DevTools | Real-time regular expression tester with capture groups. | `v run applications/regex_studio.v` |
-| **[`imagemagick_studio.v`](applications/imagemagick_studio.v)**| Media | Batch image manipulation, resizing, and filters. | `v run applications/imagemagick_studio.v` |
-| **[`nmap_studio.v`](applications/nmap_studio.v)**| Security | Network security scanner & port analyzer. | `v run applications/nmap_studio.v` |
-| **[`brew_studio.v`](applications/brew_studio.v)**| Package Mgr | Homebrew package browser, installer, and updater. | `v run applications/brew_studio.v` |
-| ... *(33 more)* | Various | See complete catalog in [`applications/README.md`](applications/README.md). | |
+<p align="center">
+  <img src="snapshots/apps/app_bundler_studio.png" width="48%" alt="App Bundler Studio Pro" />
+  <img src="snapshots/apps/media_studio_hub.png" width="48%" alt="Media & Data Studio Hub" />
+</p>
+<p align="center">
+  <img src="snapshots/apps/text_editor.png" width="48%" alt="Text Editor Pro" />
+  <img src="snapshots/apps/task_manager.png" width="48%" alt="Task Manager Pro" />
+</p>
+
+| Application | Category | Description | Run Command | Snapshot |
+| :--- | :--- | :--- | :--- | :--- |
+| **[`app_bundler_studio.v`](applications/app_bundler_studio.v)** | DevTools | macOS .app bundler, Retina .icns generator & packager. | `v run applications/app_bundler_studio.v` | [Screenshot](snapshots/apps/app_bundler_studio.png) |
+| **[`api_studio.v`](applications/api_studio.v)** | DevTools | Modern API testing client & HTTP request builder. | `v run applications/api_studio.v` | [Screenshot](snapshots/apps/api_studio.png) |
+| **[`media_studio_hub.v`](applications/media_studio_hub.v)** | Media | Master workstation with instant one-click media tools. | `v run applications/media_studio_hub.v` | [Screenshot](snapshots/apps/media_studio_hub.png) |
+| **[`ffmpeg_studio.v`](applications/ffmpeg_studio.v)** | Media | Video/audio encoding, trimming, and format transcoding. | `v run applications/ffmpeg_studio.v` | [Screenshot](snapshots/apps/ffmpeg_studio.png) |
+| **[`sqlite_studio.v`](applications/sqlite_studio.v)** | Database | Interactive SQLite schema inspector & query executor. | `v run applications/sqlite_studio.v` | [Screenshot](snapshots/apps/sqlite_studio.png) |
+| **[`docker_studio.v`](applications/docker_studio.v)** | DevOps | Container inspector, logs viewer, and lifecycle manager. | `v run applications/docker_studio.v` | [Screenshot](snapshots/apps/docker_studio.png) |
+| **[`task_manager.v`](applications/task_manager.v)** | System | Real-time process monitor with CPU/memory telemetry. | `v run applications/task_manager.v` | [Screenshot](snapshots/apps/task_manager.png) |
+| **[`text_editor.v`](applications/text_editor.v)** | Productivity | Full-featured code & markdown text editor. | `v run applications/text_editor.v` | [Screenshot](snapshots/apps/text_editor.png) |
+| **[`regex_studio.v`](applications/regex_studio.v)** | DevTools | Real-time regular expression tester with capture groups. | `v run applications/regex_studio.v` | [Screenshot](snapshots/apps/regex_studio.png) |
+| **[`imagemagick_studio.v`](applications/imagemagick_studio.v)** | Media | Batch image manipulation, resizing, and filters. | `v run applications/imagemagick_studio.v` | [Screenshot](snapshots/apps/imagemagick_studio.png) |
+| **[`nmap_studio.v`](applications/nmap_studio.v)** | Security | Network security scanner & port analyzer. | `v run applications/nmap_studio.v` | [Screenshot](snapshots/apps/nmap_studio.png) |
+| **[`brew_studio.v`](applications/brew_studio.v)** | Package Mgr | Homebrew package browser, installer, and updater. | `v run applications/brew_studio.v` | [Screenshot](snapshots/apps/brew_studio.png) |
+| ... *(32 more)* | Various | See complete visual gallery & catalog in [`applications/README.md`](applications/README.md). | | [All Snapshots](applications/README.md) |
 
 ---
 
@@ -174,6 +185,6 @@ The repository includes beginner-friendly example programs in the [`examples/`](
 # Documentation
 
 - **Full API Guide**: See [API.md](API.md) for complete details on window configuration, controls, layout engine, themes, event callbacks, reactive state management (`state.v`), system calls (`sys.v`), and standard library extensions (`stdlib.v`).
-- **Workstations Catalog**: See [applications/README.md](applications/README.md) for the complete list of 43 desktop applications.
+- **Workstations Catalog**: See [applications/README.md](applications/README.md) for the complete list & visual showcase of 44 desktop applications.
 - **Examples Guide**: See [examples/README.md](examples/README.md) for detailed descriptions of all example scripts.
 

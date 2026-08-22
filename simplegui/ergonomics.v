@@ -421,6 +421,12 @@ pub fn (mut win SimpleWindow) set(name string, value string) &SimpleWindow {
 	return win
 }
 
+// set_value is a convenient alias for `set(name, value)` / `set_text(name, value)`.
+pub fn (mut win SimpleWindow) set_value(name string, value string) &SimpleWindow {
+	win.set_text(name, value)
+	return win
+}
+
 // start runs the application window main event loop.
 pub fn (mut win SimpleWindow) start() &SimpleWindow {
 	win.run()
