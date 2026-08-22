@@ -17,8 +17,7 @@ fn main() {
 		win.add_multi_list_box('lst_multi', ['macOS Support', 'Linux Support', 'Windows Support', 'WebAssembly Export'], ['macOS Support', 'Linux Support'])
 		win.end_row()
 
-		win.on_change('lst_single', fn (mut w simplegui.SimpleWindow) {
-			sel := w.get_list_box_selected('lst_single')
+		win.on_change('lst_single', fn (mut w simplegui.SimpleWindow, sel string) {
 			w.push_toast('ListBox Selection', 'Selected: ${sel}', 'info', 2000)
 		})
 
@@ -35,8 +34,7 @@ fn main() {
 		win.add_step_slider('step_slider', 4, 75.0)
 		win.end_row()
 
-		win.on_change('color_pal', fn (mut w simplegui.SimpleWindow) {
-			c := w.get_color_selected('color_pal')
+		win.on_change('color_pal', fn (mut w simplegui.SimpleWindow, c string) {
 			w.push_toast('Color Selected', 'Picked hex color ${c}', 'info', 2000)
 		})
 	})

@@ -14,6 +14,9 @@ module simplegui
 // It receives a mutable reference to the `SimpleWindow`, allowing handlers to modify window state or other controls.
 pub type VoidEventCallback = fn (mut win SimpleWindow)
 
+// StringEventCallback represents a change event handler callback function receiving the changed value.
+pub type StringEventCallback = fn (mut win SimpleWindow, val string)
+
 // ControlValidator represents a custom input validation callback function for text inputs.
 // It receives the current string value and returns an error message string (or empty string if valid).
 pub type ControlValidator = fn (val string) string
@@ -49,7 +52,7 @@ pub mut:
 // ToolbarItem represents an interactive action button displayed within a horizontal Toolbar control.
 pub struct ToolbarItem {
 pub mut:
-	icon     string            // Icon representation or symbol (e.g. '📁', '💾', '⚙️')
+	icon     string            // Icon representation or symbol (e.g. '[Folder]', '[Save]', '[Settings]')
 	tooltip  string            // Tooltip hint text displayed when hovering over the toolbar item
 	on_click VoidEventCallback = unsafe { nil } // Callback function executed when clicked
 }
@@ -253,9 +256,10 @@ pub mut:
 	markdown_content  string             // Raw markdown document string for Markdown Viewer
 	elevation         int                // Soft drop shadow elevation level (0..4)
 	// Event Callback Handlers
-	on_click       VoidEventCallback = unsafe { nil } // Triggered on single left click
-	on_change      VoidEventCallback = unsafe { nil } // Triggered when value/text changes
-	on_enter       VoidEventCallback = unsafe { nil } // Triggered when Enter key pressed in input field
+	on_click       VoidEventCallback   = unsafe { nil } // Triggered on single left click
+	on_change      VoidEventCallback   = unsafe { nil } // Triggered when value/text changes
+	on_change_str  StringEventCallback = unsafe { nil } // Triggered when value/text changes (with string payload)
+	on_enter       VoidEventCallback   = unsafe { nil } // Triggered when Enter key pressed in input field
 	on_row_click   VoidEventCallback = unsafe { nil } // Triggered when row clicked in Data Table
 	on_hover       VoidEventCallback = unsafe { nil } // Triggered when mouse enters hover boundary
 	on_dblclick    VoidEventCallback = unsafe { nil } // Triggered on double click

@@ -161,6 +161,17 @@ pub fn (win &SimpleWindow) get_cpu_cores() int {
 	return 1
 }
 
+// get_cpu_architecture retrieves the CPU instruction set architecture (arm64, x86_64).
+pub fn (win &SimpleWindow) get_cpu_architecture() string {
+	$if arm64 {
+		return 'arm64'
+	} $else $if amd64 {
+		return 'x86_64'
+	} $else {
+		return 'arm64'
+	}
+}
+
 // get_memory_info retrieves physical RAM details on the machine.
 pub fn (win &SimpleWindow) get_memory_info() string {
 	$if macos {

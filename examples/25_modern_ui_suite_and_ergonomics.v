@@ -244,7 +244,7 @@ fn main() {
 	})
 
 	// Calendar date selection listener
-	win.on_change('month_cal', fn (mut win simplegui.SimpleWindow) {
+	win.on_change('month_cal', fn (mut win simplegui.SimpleWindow, _ string) {
 		y, m, d := win.get_calendar_date('month_cal')
 		win.push_toast('Calendar Date', 'Selected Date: ${y}-${m:02d}-${d:02d}', 'info', 2000)
 	})

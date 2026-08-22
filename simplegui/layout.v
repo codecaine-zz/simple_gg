@@ -156,6 +156,20 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 				}
 			}
 			'group_start' {
+				if !win.controls[i].visible {
+					mut depth := 1
+					i++
+					for i < win.controls.len && depth > 0 {
+						if win.controls[i].kind == 'group_start' {
+							depth++
+						} else if win.controls[i].kind == 'group_end' {
+							depth--
+						}
+						i++
+					}
+					continue
+				}
+
 				win.controls[i].x = pad
 				win.controls[i].y = cur_y
 				win.controls[i].w = content_w
@@ -179,17 +193,27 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 									i++
 								}
 								if row_indices.len > 0 {
-									row_count := f32(row_indices.len)
 									inner_content_w := content_w - group_inner_pad * 2.0
-									avail_w := inner_content_w - (row_count - 1.0) * sp
-									item_w := avail_w / row_count
+									mut fixed_w := f32(0.0)
+									mut auto_count := 0
+									for idx in row_indices {
+										r_w := win.controls[idx].w
+										if !win.controls[idx].expand_fill && r_w > 0 && r_w < inner_content_w * 0.75 {
+											fixed_w += r_w
+										} else {
+											auto_count++
+										}
+									}
+									gaps_w := (f32(row_indices.len) - 1.0) * sp
+									remaining_w := f32(math.max(10.0, inner_content_w - fixed_w - gaps_w))
+									item_w := if auto_count > 0 { remaining_w / f32(auto_count) } else { remaining_w }
 									mut max_h := f32(0.0)
 
 									mut cur_x := pad + group_inner_pad
 									for idx in row_indices {
 										win.controls[idx].x = cur_x
 										win.controls[idx].y = inner_y
-										if win.controls[idx].expand_fill || win.controls[idx].w <= 0 {
+										if win.controls[idx].expand_fill || win.controls[idx].w <= 0 || win.controls[idx].w >= inner_content_w * 0.75 {
 											win.controls[idx].w = item_w
 										}
 										if win.controls[idx].h > max_h {

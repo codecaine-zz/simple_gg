@@ -11,8 +11,7 @@ fn main() {
 	all_themes := simplegui.list_themes()
 	win.add_form_dropdown('Theme:', 'theme_picker', all_themes, 'Catppuccin Mocha')
 
-	win.on_change('theme_picker', fn (mut win simplegui.SimpleWindow) {
-		selected_theme := win.get_text('theme_picker')
+	win.on_change('theme_picker', fn (mut win simplegui.SimpleWindow, selected_theme string) {
 		win.set_theme(selected_theme)
 		println('Applied theme: ${selected_theme}')
 	})

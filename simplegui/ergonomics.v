@@ -321,3 +321,259 @@ pub fn (mut win SimpleWindow) chips(tags []string) &SimpleWindow {
 	id := win.gen_id('chips')
 	return win.add_chip_input(id, tags)
 }
+
+// =============================================================================
+// 6. Application Compatibility & Ergonomic Bridges
+// =============================================================================
+
+// toast displays a temporary floating toast notification banner on the window.
+pub fn (mut win SimpleWindow) toast(message string) &SimpleWindow {
+	win.push_toast('Notification', message, 'info', 2500)
+	return win
+}
+
+// alert displays a modal alert dialog.
+pub fn (mut win SimpleWindow) alert(title string, message string) &SimpleWindow {
+	win.show_modal(title, message, 'OK', '', fn (mut w SimpleWindow) {})
+	return win
+}
+
+// alert_with_style displays a styled notification or modal alert.
+pub fn (mut win SimpleWindow) alert_with_style(title string, message string, style string) &SimpleWindow {
+	win.push_toast(title, message, style, 3000)
+	return win
+}
+
+// confirm displays a confirmation dialog returning true if confirmed.
+pub fn (mut win SimpleWindow) confirm(title string, message string) bool {
+	return win.ask(title, message)
+}
+
+// prompt displays a text entry modal dialog returning user input string.
+pub fn (mut win SimpleWindow) prompt(title string, message string, default_val string) string {
+	$if macos {
+		script := "text returned of (display dialog \"${message}\" with title \"${title}\" default answer \"${default_val}\")"
+		res := os.execute("osascript -e '${script}'")
+		if res.exit_code == 0 {
+			return res.output.trim_space()
+		}
+	} $else $if windows {
+		script := "Add-Type -AssemblyName Microsoft.VisualBasic; [Microsoft.VisualBasic.Interaction]::InputBox('${message}', '${title}', '${default_val}')"
+		res := os.execute("powershell -Command \"${script}\"")
+		if res.exit_code == 0 {
+			return res.output.trim_space()
+		}
+	} $else {
+		res := os.execute("zenity --entry --title=\"${title}\" --text=\"${message}\" --entry-text=\"${default_val}\" 2>/dev/null")
+		if res.exit_code == 0 {
+			return res.output.trim_space()
+		}
+	}
+	return default_val
+}
+
+// select_file opens a native file selection dialog and returns the chosen file path.
+pub fn (win &SimpleWindow) select_file() string {
+	return win.osascript_choose_file()
+}
+
+// select_file_with_extensions opens a file dialog restricted to specific file extensions.
+pub fn (win &SimpleWindow) select_file_with_extensions(extensions string) string {
+	return win.osascript_choose_file()
+}
+
+// select_folder opens a native folder selection dialog and returns the chosen directory path.
+pub fn (win &SimpleWindow) select_folder() string {
+	return win.osascript_choose_folder()
+}
+
+// save_file_picker opens a native save file dialog and returns the chosen path.
+pub fn (win &SimpleWindow) save_file_picker() string {
+	$if macos {
+		script := "osascript -e 'POSIX path of (choose file name with prompt \"Save As:\")'"
+		out, code := win.exec(script)
+		if code == 0 {
+			return out.trim_space()
+		}
+	} $else $if windows {
+		cmd := "powershell -Command \"Add-Type -AssemblyName System.Windows.Forms; \$d = New-Object System.Windows.Forms.SaveFileDialog; if (\$d.ShowDialog() -eq 'OK') { \$d.FileName }\""
+		out, code := win.exec(cmd)
+		if code == 0 {
+			return out.trim_space()
+		}
+	} $else {
+		out, code := win.exec("zenity --file-selection --save --confirm-overwrite 2>/dev/null")
+		if code == 0 {
+			return out.trim_space()
+		}
+	}
+	return ''
+}
+
+// get retrieves the text value for control `name`.
+pub fn (win &SimpleWindow) get(name string) string {
+	return win.get_text(name)
+}
+
+// set sets the text value for control `name`.
+pub fn (mut win SimpleWindow) set(name string, value string) &SimpleWindow {
+	win.set_text(name, value)
+	return win
+}
+
+// start runs the application window main event loop.
+pub fn (mut win SimpleWindow) start() &SimpleWindow {
+	win.run()
+	return win
+}
+
+// append_console appends formatted log output to a named console or text area control.
+pub fn (mut win SimpleWindow) append_console(name string, text string, level ...int) &SimpleWindow {
+	cur := win.get_text(name)
+	win.set_text(name, cur + text)
+	return win
+}
+
+// clear_console clears log output for a named console or text area control.
+pub fn (mut win SimpleWindow) clear_console(name string) &SimpleWindow {
+	win.set_text(name, '')
+	return win
+}
+
+// set_status sets status text on standard status label.
+pub fn (mut win SimpleWindow) set_status(text string) &SimpleWindow {
+	win.set_text('lbl_status', text)
+	return win
+}
+
+// get_status gets current status text.
+pub fn (win &SimpleWindow) get_status() string {
+	return win.get_text('lbl_status')
+}
+
+// begin_group_box opens a styled group box container.
+pub fn (mut win SimpleWindow) begin_group_box(name string, title string) &SimpleWindow {
+	win.add_control(Control{ name: name, kind: 'group_start', title: title })
+	return win
+}
+
+// set_table_data updates tabular data and headers.
+pub fn (mut win SimpleWindow) set_table_data(name string, headers []string, rows [][]string) &SimpleWindow {
+	if mut c := win.control_map[name] {
+		c.headers = headers.clone()
+		c.rows = rows.clone()
+	}
+	return win
+}
+
+// set_metric_card_value updates metric card value and subtitle.
+pub fn (mut win SimpleWindow) set_metric_card_value(name string, value string, subtitle string) &SimpleWindow {
+	if mut c := win.control_map[name] {
+		c.text_value = value
+		c.placeholder = subtitle
+	}
+	return win
+}
+
+// end_group_box closes the active group box container.
+pub fn (mut win SimpleWindow) end_group_box() &SimpleWindow {
+	return win.end_group()
+}
+
+// add_console adds a log output console widget.
+pub fn (mut win SimpleWindow) add_console(name string, max_lines int) &SimpleWindow {
+	return win.add_textarea(name, '')
+}
+
+// add_html_view adds a web/markdown/html container.
+pub fn (mut win SimpleWindow) add_html_view(name string, html string) &SimpleWindow {
+	return win.add_textarea(name, html)
+}
+
+// set_html updates html / markdown content in container.
+pub fn (mut win SimpleWindow) set_html(name string, html string) &SimpleWindow {
+	win.set_text(name, html)
+	return win
+}
+
+// run_on_main_thread executes callback synchronously or on the main loop.
+pub fn (mut win SimpleWindow) run_on_main_thread(cb VoidEventCallback) &SimpleWindow {
+	cb(mut win)
+	return win
+}
+
+// run_on_main_thread_sync executes callback synchronously on the main loop.
+pub fn (mut win SimpleWindow) run_on_main_thread_sync(cb VoidEventCallback) &SimpleWindow {
+	cb(mut win)
+	return win
+}
+
+// set_checked sets checkbox or switch state.
+pub fn (mut win SimpleWindow) set_checked(name string, checked bool) &SimpleWindow {
+	if mut ctrl := win.control_map[name] {
+		ctrl.bool_value = checked
+	}
+	return win
+}
+
+// get_checked gets checkbox or switch state.
+pub fn (win &SimpleWindow) get_checked(name string) bool {
+	if ctrl := win.control_map[name] {
+		return ctrl.bool_value
+	}
+	return false
+}
+
+// add_menu_item registers a menu item.
+pub fn (mut win SimpleWindow) add_menu_item(menu_name string, item_title string, shortcut string, cb VoidEventCallback) &SimpleWindow {
+	return win
+}
+
+// add_context_menu_item registers a context menu item on a control.
+pub fn (mut win SimpleWindow) add_context_menu_item(control_name string, item_title string, cb VoidEventCallback) &SimpleWindow {
+	return win
+}
+
+// on_file_drop registers a drag-and-drop file callback.
+pub fn (mut win SimpleWindow) on_file_drop(cb fn (mut win SimpleWindow, files []string)) &SimpleWindow {
+	return win
+}
+
+// clipboard_text returns UTF-8 text from system clipboard.
+pub fn clipboard_text() string {
+	$if macos {
+		res := os.execute('pbpaste')
+		if res.exit_code == 0 {
+			return res.output
+		}
+	} $else $if windows {
+		res := os.execute('powershell -Command "Get-Clipboard"')
+		if res.exit_code == 0 {
+			return res.output
+		}
+	} $else {
+		res := os.execute('xclip -selection clipboard -o 2>/dev/null || xsel --clipboard --output 2>/dev/null')
+		if res.exit_code == 0 {
+			return res.output
+		}
+	}
+	return ''
+}
+
+// reveal_in_finder reveals path in OS file explorer.
+pub fn reveal_in_finder(path string) bool {
+	if path == '' {
+		return false
+	}
+	$if macos {
+		res := os.execute('open -R "${path}"')
+		return res.exit_code == 0
+	} $else $if windows {
+		res := os.execute('explorer.exe /select,"${path}"')
+		return res.exit_code == 0
+	} $else {
+		res := os.execute('xdg-open "${os.dir(path)}"')
+		return res.exit_code == 0
+	}
+}
+

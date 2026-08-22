@@ -21,6 +21,16 @@ fn measure_text_width(win &SimpleWindow, text string) f32 {
 	return f32(win.gg_ctx.text_width(text))
 }
 
+// trigger_control_change dispatches both void and string change callbacks.
+fn trigger_control_change(mut win SimpleWindow, ctrl &Control) {
+	if ctrl.on_change != unsafe { nil } {
+		ctrl.on_change(mut win)
+	}
+	if ctrl.on_change_str != unsafe { nil } {
+		ctrl.on_change_str(mut win, ctrl.text_value)
+	}
+}
+
 // get_multiline_text_index calculates the character index in a multi-line control based on mouse (x, y) coordinates.
 fn get_multiline_text_index(win &SimpleWindow, ctrl &Control, mx f32, my f32) int {
 	left_pad := f32(10.0)
@@ -503,7 +513,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 									ctrl.on_change(mut win)
 								}
 							}
-						} else if ctrl.kind in ['segmented', 'mode_control', 'tab_pills',
+						} else if ctrl.kind in ['segmented', 'mode_control', 'tab_pills', 'tabs',
 							'tab_container_start'] {
 							if ctrl.items.len > 0 {
 								seg_w := ctrl.w / f32(ctrl.items.len)
@@ -513,6 +523,9 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 									ctrl.text_value = ctrl.items[idx]
 									if ctrl.on_change != unsafe { nil } {
 										ctrl.on_change(mut win)
+									}
+									if ctrl.on_change_str != unsafe { nil } {
+										ctrl.on_change_str(mut win, ctrl.text_value)
 									}
 								}
 							}
@@ -1152,7 +1165,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 				return
 			}
 			if win.modal_active {
-				if win.modal_input_mode && e.char_code > 32 && e.char_code <= 126 {
+				if win.modal_input_mode && e.char_code >= 32 && e.char_code <= 126 {
 					ch := u8(e.char_code).ascii_str()
 					if win.modal_input_caret < 0 || win.modal_input_caret > win.modal_input_val.len {
 						win.modal_input_caret = win.modal_input_val.len
@@ -1253,14 +1266,6 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 						return
 					} else if (is_ctrl || is_super) && e.key_code == .a {
 						win.modal_input_caret = win.modal_input_val.len
-						return
-					} else if e.key_code == .space {
-						if win.modal_input_caret < 0 || win.modal_input_caret > win.modal_input_val.len {
-							win.modal_input_caret = win.modal_input_val.len
-						}
-						win.modal_input_val = win.modal_input_val[0..win.modal_input_caret] + ' ' +
-							win.modal_input_val[win.modal_input_caret..]
-						win.modal_input_caret++
 						return
 					} else if e.key_code == .left {
 						if win.modal_input_caret > 0 {
@@ -1439,25 +1444,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 						}
 					}
 
-					if e.key_code == .space {
-						if ctrl.kind in ['input', 'password', 'textarea', 'search_field',
-							'search_bar', 'file_picker', 'pin_code', 'time_picker', 'tag_input', 'code_editor', 'code_studio'] {
-							if ctrl.has_selection() {
-								ctrl.delete_selected_text()
-							} else {
-								ctrl.save_undo_state()
-							}
-							if ctrl.caret_pos < 0 || ctrl.caret_pos > ctrl.text_value.len {
-								ctrl.caret_pos = ctrl.text_value.len
-							}
-							ctrl.text_value = ctrl.text_value[0..ctrl.caret_pos] + ' ' +
-								ctrl.text_value[ctrl.caret_pos..]
-							ctrl.caret_pos++
-							if ctrl.on_change != unsafe { nil } {
-								ctrl.on_change(mut win)
-							}
-						}
-					} else if e.key_code == .enter {
+					if e.key_code == .enter {
 						if ctrl.kind == 'tag_input' && ctrl.text_value.trim_space().len > 0 {
 							ctrl.tags << ctrl.text_value.trim_space()
 							ctrl.text_value = ''

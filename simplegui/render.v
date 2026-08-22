@@ -656,7 +656,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 					}
 				}
 			}
-			'segmented', 'tab_pills', 'radio', 'filter_chips', 'mode_control' {
+			'segmented', 'tab_pills', 'tabs', 'radio', 'filter_chips', 'mode_control' {
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
 					surface)
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
@@ -680,12 +680,13 @@ pub fn (mut win SimpleWindow) render_ui() {
 						} else {
 							fg
 						}
+						text_w := f32(item.len * 7)
 						win.gg_ctx.draw_text2(
-							x:     int(item_x + (seg_w - f32(item.len * 7)) / 2.0)
-							y:     int(ctrl.y + (ctrl.h - 16.0) / 2.0)
+							x:     int(item_x + math.max(4.0, (seg_w - text_w) / 2.0))
+							y:     int(ctrl.y + (ctrl.h - 14.0) / 2.0)
 							text:  item
 							color: item_c
-							size:  13
+							size:  12
 						)
 					}
 				} else {
@@ -3280,7 +3281,10 @@ fn calc_table_col_widths(ctrl &Control) []f32 {
 					max_l = row[c_idx].len
 				}
 			}
-			weights[c_idx] = f32(max_l)
+			if max_l > 45 {
+				max_l = 45
+			}
+			weights[c_idx] = f32(math.max(6, max_l))
 		}
 
 		mut tot_w := f32(0.0)

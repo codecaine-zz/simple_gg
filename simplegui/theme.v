@@ -9,6 +9,7 @@
 module simplegui
 
 import gg
+import os
 
 // Theme represents a complete color palette configuration for the application UI.
 // Controls reference these colors to render consistent backgrounds, text, accents, and hover states.
@@ -511,3 +512,46 @@ pub fn get_theme(theme_name string) Theme {
 		}
 	}
 }
+
+// get_theme_config_path returns the file path used to persist the active window theme.
+fn get_theme_config_path() string {
+	base := os.config_dir() or { os.join_path(os.home_dir(), '.config') }
+	return os.join_path(base, 'simplegui', 'theme.txt')
+}
+
+// get_saved_theme retrieves the persisted theme preference, defaulting to 'GitHub Dark'.
+pub fn get_saved_theme() string {
+	path := get_theme_config_path()
+	if os.exists(path) {
+		val := os.read_file(path) or { '' }.trim_space()
+		if val != '' {
+			return val
+		}
+	}
+	return 'GitHub Dark'
+}
+
+// save_theme persists the active theme preference to disk.
+pub fn save_theme(theme_name string) bool {
+	path := get_theme_config_path()
+	dir := os.dir(path)
+	if !os.exists(dir) {
+		os.mkdir_all(dir) or { return false }
+	}
+	os.write_file(path, theme_name.trim_space()) or { return false }
+	return true
+}
+
+// save_theme persists the chosen theme for the window and saves it to user preferences.
+pub fn (win &SimpleWindow) save_theme(theme_name string) &SimpleWindow {
+	save_theme(theme_name)
+	return win
+}
+
+// restore_saved_theme loads and applies the saved theme from disk.
+pub fn (mut win SimpleWindow) restore_saved_theme() &SimpleWindow {
+	saved := get_saved_theme()
+	win.set_theme(saved)
+	return win
+}
+

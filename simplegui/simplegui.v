@@ -14,6 +14,15 @@ import math
 import os
 import time
 
+$if macos {
+	#flag darwin -framework Cocoa
+	#include "@VMODROOT/simplegui/native_macos.h"
+	fn C.mac_enter_fullscreen()
+	fn C.mac_exit_fullscreen()
+	fn C.mac_toggle_fullscreen()
+	fn C.mac_is_fullscreen() bool
+}
+
 // IntervalTimer represents a background scheduled interval or timeout timer callback.
 @[heap]
 pub struct IntervalTimer {
@@ -84,8 +93,9 @@ pub mut:
 	on_resize_cb    fn (mut win SimpleWindow, w int, h int)   = unsafe { nil } // Triggered on window resize
 	auto_id_counter int // Auto-increment counter for generating unique control IDs
 	state_store     map[string]string // Reactive key-value state store dictionary
-	state_listeners map[string][]StringEventCallback // Reactive listener callbacks for state keys
-	fullscreen      bool // Fullscreen borderless display state
+	state_listeners   map[string][]StringEventCallback // Reactive listener callbacks for state keys
+	fullscreen        bool // Fullscreen borderless display state
+	fullscreen_synced bool // Track if initial fullscreen state was synchronized with OS window manager
 	// Modal Dialog Overlay State
 	modal_active         bool              // Modal confirm dialog popup visibility
 	modal_title          string            // Modal dialog headline text
@@ -530,13 +540,89 @@ pub fn (mut win SimpleWindow) move_cursor_to(x int, y int) &SimpleWindow {
 	return win
 }
 
+// get_primary_screen_size returns the detected primary screen display width and height in pixels.
+pub fn get_primary_screen_size() (int, int) {
+	$if macos {
+		raw := os.execute('osascript -e \'tell application "Finder" to get bounds of window of desktop\' 2>/dev/null').output.trim_space()
+		if raw.len > 0 {
+			parts := raw.split(',').map(it.trim_space())
+			if parts.len >= 4 {
+				w := parts[2].int()
+				h := parts[3].int()
+				if w > 0 && h > 0 {
+					return w, h
+				}
+			}
+		}
+	} $else $if windows {
+		raw := os.execute('powershell -Command "[System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Width.ToString() + \' \' + [System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Height.ToString()"').output.trim_space()
+		if raw.len > 0 {
+			parts := raw.split(' ').map(it.trim_space())
+			if parts.len >= 2 {
+				w := parts[0].int()
+				h := parts[1].int()
+				if w > 0 && h > 0 {
+					return w, h
+				}
+			}
+		}
+	} $else {
+		raw := os.execute("xrandr --current 2>/dev/null | grep '\\*' | awk '{print $1}'").output.trim_space()
+		if raw.len > 0 {
+			parts := raw.split('x')
+			if parts.len >= 2 {
+				w := parts[0].int()
+				h := parts[1].int()
+				if w > 0 && h > 0 {
+					return w, h
+				}
+			}
+		}
+	}
+	return 1920, 1080
+}
+
 pub fn (mut win SimpleWindow) set_fullscreen(enable bool) &SimpleWindow {
 	win.fullscreen = enable
+	if enable {
+		scr_w, scr_h := get_primary_screen_size()
+		if scr_w > 0 && scr_h > 0 {
+			win.width = scr_w
+			win.height = scr_h
+		}
+	}
+	if win.gg_ctx != unsafe { nil } {
+		$if macos {
+			if enable {
+				C.mac_enter_fullscreen()
+			} else {
+				C.mac_exit_fullscreen()
+			}
+		} $else {
+			if gg.is_fullscreen() != enable {
+				gg.toggle_fullscreen()
+			}
+		}
+	}
 	return win
 }
 
 pub fn (mut win SimpleWindow) toggle_fullscreen() &SimpleWindow {
 	win.fullscreen = !win.fullscreen
+	if win.fullscreen {
+		scr_w, scr_h := get_primary_screen_size()
+		if scr_w > 0 && scr_h > 0 {
+			win.width = scr_w
+			win.height = scr_h
+		}
+	}
+	if win.gg_ctx != unsafe { nil } {
+		$if macos {
+			C.mac_toggle_fullscreen()
+		} $else {
+			gg.toggle_fullscreen()
+		}
+	}
 	return win
 }
 
@@ -897,7 +983,16 @@ pub fn (mut win SimpleWindow) card_with_title(name string, title string, callbac
 }
 
 pub fn (mut win SimpleWindow) add_tabs(name string, titles []string) &SimpleWindow {
-	win.add_control(Control{ name: name, kind: 'tabs', items: titles, h: 32 })
+	def_val := if titles.len > 0 { titles[0] } else { '' }
+	win.add_control(Control{
+		name:        name
+		kind:        'tabs'
+		items:       titles
+		text_value:  def_val
+		int_value:   0
+		expand_fill: true
+		h:           34
+	})
 	return win
 }
 
@@ -982,7 +1077,7 @@ pub fn (mut win SimpleWindow) add_password(name string, value string) &SimpleWin
 }
 
 pub fn (mut win SimpleWindow) add_textarea(name string, value string) &SimpleWindow {
-	win.add_control(Control{ name: name, kind: 'textarea', text_value: value, h: 90 })
+	win.add_control(Control{ name: name, kind: 'textarea', text_value: value, h: 90, expand_fill: true })
 	return win
 }
 
@@ -1426,12 +1521,13 @@ pub fn (mut win SimpleWindow) add_tree_view(name string, nodes []TreeNode) &Simp
 
 pub fn (mut win SimpleWindow) add_table(name string, headers []string, rows [][]string) &SimpleWindow {
 	win.add_control(Control{
-		name:    name
-		kind:    'table'
-		headers: headers
-		rows:    rows
-		w:       420.0
-		h:       f32(math.max(120, (rows.len + 1) * 28 + 10))
+		name:        name
+		kind:        'table'
+		headers:     headers
+		rows:        rows
+		w:           420.0
+		h:           f32(math.max(120, (rows.len + 1) * 28 + 10))
+		expand_fill: true
 	})
 	return win
 }
@@ -2743,6 +2839,29 @@ pub fn (win &SimpleWindow) get_control_enabled(name string) bool {
 pub fn (mut win SimpleWindow) set_control_visible(name string, visible bool) &SimpleWindow {
 	if mut ctrl := win.get_control_ptr(name) {
 		ctrl.visible = visible
+		if ctrl.kind == 'group_start' || ctrl.kind == 'row_start' || ctrl.kind == 'flex_start' {
+			for i := 0; i < win.controls.len; i++ {
+				if win.controls[i].name == name && win.controls[i].kind == ctrl.kind {
+					mut depth := 1
+					for j := i + 1; j < win.controls.len && depth > 0; j++ {
+						if win.controls[j].kind == ctrl.kind {
+							depth++
+						} else if (ctrl.kind == 'group_start' && win.controls[j].kind == 'group_end')
+							|| (ctrl.kind == 'row_start' && win.controls[j].kind == 'row_end')
+							|| (ctrl.kind == 'flex_start' && win.controls[j].kind == 'flex_end') {
+							depth--
+						}
+						win.controls[j].visible = visible
+						if win.controls[j].name.len > 0 {
+							if mut mapped := win.control_map[win.controls[j].name] {
+								mapped.visible = visible
+							}
+						}
+					}
+					break
+				}
+			}
+		}
 	}
 	return win
 }
@@ -3011,7 +3130,14 @@ pub fn (mut win SimpleWindow) on_click(name string, cb VoidEventCallback) &Simpl
 	return win
 }
 
-pub fn (mut win SimpleWindow) on_change(name string, cb VoidEventCallback) &SimpleWindow {
+pub fn (mut win SimpleWindow) on_change(name string, cb StringEventCallback) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.on_change_str = cb
+	}
+	return win
+}
+
+pub fn (mut win SimpleWindow) on_change_void(name string, cb VoidEventCallback) &SimpleWindow {
 	if mut ctrl := win.get_control_ptr(name) {
 		ctrl.on_change = cb
 	}
@@ -3071,7 +3197,7 @@ pub fn (mut win SimpleWindow) bind_click(name string, cb VoidEventCallback) &Sim
 	return win.on_click(name, cb)
 }
 
-pub fn (mut win SimpleWindow) bind_change(name string, cb VoidEventCallback) &SimpleWindow {
+pub fn (mut win SimpleWindow) bind_change(name string, cb StringEventCallback) &SimpleWindow {
 	return win.on_change(name, cb)
 }
 
@@ -3098,7 +3224,7 @@ pub fn (mut win SimpleWindow) bind_right_click(name string, cb VoidEventCallback
 pub fn (mut win SimpleWindow) bind_event(name string, event_type string, cb VoidEventCallback) &SimpleWindow {
 	match event_type.to_lower().trim_space() {
 		'click' { return win.on_click(name, cb) }
-		'change' { return win.on_change(name, cb) }
+		'change' { return win.on_change_void(name, cb) }
 		'enter' { return win.on_enter(name, cb) }
 		'hover' { return win.on_hover(name, cb) }
 		'dblclick', 'double_click', 'doubleclick' { return win.on_dblclick(name, cb) }
@@ -3172,9 +3298,9 @@ pub mut:
 	input_mode        bool
 	input_val         string
 	input_placeholder string
-	on_confirm        VoidEventCallback = unsafe { nil }
-	on_cancel         VoidEventCallback = unsafe { nil }
-	on_neutral        VoidEventCallback = unsafe { nil }
+	on_confirm        fn (mut SimpleWindow) = unsafe { nil }
+	on_cancel         fn (mut SimpleWindow) = unsafe { nil }
+	on_neutral        fn (mut SimpleWindow) = unsafe { nil }
 }
 
 pub fn resolve_dialog_icon(kind DialogKind, custom_path string) string {
@@ -4436,6 +4562,22 @@ pub fn ease_out_quad(t f32) f32 {
 // Execution Loop
 
 fn frame_cb(mut win SimpleWindow) {
+	ws := gg.window_size()
+	if ws.width > 0 && ws.height > 0 && (win.width != ws.width || win.height != ws.height) {
+		win.width = ws.width
+		win.height = ws.height
+		win.recalculate_layout()
+	}
+	if win.fullscreen && !win.fullscreen_synced {
+		win.fullscreen_synced = true
+		$if macos {
+			C.mac_enter_fullscreen()
+		} $else {
+			if !gg.is_fullscreen() {
+				gg.toggle_fullscreen()
+			}
+		}
+	}
 	win.gg_ctx.begin()
 	win.render_ui()
 	win.gg_ctx.end()
@@ -4446,6 +4588,14 @@ fn event_cb(e &gg.Event, mut win SimpleWindow) {
 }
 
 pub fn (mut win SimpleWindow) run() {
+	if win.fullscreen {
+		scr_w, scr_h := get_primary_screen_size()
+		if scr_w > 0 && scr_h > 0 {
+			win.width = scr_w
+			win.height = scr_h
+		}
+	}
+
 	resolved_font := if win.font_path.len > 0 && os.exists(win.font_path) {
 		win.font_path
 	} else {

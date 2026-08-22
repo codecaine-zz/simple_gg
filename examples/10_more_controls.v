@@ -40,8 +40,7 @@ fn main() {
 		])
 
 		win.add_menu_button('file_menu', 'Export & Actions', ['Export CSV', 'Export JSON', 'Print', 'Archive'])
-		win.on_change('file_menu', fn (mut win simplegui.SimpleWindow) {
-			selected := win.get_menu_selected('file_menu')
+		win.on_change('file_menu', fn (mut win simplegui.SimpleWindow, selected string) {
 			win.show_toast('Menu Action', 'You picked: ${selected}')
 		})
 
