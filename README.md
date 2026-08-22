@@ -167,10 +167,22 @@ fn main() {
 }
 ```
 
-See [CLI_API.md](CLI_API.md) for the complete SimpleCLI documentation.
-
+See [CLI_API.md](CLI_API.md) for the complete SimpleCLI documentation and API reference.
 
 ---
+
+# 💻 Production Console Applications Suite (`cli_apps/`)
+
+`simple_gg` includes 4 production-grade, zero-window command-line applications in the [`cli_apps/`](cli_apps) directory:
+
+| Application | Command | Description |
+| :--- | :--- | :--- |
+| **DevOps Sentinel** | `v run cli_apps/devops_sentinel.v` | System health guardian & TCP port monitor (PostgreSQL, Redis, MySQL, HTTP). |
+| **Vault Backup Manager** | `v run cli_apps/vault_backup_manager.v` | Enterprise-grade AES-256 encrypted directory backup with SHA-256 checksums. |
+| **API Stress Bench** | `v run cli_apps/api_stress_bench.v` | High-throughput HTTP API load benchmarker with latency stats (Mean, Median, RMS). |
+| **Git Workspace Pilot** | `v run cli_apps/multirepo_git_pilot.v` | Multi-repository Git orchestrator with parallel fetch and dirty worktree tables. |
+
+See the [`cli_apps/README.md`](cli_apps/README.md) for detailed usage guides and CLI flag options.
 
 ---
 
