@@ -172,18 +172,21 @@ See [CLI_API.md](CLI_API.md) for the complete SimpleCLI documentation and API re
 
 ---
 
-# 💻 Production Console Applications Suite (`cli_apps/`)
+# 💻 Production Console Applications Suite (`cli_apps/` - 48 Utilities)
 
-`simple_gg` includes 4 production-grade, zero-window command-line applications in the [`cli_apps/`](cli_apps) directory:
+`simple_gg` includes 48 zero-window command-line applications and client versions of the GUI workstations in the [`cli_apps/`](cli_apps) directory:
 
-| Application | Command | Description |
+| Category | Applications | Key Highlights |
 | :--- | :--- | :--- |
-| **DevOps Sentinel** | `v run cli_apps/devops_sentinel.v` | System health guardian & TCP port monitor (PostgreSQL, Redis, MySQL, HTTP). |
-| **Vault Backup Manager** | `v run cli_apps/vault_backup_manager.v` | Enterprise-grade AES-256 encrypted directory backup with SHA-256 checksums. |
-| **API Stress Bench** | `v run cli_apps/api_stress_bench.v` | High-throughput HTTP API load benchmarker with latency stats (Mean, Median, RMS). |
-| **Git Workspace Pilot** | `v run cli_apps/multirepo_git_pilot.v` | Multi-repository Git orchestrator with parallel fetch and dirty worktree tables. |
+| **DevOps & Cloud** | Sentinel, Docker CLI, Launchd CLI, Task Manager, Disk CLI, Git Pilot, App Bundler | Container stats, process monitors, backup vaults & crontabs. |
+| **Security & Network** | Nmap CLI, DNS & SSL CLI, Recon CLI, Subfinder, IFConfig CLI, Crypto Studio, Vault | Port scanning, WHOIS, certificate transparency, AES-256 & hashes. |
+| **Data & Databases** | JQ CLI, Data Convert CLI, SQLite Studio CLI, API Stress Bench, API Studio CLI | JSON queries, CSV/TSV/TOML conversion, SQLite REPL & REST client. |
+| **Media & Audio** | FFmpeg CLI, ImageMagick CLI, yt-dlp CLI, Audio Tag, ExifTool, OCR, Say TTS | Video transcoding, image resizing, stream downloader & speech. |
+| **Text & Stream** | GAWK CLI, Sed CLI, SD CLI, Cut CLI, TR CLI, Regex CLI, Ripgrep, FD, Find | Fast stream transformation, pattern matching & file traversal. |
+| **Math & Science** | Numbat Units, Kalker Math, Qalc Studio, Programmer Calc, Stats, Graph CLI | Physical dimensional analysis, arbitrary precision & ASCII charts. |
+| **Docs & Archives** | Pandoc CLI, Ouch Archive CLI, Wget2 Downloader, Text Editor CLI | Document conversion, universal archives (ZIP/7z/zstd) & downloader. |
 
-See the [`cli_apps/README.md`](cli_apps/README.md) for detailed usage guides and CLI flag options.
+See the [`cli_apps/README.md`](cli_apps/README.md) for the complete catalog of all 48 command-line applications.
 
 ---
 
