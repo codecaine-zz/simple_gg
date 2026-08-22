@@ -72,14 +72,13 @@ To inspect your system and automatically install any missing CLI tools used acro
 </p>
 <p align="center">
   <img src="../snapshots/apps/dns_studio.png" width="48%" alt="DNS & SSL Studio Pro" />
-  <img src="../snapshots/apps/ifconfig_studio.png" width="48%" alt="IFConfig Studio Pro" />
-</p>
-<p align="center">
   <img src="../snapshots/apps/recon_studio.png" width="48%" alt="Recon Studio Pro" />
-  <img src="../snapshots/apps/subfinder_studio.png" width="48%" alt="Subfinder Studio Pro" />
 </p>
 <p align="center">
+  <img src="../snapshots/apps/subfinder_studio.png" width="48%" alt="Subfinder Studio Pro" />
   <img src="../snapshots/apps/crypto_studio.png" width="48%" alt="Crypto & Hash Studio Pro" />
+</p>
+<p align="center">
   <img src="../snapshots/apps/docker_studio.png" width="48%" alt="Docker Studio Pro" />
 </p>
 
@@ -185,7 +184,7 @@ To inspect your system and automatically install any missing CLI tools used acro
 | **Task Manager Pro** | [`task_manager.v`](task_manager.v) | [Screenshot](../snapshots/apps/task_manager.png) | macOS process manager & hardware telemetry monitor: real-time process data grid (PID, Name, CPU %, Memory RSS, State), hardware stats cards, filtering scopes, process signals (SIGKILL, SIGTERM), and `lsof` socket inspector. |
 | **Ouch Studio Pro** | [`ouch_studio.v`](ouch_studio.v) | [Screenshot](../snapshots/apps/ouch_studio.png) | Ultra-fast universal archive & compression workbench powered by `ouch`: lossless/high-density packaging across `.tar.zst`, `.tar.gz`, `.zip`, `.7z`, `.tar.xz`, `.tar.bz2`, compression tuning, and tree hierarchy explorer. |
 | **Sed Studio Pro** | [`sed_studio.v`](sed_studio.v) | [Screenshot](../snapshots/apps/sed_studio.png) | POSIX/BSD `sed` stream editor & regex transformation workbench: dual-pane live scratchpad, in-place disk file editing (`-i ''`), character/line counters, backup preservation, and 15 built-in recipes. |
-| **IFConfig Studio Pro** | [`ifconfig_studio.v`](ifconfig_studio.v) | [Screenshot](../snapshots/apps/ifconfig_studio.png) | Comprehensive native macOS IP intelligence & network diagnostics studio: Public IPv4 & IPv6 detection, rich geolocation (City, Country, GPS, ASN, ISP), 1-click Maps launcher, local interface scanner, and DNS latency ping. |
+| **IFConfig Studio Pro** | [`ifconfig_studio.v`](ifconfig_studio.v) | — | Comprehensive native macOS IP intelligence & network diagnostics studio: Public IPv4 & IPv6 detection, rich geolocation (City, Country, GPS, ASN, ISP), 1-click Maps launcher, local interface scanner, and DNS latency ping. |
 | **Qalc Studio Pro** | [`qalc_studio.v`](qalc_studio.v) | [Screenshot](../snapshots/apps/qalc_studio.png) | Advanced symbolic mathematics & universal unit converter powered by `qalc` (`libqalculate`): arbitrary precision (up to 100 digits), symbolic equation solver, calculus derivatives/integrals, and 30+ formula presets. |
 | **Numbat Studio Pro** | [`numbat_studio.v`](numbat_studio.v) | [Screenshot](../snapshots/apps/numbat_studio.png) | Scientific & physical dimensional analysis studio powered by `numbat`: statically-typed physical expressions, automatic dimension validation, multi-line physics IDE, and fundamental physical constants database. |
 | **Kalker Studio Pro** | [`kalker_studio.v`](kalker_studio.v) | [Screenshot](../snapshots/apps/kalker_studio.png) | Pure mathematics, natural calculus syntax & complex analysis studio powered by `kalker`: natural calculus syntax (∫, √, f'(x)), complex arithmetic, polar conversions, and matrix/vector algebra. |
