@@ -727,6 +727,48 @@ pub fn (cli &SimpleCli) prompt_password(question string) string {
 	return os.get_raw_line().trim_space()
 }
 
+// prompt_validated prompts the user with custom validation function and retry loop.
+pub fn (cli &SimpleCli) prompt_validated(question string, default_val string, validator fn (string) bool, error_msg string) string {
+	for {
+		ans := cli.prompt(question, default_val)
+		if validator(ans) {
+			return ans
+		}
+		err_text := if error_msg.len > 0 { error_msg } else { 'Invalid input format, please try again.' }
+		println('  ${cli.red(err_text)}')
+	}
+	return default_val
+}
+
+// prompt_email prompts for a valid email address with loop retry.
+pub fn (cli &SimpleCli) prompt_email(question string, default_val string) string {
+	return cli.prompt_validated(question, default_val, fn (s string) bool {
+		cli_inst := new('Validator')
+		return cli_inst.validate_email(s)
+	}, 'Please enter a valid email address (e.g. name@domain.com)')
+}
+
+// prompt_url prompts for a valid HTTP/HTTPS URL with loop retry.
+pub fn (cli &SimpleCli) prompt_url(question string, default_val string) string {
+	return cli.prompt_validated(question, default_val, fn (s string) bool {
+		cli_inst := new('Validator')
+		return cli_inst.validate_url(s)
+	}, 'Please enter a valid URL (starting with http:// or https://)')
+}
+
+// prompt_number prompts for an integer within [min, max].
+pub fn (cli &SimpleCli) prompt_number(question string, default_val int, min int, max int) int {
+	for {
+		ans_str := cli.prompt('${question} [${min}-${max}]', '${default_val}')
+		val := ans_str.int()
+		if val >= min && val <= max {
+			return val
+		}
+		println('  ${cli.red('Value must be between ${min} and ${max}.')}')
+	}
+	return default_val
+}
+
 // confirm prompts the user for a yes/no confirmation, returning true on 'y' or 'yes'.
 pub fn (cli &SimpleCli) confirm(question string, default_yes bool) bool {
 	hint := if default_yes { '[Y/n]' } else { '[y/N]' }

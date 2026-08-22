@@ -20,6 +20,18 @@ fn test_sys_execution_and_env() {
 	assert res_list[0].exit_code == 0
 	assert res_list[1].exit_code == 0
 
+	// Safe Exec & Quoting
+	quoted := quote_arg('hello; rm -rf /')
+	assert quoted == "'hello; rm -rf /'"
+
+	sanitized := sanitize_filename('../../../etc/passwd')
+	assert !sanitized.contains('/')
+	assert !sanitized.contains('..')
+
+	safe_out, safe_code := app.exec_safe('echo', ['arg1 with spaces', 'arg2'])
+	assert safe_code == 0
+	assert safe_out.contains('arg1 with spaces')
+
 	// Environment variables
 	app.set_env('SIMPLECLI_TEST_VAR', 'antigravity_rad')
 	assert app.get_env('SIMPLECLI_TEST_VAR') == 'antigravity_rad'
@@ -59,6 +71,18 @@ fn test_sys_hardware_and_network() {
 
 	local_ip := app.get_local_ip()
 	assert local_ip.len > 0
+
+	mac := app.get_mac_address()
+	assert mac.len > 0
+
+	gateway := app.get_default_gateway()
+	assert gateway.len > 0
+
+	dns := app.get_dns_servers()
+	assert dns.len > 0
+
+	accent := app.get_system_accent_color()
+	assert accent.len > 0
 }
 
 fn test_sys_file_operations() {

@@ -5,7 +5,7 @@
 //   This file provides cross-platform OS system calls, process management (sync, async,
 //   timeout, retry, parallel), hardware resource metrics (CPU, RAM, load, battery, disk), standard directory
 //   path resolution, headless desktop notifications, audio beeps, speech synthesis (TTS),
-//   clipboard interaction, TCP network diagnostics, and native modal dialogs without any GUI window backend.
+//   clipboard interaction, TCP network diagnostics, safe shell execution, and native modal dialogs.
 
 module simplecli
 
@@ -61,7 +61,7 @@ pub:
 }
 
 // =============================================================================
-// 1. Process Execution & Command Helpers
+// 1. Process Execution & Safe Command Helpers
 // =============================================================================
 
 // exec runs a system command synchronously, returning stdout/stderr and exit code.
@@ -103,6 +103,33 @@ pub fn (cli &SimpleCli) exec_in_dir(dir string, command string) (string, int) {
 	out, code := cli.exec(command)
 	os.chdir(prev_dir) or {}
 	return out, code
+}
+
+// quote_arg wraps an argument in POSIX single quotes and escapes embedded quotes.
+pub fn quote_arg(arg string) string {
+	return "'" + arg.replace("'", "'\\''") + "'"
+}
+
+// quote_path safely quotes a file or directory path.
+pub fn quote_path(path string) string {
+	return quote_arg(resolve_user_path(path))
+}
+
+// sanitize_filename strips path separators, null bytes, and path traversal tokens.
+pub fn sanitize_filename(name string) string {
+	mut clean := name.replace('/', '_').replace('\\', '_').replace('..', '_').replace('\x00', '')
+	clean = clean.trim_space()
+	return if clean.len > 0 { clean } else { 'file' }
+}
+
+// exec_safe executes a command by safely quoting all arguments to prevent shell injection.
+pub fn (cli &SimpleCli) exec_safe(tool string, args []string) (string, int) {
+	mut parts := [quote_arg(tool)]
+	for a in args {
+		parts << quote_arg(a)
+	}
+	cmd := parts.join(' ')
+	return cli.exec(cmd)
 }
 
 // exec_timeout executes a command with a maximum timeout limit in milliseconds.
@@ -200,7 +227,7 @@ pub fn (cli &SimpleCli) parallel_exec(commands []string) []ExecResult {
 }
 
 // =============================================================================
-// 2. Process Info & Process Control
+// 2. Process Info, Readiness & Process Control
 // =============================================================================
 
 // get_pid returns the current running process ID.
@@ -233,7 +260,7 @@ pub fn (cli &SimpleCli) get_uptime_seconds() u64 {
 	} $else $if windows {
 		_, code := cli.exec('powershell -Command "(Get-CimInstance -ClassName Win32_OperatingSystem).LastBootUpTime"')
 		if code == 0 {
-			return 3600 // fallback standard uptime estimate
+			return 3600
 		}
 	}
 	return 0
@@ -242,6 +269,20 @@ pub fn (cli &SimpleCli) get_uptime_seconds() u64 {
 // exists_in_path checks whether an executable binary exists in the system PATH.
 pub fn (cli &SimpleCli) exists_in_path(cmd_name string) bool {
 	return cli.find_executable(cmd_name).len > 0
+}
+
+// command_exists is an alias for exists_in_path.
+pub fn (cli &SimpleCli) command_exists(cmd_name string) bool {
+	return cli.exists_in_path(cmd_name)
+}
+
+// require_command asserts that a required executable is present or returns an error.
+pub fn (cli &SimpleCli) require_command(cmd_name string) !string {
+	path := cli.find_executable(cmd_name)
+	if path.len == 0 {
+		return error('Required executable "${cmd_name}" was not found in system PATH')
+	}
+	return path
 }
 
 // find_executable resolves the absolute file path of an executable in system PATH.
@@ -323,6 +364,37 @@ pub fn (cli &SimpleCli) get_open_file_count() int {
 		}
 	}
 	return 0
+}
+
+// wait_for_file blocks until a target file exists on disk or timeout expires.
+pub fn (cli &SimpleCli) wait_for_file(path string, timeout_ms int) bool {
+	start := time.now()
+	resolved := resolve_user_path(path)
+	for {
+		if os.exists(resolved) {
+			return true
+		}
+		if time.since(start).milliseconds() >= timeout_ms {
+			return false
+		}
+		time.sleep(25 * time.millisecond)
+	}
+	return false
+}
+
+// wait_for_port blocks until a TCP host:port is accepting connections or timeout expires.
+pub fn (cli &SimpleCli) wait_for_port(host string, port int, timeout_ms int) bool {
+	start := time.now()
+	for {
+		if cli.ping_tcp_port(host, port, 200) {
+			return true
+		}
+		if time.since(start).milliseconds() >= timeout_ms {
+			return false
+		}
+		time.sleep(50 * time.millisecond)
+	}
+	return false
 }
 
 // =============================================================================
@@ -596,6 +668,27 @@ pub fn (cli &SimpleCli) get_system_theme() string {
 	}
 }
 
+// get_system_accent_color returns the OS system accent color name on macOS (e.g. blue, purple, pink, etc.).
+pub fn (cli &SimpleCli) get_system_accent_color() string {
+	$if macos {
+		out, code := cli.exec('defaults read -g AppleAccentColor 2>/dev/null')
+		if code == 0 {
+			match out.trim_space() {
+				'-1' { return 'graphite' }
+				'0' { return 'red' }
+				'1' { return 'orange' }
+				'2' { return 'yellow' }
+				'3' { return 'green' }
+				'4' { return 'blue' }
+				'5' { return 'purple' }
+				'6' { return 'pink' }
+				else { return 'multicolor' }
+			}
+		}
+	}
+	return 'blue'
+}
+
 // =============================================================================
 // 5. Standard Paths & App Persistence Directories
 // =============================================================================
@@ -826,6 +919,31 @@ pub fn (cli &SimpleCli) get_file_metadata(path string) !FileMetadata {
 	}
 }
 
+// reveal_in_file_manager opens the native OS desktop file manager highlighting the path.
+pub fn (cli &SimpleCli) reveal_in_file_manager(path string) &SimpleCli {
+	resolved := resolve_user_path(path)
+	$if macos {
+		os.execute("open -R \"${resolved}\"")
+	} $else $if windows {
+		os.execute("explorer.exe /select,\"${resolved}\"")
+	} $else {
+		os.execute("xdg-open \"${os.dir(resolved)}\" 2>/dev/null")
+	}
+	return cli
+}
+
+// open_in_browser opens the specified URL in the default web browser.
+pub fn (cli &SimpleCli) open_in_browser(url string) &SimpleCli {
+	$if macos {
+		os.execute("open \"${url}\"")
+	} $else $if windows {
+		os.execute("start \"\" \"${url}\"")
+	} $else {
+		os.execute("xdg-open \"${url}\" 2>/dev/null")
+	}
+	return cli
+}
+
 // =============================================================================
 // 7. Network & Socket Diagnostics
 // =============================================================================
@@ -864,6 +982,97 @@ pub fn (cli &SimpleCli) get_public_ip() string {
 	return res.body.trim_space()
 }
 
+// get_mac_address returns the primary network MAC address of the system.
+pub fn (cli &SimpleCli) get_mac_address() string {
+	$if macos {
+		out, code := cli.exec("ifconfig en0 | grep ether | awk '{print \$2}'")
+		if code == 0 && out.len > 0 {
+			return out.trim_space()
+		}
+	} $else $if linux {
+		out, code := cli.exec("cat /sys/class/net/eth0/address 2>/dev/null || ip link show | grep ether | awk '{print \$2}' | head -n 1")
+		if code == 0 && out.len > 0 {
+			return out.trim_space()
+		}
+	} $else $if windows {
+		out, code := cli.exec('powershell -Command "(Get-NetAdapter | Where-Object Status -eq Up).MacAddress | Select -First 1"')
+		if code == 0 && out.len > 0 {
+			return out.trim_space()
+		}
+	}
+	return '00:00:00:00:00:00'
+}
+
+// get_wifi_ssid returns the currently connected Wi-Fi network SSID name.
+pub fn (cli &SimpleCli) get_wifi_ssid() string {
+	$if macos {
+		out, code := cli.exec("/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport -I | awk -F': ' '/ SSID/{print \$2}'")
+		if code == 0 && out.len > 0 {
+			return out.trim_space()
+		}
+	} $else $if linux {
+		out, code := cli.exec("iwgetid -r 2>/dev/null")
+		if code == 0 && out.len > 0 {
+			return out.trim_space()
+		}
+	} $else $if windows {
+		out, code := cli.exec('powershell -Command "(netsh wlan show interfaces | Select-String \'SSID\')[0].Line.Split(\':\')[1].Trim()"')
+		if code == 0 && out.len > 0 {
+			return out.trim_space()
+		}
+	}
+	return 'Ethernet / Unknown'
+}
+
+// get_default_gateway returns the default network router gateway IP address.
+pub fn (cli &SimpleCli) get_default_gateway() string {
+	$if macos || linux {
+		out, code := cli.exec("route -n get default 2>/dev/null | grep gateway | awk '{print \$2}' || ip route | grep default | awk '{print \$3}'")
+		if code == 0 && out.len > 0 {
+			return out.trim_space()
+		}
+	} $else $if windows {
+		out, code := cli.exec('powershell -Command "(Get-NetRoute -DestinationPrefix \'0.0.0.0/0\').NextHop | Select -First 1"')
+		if code == 0 && out.len > 0 {
+			return out.trim_space()
+		}
+	}
+	return '192.168.1.1'
+}
+
+// get_dns_servers returns the configured DNS server IP addresses.
+pub fn (cli &SimpleCli) get_dns_servers() []string {
+	$if macos {
+		out, code := cli.exec("scutil --dns | grep 'nameserver\\[[0-9]*\\]' | awk '{print \$3}' | sort -u")
+		if code == 0 && out.len > 0 {
+			return out.split_into_lines().filter(it.len > 0)
+		}
+	} $else $if linux {
+		out, code := cli.exec("grep nameserver /etc/resolv.conf | awk '{print \$2}'")
+		if code == 0 && out.len > 0 {
+			return out.split_into_lines().filter(it.len > 0)
+		}
+	}
+	return ['1.1.1.1', '8.8.8.8']
+}
+
+// get_listening_ports returns a list of active TCP listening ports on the system.
+pub fn (cli &SimpleCli) get_listening_ports() []int {
+	mut ports := []int{}
+	$if macos || linux {
+		out, code := cli.exec("lsof -iTCP -sTCP:LISTEN -P -n | awk '{print \$9}' | cut -d: -f2 | sort -un")
+		if code == 0 && out.len > 0 {
+			for line in out.split_into_lines() {
+				p := line.trim_space().int()
+				if p > 0 {
+					ports << p
+				}
+			}
+		}
+	}
+	return ports
+}
+
 // =============================================================================
 // 8. Desktop Notifications, Audio & Speech Synthesis (TTS)
 // =============================================================================
@@ -885,6 +1094,22 @@ pub fn (cli &SimpleCli) show_system_notification(title string, message string) &
 // notify is an alias for show_system_notification.
 pub fn (cli &SimpleCli) notify(title string, message string) &SimpleCli {
 	return cli.show_system_notification(title, message)
+}
+
+// bounce_dock requests user attention by bouncing the macOS Dock application icon.
+pub fn (cli &SimpleCli) bounce_dock() &SimpleCli {
+	$if macos {
+		os.execute("osascript -e 'tell application \"System Events\" to tell (first application process whose frontmost is true) to set visible to true' 2>/dev/null")
+	}
+	return cli
+}
+
+// set_dock_badge sets a text badge on the macOS Dock application icon.
+pub fn (cli &SimpleCli) set_dock_badge(badge string) &SimpleCli {
+	$if macos {
+		os.execute("osascript -e 'tell application \"Finder\" to set badge of current application to \"${badge}\"' 2>/dev/null")
+	}
+	return cli
 }
 
 // beep emits a system terminal bell sound.

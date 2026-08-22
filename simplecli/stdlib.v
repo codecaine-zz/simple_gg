@@ -5,11 +5,13 @@
 //   This file provides high-level standard library wrapper utilities for HTTP client requests,
 //   JSON serialization/querying, AES encryption/decryption, SHA256/SHA512/MD5/BCrypt hashing,
 //   Base64/Hex encoding, RegEx matching, Gzip compression, CSV/TOML parsing, Math statistics,
-//   generic data collections (Stack, Queue, Set), and string metric algorithms.
+//   generic data collections (Stack, Queue, Set, RingBuffer, MinHeap), validation helpers,
+//   URL parsing, and string metric algorithms.
 
 module simplecli
 
 import net.http
+import net.urllib
 import regex
 import compress.gzip
 import crypto.sha256
@@ -32,7 +34,7 @@ import math.stats
 import strings
 
 // =============================================================================
-// 1. HTTP Client Utilities
+// 1. HTTP Client Utilities & URL Parser
 // =============================================================================
 
 // SimpleHttpResponse contains status code, response body, and raw headers.
@@ -41,6 +43,32 @@ pub:
 	status_code int
 	body        string
 	url         string
+}
+
+// SimpleURL represents a structured, parsed URL.
+pub struct SimpleURL {
+pub:
+	raw      string
+	scheme   string
+	host     string
+	port     int
+	path     string
+	query    string
+	fragment string
+}
+
+// parse_url parses an absolute or relative URL string.
+pub fn (cli &SimpleCli) parse_url(url_str string) !SimpleURL {
+	u := urllib.parse(url_str)!
+	return SimpleURL{
+		raw: url_str
+		scheme: u.scheme
+		host: u.hostname()
+		port: u.port().int()
+		path: u.path
+		query: u.raw_query
+		fragment: u.fragment
+	}
 }
 
 // http_get sends a synchronous GET request and returns the response body or empty string.
@@ -188,7 +216,7 @@ pub fn (cli &SimpleCli) rand_f64() f64 {
 }
 
 // =============================================================================
-// 3. Encodings & Serialization
+// 3. Encodings, JSON & Data Validation
 // =============================================================================
 
 // base64_encode encodes text to Base64.
@@ -280,8 +308,54 @@ pub fn (cli &SimpleCli) json_get_bool(raw_json string, key string, fallback bool
 	return fallback
 }
 
+// validate_email verifies whether a string matches standard email syntax.
+pub fn (cli &SimpleCli) validate_email(email string) bool {
+	return cli.regex_match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', email.trim_space())
+}
+
+// validate_url checks whether a string is a valid HTTP/HTTPS URL.
+pub fn (cli &SimpleCli) validate_url(url_str string) bool {
+	return url_str.starts_with('http://') || url_str.starts_with('https://')
+}
+
+// validate_ip checks if a string is a valid IPv4 address.
+pub fn (cli &SimpleCli) validate_ip(ip_str string) bool {
+	parts := ip_str.split('.')
+	if parts.len != 4 {
+		return false
+	}
+	for p in parts {
+		n := p.int()
+		if p.len == 0 || n < 0 || n > 255 || (p.len > 1 && p.starts_with('0')) {
+			return false
+		}
+	}
+	return true
+}
+
+// validate_phone checks if a string is a valid international/national phone number.
+pub fn (cli &SimpleCli) validate_phone(phone string) bool {
+	clean := phone.replace(' ', '').replace('-', '').replace('(', '').replace(')', '').replace('+', '')
+	return clean.len >= 7 && clean.len <= 15 && clean.int() > 0
+}
+
+// validate_alphanumeric checks if text contains only letters and numbers.
+pub fn (cli &SimpleCli) validate_alphanumeric(text string) bool {
+	return cli.regex_match(r'^[a-zA-Z0-9]+$', text)
+}
+
+// validate_numeric_range checks if a number is within [min, max].
+pub fn (cli &SimpleCli) validate_numeric_range(val f64, min f64, max f64) bool {
+	return val >= min && val <= max
+}
+
+// validate_length checks if string length is within [min_len, max_len].
+pub fn (cli &SimpleCli) validate_length(text string, min_len int, max_len int) bool {
+	return text.len >= min_len && text.len <= max_len
+}
+
 // =============================================================================
-// 4. Data Formats & Parsing (CSV, TOML, Gzip, RegEx)
+// 4. Data Formats & Parsing (CSV, TOML, Gzip, RegEx, Lorem)
 // =============================================================================
 
 // csv_parse parses a CSV string into a 2D array of rows and column cells.
@@ -327,6 +401,16 @@ pub fn (cli &SimpleCli) semver_compare(v1 string, v2 string) !int {
 		return 1
 	}
 	return 0
+}
+
+// lorem_words generates placeholder words.
+pub fn (cli &SimpleCli) lorem_words(count int) string {
+	sample := ['lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit', 'sed', 'do', 'eiusmod', 'tempor', 'incididunt', 'ut', 'labore', 'et', 'dolore', 'magna', 'aliqua']
+	mut out := []string{}
+	for i in 0 .. count {
+		out << sample[i % sample.len]
+	}
+	return out.join(' ')
 }
 
 // =============================================================================
@@ -419,6 +503,96 @@ pub fn (q SimpleQueue[T]) len() int {
 	return q.items.len
 }
 
+// SimpleRingBuffer provides a fixed-capacity circular ring buffer.
+pub struct SimpleRingBuffer[T] {
+pub:
+	capacity int
+pub mut:
+	items []T
+	head  int
+}
+
+// new_ring_buffer creates a new circular buffer with fixed max capacity.
+pub fn new_ring_buffer[T](capacity int) SimpleRingBuffer[T] {
+	return SimpleRingBuffer[T]{
+		capacity: if capacity > 0 { capacity } else { 16 }
+	}
+}
+
+// push appends an item, discarding the oldest element if at capacity.
+pub fn (mut r SimpleRingBuffer[T]) push(item T) {
+	if r.items.len < r.capacity {
+		r.items << item
+	} else {
+		r.items[r.head] = item
+		r.head = (r.head + 1) % r.capacity
+	}
+}
+
+// len returns current number of items.
+pub fn (r SimpleRingBuffer[T]) len() int {
+	return r.items.len
+}
+
+// SimpleMinHeap provides a lightweight min-heap priority queue of floats.
+pub struct SimpleMinHeap {
+pub mut:
+	items []f64
+}
+
+// new_min_heap initializes an empty min-heap.
+pub fn new_min_heap() SimpleMinHeap {
+	return SimpleMinHeap{}
+}
+
+// push inserts a float value maintaining heap order.
+pub fn (mut h SimpleMinHeap) push(val f64) {
+	h.items << val
+	mut i := h.items.len - 1
+	for i > 0 {
+		parent := (i - 1) / 2
+		if h.items[i] >= h.items[parent] {
+			break
+		}
+		tmp := h.items[i]
+		h.items[i] = h.items[parent]
+		h.items[parent] = tmp
+		i = parent
+	}
+}
+
+// pop extracts and returns the minimum element.
+pub fn (mut h SimpleMinHeap) pop() ?f64 {
+	if h.items.len == 0 {
+		return none
+	}
+	min := h.items[0]
+	last := h.items.pop()
+	if h.items.len > 0 {
+		h.items[0] = last
+		mut i := 0
+		for {
+			left := 2 * i + 1
+			right := 2 * i + 2
+			mut smallest := i
+			if left < h.items.len && h.items[left] < h.items[smallest] {
+				smallest = left
+			}
+			if right < h.items.len && h.items[right] < h.items[smallest] {
+				smallest = right
+			}
+			if smallest == i {
+				break
+			}
+			tmp := h.items[i]
+			h.items[i] = h.items[smallest]
+			h.items[smallest] = tmp
+			i = smallest
+		}
+	}
+	return min
+}
+
 // =============================================================================
 // 6. String Distance & Similarity Algorithms
 // =============================================================================
@@ -468,6 +642,21 @@ pub fn (cli &SimpleCli) stats_median(data []f64) f64 {
 // stats_std_dev computes the sample standard deviation.
 pub fn (cli &SimpleCli) stats_std_dev(data []f64) f64 {
 	return stats.sample_stddev(data)
+}
+
+// stats_geometric_mean computes the geometric mean of positive numbers.
+pub fn (cli &SimpleCli) stats_geometric_mean(data []f64) f64 {
+	return stats.geometric_mean(data)
+}
+
+// stats_harmonic_mean computes the harmonic mean of positive numbers.
+pub fn (cli &SimpleCli) stats_harmonic_mean(data []f64) f64 {
+	return stats.harmonic_mean(data)
+}
+
+// stats_rms computes the Root Mean Square of an array of numbers.
+pub fn (cli &SimpleCli) stats_rms(data []f64) f64 {
+	return stats.rms(data)
 }
 
 // stats_min returns the minimum float in an array.

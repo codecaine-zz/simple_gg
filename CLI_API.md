@@ -9,17 +9,18 @@
 1. [Quickstart](#1-quickstart)
 2. [CLI Flags & Argument Parsing](#2-cli-flags--argument-parsing)
 3. [Console UI & RAD Components](#3-console-ui--rad-components)
-4. [Interactive Prompts & Questionnaires](#4-interactive-prompts--questionnaires)
+4. [Interactive Prompts & Validated Inputs](#4-interactive-prompts--validated-inputs)
 5. [Structured Multi-Level Logging & File Logs](#5-structured-multi-level-logging--file-logs)
-6. [OS System Calls & Parallel Process Management](#6-os-system-calls--parallel-process-management)
+6. [Safe Command Execution & Process Management](#6-safe-command-execution--process-management)
 7. [Hardware & Resource Monitoring](#7-hardware--resource-monitoring)
 8. [Standard Paths & File System](#8-standard-paths--file-system)
-9. [Network & TCP Port Diagnostics](#9-network--tcp-port-diagnostics)
-10. [Desktop Notifications, Audio & Speech](#10-desktop-notifications-audio--speech)
-11. [Generic Collections & String Distance Algorithms](#11-generic-collections--string-distance-algorithms)
-12. [Standard Library, Crypto, JSON & HTTP Toolkit](#12-standard-library-crypto-json--http-toolkit)
-13. [Reactive State Store & File Persistence](#13-reactive-state-store--file-persistence)
-14. [Standalone 1-Liner Package Functions](#14-standalone-1-liner-package-functions)
+9. [Network, Wi-Fi & TCP Port Diagnostics](#9-network-wi-fi--tcp-port-diagnostics)
+10. [Desktop Notifications, Audio, Dock & Speech](#10-desktop-notifications-audio-dock--speech)
+11. [Generic Collections & Priority Queues](#11-generic-collections--priority-queues)
+12. [Validation Engine & URL Parsing](#12-validation-engine--url-parsing)
+13. [Standard Library, Crypto, JSON & HTTP Toolkit](#13-standard-library-crypto-json--http-toolkit)
+14. [Reactive State Store & File Persistence](#14-reactive-state-store--file-persistence)
+15. [Standalone 1-Liner Package Functions](#15-standalone-1-liner-package-functions)
 
 ---
 
@@ -56,8 +57,8 @@ fn main() {
 		'RAM': ram,
 	})
 
-	// Process execution
-	branch, _ := app.exec('git rev-parse --abbrev-ref HEAD')
+	// Safe process execution
+	branch, _ := app.exec_safe('git', ['rev-parse', '--abbrev-ref', 'HEAD'])
 	app.info('Active branch: ${branch}')
 
 	// Desktop alert & TTS
@@ -150,14 +151,28 @@ app.spinner('Synchronizing repository...', 1500)
 
 ---
 
-## 4. Interactive Prompts & Questionnaires
+## 4. Interactive Prompts & Validated Inputs
 
 ```v
-// Text Input Prompt (with default value fallback)
+// Standard Text Prompt
 name := app.prompt('Enter project name', 'my-v-service')
 
 // Masked / Sensitive Password Prompt
 apiKey := app.prompt_password('Enter API secret key')
+
+// Validated Email Input
+email := app.prompt_email('Enter admin email', 'admin@example.com')
+
+// Validated URL Input
+repo := app.prompt_url('Enter Git URL', 'https://github.com/vlang/v')
+
+// Validated Numeric Range Prompt
+port := app.prompt_number('Enter port', 8080, 1024, 65535)
+
+// Custom Validator Prompt
+code := app.prompt_validated('Enter 4-digit code', '1234', fn (s string) bool {
+	return s.len == 4 && s.int() > 0
+}, 'Code must be exactly 4 digits.')
 
 // Confirmation Prompt ([Y/n] or [y/N])
 if app.confirm('Do you want to proceed with deployment?', true) {
@@ -203,26 +218,23 @@ app.error('Database connection timed out')
 
 ---
 
-## 6. OS System Calls & Parallel Process Management
+## 6. Safe Command Execution & Process Management
 
 ```v
-// Synchronous Command Execution
-out, exit_code := app.exec('git status')
+// Safe Shell Execution (prevents command injection)
+out, code := app.exec_safe('git', ['commit', '-m', 'User input message with ; and &'])
 
-// Execution with Fallback
-val := app.exec_or('which docker', 'docker not installed')
+// POSIX Quoting & Filename Sanitization
+quoted := simplecli.quote_arg('unsafe input; rm -rf /')
+clean_name := simplecli.sanitize_filename('../../passwords.txt') // 'passwords.txt'
 
-// Background Asynchronous Execution
-app.exec_bg('npm run watch')
+// Command Verification & Dependency Requirements
+has_git := app.command_exists('git')
+git_path := app.require_command('git')! // returns absolute path or fails
 
-// Execution within Target Directory
-out, code := app.exec_in_dir('/tmp', 'ls -la')
-
-// Timeout Guard (milliseconds)
-out, code, timed_out := app.exec_timeout('ping -c 10 8.8.8.8', 2000)
-
-// Retry with Exponential Backoff
-res := app.exec_retry('curl -s https://api.ipify.org', 3, 500, 2.0)
+// Readiness Waits
+has_file := app.wait_for_file('~/build/output.bin', 5000)
+has_port := app.wait_for_port('127.0.0.1', 8080, 5000)
 
 // Parallel Concurrent Command Execution (Worker Threads)
 results := app.parallel_exec([
@@ -231,20 +243,18 @@ results := app.parallel_exec([
 	'git status',
 ])
 
-// Executable Discovery & Path Resolution
-git_bin := app.find_executable('git')
-exists := app.exists_in_path('nginx')
+// Timeout Guard (milliseconds)
+out, code, timed_out := app.exec_timeout('ping -c 10 8.8.8.8', 2000)
 
-// Process Control
-is_running := app.is_process_running('node')
-app.kill_process('node')
-app.kill_process_by_pid(1234)
+// Retry with Exponential Backoff
+res := app.exec_retry('curl -s https://api.ipify.org', 3, 500, 2.0)
 
-// Process Metrics
+// Process Control & Telemetry
 pid := app.get_pid()
 uptime_sec := app.get_uptime_seconds()
 procs := app.get_running_process_count()
 open_files := app.get_open_file_count()
+app.kill_process('node')
 ```
 
 ---
@@ -263,6 +273,7 @@ is_charging := app.is_on_ac_power()
 swap := app.get_swap_usage()
 locale := app.get_system_locale()
 theme := app.get_system_theme()
+accent_color := app.get_system_accent_color()
 ```
 
 ---
@@ -286,37 +297,44 @@ app.copy_file('~/my_app/config.json', '~/my_app/config.backup.json')!
 app.move_file('~/my_app/temp.txt', '~/my_app/saved.txt')!
 app.delete_file('~/my_app/saved.txt')
 
+// Reveal in Finder / File Explorer & Web Browser
+app.reveal_in_file_manager('~/my_app/config.json')
+app.open_in_browser('https://vlang.io')
+
 // Recursive Directory Scanning
 v_files := app.list_files_recursive('~/my_project', '.v')
 ```
 
 ---
 
-## 9. Network & TCP Port Diagnostics
+## 9. Network, Wi-Fi & TCP Port Diagnostics
 
 ```v
-// Internet connectivity test
-if app.is_online() {
-	app.info('System is online.')
-}
+// Connectivity
+is_online := app.is_online()
+is_db_up := app.ping_tcp_port('127.0.0.1', 5432, 1000)
 
-// TCP Port Health Check
-if app.ping_tcp_port('127.0.0.1', 5432, 1000) {
-	app.success('PostgreSQL server is reachable.')
-}
-
-// IP Addresses
+// Network Telemetry
 local_ip := app.get_local_ip()
 public_ip := app.get_public_ip()
+mac_addr := app.get_mac_address()
+wifi_ssid := app.get_wifi_ssid()
+gateway := app.get_default_gateway()
+dns_servers := app.get_dns_servers()
+open_ports := app.get_listening_ports()
 ```
 
 ---
 
-## 10. Desktop Notifications, Audio & Speech
+## 10. Desktop Notifications, Audio, Dock & Speech
 
 ```v
-// Native Desktop Notification Banner (macOS osascript, Linux notify-send, Windows PowerShell)
+// Native Desktop Notification Banner
 app.notify('Backup Finished', 'All database tables archived.')
+
+// macOS Dock Integration
+app.bounce_dock()
+app.set_dock_badge('3')
 
 // Terminal Bell & Sounds
 app.beep()
@@ -330,51 +348,63 @@ app.speak_with_voice('System online', 'Samantha')
 // System Volume & Muting
 vol := app.get_volume()
 app.set_volume(75)
-muted := app.is_muted()
-app.set_muted(false)
 
 // System Clipboard
 app.copy_to_clipboard('Copied API Key')
 clip := app.get_clipboard_text()
 app.clear_clipboard()
 
-// Headless Native OS Dialogs
+// Headless Native OS Confirmation Dialog
 confirmed := app.ask('Confirm Migration', 'Are you sure you want to drop the staging database?')
 ```
 
 ---
 
-## 11. Generic Collections & String Distance Algorithms
-
-### Generic LIFO Stack & FIFO Queue
+## 11. Generic Collections & Priority Queues
 
 ```v
-// SimpleStack[T]
+// SimpleStack[T] (LIFO)
 mut stack := simplecli.new_stack[int]()
 stack.push(10)
-stack.push(20)
-top := stack.pop() // 20
+top := stack.pop() // 10
 
-// SimpleQueue[T]
+// SimpleQueue[T] (FIFO)
 mut queue := simplecli.new_queue[string]()
 queue.push('task1')
-queue.push('task2')
 first := queue.pop() // 'task1'
-```
 
-### String Distance & Similarity
+// SimpleRingBuffer[T] (Circular Buffer)
+mut ring := simplecli.new_ring_buffer[string](100)
+ring.push('log entry')
 
-```v
-// Levenshtein Edit Distance
-dist := app.levenshtein_distance('docker', 'dockr') // 1
-
-// Similarity Ratio (0.0 to 1.0)
-ratio := app.similarity_ratio('deploy_prod', 'deploy_stage') // ~0.66
+// SimpleMinHeap (Priority Queue)
+mut heap := simplecli.new_min_heap()
+heap.push(45.0)
+heap.push(12.0)
+min := heap.pop() // 12.0
 ```
 
 ---
 
-## 12. Standard Library, Crypto, JSON & HTTP Toolkit
+## 12. Validation Engine & URL Parsing
+
+```v
+// Data Validators
+is_email := app.validate_email('test@domain.com')
+is_url := app.validate_url('https://google.com')
+is_ip := app.validate_ip('192.168.1.1')
+is_phone := app.validate_phone('+1-555-123-4567')
+is_alnum := app.validate_alphanumeric('User123')
+is_in_range := app.validate_numeric_range(42.0, 1.0, 100.0)
+
+// Structured URL Parsing
+u := app.parse_url('https://api.site.com:8443/v1/users?role=admin#section')!
+println('Host: ${u.host}, Port: ${u.port}, Path: ${u.path}, Query: ${u.query}')
+```
+
+---
+
+## 13. Standard Library, Crypto, JSON & HTTP Toolkit
 
 ```v
 // HTTP Client
@@ -410,13 +440,17 @@ raw_hex := app.hex_decode(hex_str)
 
 // Math & Statistics
 mean_val := app.stats_mean([10.0, 20.0, 30.0])
-median_val := app.stats_median([10.0, 20.0, 30.0])
-std_dev := app.stats_std_dev([10.0, 20.0, 30.0])
+g_mean := app.stats_geometric_mean([10.0, 20.0, 30.0])
+h_mean := app.stats_harmonic_mean([10.0, 20.0, 30.0])
+rms_val := app.stats_rms([10.0, 20.0, 30.0])
+
+// Placeholder Text Generation
+lorem_text := app.lorem_words(10)
 ```
 
 ---
 
-## 13. Reactive State Store & File Persistence
+## 14. Reactive State Store & File Persistence
 
 ```v
 mut app := simplecli.new('StateApp')
@@ -437,7 +471,7 @@ app.load_state('~/my_app/state.json')!
 
 ---
 
-## 14. Standalone 1-Liner Package Functions
+## 15. Standalone 1-Liner Package Functions
 
 ```v
 import simplecli

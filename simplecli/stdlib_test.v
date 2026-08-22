@@ -58,6 +58,23 @@ fn test_stdlib_collections_and_string_metrics() {
 	assert queue.pop() or { '' } == 'second'
 	assert queue.is_empty()
 
+	// SimpleRingBuffer
+	mut rb := new_ring_buffer[int](3)
+	rb.push(1)
+	rb.push(2)
+	rb.push(3)
+	rb.push(4) // Overwrites oldest
+	assert rb.len() == 3
+
+	// SimpleMinHeap
+	mut heap := new_min_heap()
+	heap.push(50.0)
+	heap.push(10.0)
+	heap.push(30.0)
+	assert heap.pop() or { 0.0 } == 10.0
+	assert heap.pop() or { 0.0 } == 30.0
+	assert heap.pop() or { 0.0 } == 50.0
+
 	// Levenshtein & Similarity Ratio
 	dist := app.levenshtein_distance('kitten', 'sitting')
 	assert dist == 3
@@ -70,6 +87,38 @@ fn test_stdlib_collections_and_string_metrics() {
 	assert app.json_get_string(raw_json, 'service', '') == 'auth_api'
 	assert app.json_get_int(raw_json, 'port', 0) == 5000
 	assert app.json_get_bool(raw_json, 'enabled', false) == true
+
+	// Lorem Generator
+	words := app.lorem_words(5)
+	assert words.split(' ').len == 5
+}
+
+fn test_stdlib_validators_and_url() {
+	app := new('ValidatorTest')
+
+	// Validations
+	assert app.validate_email('user@example.com')
+	assert !app.validate_email('invalid-email')
+
+	assert app.validate_url('https://github.com')
+	assert !app.validate_url('ftp://invalid')
+
+	assert app.validate_ip('192.168.1.1')
+	assert !app.validate_ip('999.999.999.999')
+
+	assert app.validate_alphanumeric('User123')
+	assert !app.validate_alphanumeric('User 123!')
+
+	assert app.validate_numeric_range(50.0, 10.0, 100.0)
+	assert !app.validate_numeric_range(5.0, 10.0, 100.0)
+
+	// URL parsing
+	url_obj := app.parse_url('https://api.example.com:8443/v1/users?query=admin#top') or { panic(err) }
+	assert url_obj.scheme == 'https'
+	assert url_obj.host == 'api.example.com'
+	assert url_obj.port == 8443
+	assert url_obj.path == '/v1/users'
+	assert url_obj.query == 'query=admin'
 }
 
 fn test_stdlib_aes_encryption() {
@@ -90,6 +139,9 @@ fn test_stdlib_math_stats() {
 
 	mean := app.stats_mean(data)
 	assert mean == 30.0
+
+	g_mean := app.stats_geometric_mean(data)
+	assert g_mean > 0.0
 
 	min_v := app.stats_min(data)
 	max_v := app.stats_max(data)
