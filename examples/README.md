@@ -93,6 +93,9 @@ This directory contains beginner-friendly, well-commented examples demonstrating
 | **[`23_modern_image_controls_showcase.v`](23_modern_image_controls_showcase.v)** | Modern Image Super Controls      | User Profile Cards, Product Cards, Multi-Image Showcase Gallery, 3D App Launcher Tiles, Media Player Card, Hero Banners, and GPU Texture Caching. | [📸 Snapshot](../snapshots/ex23.png)  |
 | **[`24_custom_image_dialogs_showcase.v`](24_custom_image_dialogs_showcase.v)**   | RAD Custom 3D Image Dialogs      | Custom 3D glowing dialog icons (Success, Error, Warning, Info, Confirm, Danger, Security, Database, Cloud, Tip), 3-button actions, Checkboxes & Inline Input Prompts. | [📸 Snapshot](../snapshots/ex24.png)  |
 | **[`25_modern_ui_suite_and_ergonomics.v`](25_modern_ui_suite_and_ergonomics.v)** | Modern UI Suite & Ergonomics     | Slide-over Drawer, Collapsible Nav Rail, Spline Area Chart, Activity Heatmap, Dynamic Flow Chips, Tree Grid, Month Calendar, Masked Inputs & Markdown Viewer. | [📸 Snapshot](../snapshots/ex25.png)  |
+| **[`26_simplecli_system_monitor.v`](26_simplecli_system_monitor.v)** | SimpleCLI Headless System Monitor | Hardware specs, CPU/RAM/Disk usage, load averages, battery telemetry, ASCII tables, and standard path resolution. | Console Utility |
+| **[`27_simplecli_rad_interactive_tool.v`](27_simplecli_rad_interactive_tool.v)** | SimpleCLI Interactive RAD Wizard  | Interactive terminal prompts, single/multi select choices, confirmation prompts, progress bar animations, and JSON state persistence. | Console Utility |
+| **[`28_simplecli_process_and_automation.v`](28_simplecli_process_and_automation.v)** | SimpleCLI Process & Task Automation | Process execution with timeouts and retries, AES-256 encryption, clipboard read/write, audio beeps, and desktop notifications. | Console Utility |
 
 ---
 

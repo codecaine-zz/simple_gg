@@ -134,6 +134,40 @@ The repository includes beginner-friendly example programs in the [`examples/`](
 | **[`23_modern_image_controls_showcase.v`](examples/23_modern_image_controls_showcase.v)**| Modern Image Controls: User Profile Cards, Product Cards, Multi-Image Showcase Gallery, 3D App Launcher Tiles, Media Player Card, Hero Banners, and Hardware Texture Caching. | `v run examples/23_modern_image_controls_showcase.v` | [ Snapshot](snapshots/ex23.png) |
 | **[`24_custom_image_dialogs_showcase.v`](examples/24_custom_image_dialogs_showcase.v)**| RAD Custom 3D Image Dialogs: 3D glossy icons (Success, Error, Warning, Info, Confirm, Danger, Security, Database, Cloud, Tip), 3-button actions, Checkboxes & Inline Input Prompts. | `v run examples/24_custom_image_dialogs_showcase.v` | [ Snapshot](snapshots/ex24.png) |
 | **[`25_modern_ui_suite_and_ergonomics.v`](examples/25_modern_ui_suite_and_ergonomics.v)**| Modern UI Suite & Ergonomic Enhancements: Slide-over Drawer, Collapsible Nav Rail, Spline Area Chart, Activity Heatmap, Dynamic Flow Chips, Tree Grid, Month Calendar, Masked Inputs & Markdown Viewer. | `v run examples/25_modern_ui_suite_and_ergonomics.v` | [ Snapshot](snapshots/ex25.png) |
+| **[`26_simplecli_system_monitor.v`](examples/26_simplecli_system_monitor.v)**| SimpleCLI Headless System Monitor: CPU/RAM/Disk metrics, load averages, battery status, ASCII tables & panels. | `v run examples/26_simplecli_system_monitor.v` | Console CLI |
+| **[`27_simplecli_rad_interactive_tool.v`](examples/27_simplecli_rad_interactive_tool.v)**| SimpleCLI Interactive RAD Wizard: Banners, selects, multi-selects, prompts, progress bars & state persistence. | `v run examples/27_simplecli_rad_interactive_tool.v` | Console CLI |
+| **[`28_simplecli_process_and_automation.v`](examples/28_simplecli_process_and_automation.v)**| SimpleCLI Process & Task Automation: Command timeouts, retry loops, AES encryption, clipboard & desktop alerts. | `v run examples/28_simplecli_process_and_automation.v` | Console CLI |
+
+---
+
+# `simplecli` - Headless Console & RAD Toolkit (Zero GUI Dependencies)
+
+Need all the power of OS system calls, process management, hardware monitoring, desktop alerts, speech synthesis, standard paths, and stdlib crypto/HTTP without spinning up a graphical window? Use `import simplecli`!
+
+```v
+module main
+
+import simplecli
+
+fn main() {
+	mut app := simplecli.new_app('DeployCLI', '1.0.0')
+	app.banner('DeployCLI Workspace', 'v1.0.0')
+
+	// System metrics & paths
+	cpu := app.get_cpu_info()
+	ram := app.get_memory_info()
+	app.print_kv({ 'CPU': cpu, 'RAM': ram })
+
+	// Interactive RAD prompts & tables
+	env := app.select('Target environment', ['dev', 'staging', 'prod'])
+	app.success('Selected ${env}')
+
+	// Desktop notification
+	app.notify('Ready', 'DeployCLI initialized.')
+}
+```
+
+See [CLI_API.md](CLI_API.md) for the complete SimpleCLI documentation.
 
 
 ---
