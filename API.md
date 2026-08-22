@@ -1438,18 +1438,44 @@ win.on_state_change('dark_mode', fn (mut win simplegui.SimpleWindow, val string)
 })
 ```
 
-### JSON Disk Persistence (`save_state_json` / `load_state_json`)
+### App State Persistence & Standard OS User Directories
+
+SimpleGUI provides robust, crash-proof state persistence following the recommended directory specifications for macOS (Apple File System / `~/Library/Application Support`), Windows (`%APPDATA%`, `%LOCALAPPDATA%`), and Linux (`$XDG_STATE_HOME`, `$XDG_CONFIG_HOME`, `~/.local/state`).
+
+All state persistence methods write atomically using temporary files and atomic renaming, preventing corrupted state files across abrupt shutdowns.
 
 ```v
-// Save state store to JSON file
-win.save_state_json('app_state.json') or {
-	win.error_dialog('Save Error', 'Failed to write app_state.json: ${err}')
+// 1. App-Level State Persistence in Recommended OS User Directories
+// Saves state to '<app_state_dir>/state.json'
+win.save_app_state('my_app') or {
+	win.error_dialog('Save Error', 'Failed to persist state: ${err}')
 }
 
-// Load state store from JSON file (Fires reactive UI listeners!)
-win.load_state_json('app_state.json') or {
-	win.warn('Load Info', 'No previous app_state.json found.')
+// Ergonomic non-error version
+win.save_app_state_or('my_app')
+
+// Load state upon startup (automatically updates reactive listeners and controls)
+if win.has_saved_app_state('my_app') {
+	win.load_app_state_or('my_app')
 }
+
+// Clear persisted state
+win.clear_app_state('my_app') or {}
+
+// 2. Automatic State Persistence on Exit
+win.enable_auto_save_state('my_app')
+
+// 3. Window Session & Geometry Persistence (Dimensions, theme, fullscreen, state keys)
+win.save_window_session('my_app') or {}
+win.restore_window_session('my_app') // Restores width, height, theme, fullscreen, and state store
+
+// 4. Custom Path JSON Persistence (with automatic tilde ~ and env expansion)
+win.save_state_json('~/app_state.json') or {}
+win.load_state_json('~/app_state.json') or {}
+
+// 5. Standalone Atomic State Serialization (no window instance required)
+simplegui.save_state_to_file('~/config.json', state_map) or {}
+loaded_map := simplegui.load_state_from_file('~/config.json') or { map[string]string{} }
 ```
 
 ---
@@ -1555,13 +1581,55 @@ num_files := win.get_open_file_count()
 swap_str := win.get_swap_usage()
 ```
 
-### Directories, Files, Archives & Storage Specs
+### Standard User Directories & Path Resolution
+
+SimpleGUI provides standardized directory lookups matching OS specifications across macOS, Windows, and Linux:
 
 ```v
-home_path := win.get_system_path('home')
-docs_path := win.get_system_path('documents')
+// 1. Standard User Directories
+home_path := win.get_system_path('home')       // User home directory
+docs_path := win.get_system_path('documents')  // Documents folder
+desk_path := win.get_system_path('desktop')    // Desktop folder
+down_path := win.get_system_path('downloads')  // Downloads folder
+conf_path := win.get_system_path('config')     // OS Config folder
+data_path := win.get_system_path('data')       // OS Data folder
+stat_path := win.get_system_path('state')      // OS State folder
+logs_path := win.get_system_path('logs')       // OS Logs folder
+temp_path := win.get_system_path('temp')       // OS Temp folder
 
-// File & Directory Utilities
+// 2. Application Directory Resolvers (by app name)
+// Resolves:
+// - macOS:   ~/Library/Application Support/<app>, ~/Library/Caches/<app>, ~/Library/Logs/<app>
+// - Windows: %APPDATA%\<app>, %LOCALAPPDATA%\<app>\State, %LOCALAPPDATA%\<app>\Logs
+// - Linux:   ~/.config/<app>, ~/.local/share/<app>, ~/.local/state/<app>, ~/.cache/<app>
+cfg_dir   := win.get_app_config_dir('my_app')
+data_dir  := win.get_app_data_dir('my_app')
+cache_dir := win.get_app_cache_dir('my_app')
+state_dir := win.get_app_state_dir('my_app')
+log_dir   := win.get_app_log_dir('my_app')
+run_dir   := win.get_app_runtime_dir('my_app')
+
+// 3. Application Target File Resolvers
+cfg_file  := win.get_app_config_file('my_app', 'settings.json')
+state_file:= win.get_app_state_file('my_app', 'state.json')
+log_file  := win.get_app_log_file('my_app', 'app.log')
+cache_file:= win.get_app_cache_file('my_app', 'image_cache.bin')
+
+// 4. Universal Path Resolution & Normalization
+// Expands ~, $VAR, ${VAR}, %VAR%, and normalizes slashes for the current OS
+clean_path := win.resolve_user_path('~/Documents/data.json')
+env_path   := win.resolve_user_path('${HOME}/.config/app/settings.json')
+win_path   := win.resolve_user_path('%APPDATA%/app/config.json')
+
+// Standalone functions (no window instance needed)
+home_dir := simplegui.get_user_home_dir()
+app_cfg  := simplegui.get_app_config_dir('my_app')
+resolved := simplegui.resolve_user_path('~/data.txt')
+```
+
+### File & Directory Utilities
+
+```v
 win.file_exists('/tmp/data.txt')
 win.is_dir('/tmp/my_folder')
 content := win.read_file('/tmp/data.txt')

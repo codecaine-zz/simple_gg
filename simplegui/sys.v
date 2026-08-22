@@ -201,12 +201,298 @@ pub fn (win &SimpleWindow) get_memory_info() string {
 }
 
 // ==========================================
-// 3. System Directory Lookup
+// 3. System Directory Lookup & Path Resolution
 // ==========================================
+
+// get_user_home_dir returns the current user's home directory across macOS, Windows, and Linux.
+pub fn get_user_home_dir() string {
+	home := os.home_dir()
+	if home != '' {
+		return home
+	}
+	$if windows {
+		userprofile := os.getenv('USERPROFILE')
+		if userprofile != '' {
+			return userprofile
+		}
+		homedrive := os.getenv('HOMEDRIVE')
+		homepath := os.getenv('HOMEPATH')
+		if homedrive != '' && homepath != '' {
+			return os.join_path(homedrive, homepath)
+		}
+	} $else {
+		env_home := os.getenv('HOME')
+		if env_home != '' {
+			return env_home
+		}
+	}
+	return '.'
+}
+
+// get_app_config_dir returns the recommended application configuration directory for the OS.
+// macOS: ~/Library/Application Support/<app_name>
+// Windows: %APPDATA%\<app_name>
+// Linux: $XDG_CONFIG_HOME/<app_name> (default ~/.config/<app_name>)
+pub fn get_app_config_dir(app_name string) string {
+	clean_name := if app_name.trim_space() != '' { sanitize_filename(app_name.trim_space()) } else { 'simplegui' }
+	$if macos {
+		home := get_user_home_dir()
+		return os.join_path(home, 'Library', 'Application Support', clean_name)
+	} $else $if windows {
+		appdata := os.getenv('APPDATA')
+		if appdata != '' {
+			return os.join_path(appdata, clean_name)
+		}
+		local := os.getenv('LOCALAPPDATA')
+		if local != '' {
+			return os.join_path(local, clean_name)
+		}
+		return os.join_path(get_user_home_dir(), 'AppData', 'Roaming', clean_name)
+	} $else {
+		xdg_config := os.getenv('XDG_CONFIG_HOME')
+		if xdg_config != '' {
+			return os.join_path(xdg_config, clean_name)
+		}
+		return os.join_path(get_user_home_dir(), '.config', clean_name)
+	}
+}
+
+// get_app_data_dir returns the recommended application data directory for the OS.
+// macOS: ~/Library/Application Support/<app_name>
+// Windows: %APPDATA%\<app_name> or %LOCALAPPDATA%\<app_name>
+// Linux: $XDG_DATA_HOME/<app_name> (default ~/.local/share/<app_name>)
+pub fn get_app_data_dir(app_name string) string {
+	clean_name := if app_name.trim_space() != '' { sanitize_filename(app_name.trim_space()) } else { 'simplegui' }
+	$if macos {
+		home := get_user_home_dir()
+		return os.join_path(home, 'Library', 'Application Support', clean_name)
+	} $else $if windows {
+		appdata := os.getenv('APPDATA')
+		if appdata != '' {
+			return os.join_path(appdata, clean_name)
+		}
+		local := os.getenv('LOCALAPPDATA')
+		if local != '' {
+			return os.join_path(local, clean_name)
+		}
+		return os.join_path(get_user_home_dir(), 'AppData', 'Roaming', clean_name)
+	} $else {
+		xdg_data := os.getenv('XDG_DATA_HOME')
+		if xdg_data != '' {
+			return os.join_path(xdg_data, clean_name)
+		}
+		return os.join_path(get_user_home_dir(), '.local', 'share', clean_name)
+	}
+}
+
+// get_app_cache_dir returns the recommended cache directory for the OS.
+// macOS: ~/Library/Caches/<app_name>
+// Windows: %LOCALAPPDATA%\<app_name>\Cache (or %TEMP%\<app_name>)
+// Linux: $XDG_CACHE_HOME/<app_name> (default ~/.cache/<app_name>)
+pub fn get_app_cache_dir(app_name string) string {
+	clean_name := if app_name.trim_space() != '' { sanitize_filename(app_name.trim_space()) } else { 'simplegui' }
+	$if macos {
+		home := get_user_home_dir()
+		return os.join_path(home, 'Library', 'Caches', clean_name)
+	} $else $if windows {
+		local := os.getenv('LOCALAPPDATA')
+		if local != '' {
+			return os.join_path(local, clean_name, 'Cache')
+		}
+		return os.join_path(os.temp_dir(), clean_name)
+	} $else {
+		xdg_cache := os.getenv('XDG_CACHE_HOME')
+		if xdg_cache != '' {
+			return os.join_path(xdg_cache, clean_name)
+		}
+		return os.join_path(get_user_home_dir(), '.cache', clean_name)
+	}
+}
+
+// get_app_state_dir returns the recommended persistent application state directory for the OS.
+// macOS: ~/Library/Application Support/<app_name>/state
+// Windows: %LOCALAPPDATA%\<app_name>\State
+// Linux: $XDG_STATE_HOME/<app_name> (default ~/.local/state/<app_name>)
+pub fn get_app_state_dir(app_name string) string {
+	clean_name := if app_name.trim_space() != '' { sanitize_filename(app_name.trim_space()) } else { 'simplegui' }
+	$if macos {
+		home := get_user_home_dir()
+		return os.join_path(home, 'Library', 'Application Support', clean_name, 'state')
+	} $else $if windows {
+		local := os.getenv('LOCALAPPDATA')
+		if local != '' {
+			return os.join_path(local, clean_name, 'State')
+		}
+		appdata := os.getenv('APPDATA')
+		if appdata != '' {
+			return os.join_path(appdata, clean_name, 'State')
+		}
+		return os.join_path(get_user_home_dir(), 'AppData', 'Local', clean_name, 'State')
+	} $else {
+		xdg_state := os.getenv('XDG_STATE_HOME')
+		if xdg_state != '' {
+			return os.join_path(xdg_state, clean_name)
+		}
+		return os.join_path(get_user_home_dir(), '.local', 'state', clean_name)
+	}
+}
+
+// get_app_log_dir returns the recommended log directory for the OS.
+// macOS: ~/Library/Logs/<app_name>
+// Windows: %LOCALAPPDATA%\<app_name>\Logs
+// Linux: $XDG_STATE_HOME/<app_name>/logs or ~/.local/state/<app_name>/logs
+pub fn get_app_log_dir(app_name string) string {
+	clean_name := if app_name.trim_space() != '' { sanitize_filename(app_name.trim_space()) } else { 'simplegui' }
+	$if macos {
+		home := get_user_home_dir()
+		return os.join_path(home, 'Library', 'Logs', clean_name)
+	} $else $if windows {
+		local := os.getenv('LOCALAPPDATA')
+		if local != '' {
+			return os.join_path(local, clean_name, 'Logs')
+		}
+		return os.join_path(get_user_home_dir(), 'AppData', 'Local', clean_name, 'Logs')
+	} $else {
+		xdg_state := os.getenv('XDG_STATE_HOME')
+		if xdg_state != '' {
+			return os.join_path(xdg_state, clean_name, 'logs')
+		}
+		return os.join_path(get_user_home_dir(), '.local', 'state', clean_name, 'logs')
+	}
+}
+
+// get_app_runtime_dir returns the recommended runtime/transient directory for the OS.
+// macOS: /tmp/<app_name>-<user>
+// Windows: %TEMP%\<app_name>
+// Linux: $XDG_RUNTIME_DIR/<app_name> (default /tmp/<app_name>-<uid>)
+pub fn get_app_runtime_dir(app_name string) string {
+	clean_name := if app_name.trim_space() != '' { sanitize_filename(app_name.trim_space()) } else { 'simplegui' }
+	$if macos {
+		user := os.user_os()
+		return os.join_path(os.temp_dir(), '${clean_name}-${user}')
+	} $else $if windows {
+		return os.join_path(os.temp_dir(), clean_name)
+	} $else {
+		xdg_runtime := os.getenv('XDG_RUNTIME_DIR')
+		if xdg_runtime != '' {
+			return os.join_path(xdg_runtime, clean_name)
+		}
+		return os.join_path(os.temp_dir(), '${clean_name}-${os.getuid()}')
+	}
+}
+
+// get_app_config_file resolves a specific configuration file in the app config directory.
+pub fn get_app_config_file(app_name string, file_name string) string {
+	clean_file := sanitize_filename(file_name)
+	return os.join_path(get_app_config_dir(app_name), clean_file)
+}
+
+// get_app_state_file resolves a specific state file in the app state directory.
+pub fn get_app_state_file(app_name string, file_name string) string {
+	clean_file := sanitize_filename(file_name)
+	return os.join_path(get_app_state_dir(app_name), clean_file)
+}
+
+// get_app_cache_file resolves a specific cache file in the app cache directory.
+pub fn get_app_cache_file(app_name string, file_name string) string {
+	clean_file := sanitize_filename(file_name)
+	return os.join_path(get_app_cache_dir(app_name), clean_file)
+}
+
+// get_app_log_file resolves a specific log file in the app log directory.
+pub fn get_app_log_file(app_name string, file_name string) string {
+	clean_file := sanitize_filename(file_name)
+	return os.join_path(get_app_log_dir(app_name), clean_file)
+}
+
+// resolve_user_path expands user home tildes (~), environment variables ($VAR, ${VAR}, %VAR%),
+// and normalizes directory separators for the current operating system.
+pub fn resolve_user_path(raw_path string) string {
+	trimmed := raw_path.trim_space()
+	if trimmed == '' {
+		return ''
+	}
+
+	mut p := trimmed
+
+	// 1. Expand environment variables: ${VAR}, %VAR%, $VAR
+	for p.contains(r'${') {
+		start := p.index(r'${') or { break }
+		end := p.index_after(r'}', start) or { break }
+		var_name := p[start + 2..end]
+		env_val := os.getenv(var_name)
+		p = p[..start] + env_val + p[end + 1..]
+	}
+
+	if p.contains('%') {
+		parts := p.split('%')
+		if parts.len >= 3 {
+			mut sb := []string{}
+			mut i := 0
+			for i < parts.len {
+				if i + 1 < parts.len && i % 2 == 1 {
+					var_name := parts[i]
+					env_val := os.getenv(var_name)
+					sb << env_val
+				} else {
+					sb << parts[i]
+				}
+				i++
+			}
+			p = sb.join('')
+		}
+	}
+
+	if p.contains('$') {
+		mut res := []u8{cap: p.len}
+		mut i := 0
+		bytes := p.bytes()
+		for i < bytes.len {
+			if bytes[i] == `$` && i + 1 < bytes.len && (bytes[i + 1].is_letter() || bytes[i + 1] == `_`) {
+				mut j := i + 1
+				for j < bytes.len && (bytes[j].is_letter() || bytes[j].is_digit() || bytes[j] == `_`) {
+					j++
+				}
+				var_name := p[i + 1..j]
+				env_val := os.getenv(var_name)
+				for b in env_val.bytes() {
+					res << b
+				}
+				i = j
+			} else {
+				res << bytes[i]
+				i++
+			}
+		}
+		p = res.bytestr()
+	}
+
+	// 2. Expand tildes (~ and ~/ or ~\ )
+	home := get_user_home_dir()
+	if p == '~' {
+		p = home
+	} else if p.starts_with('~/') || p.starts_with('~\\') {
+		p = os.join_path(home, p[2..])
+	}
+
+	// 3. Normalize path separators per OS
+	$if windows {
+		p = p.replace('/', '\\')
+	} $else {
+		p = p.replace('\\', '/')
+	}
+
+	return p
+}
+
+// expand_user_path is an ergonomic alias for `resolve_user_path`.
+pub fn expand_user_path(raw_path string) string {
+	return resolve_user_path(raw_path)
+}
 
 // get_system_path resolves paths to standard environment folders across platforms.
 pub fn (win &SimpleWindow) get_system_path(name string) string {
-	home := os.home_dir()
+	home := get_user_home_dir()
 	return match name.to_lower() {
 		'home' { home }
 		'temp', 'tmp' { os.temp_dir() }
@@ -214,11 +500,93 @@ pub fn (win &SimpleWindow) get_system_path(name string) string {
 		'documents' { os.join_path(home, 'Documents') }
 		'downloads' { os.join_path(home, 'Downloads') }
 		'cache' { os.cache_dir() }
-		'config' { os.config_dir() or { '' } }
+		'config' { os.config_dir() or { os.join_path(home, '.config') } }
 		'data' { os.data_dir() }
+		'state' {
+			$if macos {
+				os.join_path(home, 'Library', 'Application Support')
+			} $else $if windows {
+				env := os.getenv('LOCALAPPDATA')
+				if env != '' { env } else { os.join_path(home, 'AppData', 'Local') }
+			} $else {
+				env := os.getenv('XDG_STATE_HOME')
+				if env != '' { env } else { os.join_path(home, '.local', 'state') }
+			}
+		}
+		'logs' {
+			$if macos {
+				os.join_path(home, 'Library', 'Logs')
+			} $else $if windows {
+				env := os.getenv('LOCALAPPDATA')
+				if env != '' { os.join_path(env, 'Logs') } else { os.join_path(home, 'AppData', 'Local', 'Logs') }
+			} $else {
+				env := os.getenv('XDG_STATE_HOME')
+				if env != '' { os.join_path(env, 'logs') } else { os.join_path(home, '.local', 'state', 'logs') }
+			}
+		}
 		'app' { os.dir(os.executable()) }
 		else { home }
 	}
+}
+
+// resolve_user_path expands user home tildes (~), environment variables, and normalizes separators on SimpleWindow.
+pub fn (win &SimpleWindow) resolve_user_path(raw_path string) string {
+	return resolve_user_path(raw_path)
+}
+
+// expand_user_path is an ergonomic alias for SimpleWindow.resolve_user_path.
+pub fn (win &SimpleWindow) expand_user_path(raw_path string) string {
+	return resolve_user_path(raw_path)
+}
+
+// get_app_config_dir returns the recommended application configuration directory for the OS on SimpleWindow.
+pub fn (win &SimpleWindow) get_app_config_dir(app_name string) string {
+	return get_app_config_dir(app_name)
+}
+
+// get_app_data_dir returns the recommended application data directory for the OS on SimpleWindow.
+pub fn (win &SimpleWindow) get_app_data_dir(app_name string) string {
+	return get_app_data_dir(app_name)
+}
+
+// get_app_cache_dir returns the recommended cache directory for the OS on SimpleWindow.
+pub fn (win &SimpleWindow) get_app_cache_dir(app_name string) string {
+	return get_app_cache_dir(app_name)
+}
+
+// get_app_state_dir returns the recommended persistent state directory for the OS on SimpleWindow.
+pub fn (win &SimpleWindow) get_app_state_dir(app_name string) string {
+	return get_app_state_dir(app_name)
+}
+
+// get_app_log_dir returns the recommended log directory for the OS on SimpleWindow.
+pub fn (win &SimpleWindow) get_app_log_dir(app_name string) string {
+	return get_app_log_dir(app_name)
+}
+
+// get_app_runtime_dir returns the recommended runtime directory for the OS on SimpleWindow.
+pub fn (win &SimpleWindow) get_app_runtime_dir(app_name string) string {
+	return get_app_runtime_dir(app_name)
+}
+
+// get_app_config_file resolves a specific configuration file in the app config directory on SimpleWindow.
+pub fn (win &SimpleWindow) get_app_config_file(app_name string, file_name string) string {
+	return get_app_config_file(app_name, file_name)
+}
+
+// get_app_state_file resolves a specific state file in the app state directory on SimpleWindow.
+pub fn (win &SimpleWindow) get_app_state_file(app_name string, file_name string) string {
+	return get_app_state_file(app_name, file_name)
+}
+
+// get_app_cache_file resolves a specific cache file in the app cache directory on SimpleWindow.
+pub fn (win &SimpleWindow) get_app_cache_file(app_name string, file_name string) string {
+	return get_app_cache_file(app_name, file_name)
+}
+
+// get_app_log_file resolves a specific log file in the app log directory on SimpleWindow.
+pub fn (win &SimpleWindow) get_app_log_file(app_name string, file_name string) string {
+	return get_app_log_file(app_name, file_name)
 }
 
 // ==========================================

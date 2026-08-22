@@ -11,6 +11,7 @@ module simplegui
 
 import json2
 import os
+import time
 
 // StringEventCallback is a callback function invoked with a string parameter (e.g. state value change).
 pub type StringEventCallback = fn (mut win SimpleWindow, value string)
@@ -250,19 +251,186 @@ pub fn (mut win SimpleWindow) on_state_change(key string, cb StringEventCallback
 	return win
 }
 
+// write_file_atomic writes data safely to a temporary file before atomically renaming it,
+// ensuring that crashes, power cuts, or concurrent readers never observe corrupted partial files.
+pub fn write_file_atomic(file_path string, content string) ! {
+	resolved := resolve_user_path(file_path)
+	parent_dir := os.dir(resolved)
+	if parent_dir != '' && !os.exists(parent_dir) {
+		os.mkdir_all(parent_dir) or { return error('Failed to create parent directory: ${parent_dir} (${err.msg()})') }
+	}
+
+	rand_id := '${os.getpid()}_${time.now().unix_nano()}'
+	tmp_path := '${resolved}.${rand_id}.tmp'
+
+	os.write_file(tmp_path, content) or {
+		return error('Failed to write temporary state file: ${tmp_path} (${err.msg()})')
+	}
+
+	$if windows {
+		if os.exists(resolved) {
+			os.rm(resolved) or {}
+		}
+	}
+	os.mv(tmp_path, resolved) or {
+		os.rm(tmp_path) or {}
+		return error('Failed to atomically rename state file to: ${resolved} (${err.msg()})')
+	}
+}
+
+// save_state_to_file serializes a key-value state store dictionary to JSON at target path atomically.
+pub fn save_state_to_file(file_path string, store map[string]string) ! {
+	resolved := resolve_user_path(file_path)
+	data := json2.encode(store)
+	write_file_atomic(resolved, data) or { return error(err.msg()) }
+}
+
+// load_state_from_file reads and deserializes a JSON state map from disk.
+pub fn load_state_from_file(file_path string) !map[string]string {
+	resolved := resolve_user_path(file_path)
+	if !os.exists(resolved) {
+		return error('State file not found: ${resolved}')
+	}
+	content := os.read_file(resolved) or { return error(err.msg()) }
+	if content.trim_space() == '' {
+		return map[string]string{}
+	}
+	loaded := json2.decode[map[string]string](content) or { return error(err.msg()) }
+	return loaded
+}
+
 // save_state_json serializes the entire state store dictionary to a JSON file at `file_path`.
+// Automatically expands user home/env paths and writes atomically to prevent file corruption.
 pub fn (win &SimpleWindow) save_state_json(file_path string) ! {
-	data := json2.encode(win.state_store)
-	os.write_file(file_path, data) or { return error(err.msg()) }
+	save_state_to_file(file_path, win.state_store) or { return error(err.msg()) }
 }
 
 // load_state_json reads a JSON file from `file_path`, updates the state store, and triggers reactive listeners.
+// Automatically expands user home/env paths.
 pub fn (mut win SimpleWindow) load_state_json(file_path string) ! {
-	content := os.read_file(file_path) or { return error(err.msg()) }
-	loaded := json2.decode[map[string]string](content) or { return error(err.msg()) }
+	loaded := load_state_from_file(file_path) or { return error(err.msg()) }
 	for key, val in loaded {
 		win.set_state(key, val)
 	}
+}
+
+// save_app_state persists the window's state store into the recommended OS user state directory.
+// Default target file: '<app_state_dir>/state.json'.
+// Employs atomic file writing to prevent state corruption across crashes or interruptions.
+pub fn (win &SimpleWindow) save_app_state(app_name string, file_name ...string) ! {
+	fname := if file_name.len > 0 && file_name[0] != '' { file_name[0] } else { 'state.json' }
+	target_file := get_app_state_file(app_name, fname)
+	win.save_state_json(target_file) or { return error(err.msg()) }
+}
+
+// save_app_state_or persists the state store into the recommended OS user directory, returning a boolean success flag.
+pub fn (win &SimpleWindow) save_app_state_or(app_name string, file_name ...string) bool {
+	win.save_app_state(app_name, ...file_name) or { return false }
+	return true
+}
+
+// load_app_state reads persisted JSON state from the recommended OS user state directory, updates the store,
+// and invokes registered reactive listeners.
+// Returns `true` if state was found and loaded, `false` if no saved state file existed.
+pub fn (mut win SimpleWindow) load_app_state(app_name string, file_name ...string) !bool {
+	fname := if file_name.len > 0 && file_name[0] != '' { file_name[0] } else { 'state.json' }
+	target_file := get_app_state_file(app_name, fname)
+	if !os.exists(target_file) {
+		fallback_file := get_app_config_file(app_name, fname)
+		if !os.exists(fallback_file) {
+			return false
+		}
+		win.load_state_json(fallback_file) or { return error(err.msg()) }
+		return true
+	}
+	win.load_state_json(target_file) or { return error(err.msg()) }
+	return true
+}
+
+// load_app_state_or loads state from recommended OS user state directory, returning whether it succeeded.
+pub fn (mut win SimpleWindow) load_app_state_or(app_name string, file_name ...string) bool {
+	loaded := win.load_app_state(app_name, ...file_name) or { return false }
+	return loaded
+}
+
+// has_saved_app_state checks whether a persisted state file exists in the recommended OS user state directory.
+pub fn (win &SimpleWindow) has_saved_app_state(app_name string, file_name ...string) bool {
+	fname := if file_name.len > 0 && file_name[0] != '' { file_name[0] } else { 'state.json' }
+	target_file := get_app_state_file(app_name, fname)
+	if os.exists(target_file) {
+		return true
+	}
+	fallback_file := get_app_config_file(app_name, fname)
+	return os.exists(fallback_file)
+}
+
+// clear_app_state deletes the persisted state file from the recommended OS user state directory.
+pub fn (win &SimpleWindow) clear_app_state(app_name string, file_name ...string) ! {
+	fname := if file_name.len > 0 && file_name[0] != '' { file_name[0] } else { 'state.json' }
+	target_file := get_app_state_file(app_name, fname)
+	if os.exists(target_file) {
+		os.rm(target_file) or { return error('Failed to delete app state: ${err.msg()}') }
+	}
+	fallback_file := get_app_config_file(app_name, fname)
+	if os.exists(fallback_file) {
+		os.rm(fallback_file) or {}
+	}
+}
+
+// save_window_session persists current window dimensions, active theme, and state keys to session.json.
+pub fn (win &SimpleWindow) save_window_session(app_name string) ! {
+	mut session_data := map[string]string{}
+	for k, v in win.state_store {
+		session_data[k] = v
+	}
+	session_data['__win_width'] = win.width.str()
+	session_data['__win_height'] = win.height.str()
+	session_data['__win_theme'] = win.theme.name
+	session_data['__win_fullscreen'] = win.fullscreen.str()
+
+	target_file := get_app_state_file(app_name, 'session.json')
+	save_state_to_file(target_file, session_data) or { return error(err.msg()) }
+}
+
+// restore_window_session loads session.json and restores state, theme, and window dimensions.
+pub fn (mut win SimpleWindow) restore_window_session(app_name string) bool {
+	target_file := get_app_state_file(app_name, 'session.json')
+	if !os.exists(target_file) {
+		return false
+	}
+	loaded := load_state_from_file(target_file) or { return false }
+	for k, v in loaded {
+		if k == '__win_theme' {
+			win.set_theme(v)
+		} else if k == '__win_fullscreen' {
+			if v == 'true' {
+				win.set_fullscreen(true)
+			}
+		} else if k == '__win_width' {
+			w := v.int()
+			if w > 100 {
+				win.width = w
+			}
+		} else if k == '__win_height' {
+			h := v.int()
+			if h > 100 {
+				win.height = h
+			}
+		} else {
+			win.set_state(k, v)
+		}
+	}
+	return true
+}
+
+// enable_auto_save_state configures the window to automatically persist its state on window close.
+pub fn (mut win SimpleWindow) enable_auto_save_state(app_name string, file_name ...string) &SimpleWindow {
+	fname := if file_name.len > 0 && file_name[0] != '' { file_name[0] } else { 'state.json' }
+	win.on_close(fn [app_name, fname] (mut w SimpleWindow) bool {
+		w.save_app_state_or(app_name, fname)
+		return true
+	})
+	return win
 }
 
 // =============================================================================

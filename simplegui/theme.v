@@ -515,8 +515,12 @@ pub fn get_theme(theme_name string) Theme {
 
 // get_theme_config_path returns the file path used to persist the active window theme.
 fn get_theme_config_path() string {
-	base := os.config_dir() or { os.join_path(os.home_dir(), '.config') }
-	return os.join_path(base, 'simplegui', 'theme.txt')
+	recommended_path := get_app_config_file('simplegui', 'theme.txt')
+	legacy_path := os.join_path(get_user_home_dir(), '.config', 'simplegui', 'theme.txt')
+	if !os.exists(recommended_path) && os.exists(legacy_path) {
+		return legacy_path
+	}
+	return recommended_path
 }
 
 // get_saved_theme retrieves the persisted theme preference, defaulting to 'GitHub Dark'.
@@ -534,11 +538,7 @@ pub fn get_saved_theme() string {
 // save_theme persists the active theme preference to disk.
 pub fn save_theme(theme_name string) bool {
 	path := get_theme_config_path()
-	dir := os.dir(path)
-	if !os.exists(dir) {
-		os.mkdir_all(dir) or { return false }
-	}
-	os.write_file(path, theme_name.trim_space()) or { return false }
+	write_file_atomic(path, theme_name.trim_space()) or { return false }
 	return true
 }
 
