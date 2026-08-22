@@ -13,6 +13,7 @@ import os
 import term
 import time
 import json2
+import strings
 
 // LogLevel defines the severity threshold for console and file logging.
 pub enum LogLevel {
@@ -22,6 +23,95 @@ pub enum LogLevel {
 	warn  = 3
 	error = 4
 	silent = 5
+}
+
+// AlertKind defines the visual style and icon of an alert callout box.
+pub enum AlertKind {
+	info
+	success
+	warning
+	caution
+	tip
+	note
+}
+
+// TaskStatus represents the lifecycle state of a task checklist item.
+pub enum TaskStatus {
+	pending
+	running
+	done
+	failed
+	skipped
+}
+
+// FormFieldKind represents the data input type for form wizard fields.
+pub enum FormFieldKind {
+	text
+	number
+	boolean
+	password
+}
+
+// FormField defines a single field inside an interactive multi-field form.
+pub struct FormField {
+pub:
+	key         string
+	label       string
+	kind        FormFieldKind = .text
+	default_val string
+	required    bool
+}
+
+// PathMode defines path validation requirements for path prompts.
+pub enum PathMode {
+	any
+	must_exist
+	file
+	directory
+}
+
+// TreeNode represents a node in a hierarchical console tree visualizer.
+pub struct TreeNode {
+pub mut:
+	label    string
+	children []TreeNode
+}
+
+// new_tree_node creates a new tree node.
+pub fn new_tree_node(label string) TreeNode {
+	return TreeNode{
+		label: label
+	}
+}
+
+// add_child adds a child label to a tree node and returns a reference to the created child.
+pub fn (mut node TreeNode) add_child(child_label string) &TreeNode {
+	node.children << TreeNode{
+		label: child_label
+	}
+	return &node.children[node.children.len - 1]
+}
+
+// add_node adds an existing TreeNode as a child.
+pub fn (mut node TreeNode) add_node(child TreeNode) &TreeNode {
+	node.children << child
+	return &node.children[node.children.len - 1]
+}
+
+// PipelineStep represents a single executable stage in a task pipeline.
+pub struct PipelineStep {
+pub:
+	name    string
+	step_fn fn () bool @[required]
+}
+
+// Pipeline executes multi-stage workflow tasks with live spinners and timers.
+@[heap]
+pub struct Pipeline {
+pub mut:
+	title string
+	steps []PipelineStep
+	cli   &SimpleCli
 }
 
 // FlagOption represents a command-line flag definition.
@@ -704,6 +794,421 @@ pub fn (cli &SimpleCli) spinner(msg string, duration_ms int) &SimpleCli {
 	return cli
 }
 
+// sparkline converts a slice of floating point numbers into a compact Unicode sparkline string.
+pub fn (cli &SimpleCli) sparkline(values []f64) string {
+	if values.len == 0 {
+		return ''
+	}
+	glyphs := [' ', '▂', '▃', '▄', '▅', '▆', '▇', '█']
+	mut min_v := values[0]
+	mut max_v := values[0]
+	for v in values {
+		if v < min_v {
+			min_v = v
+		}
+		if v > max_v {
+			max_v = v
+		}
+	}
+	if max_v == min_v {
+		return '▄'.repeat(values.len)
+	}
+	mut res := strings.new_builder(values.len * 4)
+	for v in values {
+		idx := int(((v - min_v) / (max_v - min_v)) * f64(glyphs.len - 1))
+		clamped_idx := if idx < 0 { 0 } else if idx >= glyphs.len { glyphs.len - 1 } else { idx }
+		res.write_string(glyphs[clamped_idx])
+	}
+	return res.str()
+}
+
+// bar_chart renders a stylish horizontal ASCII/Unicode bar chart.
+pub fn (cli &SimpleCli) bar_chart(title string, data map[string]f64, max_width int) &SimpleCli {
+	if cli.silent_mode || data.len == 0 {
+		return cli
+	}
+	w := if max_width > 0 { max_width } else { 30 }
+	mut max_val := 0.0
+	mut max_lbl_len := 0
+	for k, v in data {
+		if v > max_val {
+			max_val = v
+		}
+		if k.len > max_lbl_len {
+			max_lbl_len = k.len
+		}
+	}
+	max_lbl_len = int_max(max_lbl_len, 8)
+	
+	if title.len > 0 {
+		println('\n${cli.bold(title)}')
+		cli.divider('─', max_lbl_len + w + 20)
+	}
+
+	for k, v in data {
+		pct := if max_val > 0.0 { (v / max_val) * 100.0 } else { 0.0 }
+		bar_len := if max_val > 0.0 { int((v / max_val) * f64(w)) } else { 0 }
+		clamped_bar_len := if bar_len < 0 { 0 } else if bar_len > w { w } else { bar_len }
+		
+		bar_str := '█'.repeat(clamped_bar_len) + '░'.repeat(w - clamped_bar_len)
+		pad := ' '.repeat(int_max(0, max_lbl_len - k.len))
+		
+		println('  ${cli.bold(k)}${pad}  ${cli.cyan(bar_str)}  ${v:6.1f} ${cli.dim('(' + pct.str() + '%)')}')
+	}
+	println('')
+	return cli
+}
+
+// gauge displays a single-metric meter gauge with threshold status indicator.
+pub fn (cli &SimpleCli) gauge(title string, value f64, max f64, unit string) &SimpleCli {
+	if cli.silent_mode {
+		return cli
+	}
+	pct := if max > 0.0 { (value / max) * 100.0 } else { 0.0 }
+	clamped_pct := math_clamp_f64(pct, 0.0, 100.0)
+	bar_w := 20
+	filled := int((clamped_pct / 100.0) * f64(bar_w))
+	clamped_filled := if filled < 0 { 0 } else if filled > bar_w { bar_w } else { filled }
+	
+	bar_str := '█'.repeat(clamped_filled) + '░'.repeat(bar_w - clamped_filled)
+	
+	mut colored_bar := cli.green(bar_str)
+	mut status_badge := cli.green('[OK]')
+	if clamped_pct >= 90.0 {
+		colored_bar = cli.red(bar_str)
+		status_badge = cli.red('[CRITICAL]')
+	} else if clamped_pct >= 75.0 {
+		colored_bar = cli.yellow(bar_str)
+		status_badge = cli.yellow('[WARN]')
+	}
+	
+	u := if unit.len > 0 { ' ' + unit } else { '' }
+	println('  ${cli.bold(title)}: [${colored_bar}] ${value:5.1f}/${max:5.1f}${u} (${clamped_pct:5.1f}%) ${status_badge}')
+	return cli
+}
+
+// tree renders a hierarchical tree structure to console.
+pub fn (cli &SimpleCli) tree(root TreeNode) &SimpleCli {
+	if cli.silent_mode {
+		return cli
+	}
+	println(cli.bold(root.label))
+	cli.render_tree_children(root.children, '')
+	return cli
+}
+
+fn (cli &SimpleCli) render_tree_children(children []TreeNode, prefix string) {
+	for i, child in children {
+		is_last := i == children.len - 1
+		connector := if is_last { '└── ' } else { '├── ' }
+		println('${cli.dim(prefix + connector)}${child.label}')
+		new_prefix := prefix + if is_last { '    ' } else { '│   ' }
+		if child.children.len > 0 {
+			cli.render_tree_children(child.children, new_prefix)
+		}
+	}
+}
+
+// diff_text generates a colorized line-by-line diff between two strings.
+pub fn (cli &SimpleCli) diff_text(old_text string, new_text string) string {
+	old_lines := old_text.split('\n')
+	new_lines := new_text.split('\n')
+	
+	mut b := strings.new_builder(1024)
+	mut additions := 0
+	mut deletions := 0
+	
+	max_lines := int_max(old_lines.len, new_lines.len)
+	for i in 0 .. max_lines {
+		line_num := (i + 1).str()
+		pad := ' '.repeat(int_max(0, 4 - line_num.len))
+		
+		if i < old_lines.len && i < new_lines.len {
+			if old_lines[i] == new_lines[i] {
+				b.write_string('  ${cli.dim(line_num + pad + ' |')}   ${old_lines[i]}\n')
+			} else {
+				deletions++
+				additions++
+				b.write_string('  ${cli.red(line_num + pad + ' -')} ${cli.red(old_lines[i])}\n')
+				b.write_string('  ${cli.green(line_num + pad + ' +')} ${cli.green(new_lines[i])}\n')
+			}
+		} else if i < old_lines.len {
+			deletions++
+			b.write_string('  ${cli.red(line_num + pad + ' -')} ${cli.red(old_lines[i])}\n')
+		} else if i < new_lines.len {
+			additions++
+			b.write_string('  ${cli.green(line_num + pad + ' +')} ${cli.green(new_lines[i])}\n')
+		}
+	}
+	summary := '  ${cli.dim('───')} ${cli.green('+' + additions.str() + ' additions')}, ${cli.red('-' + deletions.str() + ' deletions')} ${cli.dim('───')}\n'
+	b.write_string(summary)
+	return b.str()
+}
+
+// diff displays a colorized line-by-line unified diff between two text strings.
+pub fn (cli &SimpleCli) diff(old_text string, new_text string) &SimpleCli {
+	if !cli.silent_mode {
+		print(cli.diff_text(old_text, new_text))
+	}
+	return cli
+}
+
+// badge formats an ANSI styled badge tag (e.g. `[PROD: ACTIVE]`).
+pub fn (cli &SimpleCli) badge(prefix string, label string, level LogLevel) string {
+	tag := if prefix.len > 0 { '${prefix}: ${label}' } else { label }
+	if cli.no_color {
+		return '[${tag}]'
+	}
+	return match level {
+		.trace { cli.dim('[${tag}]') }
+		.debug { cli.magenta('[${tag}]') }
+		.info { cli.cyan('[${tag}]') }
+		.warn { cli.yellow('[${tag}]') }
+		.error { cli.red('[${tag}]') }
+		.silent { '[${tag}]' }
+	}
+}
+
+// alert displays a framed callout box with icon and style matching AlertKind.
+pub fn (cli &SimpleCli) alert(kind AlertKind, title string, msg string) &SimpleCli {
+	if cli.silent_mode {
+		return cli
+	}
+	mut icon := 'ℹ'
+	mut border_color_fn := cli.cyan
+	mut badge_text := 'NOTE'
+	
+	match kind {
+		.info {
+			icon = 'ℹ'
+			border_color_fn = cli.cyan
+			badge_text = 'INFO'
+		}
+		.success {
+			icon = '✓'
+			border_color_fn = cli.green
+			badge_text = 'SUCCESS'
+		}
+		.warning {
+			icon = '⚠'
+			border_color_fn = cli.yellow
+			badge_text = 'WARNING'
+		}
+		.caution {
+			icon = '✖'
+			border_color_fn = cli.red
+			badge_text = 'CAUTION'
+		}
+		.tip {
+			icon = '💡'
+			border_color_fn = cli.magenta
+			badge_text = 'TIP'
+		}
+		.note {
+			icon = '📝'
+			border_color_fn = cli.blue
+			badge_text = 'NOTE'
+		}
+	}
+	
+	header := '${icon}  ${badge_text}: ${title}'
+	lines := msg.split('\n')
+	mut max_len := header.len + 2
+	for l in lines {
+		if l.len > max_len {
+			max_len = l.len
+		}
+	}
+	max_len = int_max(max_len, 44)
+	
+	println(border_color_fn('┌' + '─'.repeat(max_len + 4) + '┐'))
+	println(border_color_fn('│ ') + cli.bold(header) + ' '.repeat(int_max(0, max_len - header.len + 2)) + border_color_fn(' │'))
+	println(border_color_fn('├' + '─'.repeat(max_len + 4) + '┤'))
+	for l in lines {
+		pad := ' '.repeat(int_max(0, max_len - l.len + 2))
+		println(border_color_fn('│ ') + l + pad + border_color_fn(' │'))
+	}
+	println(border_color_fn('└' + '─'.repeat(max_len + 4) + '┘'))
+	return cli
+}
+
+// task_item renders a structured checklist item with icon, title, and duration/status.
+pub fn (cli &SimpleCli) task_item(title string, status TaskStatus, duration_ms i64) &SimpleCli {
+	if cli.silent_mode {
+		return cli
+	}
+	dur_str := if duration_ms > 0 { cli.dim(' (${duration_ms} ms)') } else { '' }
+	match status {
+		.done {
+			println('  ${cli.green('✓')} ${title}${dur_str}')
+		}
+		.running {
+			println('  ${cli.cyan('⏳')} ${title}...${dur_str}')
+		}
+		.pending {
+			println('  ${cli.dim('○')} ${title}')
+		}
+		.failed {
+			println('  ${cli.red('✖')} ${title} ${cli.red('[FAILED]')}${dur_str}')
+		}
+		.skipped {
+			println('  ${cli.yellow('↷')} ${title} ${cli.dim('[SKIPPED]')}')
+		}
+	}
+	return cli
+}
+
+// table_to_csv converts table headers and rows into a standard CSV string.
+pub fn (cli &SimpleCli) table_to_csv(headers []string, rows [][]string) string {
+	mut b := strings.new_builder(512)
+	if headers.len > 0 {
+		b.write_string(headers.map(escape_csv_cell).join(',') + '\n')
+	}
+	for r in rows {
+		b.write_string(r.map(escape_csv_cell).join(',') + '\n')
+	}
+	return b.str()
+}
+
+fn escape_csv_cell(cell string) string {
+	if cell.contains(',') || cell.contains('"') || cell.contains('\n') {
+		return '"' + cell.replace('"', '""') + '"'
+	}
+	return cell
+}
+
+// table_to_markdown converts table headers and rows into a formatted Markdown table.
+pub fn (cli &SimpleCli) table_to_markdown(headers []string, rows [][]string) string {
+	if headers.len == 0 && rows.len == 0 {
+		return ''
+	}
+	mut b := strings.new_builder(512)
+	col_count := if headers.len > 0 { headers.len } else { rows[0].len }
+	
+	if headers.len > 0 {
+		b.write_string('| ' + headers.join(' | ') + ' |\n')
+		mut sep := []string{}
+		for _ in 0 .. col_count {
+			sep << ':---'
+		}
+		b.write_string('| ' + sep.join(' | ') + ' |\n')
+	}
+	for r in rows {
+		mut line := []string{}
+		for i in 0 .. col_count {
+			line << if i < r.len { r[i] } else { '' }
+		}
+		b.write_string('| ' + line.join(' | ') + ' |\n')
+	}
+	return b.str()
+}
+
+// table_to_json converts table headers and rows into a JSON array of objects.
+pub fn (cli &SimpleCli) table_to_json(headers []string, rows [][]string) string {
+	if headers.len == 0 || rows.len == 0 {
+		return '[]'
+	}
+	mut list := []map[string]string{}
+	for r in rows {
+		mut obj := map[string]string{}
+		for i, h in headers {
+			obj[h] = if i < r.len { r[i] } else { '' }
+		}
+		list << obj
+	}
+	return json2.encode[[]map[string]string](list)
+}
+
+// json_highlight adds syntax color highlighting to a JSON string for terminal display.
+pub fn (cli &SimpleCli) json_highlight(json_str string) string {
+	if cli.no_color {
+		return json_str
+	}
+	mut res := strings.new_builder(json_str.len * 2)
+	mut i := 0
+	
+	for i < json_str.len {
+		ch := json_str[i]
+		if ch == `"` {
+			mut j := i + 1
+			for j < json_str.len && json_str[j] != `"` {
+				if json_str[j] == `\\` {
+					j++
+				}
+				j++
+			}
+			str_val := if j < json_str.len { json_str[i .. j + 1] } else { json_str[i..] }
+			mut k := j + 1
+			for k < json_str.len && (json_str[k] == ` ` || json_str[k] == `\t` || json_str[k] == `\n` || json_str[k] == `\r`) {
+				k++
+			}
+			if k < json_str.len && json_str[k] == `:` {
+				res.write_string(cli.cyan(str_val))
+			} else {
+				res.write_string(cli.green(str_val))
+			}
+			i = j + 1
+			continue
+		} else if ch == `{` || ch == `}` || ch == `[` || ch == `]` {
+			res.write_string(cli.dim(ch.ascii_str()))
+		} else if ch == `:` || ch == `,` {
+			res.write_string(cli.dim(ch.ascii_str()))
+		} else if (ch >= `0` && ch <= `9`) || ch == `-` {
+			mut j := i
+			for j < json_str.len && ((json_str[j] >= `0` && json_str[j] <= `9`) || json_str[j] == `.` || json_str[j] == `-` || json_str[j] == `e` || json_str[j] == `E`) {
+				j++
+			}
+			num_val := json_str[i..j]
+			res.write_string(cli.yellow(num_val))
+			i = j
+			continue
+		} else if json_str[i..].starts_with('true') {
+			res.write_string(cli.magenta('true'))
+			i += 4
+			continue
+		} else if json_str[i..].starts_with('false') {
+			res.write_string(cli.magenta('false'))
+			i += 5
+			continue
+		} else if json_str[i..].starts_with('null') {
+			res.write_string(cli.dim('null'))
+			i += 4
+			continue
+		} else {
+			res.write_string(ch.ascii_str())
+		}
+		i++
+	}
+	return res.str()
+}
+
+// render_markdown parses basic Markdown (headings, lists, bold, blockquotes) and outputs styled console text.
+pub fn (cli &SimpleCli) render_markdown(md_text string) &SimpleCli {
+	if cli.silent_mode {
+		return cli
+	}
+	lines := md_text.split('\n')
+	for line in lines {
+		trimmed := line.trim_space()
+		if trimmed.starts_with('# ') {
+			println('\n${cli.bold(cli.cyan(trimmed[2..]))}')
+			cli.divider('═', int_max(40, trimmed.len + 10))
+		} else if trimmed.starts_with('## ') {
+			println('\n${cli.bold(trimmed[3..])}')
+			cli.divider('─', int_max(30, trimmed.len + 6))
+		} else if trimmed.starts_with('### ') {
+			println('\n${cli.cyan(trimmed[4..])}')
+		} else if trimmed.starts_with('* ') || trimmed.starts_with('- ') {
+			println('  ${cli.cyan('•')} ${trimmed[2..]}')
+		} else if trimmed.starts_with('> ') {
+			println('  ${cli.dim('│')} ${cli.dim(trimmed[2..])}')
+		} else {
+			println(line)
+		}
+	}
+	return cli
+}
+
 // =============================================================================
 // 5. Interactive RAD User Prompts & Inputs
 // =============================================================================
@@ -832,6 +1337,170 @@ pub fn (cli &SimpleCli) multi_select(question string, options []string) []string
 	return selected
 }
 
+// form presents an interactive multi-field form/wizard and returns collected responses.
+pub fn (cli &SimpleCli) form(title string, fields []FormField) map[string]string {
+	mut results := map[string]string{}
+	if cli.silent_mode || fields.len == 0 {
+		return results
+	}
+	println(cli.cyan('\n┌─ ' + cli.bold(title) + ' ' + '─'.repeat(int_max(0, 50 - title.len)) + '┐'))
+	for field in fields {
+		req_hint := if field.required { cli.red('*') } else { '' }
+		def_hint := if field.default_val.len > 0 { ' ' + cli.dim('(' + field.default_val + ')') } else { '' }
+		
+		for {
+			print('  ${cli.cyan('?')} ${cli.bold(field.label)}${req_hint}${def_hint}: ')
+			os.flush()
+			
+			mut val := os.get_raw_line().trim_space()
+			if val.len == 0 && field.default_val.len > 0 {
+				val = field.default_val
+			}
+			
+			if field.required && val.len == 0 {
+				println('    ${cli.red('This field is required.')}')
+				continue
+			}
+			
+			results[field.key] = val
+			break
+		}
+	}
+	println(cli.cyan('└' + '─'.repeat(54) + '┘\n'))
+	return results
+}
+
+// fuzzy_select filters a list of options using query substring and similarity matching.
+pub fn (cli &SimpleCli) fuzzy_select(question string, options []string) string {
+	if options.len == 0 {
+		return ''
+	}
+	println('${cli.cyan('?')} ${cli.bold(question)} ${cli.dim('(type search query or hit Enter to list all)')}')
+	print('  ${cli.dim('Search: ')}')
+	os.flush()
+	query := os.get_raw_line().trim_space().to_lower()
+	
+	if query.len == 0 {
+		return cli.select(question, options)
+	}
+	
+	// Filter matching options
+	mut matches := []string{}
+	for opt in options {
+		if opt.to_lower().contains(query) {
+			matches << opt
+		}
+	}
+	if matches.len == 0 {
+		// Fallback: search by fuzzy similarity
+		for opt in options {
+			if cli.similarity_ratio(query, opt.to_lower()) > 0.35 {
+				matches << opt
+			}
+		}
+	}
+	if matches.len == 0 {
+		println('  ${cli.yellow('No matching options found for "${query}", showing all options:')}')
+		return cli.select(question, options)
+	}
+	if matches.len == 1 {
+		println('  ${cli.green('✓ Selected match:')} ${cli.bold(matches[0])}')
+		return matches[0]
+	}
+	return cli.select('Matching options:', matches)
+}
+
+// prompt_path prompts the user for a filesystem path and validates based on PathMode.
+pub fn (cli &SimpleCli) prompt_path(question string, default_path string, mode PathMode) string {
+	for {
+		raw_path := cli.prompt(question, default_path)
+		resolved := resolve_user_path(raw_path)
+		
+		match mode {
+			.any {
+				return resolved
+			}
+			.must_exist {
+				if os.exists(resolved) {
+					return resolved
+				}
+				println('  ${cli.red('Path does not exist: ' + resolved)}')
+			}
+			.file {
+				if os.exists(resolved) && !os.is_dir(resolved) {
+					return resolved
+				}
+				println('  ${cli.red('Path must be an existing file: ' + resolved)}')
+			}
+			.directory {
+				if os.exists(resolved) && os.is_dir(resolved) {
+					return resolved
+				}
+				println('  ${cli.red('Path must be an existing directory: ' + resolved)}')
+			}
+		}
+	}
+	return default_path
+}
+
+// new_pipeline initializes a new multi-step task pipeline.
+pub fn (cli &SimpleCli) new_pipeline(title string) &Pipeline {
+	return &Pipeline{
+		title: title
+		cli: cli
+	}
+}
+
+// add_step registers a task stage in the pipeline.
+pub fn (mut p Pipeline) add_step(name string, step_fn fn () bool) &Pipeline {
+	p.steps << PipelineStep{
+		name: name
+		step_fn: step_fn
+	}
+	return p
+}
+
+// run executes all pipeline steps sequentially, displaying progress and returning true if all succeeded.
+pub fn (mut p Pipeline) run() bool {
+	if p.cli.silent_mode {
+		for s in p.steps {
+			if !s.step_fn() {
+				return false
+			}
+		}
+		return true
+	}
+	
+	p.cli.banner(p.title, '${p.steps.len} Pipeline Steps')
+	mut all_ok := true
+	start_time := time.now()
+	
+	for i, step in p.steps {
+		p.cli.print('  ${p.cli.cyan('⏳')} [${i + 1}/${p.steps.len}] ${step.name}...')
+		os.flush()
+		step_start := time.now()
+		ok := step.step_fn()
+		step_dur := time.since(step_start).milliseconds()
+		
+		if ok {
+			print('\r  ${p.cli.green('✓')} [${i + 1}/${p.steps.len}] ${step.name} ${p.cli.dim('(' + step_dur.str() + ' ms)')}\n')
+		} else {
+			print('\r  ${p.cli.red('✖')} [${i + 1}/${p.steps.len}] ${step.name} ${p.cli.red('[FAILED]')} ${p.cli.dim('(' + step_dur.str() + ' ms)')}\n')
+			all_ok = false
+			break
+		}
+	}
+	
+	total_dur := time.since(start_time).milliseconds()
+	p.cli.divider('─', 60)
+	if all_ok {
+		p.cli.println(p.cli.green('✨ Pipeline completed successfully in ${total_dur} ms'))
+	} else {
+		p.cli.println(p.cli.red('✖ Pipeline aborted due to step failure in ${total_dur} ms'))
+	}
+	return all_ok
+}
+
 // =============================================================================
 // 6. Reactive State Store & File Persistence
 // =============================================================================
@@ -936,3 +1605,86 @@ fn math_clamp_f64(val f64, min f64, max f64) f64 {
 	}
 	return val
 }
+
+// =============================================================================
+// 9. Standalone Package-Level Functions for RAD Components
+// =============================================================================
+
+// sparkline converts a slice of floating point numbers into a compact Unicode sparkline string.
+pub fn sparkline(values []f64) string {
+	cli := new('SimpleCli')
+	return cli.sparkline(values)
+}
+
+// bar_chart renders a stylish horizontal ASCII/Unicode bar chart.
+pub fn bar_chart(title string, data map[string]f64, max_width int) {
+	cli := new('SimpleCli')
+	cli.bar_chart(title, data, max_width)
+}
+
+// gauge displays a single-metric meter gauge with threshold status indicator.
+pub fn gauge(title string, value f64, max f64, unit string) {
+	cli := new('SimpleCli')
+	cli.gauge(title, value, max, unit)
+}
+
+// tree renders a hierarchical tree structure to console.
+pub fn tree(root TreeNode) {
+	cli := new('SimpleCli')
+	cli.tree(root)
+}
+
+// diff displays a colorized line-by-line unified diff between two text strings.
+pub fn diff(old_text string, new_text string) {
+	cli := new('SimpleCli')
+	cli.diff(old_text, new_text)
+}
+
+// badge formats an ANSI styled badge tag (e.g. `[PROD: ACTIVE]`).
+pub fn badge(prefix string, label string, level LogLevel) string {
+	cli := new('SimpleCli')
+	return cli.badge(prefix, label, level)
+}
+
+// alert displays a framed callout box with icon and style matching AlertKind.
+pub fn alert(kind AlertKind, title string, msg string) {
+	cli := new('SimpleCli')
+	cli.alert(kind, title, msg)
+}
+
+// task_item renders a structured checklist item with icon, title, and duration/status.
+pub fn task_item(title string, status TaskStatus, duration_ms i64) {
+	cli := new('SimpleCli')
+	cli.task_item(title, status, duration_ms)
+}
+
+// table_to_csv converts table headers and rows into a standard CSV string.
+pub fn table_to_csv(headers []string, rows [][]string) string {
+	cli := new('SimpleCli')
+	return cli.table_to_csv(headers, rows)
+}
+
+// table_to_markdown converts table headers and rows into a formatted Markdown table.
+pub fn table_to_markdown(headers []string, rows [][]string) string {
+	cli := new('SimpleCli')
+	return cli.table_to_markdown(headers, rows)
+}
+
+// table_to_json converts table headers and rows into a JSON array of objects.
+pub fn table_to_json(headers []string, rows [][]string) string {
+	cli := new('SimpleCli')
+	return cli.table_to_json(headers, rows)
+}
+
+// json_highlight adds syntax color highlighting to a JSON string for terminal display.
+pub fn json_highlight(json_str string) string {
+	cli := new('SimpleCli')
+	return cli.json_highlight(json_str)
+}
+
+// render_markdown parses basic Markdown (headings, lists, bold, blockquotes) and outputs styled console text.
+pub fn render_markdown(md_text string) {
+	cli := new('SimpleCli')
+	cli.render_markdown(md_text)
+}
+

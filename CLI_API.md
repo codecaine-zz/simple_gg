@@ -10,22 +10,23 @@
 2. [CLI Flags & Argument Parsing](#2-cli-flags--argument-parsing)
 3. [Console UI & RAD Components](#3-console-ui--rad-components)
 4. [Interactive Prompts, Menus & Input Validation](#4-interactive-prompts-menus--input-validation)
-5. [Structured Multi-Level Logging & File Logging](#5-structured-multi-level-logging--file-logging)
-6. [Benchmark & Execution Timing](#6-benchmark--execution-timing)
-7. [Reactive State Store & File Persistence](#7-reactive-state-store--file-persistence)
-8. [Safe Process Execution & Subprocess Control](#8-safe-process-execution--subprocess-control)
-9. [Hardware Telemetry & Resource Probing](#9-hardware-telemetry--resource-probing)
-10. [Standard OS Directory Resolution & File System](#10-standard-os-directory-resolution--file-system)
-11. [Network, Wi-Fi & TCP Port Diagnostics](#11-network-wi-fi--tcp-port-diagnostics)
-12. [Desktop Notifications, Speech & Audio Utilities](#12-desktop-notifications-speech--audio-utilities)
-13. [System Clipboard & Headless OS Native Dialogs](#13-system-clipboard--headless-os-native-dialogs)
-14. [HTTP Client & REST APIs](#14-http-client--rest-apis)
-15. [Cryptography, Hashing & Random Utilities](#15-cryptography-hashing--random-utilities)
-16. [Encodings, Data Formats & Serialization](#16-encodings-data-formats--serialization)
-17. [Validation Engine](#17-validation-engine)
-18. [Generic Collections, Queues & String Metrics](#18-generic-collections-queues--string-metrics)
-19. [Statistical Math Calculations](#19-statistical-math-calculations)
-20. [Standalone Package Functions (1-Liners)](#20-standalone-package-functions-1-liners)
+5. [Multi-Step Task Pipeline Runner](#5-multi-step-task-pipeline-runner)
+6. [Structured Multi-Level Logging & File Logging](#6-structured-multi-level-logging--file-logging)
+7. [Benchmark & Execution Timing](#7-benchmark--execution-timing)
+8. [Reactive State Store & File Persistence](#8-reactive-state-store--file-persistence)
+9. [Safe Process Execution & Subprocess Control](#9-safe-process-execution--subprocess-control)
+10. [Hardware Telemetry & Resource Probing](#10-hardware-telemetry--resource-probing)
+11. [Standard OS Directory Resolution & File System](#11-standard-os-directory-resolution--file-system)
+12. [Network, Wi-Fi & TCP Port Diagnostics](#12-network-wi-fi--tcp-port-diagnostics)
+13. [Desktop Notifications, Speech & Audio Utilities](#13-desktop-notifications-speech--audio-utilities)
+14. [System Clipboard & Headless OS Native Dialogs](#14-system-clipboard--headless-os-native-dialogs)
+15. [HTTP Client & REST APIs](#15-http-client--rest-apis)
+16. [Cryptography, Hashing & Random Utilities](#16-cryptography-hashing--random-utilities)
+17. [Encodings, Data Formats & Serialization](#17-encodings-data-formats--serialization)
+18. [Validation Engine](#18-validation-engine)
+19. [Generic Collections, Queues & String Metrics](#19-generic-collections-queues--string-metrics)
+20. [Statistical Math Calculations](#20-statistical-math-calculations)
+21. [Standalone Package Functions (1-Liners)](#21-standalone-package-functions-1-liners)
 
 ---
 
@@ -45,7 +46,7 @@ fn main() {
 	// Constructor with explicit version
 	mut app2 := simplecli.new_app('DeployPilot', '2.1.0')
 
-	// Automatic constructor taking name from default
+	// Automatic constructor taking name from current executable
 	mut app3 := simplecli.init_app()
 }
 ```
@@ -177,6 +178,127 @@ for i in 1 .. 101 {
 app.spinner('Synchronizing repository submodules...', 1500)
 ```
 
+### Unicode Sparklines
+
+Render inline high-density trend visualizations using Unicode block elements (` ▂▃▄▅▆▇█`):
+
+```v
+latencies := [12.0, 15.0, 45.0, 90.0, 120.0, 80.0, 30.0, 14.0]
+spark := app.sparkline(latencies)
+app.info('Latency Trend (last 8 ticks): ${spark}')
+// Output: Latency Trend (last 8 ticks):  ▂▄▆█▆▂ 
+```
+
+### Horizontal Bar Charts
+
+Visualize distributions, resource utilization, or benchmark comparative results:
+
+```v
+app.bar_chart('Resource Allocation (%)', {
+	'CPU Core 0': 42.5
+	'CPU Core 1': 89.0
+	'Memory':     64.2
+	'Disk /':     23.8
+}, 30) // 30-character max bar width
+```
+
+### Meter Gauges
+
+Display single-metric gauges with automatic green/yellow/red threshold badges:
+
+```v
+app.gauge('PostgreSQL Connection Pool', 48.0, 50.0, 'conns')
+// Output: PostgreSQL Connection Pool: [████████████████████░░] 48.0/50.0 conns (96.0%) [CRITICAL]
+
+app.gauge('Storage Capacity', 34.2, 100.0, 'GB')
+// Output: Storage Capacity: [██████░░░░░░░░░░░░░░] 34.2/100.0 GB (34.2%) [OK]
+```
+
+### Hierarchical Tree Visualizer
+
+Render nested dependency graphs, filesystem trees, or structured schemas with Unicode branch glyphs (`├──`, `└──`, `│   `):
+
+```v
+mut root := simplecli.new_tree_node('production-cluster')
+mut db := root.add_child('postgres-db')
+db.add_child('replica-01 (read-only)')
+db.add_child('replica-02 (standby)')
+root.add_child('redis-cache')
+mut api := root.add_child('api-gateway')
+api.add_child('auth-service')
+api.add_child('payment-service')
+
+app.tree(root)
+```
+
+### Colorized Line Diff Viewer
+
+Generate and display unified line-by-line diffs with line numbering and colored change annotations:
+
+```v
+old_config := 'port: 8080\nworkers: 4\nenv: staging'
+new_config := 'port: 8080\nworkers: 8\nenv: production\ntls: true'
+
+// Output colorized line diff to console:
+app.diff(old_config, new_config)
+
+// Or retrieve formatted diff string:
+diff_text := app.diff_text(old_config, new_config)
+```
+
+### Status Badges & Alert Callout Boxes
+
+```v
+// Inverted/bracketed status badges
+prod_badge := app.badge('ENV', 'PRODUCTION', .warn)
+app.println('${prod_badge} Initializing migration sequence...')
+
+// Styled GitHub-like alert boxes (.info, .success, .warning, .caution, .tip, .note)
+app.alert(.info, 'Configuration Loaded', 'Loaded 42 rules from settings.json.')
+app.alert(.warning, 'High Memory Threshold', 'Memory utilization exceeded 85%.')
+app.alert(.caution, 'Destructive Action', 'Dropping database table `audit_logs`.')
+app.alert(.tip, 'Pro Tip', 'Pass `--silent` to disable interactive output.')
+```
+
+### Task Checklist Items
+
+Format structured task execution checklists:
+
+```v
+app.task_item('Compile C sources', .done, 140)     // ✓ Compile C sources (140 ms)
+app.task_item('Run static analysis', .running, 0)   // ⏳ Run static analysis...
+app.task_item('Deploy image to registry', .pending, 0) // ○ Deploy image to registry
+app.task_item('Run smoke tests', .failed, 55)       // ✖ Run smoke tests [FAILED] (55 ms)
+app.task_item('Upload optional symbols', .skipped, 0) // ↷ Upload optional symbols [SKIPPED]
+```
+
+### Table Data Format Exporters & Markdown Rendering
+
+Convert table data structures to standard formats or render Markdown inside the terminal:
+
+```v
+headers := ['ID', 'Name', 'Role']
+rows := [
+	['1', 'Alice, VP', 'Admin'],
+	['2', 'Bob', 'Developer'],
+]
+
+// Convert to CSV string:
+csv_data := app.table_to_csv(headers, rows)
+
+// Convert to Markdown table:
+md_table := app.table_to_markdown(headers, rows)
+
+// Convert to JSON array of objects:
+json_data := app.table_to_json(headers, rows)
+
+// Syntax-highlight JSON with ANSI colors in terminal:
+app.println(app.json_highlight('{"status": "healthy", "uptime_sec": 86400, "debug": false}'))
+
+// Render Markdown document to terminal with styled headings and lists:
+app.render_markdown('# Release Notes\n## Improvements\n* Faster CLI startup\n* Zero-window RAD components\n> Ready for production.')
+```
+
 ---
 
 ## 4. Interactive Prompts, Menus & Input Validation
@@ -184,40 +306,34 @@ app.spinner('Synchronizing repository submodules...', 1500)
 ### Text, Secret & Typed Prompts
 
 ```v
-// Plain string prompt with optional default
-username := app.prompt('Enter admin username', 'admin')
+// Plain string prompt
+username := app.prompt('Enter admin username: ', 'admin')
 
 // Hidden / masked password prompt
-api_token := app.prompt_password('Enter secret API access token')
+api_token := app.prompt_password('Enter secret API access token: ')
 
-// Validated email prompt (re-prompts until valid email syntax)
-email := app.prompt_email('Enter alert recipient email', 'devops@corp.internal')
+// Validated email prompt (re-prompts until a valid email syntax is entered)
+email := app.prompt_email('Enter alert recipient email: ', 'dev@domain.com')
 
-// Validated URL prompt (re-prompts until valid http/https URL)
-webhook := app.prompt_url('Enter Slack Webhook URL', 'https://hooks.slack.com/services/xxx')
+// Validated URL prompt (re-prompts until a valid http/https URL is entered)
+webhook := app.prompt_url('Enter Slack Webhook URL: ', 'https://hooks.slack.com/...')
 
 // Constrained numeric prompt between min and max bounds
 threads := app.prompt_number('Worker thread concurrency', 8, 1, 64)
-
-// Custom validated prompt with predicate lambda
-code := app.prompt_validated('Enter 4-digit MFA code', '1234', fn (s string) bool {
-	return s.len == 4 && s.int() > 0
-}, 'Code must be exactly 4 numeric digits')
 
 // Yes/No confirmation prompt (returns bool)
 proceed := app.confirm('Do you want to apply migrations to production?', false)
 ```
 
-### Single & Multi-Select Menus
+### Single, Multi-Select & Fuzzy Search Menus
 
 ```v
-// Single selection menu with string option return
+// Single selection menu with index and value return
 choice := app.select('Choose build target environment:', [
 	'Local Development',
 	'Staging Integration',
 	'Production Release',
 ])
-app.info('Selected environment: ${choice}')
 
 // Multi-select menu with comma-separated numbers (e.g. "1, 3")
 selected := app.multi_select('Select deployment components to verify:', [
@@ -226,12 +342,93 @@ selected := app.multi_select('Select deployment components to verify:', [
 	'Kafka Event Streams',
 	'Elasticsearch Index',
 ])
-app.info('Components to check: ${selected.join(", ")}')
+
+// Interactive Fuzzy Selector with query typing and similarity ranking
+branch := app.fuzzy_select('Search and checkout Git branch:', [
+	'main',
+	'feature/rad-components',
+	'feature/graphql-api',
+	'bugfix/state-persistence',
+])
+```
+
+### Interactive Form / Wizard Builder
+
+Collect multi-field configuration forms inside a stylish framed console wizard:
+
+```v
+form_data := app.form('Deploy Microservice Wizard', [
+	simplecli.FormField{
+		key: 'name'
+		label: 'Service Name'
+		kind: .text
+		required: true
+	},
+	simplecli.FormField{
+		key: 'port'
+		label: 'Listen Port'
+		kind: .number
+		default_val: '8080'
+	},
+	simplecli.FormField{
+		key: 'secret'
+		label: 'Master API Key'
+		kind: .password
+		required: true
+	},
+])
+
+service_name := form_data['name']
+listen_port  := form_data['port']
+```
+
+### Path & Directory Validation Prompt
+
+Prompt for user file paths with automatic `~` expansion and existence mode checks (`.any`, `.must_exist`, `.file`, `.directory`):
+
+```v
+cert_path := app.prompt_path('Enter path to TLS certificate:', '~/.config/certs/app.pem', .file)
+target_dir := app.prompt_path('Enter deployment directory:', '/var/www/app', .directory)
 ```
 
 ---
 
-## 5. Structured Multi-Level Logging & File Logging
+## 5. Multi-Step Task Pipeline Runner
+
+Execute multi-stage automation workflows with live step spinners, precise step timers, and summary reporting:
+
+```v
+mut pipeline := app.new_pipeline('Production Release Pipeline')
+
+pipeline.add_step('Clean temporary build artifacts', fn () bool {
+	return os.rmdir_all('/tmp/build') or { true }
+})
+
+pipeline.add_step('Compile native binaries', fn () bool {
+	// Execute build step
+	time.sleep(200 * time.millisecond)
+	return true
+})
+
+pipeline.add_step('Run security vulnerability scan', fn () bool {
+	// Execute vulnerability scan
+	time.sleep(150 * time.millisecond)
+	return true
+})
+
+pipeline.add_step('Deploy container image to registry', fn () bool {
+	// Push artifacts
+	time.sleep(300 * time.millisecond)
+	return true
+})
+
+// Run pipeline: displays live checkmarks, spinners, and duration summary
+success := pipeline.run()
+```
+
+---
+
+## 6. Structured Multi-Level Logging & File Logging
 
 `simplecli` provides structured logging with timestamps, level tags, ANSI colors, and automatic file log streaming:
 
@@ -241,7 +438,7 @@ mut app := simplecli.new('Runner')
 // Configure log file path for persistent audit logs
 app.set_log_file('/var/log/mytool.log')
 
-// Set minimum display log level (.trace, .debug, .info, .warn, .error, .silent)
+// Set minimum display log level (.trace, .debug, .info, .warn, .error_level, .silent)
 app.set_log_level(.debug)
 
 // Multi-level log calls
@@ -252,13 +449,13 @@ app.success('Successfully provisioned staging environment')
 app.warn('High memory usage detected (> 85%)')
 app.error('Failed to connect to secondary database node')
 
-// Fatal log call outputs error, writes to log file, and terminates process with exit code 1
+// Fatal log call outputs error, writes to log file, and exits process with code 1
 // app.fatal('Unrecoverable database corruption')
 ```
 
 ---
 
-## 6. Benchmark & Execution Timing
+## 7. Benchmark & Execution Timing
 
 Track execution duration with microsecond/millisecond precision:
 
@@ -270,15 +467,15 @@ app.reset_timer()
 time.sleep(340 * time.millisecond)
 
 // Read elapsed time
-elapsed_ms := app.elapsed_ms() // i64 (e.g. 340)
+elapsed_ms := app.elapsed_ms()      // i64 (e.g. 340)
+elapsed_s  := app.elapsed_seconds() // f64 (e.g. 0.340)
 
-// Print formatted elapsed runtime directly
-app.print_elapsed()
+app.info('Task completed in ${elapsed_ms} ms (${elapsed_s:.3f} s)')
 ```
 
 ---
 
-## 7. Reactive State Store & File Persistence
+## 8. Reactive State Store & File Persistence
 
 Store key-value runtime configuration and persist it to JSON state files:
 
@@ -286,186 +483,175 @@ Store key-value runtime configuration and persist it to JSON state files:
 // Set and get memory-backed state
 app.set_state('last_sync', '2026-08-22T12:00:00Z')
 app.set_state('active_profile', 'staging-us-east')
-app.set_state('port', '8080')
-app.set_state('is_leader', 'true')
-
-profile   := app.get_state('active_profile', 'default')
-port_num  := app.get_state_int('port', 3000)
-is_leader := app.get_state_bool('is_leader', false)
+profile := app.get_state('active_profile')
 
 // Save full key-value state to persistent JSON file on disk
-state_path := app.get_system_path('state') + '/mytool_state.json'
+state_path := app.get_app_state_file('deploybot', 'state.json')
 app.save_state(state_path)!
 
 // Restore state from JSON file on subsequent runs
 app.load_state(state_path)!
-
-// Clear in-memory state
-app.clear_state()
 ```
 
 ---
 
-## 8. Safe Process Execution & Subprocess Control
+## 9. Safe Process Execution & Subprocess Control
 
 Execute system commands safely with strict argument quoting, timeouts, retries, and parallel background threads:
 
 ### Execution Functions
 
 ```v
-// Standard synchronous execution (returns output string and exit code)
-out, code := app.exec('git rev-parse HEAD')
+// Basic execution returning (output, exit_code)
+output, code := app.exec('uptime')
 
-// Execution with fallback output string if command fails
-branch := app.exec_or('git rev-parse --abbrev-ref HEAD', 'main')
+// Safe argument execution (quotes every argument with POSIX single-quotes)
+branch, _ := app.exec_safe('git', ['rev-parse', '--abbrev-ref', 'HEAD'])
 
-// Execution within a specific working directory
-tags, _ := app.exec_in_dir('/path/to/repo', 'git tag --list')
+// Fallback execution (returns fallback string if command fails or returns non-zero)
+git_tag := app.exec_or('git describe --tags', 'v0.0.0-dev')
 
-// Non-blocking background launch
-app.exec_bg('redis-server /etc/redis.conf')
+// Execute inside a specific working directory
+status, _ := app.exec_in_dir('git status --short', '/Users/developer/project')
 
-// Safe execution preventing shell injection (automatically POSIX-quotes every arg)
-res, exit_code := app.exec_safe('git', ['commit', '-m', 'User input; rm -rf /'])
+// Execute in background (non-blocking)
+app.exec_bg('open https://github.com')
 
-// Timeout guard (terminates process if exceeds timeout in milliseconds)
-stdout, err_code, timed_out := app.exec_timeout('ping -c 10 8.8.8.8', 2000)
+// Execute with a hard timeout in milliseconds
+res_timeout := app.exec_timeout('ping -c 10 1.1.1.1', 2000)
+if res_timeout.timed_out {
+	app.warn('Ping command timed out after 2000 ms')
+}
 
-// Retry execution loop with exponential backoff
-retry_res := app.exec_retry('curl -s https://api.site.com/health', 3, 500, 2.0)
-println('Status: ${retry_res.exit_code}, Output: ${retry_res.output}')
+// Execute with automatic retry logic on failure
+res_retry := app.exec_retry('curl -sf https://api.service.internal/health', 3, 500)
+app.info('Attempts: ${res_retry.attempts}, Exit Code: ${res_retry.exit_code}')
 
-// Concurrent parallel command execution across worker threads
+// Parallel concurrent command execution across background threads
 results := app.parallel_exec([
-	'curl -s https://api.ipify.org',
-	'git --version',
-	'uname -a',
+	'git fetch origin',
+	'npm check',
+	'brew update',
 ])
 for r in results {
-	println('${r.command} -> exit code ${r.exit_code}')
+	app.info('Exit: ${r.exit_code} | Duration: ${r.duration_ms} ms')
 }
 ```
 
-### Argument Sanitization & Quoting
+### Process Management & Utilities
 
 ```v
-clean_arg := simplecli.quote_arg("user's query & payload; echo 1")
-clean_path := simplecli.quote_path('/Volumes/External Drive/App Data')
-safe_name := simplecli.sanitize_filename('../../../etc/passwd') // 'passwd'
-```
-
-### Process Inspection & Control
-
-```v
-// Command discovery and requirement assertions
-has_docker := app.command_exists('docker')
-docker_path := app.require_command('docker')! // returns absolute path or fails
-bin_loc := app.find_executable('psql')
-
-// Active process checks & termination
-is_running := app.is_process_running('postgres')
-app.kill_process('stray_worker')
-app.kill_process_by_pid(12345)
-
-// Process metrics
+// Current process PID
 pid := app.get_pid()
-uptime_sec := app.get_uptime_seconds()
-procs := app.get_running_process_count()
-open_fds := app.get_open_file_count()
 
-// Readiness polling with timeout
-file_ready := app.wait_for_file('/var/run/app.pid', 5000)
-port_ready := app.wait_for_port('127.0.0.1', 5432, 5000)
+// Check if a process is alive by PID
+is_alive := app.is_process_running(1234)
 
-// Environment variables
-app.set_env('STAGE', 'production')
-stage_val := app.get_env('STAGE')
-app.unset_env('STAGE')
+// Terminate process by PID (SIGTERM / taskkill)
+app.kill_process(1234)
+
+// Check if an executable binary exists in system PATH
+has_docker := app.has_command('docker')
+docker_path := app.get_command_path('docker')
+
+// Get open file descriptors count for current process
+open_fds := app.get_open_file_descriptors()
+
+// String and path quoting helpers
+safe_arg := simplecli.quote_arg('unsafe input; rm -rf /')
+safe_path := simplecli.quote_path('~/My Documents/Report.pdf')
+clean_name := simplecli.sanitize_filename('../../../etc/passwd') // returns '______etc_passwd'
 ```
 
 ---
 
-## 9. Hardware Telemetry & Resource Probing
+## 10. Hardware Telemetry & Resource Probing
 
-Query cross-platform hardware, system metrics, and OS configurations:
+Monitor CPU, Memory, Swap, Load Averages, Battery, and Disk utilization:
 
 ```v
 // CPU information
-cpu_model := app.get_cpu_info()
-cores     := app.get_cpu_cores()
-arch      := app.get_cpu_architecture()
-cpu_usage := app.get_cpu_usage_percent()
-l1, l5, l15 := app.get_load_average()
+cpu_count := app.get_cpu_count()
+cpu_usage := app.get_cpu_usage() // Percentage 0.0 - 100.0
+app.info('CPU Cores: ${cpu_count} | CPU Usage: ${cpu_usage:.1f}%')
 
-// Memory & Disk
-ram_info   := app.get_memory_info()
-swap_info  := app.get_swap_usage()
-disk_stats := app.get_disk_usage('/')!
-println('Disk: ${disk_stats.free_gb:.1f} GB free of ${disk_stats.total_gb:.1f} GB (${disk_stats.percent_used:.1f}% used)')
+// System Load Averages (1 min, 5 min, 15 min)
+load1, load5, load15 := app.get_load_averages()
+app.info('Load: ${load1:.2f}, ${load5:.2f}, ${load15:.2f}')
 
-// Power & Battery
-battery_pct := app.get_battery_percent()
-is_charging := app.is_on_ac_power()
+// Physical RAM Memory stats
+total_ram, used_ram, ram_percent := app.get_memory_stats()
+app.info('RAM: ${(used_ram / 1024 / 1024)} MB / ${(total_ram / 1024 / 1024)} MB (${ram_percent:.1f}%)')
 
-// System Locale & Desktop Appearance
-locale := app.get_system_locale()
-theme  := app.get_system_theme() // 'Dark' or 'Light'
-accent := app.get_system_accent_color()
+// Swap memory stats
+total_swap, used_swap, swap_percent := app.get_swap_stats()
+
+// Battery & Power metrics
+if battery := app.get_battery_level() {
+	is_charging := app.is_battery_charging() or { false }
+	app.info('Battery: ${battery}% (Charging: ${is_charging})')
+}
+
+// Disk space statistics for a given path
+total_disk, used_disk, disk_percent := app.get_disk_stats('/')
+app.info('Disk /: ${(used_disk / 1024 / 1024 / 1024)} GB / ${(total_disk / 1024 / 1024 / 1024)} GB (${disk_percent:.1f}%)')
+
+// System Locale, OS Theme & Accent Color
+locale := app.get_system_locale()       // e.g. "en_US.UTF-8"
+theme := app.get_os_theme()             // "dark" or "light"
+accent := app.get_system_accent_color() // e.g. "blue"
 ```
 
 ---
 
-## 10. Standard OS Directory Resolution & File System
+## 11. Standard OS Directory Resolution & File System
 
-Cross-platform standard folder resolvers with support for `~` and environment variables:
+### Standard OS Directories
 
-### Standard Paths
-
-```v
-home_dir   := simplecli.get_user_home_dir()
-config_dir := simplecli.get_app_config_dir('my_app')
-data_dir   := simplecli.get_app_data_dir('my_app')
-cache_dir  := simplecli.get_app_cache_dir('my_app')
-state_dir  := simplecli.get_app_state_dir('my_app')
-log_dir    := simplecli.get_app_log_dir('my_app')
-
-// Dynamic resolution via name: 'home', 'desktop', 'documents', 'downloads', 'config', 'data', 'cache', 'state', 'logs', 'temp'
-downloads  := app.get_system_path('downloads')
-resolved   := simplecli.resolve_user_path('~/Projects/app.conf')
-```
-
-### File Operations
+Resolves standard paths across macOS, Linux, and Windows following XDG and Apple guidelines:
 
 ```v
-// Existence & directory checks
-exists := app.file_exists('~/data/config.json')
-is_dir := app.is_dir('~/data')
+home_dir := app.get_user_home_dir()
 
-// File read / write (automatically creates parent directory tree)
-app.write_file('~/data/config.json', '{"port": 8080}')
-app.append_file('~/data/audit.log', 'User login at 10:00 AM')
-content := app.read_file('~/data/config.json')
+// Standard application configuration directories & files
+app_cfg_dir  := app.get_app_config_dir('DeployBot')
+app_cfg_file := app.get_app_config_file('DeployBot', 'config.json')
 
-// Copy, move, delete
-app.copy_file('~/data/config.json', '~/data/config.bak')!
-app.move_file('~/data/config.bak', '~/data/config.old')!
-app.delete_file('~/data/config.old')
+// Persistent application data directories
+app_data_dir := app.get_app_data_dir('DeployBot')
 
-// Directory management & recursive scanning
-app.create_directory('~/data/backups/daily')
-entries := app.read_dir('~/data')
-v_sources := app.list_files_recursive('~/Projects/my_app', '.v')
+// State directories & files
+app_state_dir  := app.get_app_state_dir('DeployBot')
+app_state_file := app.get_app_state_file('DeployBot', 'state.json')
 
-// Detailed file metadata
-meta := app.get_file_metadata('~/data/config.json')!
-println('Name: ${meta.name}, Size: ${meta.size_bytes} bytes, Readable: ${meta.is_readable}')
+// Cache directories & files
+app_cache_dir  := app.get_app_cache_dir('DeployBot')
+app_cache_file := app.get_app_cache_file('DeployBot', 'index.cache')
 
-// Reveal in desktop file explorer or open web browser
-app.reveal_in_file_manager('~/data/config.json')
-app.open_in_browser('https://vlang.io')
+// Log directories & files
+app_log_dir  := app.get_app_log_dir('DeployBot')
+app_log_file := app.get_app_log_file('DeployBot', 'runner.log')
+
+// Temporary runtime directory (for PID / sockets)
+app_run_dir := app.get_app_runtime_dir('DeployBot')
+
+// User standard folders
+downloads_dir := app.get_system_path('downloads')
+desktop_dir   := app.get_system_path('desktop')
+documents_dir := app.get_system_path('documents')
+pictures_dir  := app.get_system_path('pictures')
+music_dir     := app.get_system_path('music')
+videos_dir    := app.get_system_path('videos')
+
+// Resolve and expand '~' in user paths
+abs_path := app.resolve_user_path('~/.config/myapp/settings.toml')
 ```
 
-### Overwrite & Persistence Behavior Matrix
+### File System Utilities & Overwrite Options
+
+`simplecli` provides built-in path resolution (expanding `~/`), automatic parent directory creation, and flexible file operations.
+
+#### Overwrite & Persistence Behavior Matrix
 
 | Method | Default Behavior | Parent Dirs Created? | Safe Non-Overwrite Alternative |
 | :--- | :--- | :--- | :--- |
@@ -474,354 +660,452 @@ app.open_in_browser('https://vlang.io')
 | `app.copy_file(src, dst)!` | **Overwrites** destination if present | ✅ Yes | Guard with `if !app.file_exists(dst)` |
 | `app.move_file(src, dst)!` | **Overwrites** / replaces destination | ❌ No | Guard with `if !app.file_exists(dst)` |
 | `app.http_download(url, dst)!` | **Always Overwrites** destination | ✅ Yes | Guard with `if !app.file_exists(dst)` |
-| `app.save_state(path)!` | **Always Overwrites** JSON state file | ✅ Yes | Check existence or create `.bak` |
+| `app.save_state(path)!` | **Always Overwrites** JSON state file | ✅ Yes | Check file existence or create backup |
 
-### Practical Overwrite & File Safety Patterns
+---
 
-#### 1. Default Overwriting (Auto-creating Parent Directories)
+#### 1. Default Overwrite vs. Safe Non-Overwrite Pattern
+
 ```v
-// Overwrites target file if it already exists; creates all necessary parent directories automatically
-app.write_file('~/data/export/report.json', '{"status": "ok"}')
-```
+file_path := app.resolve_user_path('~/project/config.env')
+content := 'API_KEY=secret_12345\nDEBUG=true\n'
 
-#### 2. Guarded Non-Overwriting
-```v
-target_path := '~/data/config.json'
-if app.file_exists(target_path) {
-	app.log_warn('File already exists: ${target_path}. Skipping write to prevent data loss.')
+// --- OPTION A: Direct Overwrite (Replaces entire content) ---
+// Note: Automatically creates parent directories if they do not exist
+app.write_file(file_path, content)
+app.success('Wrote (overwrote) file: ${file_path}')
+
+// --- OPTION B: Safe Non-Overwrite (Only write if file does NOT exist) ---
+if !app.file_exists(file_path) {
+	app.write_file(file_path, content)
+	app.success('Created new file: ${file_path}')
 } else {
-	app.write_file(target_path, default_config)
-	app.log_info('Config initialized at ${target_path}')
+	app.warn('File already exists: ${file_path}. Skipping write to prevent overwrite.')
 }
-```
 
-#### 3. CLI Flag-Controlled Overwrite (`--overwrite` / `--force`)
-```v
-app.add_flag_bool('overwrite', 'f', false, 'Force overwrite existing target files')
-app.parse_cli() or { return }
+// --- OPTION C: CLI Flag-Controlled Overwrite (--overwrite / -f) ---
+overwrite_allowed := app.get_flag_bool('overwrite') // Or: app.get_flag_bool('force')
 
-target_path := '~/data/output.csv'
-if app.file_exists(target_path) && !app.get_flag_bool('overwrite') {
-	app.log_error('Destination ${target_path} already exists. Pass --overwrite or -f to replace.')
-	return
+if !app.file_exists(file_path) || overwrite_allowed {
+	app.write_file(file_path, content)
+	app.info('File saved successfully (force/overwrite: ${overwrite_allowed})')
+} else {
+	app.error('File "${file_path}" exists. Pass --overwrite / -f to replace it.')
 }
-app.write_file(target_path, csv_payload)
-```
 
-#### 4. Interactive User Confirmation Before Overwrite
-```v
-target_path := '~/data/production.db'
-if app.file_exists(target_path) {
-	if !app.prompt_confirm('File "${target_path}" already exists. Overwrite?', false) {
-		app.log_info('Operation cancelled by user.')
-		return
-	}
-}
-app.write_file(target_path, new_db_data)
-```
-
-#### 5. Safe Backup Before Overwrite
-```v
-file_path := '~/data/important.json'
+// --- OPTION D: Interactive Prompt Confirmation Before Overwrite ---
 if app.file_exists(file_path) {
-	backup_path := '${file_path}.bak'
-	app.copy_file(file_path, backup_path)!
-	app.log_info('Created safety backup at ${backup_path}')
-}
-app.write_file(file_path, updated_payload)
-```
-
-#### 6. Non-Destructive Log Appending
-```v
-// Append logs or streaming outputs without truncating previous contents
-app.append_file('~/logs/audit.log', '[${app.now()}] Job processed\n')
-```
-
-#### 7. Copy & Move Safety Guards
-```v
-src := '~/data/input.raw'
-dst := '~/data/archive/input.raw'
-
-if app.file_exists(dst) {
-	app.log_warn('Destination already exists: ${dst}')
+	if app.prompt_confirm('File "${file_path}" already exists. Overwrite?', false) {
+		app.write_file(file_path, content)
+		app.success('File overwritten by user confirmation.')
+	} else {
+		app.info('Operation aborted by user.')
+	}
 } else {
-	app.copy_file(src, dst)!
+	app.write_file(file_path, content)
+}
+
+// --- OPTION E: Atomic Backup Before Overwrite ---
+if app.file_exists(file_path) {
+	bak_path := '${file_path}.bak'
+	app.copy_file(file_path, bak_path)!
+	app.info('Backed up existing file to ${bak_path}')
+}
+app.write_file(file_path, content)
+```
+
+---
+
+#### 2. Appending to Files Without Overwriting
+
+```v
+log_file := '/tmp/audit.log'
+
+// app.append_file appends text without modifying existing contents:
+app.append_file(log_file, '[2026-08-22 09:00:00] Worker started')
+app.append_file(log_file, '[2026-08-22 09:01:00] Job completed successfully')
+
+// Read back the complete file content:
+full_log := app.read_file(log_file)
+app.info('Log file size: ${full_log.len} bytes')
+```
+
+---
+
+#### 3. Copy, Move, Directory & Metadata Operations
+
+```v
+src := '/tmp/source_data.csv'
+dst := '/tmp/backups/target_data.csv'
+
+// Copy with overwrite protection
+if app.file_exists(dst) && !app.get_flag_bool('force') {
+	app.warn('Destination already exists. Use --force to overwrite.')
+} else {
+	app.copy_file(src, dst)! // Automatically creates /tmp/backups/ if needed
+	app.success('Copied ${src} -> ${dst}')
+}
+
+// Moving / Renaming files
+app.move_file('/tmp/old_name.txt', '/tmp/new_name.txt')!
+
+// Deleting files
+app.delete_file('/tmp/temporary_cache.tmp')
+
+// Directory management
+app.create_directory('/tmp/my_app/workspace/logs')
+entries := app.read_dir('/tmp/my_app')
+
+// Recursive file listing by file extension (e.g. all '.v' or '.json' files, or '' for all)
+v_files := app.list_files_recursive('/path/to/project', '.v')
+all_files := app.list_files_recursive('/path/to/project', '')
+
+// Detailed File & Directory Metadata
+if meta := app.get_file_metadata('/tmp/source_data.csv') {
+	app.info('Path: ${meta.path}')
+	app.info('Size: ${meta.size_bytes} bytes')
+	app.info('Is Directory: ${meta.is_dir}')
+	app.info('Is Readable: ${meta.is_readable}, Is Writable: ${meta.is_writable}')
 }
 ```
 
 ---
 
-## 11. Network, Wi-Fi & TCP Port Diagnostics
+## 12. Network, Wi-Fi & TCP Port Diagnostics
+
+Inspect local network interfaces, public IPs, Wi-Fi connectivity, DNS servers, and open listening ports:
 
 ```v
-// Connectivity checks
+// Check Internet connectivity (checks default gateway / DNS reachability)
 online := app.is_online()
-db_open := app.ping_tcp_port('10.0.0.5', 5432, 1000)
 
-// IP addresses & MAC hardware
-local_ip  := app.get_local_ip()
-public_ip := app.get_public_ip()
-mac_addr  := app.get_mac_address()
+// Fast TCP socket ping (returns true if port is listening and reachable)
+is_pg_up := app.ping_tcp_port('127.0.0.1', 5432, 500)
+is_redis_up := app.ping_tcp_port('127.0.0.1', 6379, 500)
 
-// Network routing & Wi-Fi
-wifi_ssid := app.get_wifi_ssid()
-gateway   := app.get_default_gateway()
-dns_hosts := app.get_dns_servers()
-listeners := app.get_listening_ports()
-println('Active listening TCP ports: ${listeners}')
+// IP addresses
+local_ip  := app.get_local_ip()  // e.g. "192.168.1.42"
+public_ip := app.get_public_ip() // e.g. "203.0.113.195" via https://api.ipify.org
+
+// Hardware MAC Address & Wi-Fi SSID
+mac_addr := app.get_mac_address()
+wifi_name := app.get_wifi_ssid()
+
+// Default Gateway & Configured DNS Servers
+gateway := app.get_default_gateway()
+dns_servers := app.get_dns_servers() // e.g. ["1.1.1.1", "8.8.8.8"]
+
+// List active TCP listening ports on the local machine
+listening_ports := app.get_listening_ports() // e.g. [22, 80, 443, 5432, 8080]
 ```
 
 ---
 
-## 12. Desktop Notifications, Speech & Audio Utilities
+## 13. Desktop Notifications, Speech & Audio Utilities
 
 ```v
-// Native OS desktop banner notifications
-app.notify('Build Successful', 'Artifacts uploaded to repository.')
-app.show_system_notification('Backup Complete', 'All 18 tables backed up.')
+// Desktop notification
+app.notify('Deployment Complete', 'Artifacts uploaded to S3 bucket.')
 
-// macOS Dock integration
-app.bounce_dock()
-app.set_dock_badge('5')
+// Desktop notification with custom sound
+app.notify_with_sound('Alert Triggered', 'CPU load exceeded 90%', 'Glass')
 
-// Terminal bell and system audio sounds
+// Text-to-Speech (TTS) voice synthesis
+app.say('Deployment succeeded.')
+app.speak_with_voice('Build failed on step 4.', 'Samantha')
+
+// Terminal bell audio beep
 app.beep()
-app.beep_n(3)
-app.play_system_sound('Ping')
 
-// Text-to-Speech (TTS) synthesizer
-app.say('System operational.')
-app.speak_with_voice('Deployment finished.', 'Samantha')
-
-// Volume controls
+// System audio volume control (0-100)
+app.set_volume(75)
 vol := app.get_volume()
-app.set_volume(80)
-is_mute := app.is_muted()
-app.set_muted(false)
+
+// Mute and unmute system audio
+app.mute_audio()
+app.unmute_audio()
 ```
 
 ---
 
-## 13. System Clipboard & Headless OS Native Dialogs
+## 14. System Clipboard & Headless OS Native Dialogs
+
+Interact with system clipboard and trigger native OS dialogs without GUI libraries:
 
 ```v
-// System Clipboard
-app.copy_to_clipboard('Copied API Key')
-current_clip := app.get_clipboard_text()
+// Copy and read system clipboard
+app.copy_to_clipboard('https://example.com/builds/123')
+clip_text := app.get_clipboard_text()
 app.clear_clipboard()
 
-// Headless native OS confirmation dialog (OK / Cancel)
-confirmed := app.ask('Confirm Operation', 'Do you want to purge cached data?')
+// Native OS dialogs (AppleScript on macOS, Zenity/Kdialog on Linux)
+user_input := app.ask('Please enter database migration passphrase:')
+confirmed := app.osascript_dialog('Proceed with destructive database reset?', 'Warning')
 
-// macOS Native AppleScript popups
-user_input := app.osascript_dialog('Enter server hostname:', 'localhost')
-chosen_file := app.osascript_choose_file()
-chosen_dir := app.osascript_choose_folder()
+// Native OS file and folder picker
+selected_files := app.osascript_file_picker('Choose archive to restore', true)
+selected_folder := app.osascript_folder_picker('Choose backup target folder')
 ```
 
 ---
 
-## 14. HTTP Client & REST APIs
+## 15. HTTP Client & REST APIs
+
+Synchronous and flexible HTTP operations with URL parsing and file streaming:
 
 ```v
 // URL parsing
-url_info := app.parse_url('https://api.example.com:8443/v2/items?filter=active#results')!
-println('Host: ${url_info.host}, Port: ${url_info.port}, Path: ${url_info.path}, Query: ${url_info.query}')
+parsed_url := app.parse_url('https://api.github.com:443/repos/vlang/v?tab=tags#top')!
+app.info('Host: ${parsed_url.host}, Port: ${parsed_url.port}, Path: ${parsed_url.path}')
 
-// Simplified HTTP GET and POST
-body := app.http_get('https://api.ipify.org')
-resp_text := app.http_post('https://httpbin.org/post', '{"key":"value"}')
+// Quick HTTP GET and POST
+body_get := app.http_get('https://httpbin.org/get')
+body_post := app.http_post('https://httpbin.org/post', '{"action": "ping"}')
 
-// Full custom HTTP request
-res := app.http_request('PUT', 'https://api.example.com/v1/resource', '{"status":"active"}')!
-println('HTTP ${res.status_code}: ${res.body}')
+// Full HTTP request with custom method and response metadata
+resp := app.http_request('GET', 'https://api.github.com/zen', '')!
+app.info('Status: ${resp.status_code}, Body: ${resp.body}')
 
-// File download streaming to disk
-app.http_download('https://example.com/release.tar.gz', '/tmp/release.tar.gz')!
+// Direct remote file download to disk
+app.http_download('https://example.com/assets.zip', '/tmp/assets.zip')!
 ```
 
 ---
 
-## 15. Cryptography, Hashing & Random Utilities
+## 16. Cryptography, Hashing & Random Utilities
+
+### Hashing & Authentication
 
 ```v
-// Cryptographic hashes
-h256 := app.crypto_sha256('secret text')
-h512 := app.crypto_sha512('secret text')
-h1   := app.crypto_sha1('secret text')
-md5  := app.crypto_md5('secret text')
-hmac := app.crypto_hmac_sha256('signing_key', 'payload data')
+// Standard cryptographic hashes
+sha256_hash := app.crypto_sha256('secret message')
+sha512_hash := app.crypto_sha512('secret message')
+sha1_hash   := app.crypto_sha1('secret message')
+md5_hash    := app.crypto_md5('secret message')
 
-// BCrypt password hashing & verification
-bcrypt_hash := app.crypto_bcrypt_hash('my_secure_password')!
-is_valid := app.crypto_bcrypt_verify('my_secure_password', bcrypt_hash)
+// HMAC-SHA256
+hmac_sig := app.crypto_hmac_sha256('api_secret_key', 'payload_data')
 
-// AES-256-CTR Symmetric Encryption & Decryption
-cipher_b64 := app.crypto_aes_encrypt('my_secret_key_32_bytes_long_!', 'Sensitive Data')!
-plaintext := app.crypto_aes_decrypt('my_secret_key_32_bytes_long_!', cipher_b64)!
+// Bcrypt password hashing and verification
+pw_hash := app.crypto_bcrypt_hash('my_super_password')!
+is_valid := app.crypto_bcrypt_verify('my_super_password', pw_hash)
+```
 
-// Random values
-uuid_v4 := app.rand_uuid()
-rand_str := app.rand_string(16)
-rand_num := app.rand_int(100, 999)
-rand_float := app.rand_f64()
+### AES-256-CTR Symmetric Encryption
+
+```v
+key := '01234567890123456789012345678901' // 32-character key for AES-256
+plaintext := 'Confidential database connection string'
+
+// Encrypt string to Base64 (includes 16-byte random IV)
+encrypted_b64 := app.crypto_aes_encrypt(key, plaintext)!
+
+// Decrypt Base64 back to plaintext
+decrypted := app.crypto_aes_decrypt(key, encrypted_b64)!
+assert decrypted == plaintext
+```
+
+### Random Generation
+
+```v
+uuid_str := app.rand_uuid()               // e.g. "c4a8d09b-2a91-4c39-8b65-68041a87b1c2"
+rand_tok := app.rand_string(32)           // 32-character alphanumeric token
+rand_num := app.rand_int(1000, 9999)      // Random integer in range
+rand_flt := app.rand_f64()                // Random float 0.0 - 1.0
 ```
 
 ---
 
-## 16. Encodings, Data Formats & Serialization
+## 17. Encodings, Data Formats & Serialization
+
+### Encodings
 
 ```v
-// Base64 & Hex
-b64 := app.base64_encode('Binary Data')
-decoded := app.base64_decode(b64)
-hex_str := app.hex_encode('Hello')
-raw_str := app.hex_decode(hex_str)
+// Base64 encode / decode
+b64_str := app.base64_encode('Hello World')
+decoded := app.base64_decode(b64_str)
 
-// JSON manipulation & extraction
-formatted_json := app.json_pretty('{"a":1,"b":"text"}')
-json_payload := '{"service": "auth_node", "port": 9000, "active": true}'
-svc_name  := app.json_get_string(json_payload, 'service', 'unknown')
-svc_port  := app.json_get_int(json_payload, 'port', 80)
-is_active := app.json_get_bool(json_payload, 'active', false)
+// Hex encode / decode
+hex_str := app.hex_encode('Hello World')
+hex_raw := app.hex_decode(hex_str)
+```
 
-// CSV & TOML parsing
-csv_rows := app.csv_parse('id,name,role\n1,Alice,Admin\n2,Bob,User')
-toml_doc := app.toml_parse('title = "App"\n[server]\nport = 8080')!
+### JSON, CSV & TOML Helpers
 
-// Gzip Compression
-compressed_bytes := app.gzip_compress('Large payload text...')!
-uncompressed := app.gzip_decompress(compressed_bytes)!
+```v
+// Format JSON with 2-space indentation
+pretty_json := app.json_pretty('{"name":"Sentinel","port":8080,"enabled":true}')
 
-// Regular Expression & SemVer comparison
-matches := app.regex_match('^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,}$', 'user@domain.com')
-cmp := app.semver_compare('1.2.0', '1.1.9')! // Returns 1 (v1 > v2), 0 (v1 == v2), -1 (v1 < v2)
+// Safe extraction from JSON strings without full struct mapping
+name := app.json_get_string(pretty_json, 'name', 'default_name')
+port := app.json_get_int(pretty_json, 'port', 80)
+enabled := app.json_get_bool(pretty_json, 'enabled', false)
+
+// Parse CSV content into 2D string grid
+csv_rows := app.csv_parse('ID,Name,Role\n1,Alice,Admin\n2,Bob,Developer')
+
+// Parse TOML document
+toml_doc := app.toml_parse('title = "Build Config"\nversion = 2')!
+
+// GZIP string compression and decompression
+compressed_bytes := app.gzip_compress('Large payload string to compress')!
+uncompressed_str := app.gzip_decompress(compressed_bytes)!
+
+// Regex matching
+is_match := app.regex_match(r'^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$', 'user@domain.com')
+
+// Semantic Version Comparison (-1, 0, 1)
+cmp := app.semver_compare('1.2.4', '1.3.0')! // returns -1
 
 // Placeholder text generator
-lorem := app.lorem_words(12)
+sample_text := app.lorem_words(10)
 ```
 
 ---
 
-## 17. Validation Engine
+## 18. Validation Engine
+
+Validate inputs and values with built-in boolean validators:
 
 ```v
-valid_email := app.validate_email('contact@company.com')
-valid_url   := app.validate_url('https://sub.domain.org/path')
-valid_ip    := app.validate_ip('192.168.1.50')
-valid_phone := app.validate_phone('+1-555-019-2834')
-valid_alnum := app.validate_alphanumeric('AlphaNumeric123')
-in_range    := app.validate_numeric_range(42.0, 10.0, 100.0)
-valid_len   := app.validate_length('Password123', 8, 32)
+// Email validation
+is_email := app.validate_email('developer@company.org') // true
+
+// URL validation
+is_url := app.validate_url('https://vlang.io')          // true
+
+// IPv4 validation
+is_ip := app.validate_ip('192.168.1.1')                 // true
+
+// Phone number validation
+is_phone := app.validate_phone('+1 (555) 234-5678')    // true
+
+// Alphanumeric validation
+is_alpha := app.validate_alphanumeric('AdminUser123')   // true
+
+// Numeric range check [min, max]
+in_range := app.validate_numeric_range(85.5, 0.0, 100.0) // true
+
+// String length check [min_len, max_len]
+len_valid := app.validate_length('secretpass', 8, 32)   // true
 ```
 
 ---
 
-## 18. Generic Collections, Queues & String Metrics
+## 19. Generic Collections, Queues & String Metrics
 
-### Generic Stack (LIFO)
+### Generic Stack (`SimpleStack[T]`)
 
 ```v
+import simplecli
+
 mut stack := simplecli.new_stack[string]()
 stack.push('first')
 stack.push('second')
-top := stack.pop() // 'second'
-peek := stack.peek() // 'first'
-is_empty := stack.is_empty() // false
-size := stack.len() // 1
+stack.push('third')
+
+top := stack.peek()  // ?string ('third')
+val := stack.pop()   // ?string ('third')
+len := stack.len()   // 2
+empty := stack.is_empty() // false
 ```
 
-### Generic Queue (FIFO)
+### Generic Queue (`SimpleQueue[T]`)
 
 ```v
 mut queue := simplecli.new_queue[int]()
 queue.push(10)
 queue.push(20)
-first := queue.pop() // 10
-head := queue.peek() // 20
+queue.push(30)
+
+next := queue.peek() // ?int (10)
+out  := queue.pop()  // ?int (10)
+len  := queue.len()  // 2
 ```
 
-### Generic Circular Ring Buffer
+### Generic Fixed-Capacity Ring Buffer (`SimpleRingBuffer[T]`)
 
 ```v
-mut ring := simplecli.new_ring_buffer[string](100)
-ring.push('log item 1')
-ring.push('log item 2')
-total := ring.len()
+// Circular buffer holding up to 5 items (overwrites oldest on overflow)
+mut ring := simplecli.new_ring_buffer[string](5)
+ring.push('log 1')
+ring.push('log 2')
+ring.push('log 3')
+
+elem := ring.get(0) // ?string ('log 1')
+item := ring.pop()   // ?string ('log 1')
+full := ring.is_full()
 ```
 
-### Min-Heap Priority Queue
+### Min-Heap Priority Queue (`SimpleMinHeap`)
 
 ```v
 mut heap := simplecli.new_min_heap()
-heap.push(35.5)
-heap.push(12.2)
-heap.push(88.0)
-min_val := heap.pop() // 12.2
+heap.push(42.0)
+heap.push(12.5)
+heap.push(99.0)
+heap.push(5.0)
+
+min_val := heap.pop() // ?f64 (5.0 - always extracts minimum)
 ```
 
-### String Similarity & Edit Distance
+### String Similarity & Levenshtein Distance
 
 ```v
+// Compute minimum edit distance
 dist := app.levenshtein_distance('kitten', 'sitting') // 3
-ratio := app.similarity_ratio('simplecli', 'simplegui') // 0.7777... (77.8% match)
+
+// Compute similarity ratio between 0.0 (unrelated) and 1.0 (identical)
+ratio := app.similarity_ratio('deploy', 'deploying') // ~0.667
 ```
 
 ---
 
-## 19. Statistical Math Calculations
+## 20. Statistical Math Calculations
 
-Perform rapid statistics on floating-point datasets:
+Calculate descriptive statistics across numeric arrays:
 
 ```v
-data := [12.0, 15.0, 18.0, 22.0, 29.0, 35.0]
+latencies := [12.4, 15.1, 9.8, 14.2, 110.5, 13.0, 16.2]
 
-mean_val    := app.stats_mean(data)
-median_val  := app.stats_median(data)
-std_dev     := app.stats_std_dev(data)
-geo_mean    := app.stats_geometric_mean(data)
-harm_mean   := app.stats_harmonic_mean(data)
-rms_val     := app.stats_rms(data)
-min_item    := app.stats_min(data)
-max_item    := app.stats_max(data)
-
-println('Mean: ${mean_val:.2f}, StdDev: ${std_dev:.2f}, RMS: ${rms_val:.2f}')
+mean      := app.stats_mean(latencies)            // Arithmetic average
+median    := app.stats_median(latencies)          // Median value
+std_dev   := app.stats_std_dev(latencies)         // Standard deviation
+geo_mean  := app.stats_geometric_mean(latencies)  // Geometric mean
+harm_mean := app.stats_harmonic_mean(latencies)   // Harmonic mean
+rms       := app.stats_rms(latencies)             // Root Mean Square
+min_val   := app.stats_min(latencies)             // Minimum
+max_val   := app.stats_max(latencies)             // Maximum
 ```
 
 ---
 
-## 20. Standalone Package Functions (1-Liners)
+## 21. Standalone Package Functions (1-Liners)
 
-For lightweight scripts and quick automations, call `simplecli` package functions directly without instantiating `SimpleCli`:
+Every method available on `&SimpleCli` is also exported as a standalone package-level function in `simplecli` for direct one-liner scripting without instantiating an app instance:
 
 ```v
 import simplecli
 
 fn main() {
-	// Execute shell command
-	out, code := simplecli.exec('git status -s')
-	fallback := simplecli.exec_or('git rev-parse HEAD', 'unknown')
-
-	// System hardware & metrics
-	cpu := simplecli.cpu_info()
-	ram := simplecli.memory_info()
-	cores := simplecli.cpu_cores()
-
-	// Text-to-speech & audio alert
-	simplecli.say('Pipeline completed')
-	simplecli.sys_beep()
-
-	// Desktop notification banner
-	simplecli.notify('Job Complete', 'Artifacts published.')
-
-	// Cryptography, UUID & Encodings
-	h256 := simplecli.crypto_sha256('mypassword')
-	uuid := simplecli.rand_uuid()
-	b64  := simplecli.base64_encode('Payload')
-	raw  := simplecli.base64_decode(b64)
-
-	// HTTP Requests
-	html := simplecli.http_get('https://example.com')
-	post_res := simplecli.http_post('https://httpbin.org/post', '{"test":true}')
+	// Standalone process execution
+	out, _ := simplecli.exec_safe('git', ['status', '--short'])
+	
+	// Standalone path resolvers
+	cfg_dir := simplecli.get_app_config_dir('DeployBot')
+	home := simplecli.get_user_home_dir()
+	
+	// Standalone network & hardware probes
+	is_up := simplecli.is_online()
+	port_open := simplecli.ping_tcp_port('127.0.0.1', 5432, 500)
+	cpu_count := simplecli.get_cpu_count()
+	
+	// Standalone crypto & validation
+	hash := simplecli.crypto_sha256('input')
+	valid_email := simplecli.validate_email('test@domain.com')
+	
+	// Standalone notifications & speech
+	simplecli.notify('Alert', 'System running')
+	simplecli.say('Backup complete')
 }
 ```

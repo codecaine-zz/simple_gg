@@ -110,3 +110,135 @@ fn test_simplecli_visual_components() {
 
 	assert true
 }
+
+fn test_sparkline_and_charts() {
+	app := new('ChartTest')
+	
+	// Sparklines
+	spark := app.sparkline([1.0, 3.0, 5.0, 7.0, 10.0])
+	assert spark.len > 0
+	assert sparkline([10.0, 20.0, 30.0]).len > 0
+	assert app.sparkline([]).len == 0
+	
+	// Bar chart
+	app.bar_chart('Metrics', {
+		'CPU': 45.0
+		'RAM': 80.0
+	}, 20)
+
+	// Gauge
+	app.gauge('Disk /', 45.0, 100.0, 'GB')
+	app.gauge('RAM /', 95.0, 100.0, 'GB') // Threshold trigger
+
+	assert true
+}
+
+fn test_tree_structure() {
+	mut root := new_tree_node('app-root')
+	mut db := root.add_child('database')
+	db.add_child('postgres-primary')
+	db.add_child('postgres-replica')
+	root.add_child('cache')
+
+	assert root.label == 'app-root'
+	assert root.children.len == 2
+	assert root.children[0].label == 'database'
+	assert root.children[0].children.len == 2
+
+	app := new('TreeTest')
+	app.tree(root)
+	tree(root)
+	assert true
+}
+
+fn test_diff_and_text() {
+	app := new('DiffTest')
+	old_str := 'name: my-app\nversion: 1.0.0\nport: 8080'
+	new_str := 'name: my-app\nversion: 1.1.0\nport: 8080\nenv: prod'
+
+	diff_out := app.diff_text(old_str, new_str)
+	assert diff_out.contains('version: 1.0.0')
+	assert diff_out.contains('version: 1.1.0')
+	assert diff_out.contains('env: prod')
+	assert diff_out.contains('additions')
+
+	app.diff(old_str, new_str)
+	diff(old_str, new_str)
+	assert true
+}
+
+fn test_badges_alerts_and_tasks() {
+	app := new('BadgeAlertTest')
+	
+	b1 := app.badge('STATUS', 'ACTIVE', .info)
+	assert b1.contains('STATUS: ACTIVE')
+	b2 := badge('ENV', 'PROD', .error)
+	assert b2.contains('ENV: PROD')
+
+	app.alert(.info, 'Info Title', 'This is an information notice.')
+	app.alert(.success, 'Success Title', 'Operation finished cleanly.')
+	app.alert(.warning, 'Warning Title', 'Resource nearing limits.')
+	app.alert(.caution, 'Caution Title', 'Destructive action ahead.')
+	alert(.tip, 'Tip Title', 'Use flags for unattended mode.')
+
+	app.task_item('Compile C sources', .done, 140)
+	app.task_item('Run linter', .running, 0)
+	app.task_item('Deploy image', .pending, 0)
+	app.task_item('Integration check', .failed, 45)
+	task_item('Optional sync', .skipped, 0)
+
+	assert true
+}
+
+fn test_table_exporters_and_json_highlight() {
+	app := new('ExportTest')
+	headers := ['ID', 'Name', 'Role']
+	rows := [
+		['1', 'Alice, VP', 'Admin'],
+		['2', 'Bob', 'Developer'],
+	]
+
+	// CSV
+	csv_str := app.table_to_csv(headers, rows)
+	assert csv_str.contains('"Alice, VP"')
+	assert csv_str.contains('Admin')
+	assert table_to_csv(headers, rows).contains('Bob')
+
+	// Markdown
+	md_str := app.table_to_markdown(headers, rows)
+	assert md_str.contains('| ID | Name | Role |')
+	assert md_str.contains('| :--- | :--- | :--- |')
+	assert md_str.contains('| 1 | Alice, VP | Admin |')
+
+	// JSON
+	json_str := app.table_to_json(headers, rows)
+	assert json_str.contains('"Name":"Bob"')
+	assert json_str.contains('"Role":"Admin"')
+
+	// JSON Highlight
+	highlighted := app.json_highlight('{"name": "test", "count": 42, "active": true}')
+	assert highlighted.len > 0
+
+	// Markdown rendering
+	app.render_markdown('# Headline\n## Subheader\n* Bullet 1\n* Bullet 2\n> Quoted note')
+	render_markdown('## Section\n- item')
+
+	assert true
+}
+
+fn test_pipeline_execution() {
+	mut app := new('PipelineTest')
+	app.set_silent(true)
+
+	mut pipeline := app.new_pipeline('Test Pipeline')
+	pipeline.add_step('Step 1', fn () bool {
+		return true
+	})
+	pipeline.add_step('Step 2', fn () bool {
+		return true
+	})
+
+	ok := pipeline.run()
+	assert ok == true
+}
+
