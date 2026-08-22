@@ -168,7 +168,7 @@ fn main() {
     </array>
     <key>WatchPaths</key>
     <array>
-        <string>' + os.home_dir() + '/Downloads</string>
+        <string>/Users/Shared/Downloads</string>
     </array>
 </dict>
 </plist>')
@@ -227,11 +227,11 @@ fn main() {
 	// List User LaunchAgents
 	win.on_click('btn_list_user_agents', fn (mut w simplegui.SimpleWindow) {
 		agents_dir := os.join_path(os.home_dir(), 'Library/LaunchAgents')
-		w.append_console('job_console', ' Inspecting user agents directory: ${agents_dir}...\n', 1)
+		w.append_console('job_console', ' Inspecting user agents directory: ~/Library/LaunchAgents...\n', 1)
 
 		if os.exists(agents_dir) {
 			files := os.ls(agents_dir) or { []string{} }
-			mut out := '--- User LaunchAgents (${files.len} files) in ${agents_dir} ---\n\n'
+			mut out := '--- User LaunchAgents (${files.len} files) in ~/Library/LaunchAgents ---\n\n'
 			for f in files {
 				out += ' ' + f + '\n'
 			}

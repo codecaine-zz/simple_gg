@@ -74,7 +74,7 @@ fn main() {
 
 	win.begin_row('row_dest_dir')
 	win.add_label('lbl_dest_dir', 'Save Folder (-P):')
-	win.add_input('txt_dest_dir', get_default_download_dir())
+	win.add_input('txt_dest_dir', '~/Downloads/Wget2_Downloads')
 	win.set_control_width('txt_dest_dir', 520)
 	win.add_button('btn_choose_dir', 'Choose Folder...')
 	win.add_button('btn_open_dir', 'Open in Finder')
@@ -205,7 +205,13 @@ fn main() {
 
 	// Open in Finder
 	win.on_click('btn_open_dir', fn (mut w simplegui.SimpleWindow) {
-		dir := w.get('txt_dest_dir').trim_space()
+		raw_dir := w.get('txt_dest_dir').trim_space()
+		mut dir := raw_dir
+		if dir == '~' {
+			dir = os.home_dir()
+		} else if dir.starts_with('~/') {
+			dir = os.join_path(os.home_dir(), dir[2..])
+		}
 		if dir != '' && os.is_dir(dir) {
 			os.execute('open "${dir}"')
 		} else {
@@ -266,7 +272,13 @@ fn main() {
 			return
 		}
 
-		dest_dir := w.get('txt_dest_dir').trim_space()
+		raw_dest := w.get('txt_dest_dir').trim_space()
+		mut dest_dir := raw_dest
+		if dest_dir == '~' {
+			dest_dir = os.home_dir()
+		} else if dest_dir.starts_with('~/') {
+			dest_dir = os.join_path(os.home_dir(), dest_dir[2..])
+		}
 		if dest_dir == '' {
 			w.alert('Destination Required', 'Please specify a save folder.')
 			return

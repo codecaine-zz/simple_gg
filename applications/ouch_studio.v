@@ -174,7 +174,7 @@ fn main() {
 
 	win.begin_row('row_in_path')
 	win.add_label('lbl_src', 'Source Path:')
-	win.add_input('txt_src_path', os.getwd())
+	win.add_input('txt_src_path', './data')
 	win.set_control_width('txt_src_path', 500)
 	win.add_button('btn_pick_file', 'Pick File...')
 	win.add_button('btn_pick_folder', 'Pick Folder...')
@@ -189,7 +189,7 @@ fn main() {
 
 	win.begin_row('row_out_path')
 	win.add_label('lbl_dest', 'Output Target:')
-	default_archive := os.join_path(os.getwd(), 'archive.tar.zst')
+	default_archive := './archive.tar.zst'
 	win.add_input('txt_dest_path', default_archive)
 	win.set_control_width('txt_dest_path', 500)
 	win.add_button('btn_pick_dest', 'Choose Output...')

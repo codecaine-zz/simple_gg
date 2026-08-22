@@ -72,7 +72,7 @@ fn main() {
 
 	win.begin_row('row_out_dir')
 	win.add_label('lbl_out_dir', 'Save Folder:')
-	win.add_input('txt_out_dir', get_default_download_dir())
+	win.add_input('txt_out_dir', '~/Downloads/Media')
 	win.set_control_width('txt_out_dir', 520)
 	win.add_button('btn_browse_out_dir', 'Choose Folder...')
 	win.add_button('btn_open_folder', 'Open in Finder')
@@ -195,9 +195,15 @@ fn main() {
 		}
 	})
 
-	// Open Folder in Finder
+	// Open in Finder
 	win.on_click('btn_open_folder', fn (mut w simplegui.SimpleWindow) {
-		dir := w.get('txt_out_dir').trim_space()
+		raw_dir := w.get('txt_out_dir').trim_space()
+		mut dir := raw_dir
+		if dir == '~' {
+			dir = os.home_dir()
+		} else if dir.starts_with('~/') {
+			dir = os.join_path(os.home_dir(), dir[2..])
+		}
 		if dir != '' && os.is_dir(dir) {
 			os.execute('open "${dir}"')
 		} else {
@@ -246,19 +252,23 @@ fn main() {
 			return
 		}
 		ytdlp := get_yt_dlp_bin()
-		w.append_console('dl_console', ' Fetching metadata info...\n', 1)
-		w.set_status('Fetching title and video metadata...')
-		w.toast('Fetching metadata...')
+		w.append_console('dl_console', ' Fetching media title & metadata in background...\n', 1)
+		w.set_status('Fetching video metadata...')
+		w.toast('Fetching video metadata...')
 
 		go fn [mut w, ytdlp, url] () {
-			res := simplegui.exec_safe(ytdlp, ['--print', '%(title)s | %(uploader)s | %(duration_string)s | %(view_count)s views | %(resolution)s', url])
+			res := simplegui.exec_safe(ytdlp, ['--print', 'title', '--print', 'duration_string', '--print', 'uploader', url])
 			w.run_on_main_thread(fn [res] (mut win_main simplegui.SimpleWindow) {
 				if res.exit_code == 0 {
-					win_main.append_console('dl_console', 'Tip: Media Metadata:\n' + res.output + '\n', 4)
-					win_main.set_status('Metadata fetched successfully.')
-					win_main.toast('Metadata received!')
+					lines := res.output.split_into_lines()
+					title := if lines.len > 0 { lines[0] } else { 'Unknown' }
+					uploader := if lines.len > 2 { lines[2] } else { '' }
+					dur := if lines.len > 1 { lines[1] } else { '' }
+					win_main.append_console('dl_console', ' Title: ${title} | Channel: ${uploader} | Duration: ${dur}\n', 4)
+					win_main.set_status('Title: ' + title)
+					win_main.toast('Loaded metadata: ' + title)
 				} else {
-					win_main.append_console('dl_console', ' Error fetching metadata:\n' + res.output + '\n', 3)
+					win_main.append_console('dl_console', ' Error fetching metadata: ' + res.output + '\n', 3)
 					win_main.set_status('Failed to fetch metadata.')
 				}
 			})
@@ -290,7 +300,13 @@ fn main() {
 			return
 		}
 
-		out_dir := w.get('txt_out_dir').trim_space()
+		raw_out := w.get('txt_out_dir').trim_space()
+		mut out_dir := raw_out
+		if out_dir == '~' {
+			out_dir = os.home_dir()
+		} else if out_dir.starts_with('~/') {
+			out_dir = os.join_path(os.home_dir(), out_dir[2..])
+		}
 		if out_dir == '' {
 			w.alert('Destination Required', 'Please specify a download folder.')
 			return

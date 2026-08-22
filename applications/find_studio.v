@@ -186,7 +186,7 @@ fn main() {
 
 	win.begin_row('row_target_dir')
 	win.add_label('lbl_dir', 'Target Directory:')
-	win.add_input('txt_target_dir', os.getwd())
+	win.add_input('txt_target_dir', '.')
 	win.set_control_width('txt_target_dir', 480)
 	win.add_button('btn_browse_dir', 'Browse...')
 	win.add_button('btn_home_dir', 'Home (~)')
@@ -327,7 +327,13 @@ fn main() {
 
 	// Helper to assemble find arguments
 	build_find_args := fn (win simplegui.SimpleWindow) []string {
-		mut dir := win.get('txt_target_dir').trim_space()
+		mut raw_dir := win.get('txt_target_dir').trim_space()
+		mut dir := raw_dir
+		if dir == '~' {
+			dir = os.home_dir()
+		} else if dir.starts_with('~/') {
+			dir = os.join_path(os.home_dir(), dir[2..])
+		}
 		if dir == '' { dir = '.' }
 
 		mut args := [dir]
@@ -432,15 +438,21 @@ fn main() {
 		}
 	})
 	win.on_click('btn_home_dir', fn (mut w simplegui.SimpleWindow) {
-		w.set('txt_target_dir', os.home_dir())
-		w.toast('Scope set to Home folder.')
+		w.set('txt_target_dir', '~')
+		w.toast('Scope set to Home (~).')
 	})
 	win.on_click('btn_tmp_dir', fn (mut w simplegui.SimpleWindow) {
 		w.set('txt_target_dir', '/tmp')
 		w.toast('Scope set to /tmp.')
 	})
 	win.on_click('btn_reveal_dir', fn (mut w simplegui.SimpleWindow) {
-		dir := w.get('txt_target_dir').trim_space()
+		raw_dir := w.get('txt_target_dir').trim_space()
+		mut dir := raw_dir
+		if dir == '~' {
+			dir = os.home_dir()
+		} else if dir.starts_with('~/') {
+			dir = os.join_path(os.home_dir(), dir[2..])
+		}
 		if dir != '' && os.exists(dir) {
 			simplegui.reveal_in_finder(dir)
 			w.toast('Revealed in Finder.')

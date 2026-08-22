@@ -43,7 +43,7 @@ fn get_all_cut_recipes() []CutRecipe {
 			delim_type: 'colon'
 			custom_delim: ':'
 			suppress_no_delim: true
-			sample_data: 'root:x:0:0:System Administrator:/var/root:/bin/sh\ndaemon:x:1:1:System Services:/var/root:/usr/bin/false\n_spotlight:x:89:89:Spotlight:/var/spotlight:/usr/bin/false\ncodecaine:x:501:20:Developer User:/Users/codecaine:/bin/zsh'
+			sample_data: 'root:x:0:0:System Administrator:/var/root:/bin/sh\ndaemon:x:1:1:System Services:/var/root:/usr/bin/false\n_spotlight:x:89:89:Spotlight:/var/spotlight:/usr/bin/false\ndeveloper:x:501:20:Developer User:/Users/developer:/bin/zsh'
 			desc: 'Cuts out the 1st field (username) from standard Unix passwd format.'
 		},
 		CutRecipe{
@@ -53,7 +53,7 @@ fn get_all_cut_recipes() []CutRecipe {
 			delim_type: 'colon'
 			custom_delim: ':'
 			suppress_no_delim: true
-			sample_data: 'root:x:0:0:System Administrator:/var/root:/bin/sh\ndaemon:x:1:1:System Services:/var/root:/usr/bin/false\ncodecaine:x:501:20:Developer User:/Users/codecaine:/bin/zsh'
+			sample_data: 'root:x:0:0:System Administrator:/var/root:/bin/sh\ndaemon:x:1:1:System Services:/var/root:/usr/bin/false\ndeveloper:x:501:20:Developer User:/Users/developer:/bin/zsh'
 			desc: 'Extracts username (col 1) and user shell (col 7).'
 		},
 		CutRecipe{

@@ -5,6 +5,7 @@ import simplegui
 fn main() {
 	// 1. Create modern desktop window (Width: 1080px, Height: 780px)
 	mut win := simplegui.new_simple_window('Modern UI Suite & Ergonomic Enhancements - SimpleGUI', 1080, 780)
+	win.set_fullscreen(true)
 	win.set_theme('Executive Slate')
 
 	// 2. Setup Top Action Bar with Vector Icons & Soft Elevation
@@ -216,10 +217,10 @@ fn main() {
 			w.add_drawer_item(simplegui.DrawerItem{
 				id: 'dr_user'
 				title: 'User Profile & Identity'
-				subtitle: 'codecaine@workspace.dev'
+				subtitle: 'developer@workspace.dev'
 				icon: 'user'
 				on_click: fn (mut win simplegui.SimpleWindow) {
-					win.push_toast('User Account', 'Logged in as codecaine.', 'info', 2000)
+					win.push_toast('User Account', 'Logged in as developer.', 'info', 2000)
 				}
 			})
 		})

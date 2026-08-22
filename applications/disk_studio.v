@@ -4,10 +4,21 @@ import os
 import time
 import simplegui
 
+fn expand_path(p string) string {
+	trimmed := p.trim_space()
+	if trimmed == '~' {
+		return os.home_dir()
+	}
+	if trimmed.starts_with('~/') {
+		return os.join_path(os.home_dir(), trimmed[2..])
+	}
+	return trimmed
+}
+
 fn main() {
 	println('Starting SimpleGUI - Disk Space & Cleanup Studio Pro...')
 
-	mut win := simplegui.new_simple_window('SimpleGUI - Disk Space & Cleanup Studio Pro', 1080, 950)
+	mut win := simplegui.new_simple_window('SimpleGUI - Disk Space & Cleanup Studio Pro', 1060, 940)
 	win.set_fullscreen(true)
 	win.set_spacing(8)
 	win.set_padding(16)
@@ -35,7 +46,7 @@ fn main() {
 	
 	win.begin_row('row_target_dir')
 	win.add_label('lbl_dir', 'Directory:')
-	win.add_input('txt_target_dir', os.home_dir())
+	win.add_input('txt_target_dir', '~')
 	win.set_control_width('txt_target_dir', 420)
 
 	win.add_button('btn_select_dir', 'Browse Folder...')
@@ -73,7 +84,7 @@ fn main() {
 
 	// Status Row
 	win.begin_row('row_stats')
-	win.add_label('lbl_stats', 'Stats: Ready  |  Target: ${os.home_dir()}  |  Duration: 0 ms')
+	win.add_label('lbl_stats', 'Stats: Ready  |  Target: ~  |  Duration: 0 ms')
 	win.end_row()
 
 	win.append_console('disk_console', ' Disk Space & Cleanup Studio Pro Initialized.\n', 1)
@@ -94,40 +105,41 @@ fn main() {
 
 	// Home Dir Quick Action
 	win.on_click('btn_home_dir', fn (mut w simplegui.SimpleWindow) {
-		w.set('txt_target_dir', os.home_dir())
+		w.set('txt_target_dir', '~')
 		w.toast('Target set to Home directory.')
 	})
 
 	// Downloads Dir Quick Action
 	win.on_click('btn_downloads_dir', fn (mut w simplegui.SimpleWindow) {
-		w.set('txt_target_dir', os.join_path(os.home_dir(), 'Downloads'))
+		w.set('txt_target_dir', '~/Downloads')
 		w.toast('Target set to Downloads directory.')
 	})
 
 	// Directory Breakdown Action
 	win.on_click('btn_analyze_usage', fn (mut w simplegui.SimpleWindow) {
-		target_dir := w.get('txt_target_dir').trim_space()
+		raw_target := w.get('txt_target_dir').trim_space()
+		target_dir := expand_path(raw_target)
 		if target_dir == '' || !os.exists(target_dir) {
 			w.alert('Directory Required', 'Please select a valid directory on disk.')
 			return
 		}
 
-		w.append_console('disk_console', ' Analyzing directory sizes for: ${target_dir}...\n', 1)
+		w.append_console('disk_console', ' Analyzing directory sizes for: ${raw_target}...\n', 1)
 		w.set_status('Calculating disk space usage...')
 		w.toast('Calculating disk usage...')
 
-		go fn [mut w, target_dir] () {
+		go fn [mut w, target_dir, raw_target] () {
 			t0 := time.ticks()
 			res := os.execute('du -sh "${target_dir}"/* 2>/dev/null | sort -hr | head -n 40')
 			elapsed_ms := time.ticks() - t0
 
-			w.run_on_main_thread(fn [res, elapsed_ms, target_dir] (mut win_main simplegui.SimpleWindow) {
+			w.run_on_main_thread(fn [res, elapsed_ms, target_dir, raw_target] (mut win_main simplegui.SimpleWindow) {
 				out := res.output.trim_space()
 				win_main.set('txt_disk_output', out)
 
 				lines_cnt := if out != '' { out.split_into_lines().len } else { 0 }
 				win_main.append_console('disk_console', ' Directory breakdown complete in ${elapsed_ms} ms (${lines_cnt} entries sorted by size).\n', 4)
-				win_main.set('lbl_stats', ' Stats: SUCCESS  |  Target: ${os.file_name(target_dir)}  |  Entries: ${lines_cnt}  |  Duration: ${elapsed_ms} ms')
+				win_main.set('lbl_stats', ' Stats: SUCCESS  |  Target: ${raw_target}  |  Entries: ${lines_cnt}  |  Duration: ${elapsed_ms} ms')
 				win_main.set_status('Disk usage analysis complete.')
 				win_main.toast('Disk breakdown calculated!')
 			})
@@ -136,28 +148,29 @@ fn main() {
 
 	// Top 30 Largest Files Action
 	win.on_click('btn_largest_files', fn (mut w simplegui.SimpleWindow) {
-		target_dir := w.get('txt_target_dir').trim_space()
+		raw_target := w.get('txt_target_dir').trim_space()
+		target_dir := expand_path(raw_target)
 		if target_dir == '' || !os.exists(target_dir) {
 			w.alert('Directory Required', 'Please select a valid directory on disk.')
 			return
 		}
 
-		w.append_console('disk_console', ' Searching for top largest files in: ${target_dir}...\n', 1)
+		w.append_console('disk_console', ' Searching for top largest files in: ${raw_target}...\n', 1)
 		w.set_status('Finding largest files...')
 		w.toast('Scanning for large files...')
 
-		go fn [mut w, target_dir] () {
+		go fn [mut w, target_dir, raw_target] () {
 			t0 := time.ticks()
 			cmd := 'find "${target_dir}" -type f -exec ls -lh {} + 2>/dev/null | awk \'{print $5, $9}\' | sort -hr | head -n 30'
 			res := os.execute(cmd)
 			elapsed_ms := time.ticks() - t0
 
-			w.run_on_main_thread(fn [res, elapsed_ms, target_dir] (mut win_main simplegui.SimpleWindow) {
+			w.run_on_main_thread(fn [res, elapsed_ms, target_dir, raw_target] (mut win_main simplegui.SimpleWindow) {
 				out := res.output.trim_space()
 				win_main.set('txt_disk_output', out)
 
 				win_main.append_console('disk_console', ' Top largest files located in ${elapsed_ms} ms.\n', 4)
-				win_main.set('lbl_stats', ' Stats: SUCCESS  |  Scope: ${os.file_name(target_dir)}  |  Duration: ${elapsed_ms} ms')
+				win_main.set('lbl_stats', ' Stats: SUCCESS  |  Scope: ${raw_target}  |  Duration: ${elapsed_ms} ms')
 				win_main.set_status('Largest files found.')
 				win_main.toast('Largest files located!')
 			})
@@ -185,7 +198,8 @@ fn main() {
 
 	// Scan Developer Junk
 	win.on_click('btn_scan_dev_junk', fn (mut w simplegui.SimpleWindow) {
-		target_dir := w.get('txt_target_dir').trim_space()
+		raw_target := w.get('txt_target_dir').trim_space()
+		target_dir := expand_path(raw_target)
 		if target_dir == '' || !os.exists(target_dir) {
 			w.alert('Directory Required', 'Please select a directory to scan.')
 			return

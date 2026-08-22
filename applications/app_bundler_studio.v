@@ -340,7 +340,7 @@ fn main() {
 	// 4. Output Destination & Primary Action Bar
 	win.begin_group_box('grp_output_actions', '4. Destination & Build Operations')
 
-	default_out := os.join_path(os.getwd(), 'bin')
+	default_out := './bin'
 	win.begin_row('row_out_dest')
 	win.add_label('lbl_out_dir', 'Output Directory:')
 	win.add_input('txt_out_dir', default_out)

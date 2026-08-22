@@ -47,7 +47,9 @@ fn get_all_processes() []ProcessItem {
 			rss := tokens[3].u64()
 			state := tokens[4]
 			user := tokens[5]
-			full_cmd := tokens[6..].join(' ')
+			raw_cmd := tokens[6..].join(' ')
+			clean_cmd := raw_cmd.replace(os.home_dir(), '/Users/developer').replace('codecaine', 'developer')
+			display_user := if user == 'codecaine' || user == os.user_os() { 'developer' } else { user }
 			
 			// Extract clean short executable name
 			raw_bin := tokens[6]
@@ -59,9 +61,9 @@ fn get_all_processes() []ProcessItem {
 				mem_pct: mem
 				rss_kb: rss
 				state: state
-				user: user
+				user: display_user
 				comm: if comm != '' { comm } else { raw_bin }
-				full_cmd: full_cmd
+				full_cmd: clean_cmd
 			}
 		}
 	}

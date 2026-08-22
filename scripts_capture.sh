@@ -4,6 +4,10 @@ set -e
 
 for app_path in applications/*.v; do
     app_name=$(basename "$app_path" .v)
+    if [ "$app_name" = "ifconfig_studio" ]; then
+        echo "=== Skipping $app_name (sensitive network/location telemetry) ==="
+        continue
+    fi
     echo "=== Capturing $app_name ==="
     
     # Compile
