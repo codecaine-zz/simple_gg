@@ -73,6 +73,7 @@
 -  **Layout Engine**: Automatic vertical stacking, horizontal rows (`begin_row`), multi-column grids (`begin_grid`), flexboxes (`begin_flex_box`), tab containers, and group cards.
 -  **Reactive State Management (`state.v`)**: Key-value reactive store (`set_state`, `get_state`), typed accessors, reactive state listeners (`on_state_change`), atomic crash-proof disk persistence (`save_app_state`, `load_app_state`), window session restoration (`save_window_session`, `restore_window_session`), and auto-save on close.
 -  **OS & System Extensions (`sys.v`)**: Standardized user directory lookups for macOS (`~/Library`), Windows (`%APPDATA%`), and Linux (`$XDG_*`), path expansion with tilde (`~`) and environment variable resolution, native notifications, hardware metrics, process execution, clipboard, and file operations.
+-  **Headless Console & RAD Toolkit (`simplecli`)**: Full-featured zero-window CLI framework with flag parsing, ANSI colors, tables, interactive prompts, multi-level logging, process control, hardware probing, and cryptography.
 -  **V Standard Library Integrations (`stdlib.v`)**: Built-in fluent helpers for HTTP requests, RegEx matching, Cryptography (SHA256, MD5, AES, Bcrypt), Gzip/Zlib/Zstd compression, TOML parsing, SemVer checks, and WebSockets.
 -  **Beginner Friendly**: Fluent chainable builder API with zero boilerplate.
 
@@ -230,7 +231,9 @@ See the [`cli_apps/README.md`](cli_apps/README.md) for detailed usage guides and
 
 # Documentation
 
-- **Full API Guide**: See [API.md](API.md) for complete details on window configuration, controls, layout engine, themes, event callbacks, reactive state management (`state.v`), system calls (`sys.v`), and standard library extensions (`stdlib.v`).
+- **Full API Guide (GUI)**: See [API.md](API.md) for complete details on window configuration, controls, layout engine, themes, event callbacks, reactive state management (`state.v`), system calls (`sys.v`), and standard library extensions (`stdlib.v`).
+- **SimpleCLI Reference (Headless & Console)**: See [CLI_API.md](CLI_API.md) for complete details on the zero-window console utility framework, flag parsing, ANSI UI, interactive prompts, process management, hardware metrics, and stdlib utilities.
 - **Workstations Catalog**: See [applications/README.md](applications/README.md) for the complete list & visual showcase of 44 desktop applications.
 - **Examples Guide**: See [examples/README.md](examples/README.md) for detailed descriptions of all example scripts.
+
 
