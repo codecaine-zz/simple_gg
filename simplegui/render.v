@@ -200,7 +200,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 					mono:  is_mono
 				)
 			}
-			'input', 'password', 'search_field', 'pin_code', 'number', 'time_picker' {
+			'input', 'password', 'search_field', 'pin_code', 'number', 'time_picker', 'date_picker' {
 				in_bg := if ctrl.is_hovered { surface_hover } else { surface }
 				b_c := if ctrl.is_focused { accent } else if ctrl.is_hovered { hover_c } else { border_c }
 
@@ -219,6 +219,9 @@ pub fn (mut win SimpleWindow) render_ui() {
 				if ctrl.kind == 'time_picker' {
 					draw_vector_clock_icon(win.gg_ctx, ctrl.x + ctrl.w - 18.0, ctrl.y + ctrl.h / 2.0, 5.0, fg)
 				}
+				if ctrl.kind == 'date_picker' {
+					draw_vector_calendar_icon(win.gg_ctx, ctrl.x + ctrl.w - 24.0, ctrl.y + (ctrl.h - 14.0) / 2.0, fg)
+				}
 				if ctrl.kind == 'number' {
 					up_x := ctrl.x + ctrl.w - 18.0
 					draw_vector_chevron(win.gg_ctx, up_x, ctrl.y + 8.0, 4.0, 'up', fg)
@@ -231,6 +234,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 					'${ctrl.int_value}'
 				} else if ctrl.text_value.len == 0 && ctrl.placeholder.len > 0 {
 					ctrl.placeholder
+				} else if ctrl.text_value.len == 0 && ctrl.kind == 'date_picker' {
+					'YYYY-MM-DD'
 				} else {
 					ctrl.text_value
 				}
@@ -712,22 +717,6 @@ pub fn (mut win SimpleWindow) render_ui() {
 					draw_vector_star(win.gg_ctx, star_x, star_y, 8.5, 3.6, is_filled, fill_c, stroke_c)
 					star_x += 24.0
 				}
-			}
-			'date_picker' {
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					surface)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					border_c)
-
-				date_str := if ctrl.text_value.len > 0 { ctrl.text_value } else { 'yyyy-mm-dd' }
-				win.gg_ctx.draw_text2(
-					x:     int(ctrl.x + 10)
-					y:     int(ctrl.y + (ctrl.h - 16.0) / 2.0)
-					text:  date_str
-					color: fg
-					size:  14
-				)
-				draw_vector_calendar_icon(win.gg_ctx, ctrl.x + ctrl.w - 24.0, ctrl.y + (ctrl.h - 14.0) / 2.0, fg)
 			}
 			'color_well', 'color_palette', 'color_grid' {
 				swatch_c := parse_hex_color(if ctrl.text_value.len > 0 {
@@ -3134,6 +3123,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 	win.render_tooltip()
 	win.render_command_palette()
 	win.render_context_menu()
+	win.render_menu_bar()
 }
 
 fn (mut win SimpleWindow) render_toasts() {
@@ -3247,6 +3237,125 @@ fn (mut win SimpleWindow) render_context_menu() {
 		win.gg_ctx.draw_text2(x: int(text_x), y: int(iy + 6), text: item.title, color: gg.Color{r: 255, g: 255, b: 255}, size: 13)
 		if item.shortcut.len > 0 {
 			win.gg_ctx.draw_text2(x: int(mx + menu_w - 60), y: int(iy + 6), text: item.shortcut, color: gg.rgb(160, 165, 180), size: 11)
+		}
+	}
+}
+
+fn (mut win SimpleWindow) render_menu_bar() {
+	if !win.menu_bar_visible || win.menu_categories.len == 0 {
+		return
+	}
+
+	bar_h := f32(28.0)
+	bar_w := f32(win.width)
+
+	fg := parse_hex_color(win.theme.font_color)
+	accent := parse_hex_color(win.theme.accent_color)
+	bar_bg := if win.theme.is_dark { gg.rgb(28, 30, 38) } else { gg.rgb(238, 240, 244) }
+	bar_border := if win.theme.is_dark { gg.rgb(55, 60, 75) } else { gg.rgb(215, 220, 228) }
+	hover_bg := if win.theme.is_dark { gg.rgb(45, 50, 65) } else { gg.rgb(222, 226, 234) }
+
+	// Draw top menubar background and bottom border
+	win.gg_ctx.draw_rect_filled(0, 0, bar_w, bar_h, bar_bg)
+	win.gg_ctx.draw_line(0, bar_h, bar_w, bar_h, bar_border)
+
+	mut cur_x := f32(12.0)
+	mut open_menu_x := f32(0.0)
+
+	for idx, cat in win.menu_categories {
+		txt_w := f32(cat.title.len * 8 + 16)
+		is_cat_hover := win.mouse_x >= cur_x && win.mouse_x < cur_x + txt_w && win.mouse_y >= 0 && win.mouse_y <= bar_h
+		is_cat_active := win.active_menu_idx == idx
+
+		if is_cat_active {
+			open_menu_x = cur_x
+			win.gg_ctx.draw_rounded_rect_filled(cur_x, 3.0, txt_w, bar_h - 6.0, 4.0, accent)
+		} else if is_cat_hover {
+			win.gg_ctx.draw_rounded_rect_filled(cur_x, 3.0, txt_w, bar_h - 6.0, 4.0, hover_bg)
+		}
+
+		cat_txt_c := if is_cat_active { gg.rgb(255, 255, 255) } else { fg }
+		win.gg_ctx.draw_text2(
+			x: int(cur_x + 8.0)
+			y: int((bar_h - 14.0) / 2.0)
+			text: cat.title
+			color: cat_txt_c
+			size: 13
+		)
+
+		cur_x += txt_w + 4.0
+	}
+
+	// Render open dropdown menu
+	if win.active_menu_idx >= 0 && win.active_menu_idx < win.menu_categories.len {
+		cat := win.menu_categories[win.active_menu_idx]
+		if cat.items.len > 0 {
+			menu_x := open_menu_x
+			menu_y := bar_h + 2.0
+			menu_w := f32(200.0)
+			mut total_menu_h := f32(8.0)
+			for item in cat.items {
+				if item.is_separator {
+					total_menu_h += 7.0
+				} else {
+					total_menu_h += 26.0
+				}
+			}
+
+			popup_bg := if win.theme.is_dark { gg.rgb(32, 35, 45) } else { gg.rgb(255, 255, 255) }
+			popup_border := if win.theme.is_dark { gg.rgb(65, 72, 90) } else { gg.rgb(205, 212, 222) }
+			popup_hover := accent
+			popup_muted := if win.theme.is_dark { gg.rgb(150, 155, 175) } else { gg.rgb(125, 130, 145) }
+
+			// Drop shadow
+			win.gg_ctx.draw_rounded_rect_filled(menu_x + 2.0, menu_y + 2.0, menu_w, total_menu_h, 6.0, gg.rgba(0, 0, 0, 40))
+			// Popup box
+			win.gg_ctx.draw_rounded_rect_filled(menu_x, menu_y, menu_w, total_menu_h, 6.0, popup_bg)
+			win.gg_ctx.draw_rounded_rect_empty(menu_x, menu_y, menu_w, total_menu_h, 6.0, popup_border)
+
+			mut item_y := menu_y + 4.0
+			for item in cat.items {
+				if item.is_separator {
+					win.gg_ctx.draw_line(menu_x + 8.0, item_y + 3.0, menu_x + menu_w - 8.0, item_y + 3.0, bar_border)
+					item_y += 7.0
+				} else {
+					is_item_hover := win.mouse_x >= menu_x && win.mouse_x <= menu_x + menu_w && win.mouse_y >= item_y && win.mouse_y < item_y + 26.0 && !item.disabled
+
+					if is_item_hover {
+						win.gg_ctx.draw_rounded_rect_filled(menu_x + 4.0, item_y, menu_w - 8.0, 24.0, 4.0, popup_hover)
+					}
+
+					item_fg := if item.disabled {
+						popup_muted
+					} else if is_item_hover {
+						gg.rgb(255, 255, 255)
+					} else {
+						fg
+					}
+
+					item_title := if item.icon.len > 0 { '${item.icon} ${item.title}' } else { item.title }
+					win.gg_ctx.draw_text2(
+						x: int(menu_x + 12.0)
+						y: int(item_y + 5.0)
+						text: item_title
+						color: item_fg
+						size: 13
+					)
+
+					if item.shortcut.len > 0 {
+						sc_color := if is_item_hover { gg.rgb(230, 235, 255) } else { popup_muted }
+						win.gg_ctx.draw_text2(
+							x: int(menu_x + menu_w - 65.0)
+							y: int(item_y + 5.0)
+							text: item.shortcut
+							color: sc_color
+							size: 11
+						)
+					}
+
+					item_y += 26.0
+				}
+			}
 		}
 	}
 }

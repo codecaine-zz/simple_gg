@@ -85,6 +85,9 @@ pub mut:
 	context_menu_x         f32     // Context menu popup X coordinate
 	context_menu_y         f32     // Context menu popup Y coordinate
 	context_menu_items     []ContextMenuItem // Right-click context menu item list
+	menu_categories        []MenuCategory    // Application top-level Menu Bar categories
+	active_menu_idx        int = -1          // Index of currently open menu dropdown (-1 if none)
+	menu_bar_visible       bool              // Whether application top Menu Bar is displayed
 	active_tab_map         map[string]int    // Map tracking selected tab index for container tabs
 	// Window-level event callback handlers
 	on_key_down_cb  fn (mut win SimpleWindow, key gg.KeyCode) = unsafe { nil } // Triggered when key pressed
@@ -4005,6 +4008,36 @@ pub fn (mut win SimpleWindow) hide_context_menu() {
 	win.context_menu_active = false
 }
 
+// add_menu_bar configures the top-level application Menu Bar with multiple menu categories.
+pub fn (mut win SimpleWindow) add_menu_bar(categories []MenuCategory) &SimpleWindow {
+	win.menu_categories = categories
+	win.menu_bar_visible = true
+	return win
+}
+
+// add_menu adds or appends a single top-level category with items to the application Menu Bar.
+pub fn (mut win SimpleWindow) add_menu(title string, items []MenuItem) &SimpleWindow {
+	win.menu_categories << MenuCategory{
+		title: title
+		items: items
+	}
+	win.menu_bar_visible = true
+	return win
+}
+
+// hide_menu_bar hides the application top Menu Bar.
+pub fn (mut win SimpleWindow) hide_menu_bar() &SimpleWindow {
+	win.menu_bar_visible = false
+	win.active_menu_idx = -1
+	return win
+}
+
+// show_menu_bar displays the application top Menu Bar.
+pub fn (mut win SimpleWindow) show_menu_bar() &SimpleWindow {
+	win.menu_bar_visible = true
+	return win
+}
+
 // =============================================================================
 // Interval Timers & Scheduled Callbacks
 // =============================================================================
@@ -4475,7 +4508,7 @@ pub fn (mut win SimpleWindow) add_inline_editable_label(name string, initial_tex
 pub fn (mut win SimpleWindow) focus_next_control() &SimpleWindow {
 	mut focusables := []int{}
 	for idx, ctrl in win.controls {
-		if ctrl.visible && !ctrl.disabled && ctrl.kind in ['textbox', 'input', 'password', 'masked_input', 'textarea', 'search_bar', 'search_field', 'button', 'checkbox', 'switch', 'slider', 'list_box', 'combobox', 'number'] {
+		if ctrl.visible && !ctrl.disabled && ctrl.kind in ['textbox', 'input', 'password', 'masked_input', 'textarea', 'search_bar', 'search_field', 'button', 'checkbox', 'switch', 'slider', 'list_box', 'combobox', 'number', 'time_picker', 'date_picker', 'dropdown', 'rating'] {
 			focusables << idx
 		}
 	}
@@ -4498,7 +4531,9 @@ pub fn (mut win SimpleWindow) focus_next_control() &SimpleWindow {
 	next_pos := (cur_pos + 1) % focusables.len
 	target_idx := focusables[next_pos]
 	win.controls[target_idx].is_focused = true
+	win.controls[target_idx].caret_pos = win.controls[target_idx].text_value.len
 	win.focused_ctrl_idx = target_idx
+	win.focused_control = win.controls[target_idx].name
 	return win
 }
 
@@ -4506,7 +4541,7 @@ pub fn (mut win SimpleWindow) focus_next_control() &SimpleWindow {
 pub fn (mut win SimpleWindow) focus_prev_control() &SimpleWindow {
 	mut focusables := []int{}
 	for idx, ctrl in win.controls {
-		if ctrl.visible && !ctrl.disabled && ctrl.kind in ['textbox', 'input', 'password', 'masked_input', 'textarea', 'search_bar', 'search_field', 'button', 'checkbox', 'switch', 'slider', 'list_box', 'combobox', 'number'] {
+		if ctrl.visible && !ctrl.disabled && ctrl.kind in ['textbox', 'input', 'password', 'masked_input', 'textarea', 'search_bar', 'search_field', 'button', 'checkbox', 'switch', 'slider', 'list_box', 'combobox', 'number', 'time_picker', 'date_picker', 'dropdown', 'rating'] {
 			focusables << idx
 		}
 	}
@@ -4529,14 +4564,25 @@ pub fn (mut win SimpleWindow) focus_prev_control() &SimpleWindow {
 	prev_pos := if cur_pos <= 0 { focusables.len - 1 } else { cur_pos - 1 }
 	target_idx := focusables[prev_pos]
 	win.controls[target_idx].is_focused = true
+	win.controls[target_idx].caret_pos = win.controls[target_idx].text_value.len
 	win.focused_ctrl_idx = target_idx
+	win.focused_control = win.controls[target_idx].name
 	return win
 }
 
 // focus_control sets focus specifically on a target control by name.
 pub fn (mut win SimpleWindow) focus_control(name string) &SimpleWindow {
-	for mut ctrl in win.controls {
-		ctrl.is_focused = (ctrl.name == name)
+	win.focused_control = ''
+	win.focused_ctrl_idx = -1
+	for idx, mut ctrl in win.controls {
+		if ctrl.name == name {
+			ctrl.is_focused = true
+			ctrl.caret_pos = ctrl.text_value.len
+			win.focused_control = name
+			win.focused_ctrl_idx = idx
+		} else {
+			ctrl.is_focused = false
+		}
 	}
 	return win
 }

@@ -101,6 +101,25 @@ pub mut:
 	on_select VoidEventCallback = unsafe { nil } // Callback function triggered upon clicking the menu item
 }
 
+// MenuItem represents an individual action or entry in a window Menu Bar dropdown menu.
+pub struct MenuItem {
+pub mut:
+	id           string            // Unique identifier
+	title        string            // Display text label (e.g. 'Open...', 'Save As')
+	shortcut     string            // Keyboard shortcut hint (e.g. 'Ctrl+O', 'Cmd+S')
+	icon         string            // Optional icon/emoji
+	is_separator bool              // Whether this item is a divider line
+	disabled     bool              // Whether this item is disabled/grayed out
+	on_select    VoidEventCallback = unsafe { nil } // Callback invoked upon clicking this item
+}
+
+// MenuCategory represents a top-level category in a window Menu Bar (e.g. 'File', 'Edit', 'View', 'Help').
+pub struct MenuCategory {
+pub mut:
+	title string     // Title displayed on the top Menu Bar
+	items []MenuItem // Sub-menu items displayed in the dropdown
+}
+
 // SidebarItem represents an individual navigation destination in a Collapsible Sidebar or Nav Rail.
 pub struct SidebarItem {
 pub mut:

@@ -1,6 +1,6 @@
 // Example 10: More Window UI Controls
-// Demonstrates newly added developer/user-requested controls: icon buttons, toolbars,
-// hyperlinks, checklists, chip groups (tag selectors), time pickers, password strength
+// Demonstrates newly added developer/user-requested controls: standard top menu bars, icon buttons,
+// toolbars, hyperlinks, checklists, chip groups (tag selectors), time pickers, password strength
 // meters, and dropdown menu buttons.
 
 module main
@@ -8,8 +8,95 @@ module main
 import simplegui
 
 fn main() {
-	mut win := simplegui.new_simple_window('10 - More Window UI Controls', 700, 570)
+	mut win := simplegui.new_simple_window('10 - More Window UI Controls', 700, 600)
 	win.set_theme('Apple Dark')
+
+	// Standard Desktop Top Menu Bar
+	win.add_menu('File', [
+		simplegui.MenuItem{
+			title: 'New Document'
+			shortcut: 'Ctrl+N'
+			on_select: fn (mut win simplegui.SimpleWindow) {
+				win.show_toast('Menu Bar', 'Created new document')
+			}
+		},
+		simplegui.MenuItem{
+			title: 'Open File...'
+			shortcut: 'Ctrl+O'
+			on_select: fn (mut win simplegui.SimpleWindow) {
+				win.show_toast('Menu Bar', 'Opened file dialog')
+			}
+		},
+		simplegui.MenuItem{
+			is_separator: true
+		},
+		simplegui.MenuItem{
+			title: 'Save'
+			shortcut: 'Ctrl+S'
+			on_select: fn (mut win simplegui.SimpleWindow) {
+				win.show_toast('Menu Bar', 'Document saved successfully')
+			}
+		},
+		simplegui.MenuItem{
+			title: 'Exit'
+			shortcut: 'Ctrl+Q'
+			on_select: fn (mut win simplegui.SimpleWindow) {
+				win.close()
+			}
+		},
+	])
+
+	win.add_menu('Edit', [
+		simplegui.MenuItem{
+			title: 'Undo'
+			shortcut: 'Ctrl+Z'
+			on_select: fn (mut win simplegui.SimpleWindow) {
+				win.show_toast('Menu Bar', 'Undo action triggered')
+			}
+		},
+		simplegui.MenuItem{
+			title: 'Redo'
+			shortcut: 'Ctrl+Y'
+			on_select: fn (mut win simplegui.SimpleWindow) {
+				win.show_toast('Menu Bar', 'Redo action triggered')
+			}
+		},
+		simplegui.MenuItem{
+			is_separator: true
+		},
+		simplegui.MenuItem{
+			title: 'Preferences'
+			shortcut: 'Ctrl+,'
+			on_select: fn (mut win simplegui.SimpleWindow) {
+				win.show_toast('Menu Bar', 'Opened Preferences')
+			}
+		},
+	])
+
+	win.add_menu('View', [
+		simplegui.MenuItem{
+			title: 'Toggle Theme'
+			on_select: fn (mut win simplegui.SimpleWindow) {
+				win.toggle_window_theme()
+			}
+		},
+		simplegui.MenuItem{
+			title: 'Toggle Fullscreen'
+			shortcut: 'F11'
+			on_select: fn (mut win simplegui.SimpleWindow) {
+				win.toggle_fullscreen()
+			}
+		},
+	])
+
+	win.add_menu('Help', [
+		simplegui.MenuItem{
+			title: 'About SimpleGUI'
+			on_select: fn (mut win simplegui.SimpleWindow) {
+				win.show_dialog_info('About SimpleGUI', 'SimpleGUI - Modern Immediate-Mode GUI Framework for V')
+			}
+		},
+	])
 
 	win.add_heading('More Window UI Controls Showcase')
 

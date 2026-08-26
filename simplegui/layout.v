@@ -33,8 +33,8 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 	pad := f32(win.padding)  // Edge padding around window canvas
 	sp := f32(win.spacing)   // Vertical gap spacing between controls
 	content_w := win_w - pad * 2.0 // Available horizontal content width inside window edge padding
-
-	mut cur_y := pad // Vertical tracking cursor (starts below top window padding)
+	menubar_h := if win.menu_bar_visible && win.menu_categories.len > 0 { f32(28.0) } else { f32(0.0) }
+	mut cur_y := pad + menubar_h // Vertical tracking cursor (starts below top window padding and menu bar)
 	mut i := 0
 
 	for i < win.controls.len {
