@@ -239,4 +239,11 @@ See the [`cli_apps/README.md`](cli_apps/README.md) for the complete catalog of a
 - **Workstations Catalog**: See [applications/README.md](applications/README.md) for the complete list & visual showcase of 44 desktop applications.
 - **Examples Guide**: See [examples/README.md](examples/README.md) for detailed descriptions of all example scripts.
 
+---
+
+# Related Projects
+
+- **[Bun RAD Studio](https://github.com/codecaine-zz/bun_rad_studio)** - A high-performance Rapid Application Development (RAD) Visual IDE for Bun and Webview-Bun, inspired by classic Borland Delphi and Visual Basic 6.
+
+
 
