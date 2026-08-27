@@ -6,12 +6,10 @@ fn test_linux_font_candidates() {
 	candidates := linux_font_candidates()
 	assert candidates.len > 0
 	assert candidates.contains('/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf')
-	assert candidates.contains('/usr/share/fonts/truetype/ubuntu/Ubuntu-Regular.ttf')
-	assert candidates.contains('/usr/share/fonts/truetype/ubuntu/Ubuntu.ttf')
-	assert candidates.contains('/usr/share/fonts/opentype/ubuntu/Ubuntu-R.ttf')
-	assert candidates.contains('/usr/share/fonts/opentype/ubuntu/Ubuntu-Regular.ttf')
 	assert candidates.contains('/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf')
 	assert candidates.contains('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf')
+	assert candidates.contains('/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf')
+	assert candidates.contains('/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf')
 }
 
 fn test_macos_font_candidates() {

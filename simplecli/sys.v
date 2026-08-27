@@ -1204,39 +1204,96 @@ pub fn (cli &SimpleCli) set_muted(muted bool) &SimpleCli {
 // 9. Clipboard Access
 // =============================================================================
 
-// copy_to_clipboard copies text to the system clipboard.
+// copy_to_clipboard copies text to the system clipboard across macOS, Linux, and Windows.
 pub fn (cli &SimpleCli) copy_to_clipboard(text string) &SimpleCli {
 	$if macos {
-		mut p := os.new_process('/usr/bin/pbcopy')
-		p.set_redirect_stdio()
-		p.run()
-		p.stdin_write(text)
-		p.close()
-		p.wait()
+		pbcopy_path := os.find_abs_path_of_executable('pbcopy') or { '' }
+		if pbcopy_path.len > 0 {
+			mut p := os.new_process(pbcopy_path)
+			p.set_redirect_stdio()
+			p.run()
+			p.stdin_write(text)
+			p.close()
+			p.wait()
+		}
+	} $else $if linux {
+		wl_copy := os.find_abs_path_of_executable('wl-copy') or { '' }
+		xclip := os.find_abs_path_of_executable('xclip') or { '' }
+		xsel := os.find_abs_path_of_executable('xsel') or { '' }
+		if wl_copy.len > 0 {
+			mut p := os.new_process(wl_copy)
+			p.set_redirect_stdio()
+			p.run()
+			p.stdin_write(text)
+			p.close()
+			p.wait()
+		} else if xclip.len > 0 {
+			mut p := os.new_process(xclip)
+			p.set_args(['-selection', 'clipboard'])
+			p.set_redirect_stdio()
+			p.run()
+			p.stdin_write(text)
+			p.close()
+			p.wait()
+		} else if xsel.len > 0 {
+			mut p := os.new_process(xsel)
+			p.set_args(['-b', '-i'])
+			p.set_redirect_stdio()
+			p.run()
+			p.stdin_write(text)
+			p.close()
+			p.wait()
+		}
 	} $else $if windows {
-		os.execute("powershell -Command \"Set-Clipboard -Value '${text}'\"")
-	} $else {
-		os.execute("echo -n \"${text}\" | xclip -selection clipboard 2>/dev/null || echo -n \"${text}\" | xsel -b 2>/dev/null")
+		clip_path := os.find_abs_path_of_executable('clip.exe') or { '' }
+		if clip_path.len > 0 {
+			mut p := os.new_process(clip_path)
+			p.set_redirect_stdio()
+			p.run()
+			p.stdin_write(text)
+			p.close()
+			p.wait()
+		}
 	}
 	return cli
 }
 
-// get_clipboard_text retrieves the current text content from the system clipboard.
+// get_clipboard_text retrieves the current text content from the system clipboard across macOS, Linux, and Windows.
 pub fn (cli &SimpleCli) get_clipboard_text() string {
 	$if macos {
-		res := os.execute('/usr/bin/pbpaste')
-		if res.exit_code == 0 {
-			return res.output
+		pbpaste_path := os.find_abs_path_of_executable('pbpaste') or { '' }
+		if pbpaste_path.len > 0 {
+			res := os.execute(pbpaste_path)
+			if res.exit_code == 0 {
+				return res.output
+			}
+		}
+	} $else $if linux {
+		wl_paste := os.find_abs_path_of_executable('wl-paste') or { '' }
+		if wl_paste.len > 0 {
+			res := os.execute('${wl_paste} --no-newline 2>/dev/null || ${wl_paste} 2>/dev/null')
+			if res.exit_code == 0 && res.output.len > 0 {
+				return res.output
+			}
+		}
+		xclip := os.find_abs_path_of_executable('xclip') or { '' }
+		if xclip.len > 0 {
+			res := os.execute('${xclip} -selection clipboard -o 2>/dev/null')
+			if res.exit_code == 0 {
+				return res.output
+			}
+		}
+		xsel := os.find_abs_path_of_executable('xsel') or { '' }
+		if xsel.len > 0 {
+			res := os.execute('${xsel} -b -o 2>/dev/null')
+			if res.exit_code == 0 {
+				return res.output
+			}
 		}
 	} $else $if windows {
 		res := os.execute('powershell -Command "Get-Clipboard"')
 		if res.exit_code == 0 {
 			return res.output.trim_space()
-		}
-	} $else {
-		res := os.execute('xclip -selection clipboard -o 2>/dev/null || xsel -b -o 2>/dev/null')
-		if res.exit_code == 0 {
-			return res.output
 		}
 	}
 	return ''

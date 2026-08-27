@@ -23,10 +23,17 @@ fn main() {
 	win.begin_row('row_submit')
 	win.add_button('btn_submit', 'Submit Form')
 	win.on_click('btn_submit', fn (mut win simplegui.SimpleWindow) {
+		user := win.get_text('user')
 		qty := win.get_value_int('qty')
 		vol := win.get_value_int('vol')
 		rating := win.get_value_int('user_rating')
-		println('Form Submitted! Qty: ${qty}, Vol: ${vol}, Rating: ${rating}')
+		r_date := win.get_text('r_date')
+		if win.is_valid_date_str(r_date) {
+			win.push_toast('Form Submitted', 'User: ${user} | Date: ${r_date} | Rating: ${rating}', 'success', 3000)
+		} else {
+			win.push_toast('Validation Warning', 'Please provide a valid date (YYYY-MM-DD)', 'warning', 3000)
+		}
+		println('Form Submitted! User: ${user}, Date: ${r_date}, Qty: ${qty}, Vol: ${vol}, Rating: ${rating}')
 	})
 	win.end_row()
 

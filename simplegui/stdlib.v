@@ -9,6 +9,7 @@
 
 module simplegui
 
+import os
 import net.http
 import regex
 import compress.gzip
@@ -1128,16 +1129,87 @@ pub fn new_ringbuffer[T](capacity int) SimpleRingBuffer[T] {
 // 18. System Clipboard Helper (Chapter 13: clipboard)
 // ==========================================
 
-// clipboard_copy copies text to the system clipboard.
+// clipboard_copy copies text to the system clipboard across macOS, Linux (Wayland/X11), and Windows.
 pub fn clipboard_copy(text string) bool {
-	mut cb := clipboard.new()
-	defer {
-		cb.destroy()
+	$if macos {
+		pbcopy_path := os.find_abs_path_of_executable('pbcopy') or { '' }
+		if pbcopy_path.len > 0 {
+			mut p := os.new_process(pbcopy_path)
+			p.set_redirect_stdio()
+			p.run()
+			p.stdin_write(text)
+			p.close()
+			p.wait()
+			if p.code == 0 {
+				return true
+			}
+		}
+	} $else $if linux {
+		// 1. Wayland clipboard
+		wl_copy := os.find_abs_path_of_executable('wl-copy') or { '' }
+		if wl_copy.len > 0 {
+			mut p := os.new_process(wl_copy)
+			p.set_redirect_stdio()
+			p.run()
+			p.stdin_write(text)
+			p.close()
+			p.wait()
+			if p.code == 0 {
+				return true
+			}
+		}
+		// 2. X11 via xclip
+		xclip := os.find_abs_path_of_executable('xclip') or { '' }
+		if xclip.len > 0 {
+			mut p := os.new_process(xclip)
+			p.set_args(['-selection', 'clipboard'])
+			p.set_redirect_stdio()
+			p.run()
+			p.stdin_write(text)
+			p.close()
+			p.wait()
+			if p.code == 0 {
+				return true
+			}
+		}
+		// 3. X11 via xsel
+		xsel := os.find_abs_path_of_executable('xsel') or { '' }
+		if xsel.len > 0 {
+			mut p := os.new_process(xsel)
+			p.set_args(['-b', '-i'])
+			p.set_redirect_stdio()
+			p.run()
+			p.stdin_write(text)
+			p.close()
+			p.wait()
+			if p.code == 0 {
+				return true
+			}
+		}
+	} $else $if windows {
+		clip_path := os.find_abs_path_of_executable('clip.exe') or { '' }
+		if clip_path.len > 0 {
+			mut p := os.new_process(clip_path)
+			p.set_redirect_stdio()
+			p.run()
+			p.stdin_write(text)
+			p.close()
+			p.wait()
+			if p.code == 0 {
+				return true
+			}
+		}
 	}
+
+	// Fallback to V built-in clipboard module
+	mut cb := clipboard.new()
 	if !cb.is_available() {
+		cb.destroy()
 		return false
 	}
-	return cb.copy(text)
+	res := cb.copy(text)
+	cb.destroy()
+	return res
 }
 
 // clipboard_copy delegates to standalone clipboard_copy.
@@ -1145,16 +1217,57 @@ pub fn (win &SimpleWindow) clipboard_copy(text string) bool {
 	return clipboard_copy(text)
 }
 
-// clipboard_read retrieves text from the system clipboard.
+// clipboard_read retrieves text from the system clipboard across macOS, Linux (Wayland/X11), and Windows.
 pub fn clipboard_read() string {
-	mut cb := clipboard.new()
-	defer {
-		cb.destroy()
+	$if macos {
+		pbpaste_path := os.find_abs_path_of_executable('pbpaste') or { '' }
+		if pbpaste_path.len > 0 {
+			res := os.execute(pbpaste_path)
+			if res.exit_code == 0 {
+				return res.output
+			}
+		}
+	} $else $if linux {
+		// 1. Wayland clipboard
+		wl_paste := os.find_abs_path_of_executable('wl-paste') or { '' }
+		if wl_paste.len > 0 {
+			res := os.execute('${wl_paste} --no-newline 2>/dev/null || ${wl_paste} 2>/dev/null')
+			if res.exit_code == 0 && res.output.len > 0 {
+				return res.output
+			}
+		}
+		// 2. X11 via xclip
+		xclip := os.find_abs_path_of_executable('xclip') or { '' }
+		if xclip.len > 0 {
+			res := os.execute('${xclip} -selection clipboard -o 2>/dev/null')
+			if res.exit_code == 0 {
+				return res.output
+			}
+		}
+		// 3. X11 via xsel
+		xsel := os.find_abs_path_of_executable('xsel') or { '' }
+		if xsel.len > 0 {
+			res := os.execute('${xsel} -b -o 2>/dev/null')
+			if res.exit_code == 0 {
+				return res.output
+			}
+		}
+	} $else $if windows {
+		res := os.execute('powershell -Command "Get-Clipboard"')
+		if res.exit_code == 0 {
+			return res.output.trim_space()
+		}
 	}
+
+	// Fallback to V built-in clipboard module
+	mut cb := clipboard.new()
 	if !cb.is_available() {
+		cb.destroy()
 		return ''
 	}
-	return cb.paste()
+	text := cb.paste()
+	cb.destroy()
+	return text
 }
 
 // clipboard_read delegates to standalone clipboard_read.
@@ -2833,10 +2946,56 @@ pub fn time_days_in_month(year int, month int) int {
 	return time.days_in_month(month, year) or { 30 }
 }
 
-// time_days_in_month delegates to standalone time_days_in_month.
-pub fn (win &SimpleWindow) time_days_in_month(year int, month int) int {
-	return time_days_in_month(year, month)
+// is_valid_date_str validates that a date string adheres strictly to YYYY-MM-DD format with a valid calendar date.
+pub fn is_valid_date_str(date_str string) bool {
+	parts := date_str.split('-')
+	if parts.len != 3 {
+		return false
+	}
+	if parts[0].len != 4 || parts[1].len != 2 || parts[2].len != 2 {
+		return false
+	}
+	year := parts[0].int()
+	month := parts[1].int()
+	day := parts[2].int()
+
+	if year < 1000 || year > 9999 {
+		return false
+	}
+	if month < 1 || month > 12 {
+		return false
+	}
+	max_days := time_days_in_month(year, month)
+	if day < 1 || day > max_days {
+		return false
+	}
+	return true
 }
+
+// is_valid_date_str delegates to standalone is_valid_date_str.
+pub fn (win &SimpleWindow) is_valid_date_str(date_str string) bool {
+	return is_valid_date_str(date_str)
+}
+
+// is_valid_time_str validates that a time string adheres strictly to HH:MM (24-hour) format.
+pub fn is_valid_time_str(time_str string) bool {
+	parts := time_str.split(':')
+	if parts.len != 2 {
+		return false
+	}
+	if parts[0].len != 2 || parts[1].len != 2 {
+		return false
+	}
+	h := parts[0].int()
+	m := parts[1].int()
+	return h >= 0 && h <= 23 && m >= 0 && m <= 59
+}
+
+// is_valid_time_str delegates to standalone is_valid_time_str.
+pub fn (win &SimpleWindow) is_valid_time_str(time_str string) bool {
+	return is_valid_time_str(time_str)
+}
+
 
 // ==========================================
 // 49. JSON Formatting & Validation Utilities (Chapter 13: json)

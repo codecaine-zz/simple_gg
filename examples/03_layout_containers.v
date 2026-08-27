@@ -4,7 +4,7 @@ module main
 import simplegui
 
 fn main() {
-	mut win := simplegui.new_simple_window('03 - Layout Containers Demo', 660, 440)
+	mut win := simplegui.new_simple_window('03 - Layout Containers Demo', 660, 460)
 	win.set_theme('Nord')
 
 	win.add_heading('Layout & Group Containers')

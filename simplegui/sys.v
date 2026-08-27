@@ -2343,52 +2343,43 @@ pub fn sys_set_external_app_visible(pid int, visible bool) bool {
 // 21. Linux Font Resolution & Typography
 // ==========================================
 
-// linux_font_candidates returns prioritized candidate paths for system TTF/OTF fonts on Linux.
+// linux_font_candidates returns prioritized candidate paths for system TTF/OTF fonts on Linux (Sans, Serif, and Monospace).
 pub fn linux_font_candidates() []string {
 	return [
-		'/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf',
-		'/usr/share/fonts/truetype/ubuntu/Ubuntu-Regular.ttf',
-		'/usr/share/fonts/truetype/ubuntu/Ubuntu.ttf',
-		'/usr/share/fonts/opentype/ubuntu/Ubuntu-R.ttf',
-		'/usr/share/fonts/opentype/ubuntu/Ubuntu-Regular.ttf',
-		'/usr/share/fonts/ubuntu-font-family/Ubuntu-R.ttf',
-		'/usr/share/fonts/ubuntu-font-family/Ubuntu-Regular.ttf',
-		'/usr/share/fonts/TTF/Ubuntu-R.ttf',
-		'/usr/share/fonts/TTF/Ubuntu-Regular.ttf',
-		'/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
-		'/usr/share/fonts/truetype/liberation2/LiberationSans-Regular.ttf',
-		'/usr/share/fonts/liberation-sans/LiberationSans-Regular.ttf',
-		'/usr/share/fonts/liberation-sans-fonts/LiberationSans-Regular.ttf',
-		'/usr/share/fonts/TTF/LiberationSans-Regular.ttf',
+		// Sans-Serif candidates
 		'/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-		'/usr/share/fonts/dejavu-sans-fonts/DejaVuSans.ttf',
-		'/usr/share/fonts/dejavu/DejaVuSans.ttf',
-		'/usr/share/fonts/TTF/DejaVuSans.ttf',
+		'/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf',
+		'/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
 		'/usr/share/fonts/truetype/noto/NotoSans-Regular.ttf',
-		'/usr/share/fonts/google-noto/NotoSans-Regular.ttf',
-		'/usr/share/fonts/noto/NotoSans-Regular.ttf',
-		'/usr/share/fonts/TTF/NotoSans-Regular.ttf',
-		'/usr/share/fonts/cantarell/Cantarell-Regular.otf',
-		'/usr/share/fonts/opentype/cantarell/Cantarell-Regular.otf',
 		'/usr/share/fonts/truetype/freefont/FreeSans.ttf',
-		'/usr/share/fonts/freefont/FreeSans.ttf',
 		'/usr/share/fonts/truetype/roboto/unhinted/Roboto-Regular.ttf',
-		'/usr/share/fonts/truetype/roboto/hinted/Roboto-Regular.ttf',
-		'/usr/share/fonts/roboto/Roboto-Regular.ttf',
-		'/usr/share/fonts/TTF/Roboto-Regular.ttf',
+		// Monospace candidates
+		'/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf',
+		'/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf',
+		'/usr/share/fonts/truetype/ubuntu/UbuntuMono-R.ttf',
+		'/usr/share/fonts/truetype/freefont/FreeMono.ttf',
+		// Serif candidates
+		'/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf',
+		'/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf',
+		'/usr/share/fonts/truetype/freefont/FreeSerif.ttf',
+		'/usr/share/fonts/cantarell/Cantarell-Regular.otf',
 	]
 }
 
 // macos_font_candidates returns candidate paths for system TTF/OTF fonts on macOS.
 pub fn macos_font_candidates() []string {
 	return [
+		// Sans-Serif candidates
 		'/System/Library/Fonts/Supplemental/Arial.ttf',
 		'/System/Library/Fonts/Supplemental/Helvetica.ttf',
-		'/System/Library/Fonts/Supplemental/Times New Roman.ttf',
-		'/System/Library/Fonts/Supplemental/Courier New.ttf',
-		'/System/Library/Fonts/Supplemental/Georgia.ttf',
 		'/System/Library/Fonts/Supplemental/Verdana.ttf',
+		// Monospace candidates
 		'/System/Library/Fonts/Monaco.ttf',
+		'/System/Library/Fonts/Supplemental/Courier New.ttf',
+		'/System/Library/Fonts/Menlo.ttc',
+		// Serif candidates
+		'/System/Library/Fonts/Supplemental/Times New Roman.ttf',
+		'/System/Library/Fonts/Supplemental/Georgia.ttf',
 		'/Library/Fonts/Arial.ttf',
 	]
 }

@@ -79,6 +79,42 @@
 
 ---
 
+# 📦 Installation & Module Setup
+
+### 1. Install via VPM (V Package Manager)
+
+```bash
+v install codecaine-zz.simplegui
+```
+
+Or install directly from GitHub:
+```bash
+v install --git https://github.com/codecaine-zz/simple_gg
+```
+
+### 2. Linux System Dependencies
+
+On Linux (Debian / Ubuntu / Pop!_OS / Mint), ensure standard X11/GL development headers are present:
+
+```bash
+# Run the automated dependency installer:
+v run install_dependencies.vsh
+
+# Or install manually via apt:
+sudo apt update
+sudo apt install -y libx11-dev libxcursor-dev libxi-dev libgl1-mesa-dev libasound2-dev xclip
+```
+
+### 3. Naming & Import Convention
+
+| Element | Name | Description |
+| :--- | :--- | :--- |
+| **Repository Name** | `simple_gg` | The GitHub project name (SimpleGUI built on V's `gg` engine). |
+| **V Module Name** | `simplegui` | Used in all code across **macOS, Linux, and Windows**: `import simplegui` |
+| **Headless CLI Module** | `simplecli` | Zero-window terminal apps across all platforms: `import simplecli` |
+
+---
+
 # Quick Start
 
 ```v

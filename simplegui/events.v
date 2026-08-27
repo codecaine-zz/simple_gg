@@ -494,11 +494,14 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 
 							if ctrl.kind == 'date_picker' && win.mouse_x >= ctrl.x + ctrl.w - 30.0 {
 								ctrl_name := ctrl.name
-								cur_d := if ctrl.text_value.len > 0 { ctrl.text_value } else { '2026-08-11' }
-								win.show_dialog_input('Select Date', 'Enter or edit date (YYYY-MM-DD):', cur_d, 'YYYY-MM-DD', fn [ctrl_name] (mut win SimpleWindow) {
-									inp := win.get_dialog_input()
-									if inp.len > 0 {
+								cur_d := if is_valid_date_str(ctrl.text_value) { ctrl.text_value } else { '2026-08-11' }
+								win.show_dialog_input('Select Date', 'Enter or edit calendar date (YYYY-MM-DD):', cur_d, 'YYYY-MM-DD', fn [ctrl_name] (mut win SimpleWindow) {
+									inp := win.get_dialog_input().trim_space()
+									if is_valid_date_str(inp) {
 										win.set_value(ctrl_name, inp)
+										win.push_toast('Date Updated', 'Selected: ${inp}', 'success', 2500)
+									} else {
+										win.push_toast('Invalid Date', 'Date must be valid YYYY-MM-DD (e.g. 2026-08-11)', 'warning', 3500)
 									}
 								})
 							}
@@ -1220,6 +1223,28 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 						'file_picker', 'color_picker', 'pin_code', 'time_picker', 'date_picker', 'tag_input', 'code_editor', 'code_studio'] {
 						if e.char_code >= 32 && e.char_code <= 126 {
 							ch := u8(e.char_code).ascii_str()
+
+							// Specific control typing restrictions
+							if ctrl.kind == 'date_picker' {
+								if ch !in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-'] {
+									return
+								}
+								if !ctrl.has_selection() && ctrl.text_value.len >= 10 {
+									return
+								}
+							} else if ctrl.kind == 'time_picker' {
+								if ch !in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':'] {
+									return
+								}
+								if !ctrl.has_selection() && ctrl.text_value.len >= 5 {
+									return
+								}
+							} else if ctrl.kind == 'pin_code' {
+								if ch !in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'] {
+									return
+								}
+							}
+
 							if ctrl.has_selection() {
 								ctrl.delete_selected_text()
 							} else {

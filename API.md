@@ -9,6 +9,21 @@ Whether you are building a 5-minute utility tool, a multi-tab admin panel, or an
 
 ---
 
+## 📦 Installation & Module Setup
+
+```bash
+# Install via V Package Manager (VPM)
+v install codecaine-zz.simplegui
+
+# Or install directly from Git
+v install --git https://github.com/codecaine-zz/simple_gg
+```
+
+- **V Module Import**: `import simplegui` (unified on macOS, Linux, and Windows)
+- **Headless CLI Import**: `import simplecli`
+
+---
+
 ## Quick Navigation Index
 
 1. [60-Second Copy-Paste Starter App](#1-60-second-copy-paste-starter-app)
