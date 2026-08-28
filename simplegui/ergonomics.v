@@ -365,9 +365,18 @@ pub fn (mut win SimpleWindow) prompt(title string, message string, default_val s
 			return res.output.trim_space()
 		}
 	} $else {
-		res := os.execute("zenity --entry --title=\"${title}\" --text=\"${message}\" --entry-text=\"${default_val}\" 2>/dev/null")
-		if res.exit_code == 0 {
-			return res.output.trim_space()
+		for cmd in [
+			"zenity --entry --title=\"${title}\" --text=\"${message}\" --entry-text=\"${default_val}\" 2>/dev/null",
+			"kdialog --inputbox \"${message}\" \"${default_val}\" 2>/dev/null",
+			"yad --entry --title=\"${title}\" --text=\"${message}\" --entry-text=\"${default_val}\" 2>/dev/null",
+		] {
+			prog := cmd.split(' ')[0]
+			if os.find_abs_path_of_executable(prog) or { '' } != '' {
+				res := os.execute(cmd)
+				if res.exit_code == 0 {
+					return res.output.trim_space()
+				}
+			}
 		}
 	}
 	return default_val
@@ -587,8 +596,14 @@ pub fn reveal_in_finder(path string) bool {
 		res := os.execute('explorer.exe /select,"${path}"')
 		return res.exit_code == 0
 	} $else {
-		res := os.execute('xdg-open "${os.dir(path)}"')
-		return res.exit_code == 0
+		for opener in ['xdg-open', 'gio', 'gnome-open', 'kde-open5', 'kde-open'] {
+			if os.find_abs_path_of_executable(opener) or { '' } != '' {
+				cmd := if opener == 'gio' { 'gio open "${os.dir(path)}" 2>/dev/null' } else { '${opener} "${os.dir(path)}" 2>/dev/null' }
+				res := os.execute(cmd)
+				return res.exit_code == 0
+			}
+		}
+		return false
 	}
 }
 

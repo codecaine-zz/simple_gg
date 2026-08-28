@@ -940,7 +940,13 @@ pub fn (cli &SimpleCli) open_in_browser(url string) &SimpleCli {
 	} $else $if windows {
 		os.execute("start \"\" \"${url}\"")
 	} $else {
-		os.execute("xdg-open \"${url}\" 2>/dev/null")
+		for opener in ['xdg-open', 'gio', 'gnome-open', 'kde-open5', 'kde-open'] {
+			if os.find_abs_path_of_executable(opener) or { '' } != '' {
+				cmd := if opener == 'gio' { 'gio open "${url}" 2>/dev/null' } else { '${opener} "${url}" 2>/dev/null' }
+				os.execute(cmd)
+				return cli
+			}
+		}
 	}
 	return cli
 }
@@ -1087,7 +1093,17 @@ pub fn (cli &SimpleCli) show_system_notification(title string, message string) &
 		script := "[reflection.assembly]::loadwithpartialname('System.Windows.Forms'); [reflection.assembly]::loadwithpartialname('System.Drawing'); \$notify = new-object system.windows.forms.notifyicon; \$notify.icon = [system.drawing.systemicons]::information; \$notify.visible = \$true; \$notify.showballoontip(0, '${title}', '${message}', [system.windows.forms.tooltipicon]::None)"
 		os.execute("powershell -Command \"${script}\"")
 	} $else {
-		os.execute("notify-send \"${title}\" \"${message}\" 2>/dev/null")
+		for cmd in [
+			"notify-send \"${title}\" \"${message}\" 2>/dev/null",
+			"kdialog --title \"${title}\" --passivepopup \"${message}\" 2>/dev/null",
+			"zenity --notification --window-icon=info --text=\"${message}\" 2>/dev/null",
+		] {
+			prog := cmd.split(' ')[0]
+			if os.find_abs_path_of_executable(prog) or { '' } != '' {
+				os.execute(cmd)
+				return cli
+			}
+		}
 	}
 	return cli
 }
@@ -1336,8 +1352,20 @@ pub fn (cli &SimpleCli) ask(title string, question string) bool {
 		res := os.execute("powershell -Command \"${script}\"")
 		return res.exit_code == 0 && res.output.trim_space() == 'True'
 	} $else {
-		res := os.execute("zenity --question --title=\"${title}\" --text=\"${question}\" 2>/dev/null")
-		return res.exit_code == 0
+		for cmd in [
+			"zenity --question --title=\"${title}\" --text=\"${question}\" 2>/dev/null",
+			"kdialog --yesno \"${question}\" 2>/dev/null",
+			"yad --question --title=\"${title}\" --text=\"${question}\" 2>/dev/null",
+		] {
+			prog := cmd.split(' ')[0]
+			if os.find_abs_path_of_executable(prog) or { '' } != '' {
+				res := os.execute(cmd)
+				if res.exit_code == 0 {
+					return true
+				}
+			}
+		}
+		return false
 	}
 }
 

@@ -113,8 +113,17 @@ pub fn (win &SimpleWindow) show_system_notification(title string, message string
 		cmd := "powershell -Command \"[reflection.assembly]::loadwithpartialname('System.Windows.Forms'); \$n = new-object system.windows.forms.notifyicon; \$n.icon = [system.drawing.systemicons]::information; \$n.visible = \$true; \$n.showballoontip(0, '${title_esc}', '${msg_esc}', [system.windows.forms.tooltipicon]::info)\""
 		win.exec_bg(cmd)
 	} $else {
-		cmd := "notify-send \"${title}\" \"${message}\" 2>/dev/null"
-		win.exec_bg(cmd)
+		linux_cmds := [
+			"notify-send \"${title}\" \"${message}\" 2>/dev/null",
+			"kdialog --title \"${title}\" --passivepopup \"${message}\" 2>/dev/null",
+			"zenity --notification --window-icon=info --text=\"${message}\" 2>/dev/null",
+		]
+		for cmd in linux_cmds {
+			if os.find_abs_path_of_executable(cmd.split(' ')[0]) or { '' } != '' {
+				win.exec_bg(cmd)
+				return win
+			}
+		}
 	}
 	return win
 }
@@ -882,7 +891,23 @@ pub fn (win &SimpleWindow) open_url(url string) &SimpleWindow {
 	} $else $if windows {
 		win.exec_bg('start "${url}"')
 	} $else {
-		win.exec_bg('xdg-open "${url}"')
+		linux_openers := [
+			'xdg-open',
+			'gio',
+			'gnome-open',
+			'kde-open5',
+			'kde-open',
+		]
+		for opener in linux_openers {
+			if os.find_abs_path_of_executable(opener) or { '' } != '' {
+				if opener == 'gio' {
+					win.exec_bg('gio open "${url}" 2>/dev/null')
+				} else {
+					win.exec_bg('${opener} "${url}" 2>/dev/null')
+				}
+				return win
+			}
+		}
 	}
 	return win
 }
@@ -897,7 +922,23 @@ pub fn (win &SimpleWindow) reveal_in_finder(path string) &SimpleWindow {
 	} $else $if windows {
 		win.exec_bg('explorer.exe /select,"${path}"')
 	} $else {
-		win.exec_bg('xdg-open "${os.dir(path)}"')
+		linux_openers := [
+			'xdg-open',
+			'gio',
+			'gnome-open',
+			'kde-open5',
+			'kde-open',
+		]
+		for opener in linux_openers {
+			if os.find_abs_path_of_executable(opener) or { '' } != '' {
+				if opener == 'gio' {
+					win.exec_bg('gio open "${os.dir(path)}" 2>/dev/null')
+				} else {
+					win.exec_bg('${opener} "${os.dir(path)}" 2>/dev/null')
+				}
+				return win
+			}
+		}
 	}
 	return win
 }
@@ -912,7 +953,17 @@ pub fn (win &SimpleWindow) open_in_default_app(path string) &SimpleWindow {
 	} $else $if windows {
 		win.exec_bg('start "" "${path}"')
 	} $else {
-		win.exec_bg('xdg-open "${path}"')
+		linux_openers := ['xdg-open', 'gio', 'gnome-open', 'kde-open5', 'kde-open']
+		for opener in linux_openers {
+			if os.find_abs_path_of_executable(opener) or { '' } != '' {
+				if opener == 'gio' {
+					win.exec_bg('gio open "${path}" 2>/dev/null')
+				} else {
+					win.exec_bg('${opener} "${path}" 2>/dev/null')
+				}
+				return win
+			}
+		}
 	}
 	return win
 }
@@ -927,7 +978,21 @@ pub fn (win &SimpleWindow) open_with_app(path string, app_id string) &SimpleWind
 	} $else $if windows {
 		win.exec_bg('start "${app_id}" "${path}"')
 	} $else {
-		win.exec_bg('${app_id} "${path}"')
+		if app_id.len > 0 {
+			win.exec_bg('${app_id} "${path}" 2>/dev/null')
+			return win
+		}
+		linux_openers := ['xdg-open', 'gio', 'gnome-open', 'kde-open5', 'kde-open']
+		for opener in linux_openers {
+			if os.find_abs_path_of_executable(opener) or { '' } != '' {
+				if opener == 'gio' {
+					win.exec_bg('gio open "${path}" 2>/dev/null')
+				} else {
+					win.exec_bg('${opener} "${path}" 2>/dev/null')
+				}
+				return win
+			}
+		}
 	}
 	return win
 }
@@ -1117,10 +1182,18 @@ pub fn (win &SimpleWindow) osascript_dialog(prompt string, default_value string)
 			return out.trim_space()
 		}
 	} $else {
-		cmd := "zenity --entry --title=\"Input\" --text=\"${prompt}\" --entry-text=\"${default_value}\" 2>/dev/null"
-		out, code := win.exec(cmd)
-		if code == 0 {
-			return out.trim_space()
+		for cmd in [
+			"zenity --entry --title=\"Input\" --text=\"${prompt}\" --entry-text=\"${default_value}\" 2>/dev/null",
+			"kdialog --inputbox \"${prompt}\" \"${default_value}\" 2>/dev/null",
+			"yad --entry --title=\"Input\" --text=\"${prompt}\" --entry-text=\"${default_value}\" 2>/dev/null",
+		] {
+			prog := cmd.split(' ')[0]
+			if os.find_abs_path_of_executable(prog) or { '' } != '' {
+				out, code := win.exec(cmd)
+				if code == 0 {
+					return out.trim_space()
+				}
+			}
 		}
 	}
 	return ''
@@ -1143,9 +1216,19 @@ pub fn (win &SimpleWindow) osascript_alert(title string, message string) bool {
 		out, _ := win.exec(cmd)
 		return out.contains('OK')
 	} $else {
-		cmd := "zenity --question --title=\"${title}\" --text=\"${message}\" 2>/dev/null"
-		_, code := win.exec(cmd)
-		return code == 0
+		for cmd in [
+			"zenity --question --title=\"${title}\" --text=\"${message}\" 2>/dev/null",
+			"kdialog --yesno \"${message}\" 2>/dev/null",
+			"yad --question --title=\"${title}\" --text=\"${message}\" 2>/dev/null",
+		] {
+			prog := cmd.split(' ')[0]
+			if os.find_abs_path_of_executable(prog) or { '' } != '' {
+				_, code := win.exec(cmd)
+				if code == 0 {
+					return true
+				}
+			}
+		}
 	}
 	return false
 }
@@ -1165,9 +1248,18 @@ pub fn (win &SimpleWindow) osascript_choose_file() string {
 			return out.trim_space()
 		}
 	} $else {
-		out, code := win.exec("zenity --file-selection 2>/dev/null")
-		if code == 0 {
-			return out.trim_space()
+		for cmd in [
+			"zenity --file-selection 2>/dev/null",
+			"kdialog --getopenfilename 2>/dev/null",
+			"yad --file --title=\"Open File\" 2>/dev/null",
+		] {
+			prog := cmd.split(' ')[0]
+			if os.find_abs_path_of_executable(prog) or { '' } != '' {
+				out, code := win.exec(cmd)
+				if code == 0 {
+					return out.trim_space()
+				}
+			}
 		}
 	}
 	return ''
@@ -1188,9 +1280,18 @@ pub fn (win &SimpleWindow) osascript_choose_folder() string {
 			return out.trim_space()
 		}
 	} $else {
-		out, code := win.exec("zenity --file-selection --directory 2>/dev/null")
-		if code == 0 {
-			return out.trim_space()
+		for cmd in [
+			"zenity --file-selection --directory 2>/dev/null",
+			"kdialog --getexistingdirectory 2>/dev/null",
+			"yad --file --directory --title=\"Select Folder\" 2>/dev/null",
+		] {
+			prog := cmd.split(' ')[0]
+			if os.find_abs_path_of_executable(prog) or { '' } != '' {
+				out, code := win.exec(cmd)
+				if code == 0 {
+					return out.trim_space()
+				}
+			}
 		}
 	}
 	return ''
