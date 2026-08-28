@@ -1131,6 +1131,14 @@ pub fn new_ringbuffer[T](capacity int) SimpleRingBuffer[T] {
 
 // clipboard_copy copies text to the system clipboard across macOS, Linux (Wayland/X11), and Windows.
 pub fn clipboard_copy(text string) bool {
+	mut cb := clipboard.new()
+	if cb.is_available() {
+		res := cb.copy(text)
+		cb.destroy()
+		return res
+	}
+	cb.destroy()
+
 	$if macos {
 		pbcopy_path := os.find_abs_path_of_executable('pbcopy') or { '' }
 		if pbcopy_path.len > 0 {
@@ -1200,16 +1208,7 @@ pub fn clipboard_copy(text string) bool {
 			}
 		}
 	}
-
-	// Fallback to V built-in clipboard module
-	mut cb := clipboard.new()
-	if !cb.is_available() {
-		cb.destroy()
-		return false
-	}
-	res := cb.copy(text)
-	cb.destroy()
-	return res
+	return false
 }
 
 // clipboard_copy delegates to standalone clipboard_copy.
@@ -1219,6 +1218,14 @@ pub fn (win &SimpleWindow) clipboard_copy(text string) bool {
 
 // clipboard_read retrieves text from the system clipboard across macOS, Linux (Wayland/X11), and Windows.
 pub fn clipboard_read() string {
+	mut cb := clipboard.new()
+	if cb.is_available() {
+		text := cb.paste()
+		cb.destroy()
+		return text
+	}
+	cb.destroy()
+
 	$if macos {
 		pbpaste_path := os.find_abs_path_of_executable('pbpaste') or { '' }
 		if pbpaste_path.len > 0 {
@@ -1258,16 +1265,7 @@ pub fn clipboard_read() string {
 			return res.output.trim_space()
 		}
 	}
-
-	// Fallback to V built-in clipboard module
-	mut cb := clipboard.new()
-	if !cb.is_available() {
-		cb.destroy()
-		return ''
-	}
-	text := cb.paste()
-	cb.destroy()
-	return text
+	return ''
 }
 
 // clipboard_read delegates to standalone clipboard_read.

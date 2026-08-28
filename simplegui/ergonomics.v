@@ -10,6 +10,7 @@
 module simplegui
 
 import json2
+import clipboard
 import os
 
 // =============================================================================
@@ -547,6 +548,14 @@ pub fn (mut win SimpleWindow) on_file_drop(cb fn (mut win SimpleWindow, files []
 
 // clipboard_text returns UTF-8 text from system clipboard.
 pub fn clipboard_text() string {
+	mut cb := clipboard.new()
+	if cb.is_available() {
+		text := cb.paste()
+		cb.destroy()
+		return text
+	}
+	cb.destroy()
+
 	$if macos {
 		res := os.execute('pbpaste')
 		if res.exit_code == 0 {
@@ -558,7 +567,7 @@ pub fn clipboard_text() string {
 			return res.output
 		}
 	} $else {
-		res := os.execute('xclip -selection clipboard -o 2>/dev/null || xsel --clipboard --output 2>/dev/null')
+		res := os.execute('xclip -selection clipboard -o 2>/dev/null || xsel --clipboard --output 2>/dev/null || wl-paste --no-newline 2>/dev/null || wl-paste 2>/dev/null')
 		if res.exit_code == 0 {
 			return res.output
 		}

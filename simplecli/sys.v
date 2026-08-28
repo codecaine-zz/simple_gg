@@ -13,6 +13,7 @@ import os
 import time
 import net
 import net.http
+import clipboard
 
 // Native C declarations for POSIX system calls
 $if macos || linux || freebsd {
@@ -1206,6 +1207,14 @@ pub fn (cli &SimpleCli) set_muted(muted bool) &SimpleCli {
 
 // copy_to_clipboard copies text to the system clipboard across macOS, Linux, and Windows.
 pub fn (cli &SimpleCli) copy_to_clipboard(text string) &SimpleCli {
+	mut cb := clipboard.new()
+	if cb.is_available() {
+		_ := cb.copy(text)
+		cb.destroy()
+		return cli
+	}
+	cb.destroy()
+
 	$if macos {
 		pbcopy_path := os.find_abs_path_of_executable('pbcopy') or { '' }
 		if pbcopy_path.len > 0 {
@@ -1260,6 +1269,14 @@ pub fn (cli &SimpleCli) copy_to_clipboard(text string) &SimpleCli {
 
 // get_clipboard_text retrieves the current text content from the system clipboard across macOS, Linux, and Windows.
 pub fn (cli &SimpleCli) get_clipboard_text() string {
+	mut cb := clipboard.new()
+	if cb.is_available() {
+		text := cb.paste()
+		cb.destroy()
+		return text
+	}
+	cb.destroy()
+
 	$if macos {
 		pbpaste_path := os.find_abs_path_of_executable('pbpaste') or { '' }
 		if pbpaste_path.len > 0 {
