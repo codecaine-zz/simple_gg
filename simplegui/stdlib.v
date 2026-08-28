@@ -1129,62 +1129,88 @@ pub fn new_ringbuffer[T](capacity int) SimpleRingBuffer[T] {
 // 18. System Clipboard Helper (Chapter 13: clipboard)
 // ==========================================
 
+fn linux_clipboard_read_candidates() []string {
+	mut cmds := []string{}
+	wl_paste := os.find_abs_path_of_executable('wl-paste') or { '' }
+	if wl_paste.len > 0 {
+		cmds << '${wl_paste} --no-newline 2>/dev/null || ${wl_paste} 2>/dev/null'
+	}
+	xclip := os.find_abs_path_of_executable('xclip') or { '' }
+	if xclip.len > 0 {
+		cmds << '${xclip} -selection clipboard -o 2>/dev/null'
+		cmds << '${xclip} -selection primary -o 2>/dev/null'
+	}
+	xsel := os.find_abs_path_of_executable('xsel') or { '' }
+	if xsel.len > 0 {
+		cmds << '${xsel} -b -o 2>/dev/null'
+		cmds << '${xsel} -p -o 2>/dev/null'
+	}
+	return cmds
+}
+
+struct LinuxClipboardCmd {
+	path string
+	args []string
+}
+
+fn linux_clipboard_write_candidates() []LinuxClipboardCmd {
+	mut cmds := []LinuxClipboardCmd{}
+	wl_copy := os.find_abs_path_of_executable('wl-copy') or { '' }
+	if wl_copy.len > 0 {
+		cmds << LinuxClipboardCmd{wl_copy, []}
+	}
+	xclip := os.find_abs_path_of_executable('xclip') or { '' }
+	if xclip.len > 0 {
+		cmds << LinuxClipboardCmd{xclip, ['-selection', 'clipboard']}
+		cmds << LinuxClipboardCmd{xclip, ['-selection', 'primary']}
+	}
+	xsel := os.find_abs_path_of_executable('xsel') or { '' }
+	if xsel.len > 0 {
+		cmds << LinuxClipboardCmd{xsel, ['-b', '-i']}
+		cmds << LinuxClipboardCmd{xsel, ['-p', '-i']}
+	}
+	return cmds
+}
+
 // clipboard_copy copies text to the system clipboard across macOS, Linux (Wayland/X11), and Windows.
 pub fn clipboard_copy(text string) bool {
+	$if linux {
+		// Prefer xclip/xsel/wl-copy: they detach into the background and keep
+		// serving the selection to other apps, unlike the native X11 library
+		// path below, which loses ownership as soon as our process exits and
+		// can be unreliable for cross-process pastes even while it is running.
+		for cmd in linux_clipboard_write_candidates() {
+			mut p := os.new_process(cmd.path)
+			p.set_args(cmd.args)
+			p.set_redirect_stdio()
+			p.run()
+			p.stdin_write(text)
+			p.close()
+			p.wait()
+			if p.code == 0 {
+				return true
+			}
+		}
+	}
+
 	mut cb := clipboard.new()
-	if cb.is_available() {
-		res := cb.copy(text)
-		cb.destroy()
-		return res
+	if cb.is_available() && cb.copy(text) {
+		// Do not destroy: the X11 selection owner must stay alive so other
+		// apps can request the clipboard contents after this call returns.
+		return true
 	}
 	cb.destroy()
+
+	mut primary_cb := clipboard.new_primary()
+	if primary_cb.is_available() && primary_cb.copy(text) {
+		return true
+	}
+	primary_cb.destroy()
 
 	$if macos {
 		pbcopy_path := os.find_abs_path_of_executable('pbcopy') or { '' }
 		if pbcopy_path.len > 0 {
 			mut p := os.new_process(pbcopy_path)
-			p.set_redirect_stdio()
-			p.run()
-			p.stdin_write(text)
-			p.close()
-			p.wait()
-			if p.code == 0 {
-				return true
-			}
-		}
-	} $else $if linux {
-		// 1. Wayland clipboard
-		wl_copy := os.find_abs_path_of_executable('wl-copy') or { '' }
-		if wl_copy.len > 0 {
-			mut p := os.new_process(wl_copy)
-			p.set_redirect_stdio()
-			p.run()
-			p.stdin_write(text)
-			p.close()
-			p.wait()
-			if p.code == 0 {
-				return true
-			}
-		}
-		// 2. X11 via xclip
-		xclip := os.find_abs_path_of_executable('xclip') or { '' }
-		if xclip.len > 0 {
-			mut p := os.new_process(xclip)
-			p.set_args(['-selection', 'clipboard'])
-			p.set_redirect_stdio()
-			p.run()
-			p.stdin_write(text)
-			p.close()
-			p.wait()
-			if p.code == 0 {
-				return true
-			}
-		}
-		// 3. X11 via xsel
-		xsel := os.find_abs_path_of_executable('xsel') or { '' }
-		if xsel.len > 0 {
-			mut p := os.new_process(xsel)
-			p.set_args(['-b', '-i'])
 			p.set_redirect_stdio()
 			p.run()
 			p.stdin_write(text)
@@ -1218,43 +1244,35 @@ pub fn (win &SimpleWindow) clipboard_copy(text string) bool {
 
 // clipboard_read retrieves text from the system clipboard across macOS, Linux (Wayland/X11), and Windows.
 pub fn clipboard_read() string {
+	$if linux {
+		for cmd in linux_clipboard_read_candidates() {
+			res := os.execute(cmd)
+			if res.exit_code == 0 && res.output.trim_space().len > 0 {
+				return res.output.trim_right('\r\n')
+			}
+		}
+	}
+
 	mut cb := clipboard.new()
-	if cb.is_available() {
-		text := cb.paste()
-		cb.destroy()
+	cb_avail := cb.is_available()
+	text := if cb_avail { cb.paste() } else { '' }
+	cb.destroy()
+	if cb_avail && text.len > 0 {
 		return text
 	}
-	cb.destroy()
+
+	mut primary_cb := clipboard.new_primary()
+	primary_avail := primary_cb.is_available()
+	primary_text := if primary_avail { primary_cb.paste() } else { '' }
+	primary_cb.destroy()
+	if primary_avail && primary_text.len > 0 {
+		return primary_text
+	}
 
 	$if macos {
 		pbpaste_path := os.find_abs_path_of_executable('pbpaste') or { '' }
 		if pbpaste_path.len > 0 {
 			res := os.execute(pbpaste_path)
-			if res.exit_code == 0 {
-				return res.output
-			}
-		}
-	} $else $if linux {
-		// 1. Wayland clipboard
-		wl_paste := os.find_abs_path_of_executable('wl-paste') or { '' }
-		if wl_paste.len > 0 {
-			res := os.execute('${wl_paste} --no-newline 2>/dev/null || ${wl_paste} 2>/dev/null')
-			if res.exit_code == 0 && res.output.len > 0 {
-				return res.output
-			}
-		}
-		// 2. X11 via xclip
-		xclip := os.find_abs_path_of_executable('xclip') or { '' }
-		if xclip.len > 0 {
-			res := os.execute('${xclip} -selection clipboard -o 2>/dev/null')
-			if res.exit_code == 0 {
-				return res.output
-			}
-		}
-		// 3. X11 via xsel
-		xsel := os.find_abs_path_of_executable('xsel') or { '' }
-		if xsel.len > 0 {
-			res := os.execute('${xsel} -b -o 2>/dev/null')
 			if res.exit_code == 0 {
 				return res.output
 			}

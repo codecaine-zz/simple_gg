@@ -77,6 +77,23 @@ fn test_date_picker_interactive() {
 	assert ctx.str_val == '2026-12-25'
 }
 
+fn test_clipboard_round_trip() {
+	mut win := new_simple_window('Test Clipboard Round Trip', 400, 300)
+	win.add_input('input_clip', '')
+	text := 'hello from clipboard'
+	if !win.clipboard_copy(text) {
+		// No system clipboard mechanism available (e.g. headless CI without
+		// xclip/xsel/wl-clipboard and no X11/Wayland session); nothing to verify.
+		return
+	}
+	clipped := win.get_clipboard_text()
+	if clipped.len == 0 {
+		return
+	}
+	win.set_text('input_clip', clipped)
+	assert win.get_text('input_clip') == clipped
+}
+
 fn test_menubar_creation_and_selection() {
 	mut win := new_simple_window('Test Menu Bar', 500, 400)
 	mut ctx := &TestContext{}

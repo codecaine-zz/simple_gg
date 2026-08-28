@@ -2731,6 +2731,9 @@ pub fn (win &SimpleWindow) get_text_or(name string, fallback string) string {
 // set_text sets the string text value for control `name`.
 pub fn (mut win SimpleWindow) set_text(name string, value string) &SimpleWindow {
 	if mut ctrl := win.get_control_ptr(name) {
+		if ctrl.text_value == value {
+			return win
+		}
 		ctrl.text_value = value
 		if ctrl.kind in ['label', 'heading', 'button', 'badge', 'link', 'tag'] {
 			ctrl.title = value
@@ -2749,6 +2752,7 @@ pub fn (mut win SimpleWindow) set_text(name string, value string) &SimpleWindow 
 				}
 			}
 		}
+		trigger_control_change(mut win, ctrl)
 	}
 	return win
 }

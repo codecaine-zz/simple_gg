@@ -557,13 +557,30 @@ pub fn (mut win SimpleWindow) on_file_drop(cb fn (mut win SimpleWindow, files []
 
 // clipboard_text returns UTF-8 text from system clipboard.
 pub fn clipboard_text() string {
+	$if linux {
+		for cmd in linux_clipboard_read_candidates() {
+			res := os.execute(cmd)
+			if res.exit_code == 0 && res.output.trim_space().len > 0 {
+				return res.output.trim_right('\r\n')
+			}
+		}
+	}
+
 	mut cb := clipboard.new()
-	if cb.is_available() {
-		text := cb.paste()
-		cb.destroy()
+	cb_avail := cb.is_available()
+	text := if cb_avail { cb.paste() } else { '' }
+	cb.destroy()
+	if cb_avail && text.len > 0 {
 		return text
 	}
-	cb.destroy()
+
+	mut primary_cb := clipboard.new_primary()
+	primary_avail := primary_cb.is_available()
+	primary_text := if primary_avail { primary_cb.paste() } else { '' }
+	primary_cb.destroy()
+	if primary_avail && primary_text.len > 0 {
+		return primary_text
+	}
 
 	$if macos {
 		res := os.execute('pbpaste')
@@ -572,11 +589,6 @@ pub fn clipboard_text() string {
 		}
 	} $else $if windows {
 		res := os.execute('powershell -Command "Get-Clipboard"')
-		if res.exit_code == 0 {
-			return res.output
-		}
-	} $else {
-		res := os.execute('xclip -selection clipboard -o 2>/dev/null || xsel --clipboard --output 2>/dev/null || wl-paste --no-newline 2>/dev/null || wl-paste 2>/dev/null')
 		if res.exit_code == 0 {
 			return res.output
 		}

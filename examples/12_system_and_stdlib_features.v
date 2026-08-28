@@ -56,14 +56,21 @@ fn main() {
 
 	win.on_click('btn_copy', fn (mut win simplegui.SimpleWindow) {
 		val := win.get_text('input_clip')
-		win.copy_to_clipboard(val)
-		win.set_text('lbl_clip_status', 'Copied "${val}" to system clipboard!')
+		if win.clipboard_copy(val) {
+			win.set_text('lbl_clip_status', 'Copied "${val}" to system clipboard!')
+		} else {
+			win.set_text('lbl_clip_status', 'Clipboard unavailable on this Linux session. Run in a desktop session with X11/Wayland active.')
+		}
 	})
 
 	win.on_click('btn_paste', fn (mut win simplegui.SimpleWindow) {
 		clip := win.get_clipboard_text()
-		win.set_text('input_clip', clip)
-		win.set_text('lbl_clip_status', 'Pasted "${clip}" from system clipboard!')
+		if clip.len > 0 {
+			win.set_text('input_clip', clip)
+			win.set_text('lbl_clip_status', 'Pasted "${clip}" from system clipboard!')
+		} else {
+			win.set_text('lbl_clip_status', 'Clipboard is empty or unavailable on this Linux session.')
+		}
 	})
 
 	win.on_click('btn_hash', fn (mut win simplegui.SimpleWindow) {
