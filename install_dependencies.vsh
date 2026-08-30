@@ -297,29 +297,46 @@ fn main() {
 		i++
 	}
 
+	platform := os.user_os()
 	println('======================================================================')
-	println('  SimpleGUI Homebrew Dependencies Inspector & Installer')
+	println('  SimpleGUI Dependencies Inspector & Installer')
 	println('======================================================================')
+	println('Platform: ${platform}')
 
-	// Verify Homebrew is present
 	mut brew_path := ''
-	if p := os.find_abs_path_of_executable('brew') {
-		brew_path = p
-	} else if os.exists('/opt/homebrew/bin/brew') {
-		brew_path = '/opt/homebrew/bin/brew'
-	} else if os.exists('/usr/local/bin/brew') {
-		brew_path = '/usr/local/bin/brew'
+	if platform == 'darwin' {
+		if p := os.find_abs_path_of_executable('brew') {
+			brew_path = p
+		} else if os.exists('/opt/homebrew/bin/brew') {
+			brew_path = '/opt/homebrew/bin/brew'
+		} else if os.exists('/usr/local/bin/brew') {
+			brew_path = '/usr/local/bin/brew'
+		}
 	}
 
-	if brew_path.len == 0 {
+	if platform == 'linux' {
+		println('Linux detected: this project uses V/gg and needs X11/OpenGL dev headers.')
+		println('Install them with:')
+		println('  sudo apt update')
+		println('  sudo apt install -y libx11-dev libxcursor-dev libxi-dev libgl1-mesa-dev libasound2-dev xclip')
+		println('')
+		println('Some CLI utilities can also be installed with Homebrew on Linux/macOS:')
+		println('  brew install ffmpeg imagemagick yt-dlp exiftool tesseract graphviz jq ripgrep fd sd gawk pandoc sqlite wget nmap whois subfinder qalc numbat')
+		println('')
+		println('If you cloned the repo from GitHub, make the module importable with:')
+		println('  mkdir -p ~/.vmodules')
+		println('  ln -s "$PWD" ~/.vmodules/simplegui')
+		println('----------------------------------------------------------------------')
+	} else if brew_path.len == 0 {
 		eprintln('\n❌ Homebrew is not installed on this system!')
 		eprintln('To install Homebrew, run:')
 		eprintln('   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"')
 		eprintln('\nThen re-run this script.\n')
 		exit(1)
+	} else {
+		println('Homebrew Path: ${brew_path}')
 	}
 
-	println('Homebrew Path: ${brew_path}')
 	println('Scanning installed CLI tools across 43 workstation applications...')
 	println('----------------------------------------------------------------------')
 
@@ -364,7 +381,18 @@ fn main() {
 	}
 
 	if is_check_only {
-		println('\nℹ️  Run `./install_dependencies.vsh -y` to install all missing formulas.')
+		println('\nℹ️  Run this script again on your platform with the package manager that matches your OS.')
+		exit(0)
+	}
+
+	if platform == 'linux' {
+		println('\nℹ️  Linux installs are commonly done with apt, but many of the same tools are available via Homebrew too.')
+		println('Use apt on Ubuntu/Debian, for example:')
+		println('  sudo apt update')
+		println('  sudo apt install -y jq ripgrep fd-find sd gawk pandoc sqlite3 wget2 nmap dnsutils openssl whois subfinder ffmpeg imagemagick exiftool tesseract-ocr graphviz qalc numbat')
+		println('')
+		println('Or with Homebrew if it is already installed on your Linux/macOS system:')
+		println('  brew install ffmpeg imagemagick yt-dlp exiftool tesseract graphviz jq ripgrep fd sd gawk pandoc sqlite wget nmap whois subfinder qalc numbat')
 		exit(0)
 	}
 
