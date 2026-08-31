@@ -156,6 +156,35 @@ fn format_friendly_name(raw string) string {
 	return result.join(' ')
 }
 
+fn detect_default_job_count() int {
+	mut detected := 0
+
+	if os.exists_in_system_path('nproc') {
+		res := os.execute('nproc')
+		if res.exit_code == 0 {
+			detected = res.output.trim_space().int()
+		}
+	}
+
+	if detected <= 0 && os.exists('/proc/cpuinfo') {
+		content := os.read_file('/proc/cpuinfo') or { '' }
+		if content.len > 0 {
+			detected = content.split('processor').len - 1
+		}
+	}
+
+	if detected <= 0 {
+		return 2
+	}
+	if detected <= 2 {
+		return 1
+	}
+	if detected <= 4 {
+		return 2
+	}
+	return 4
+}
+
 fn ensure_icon_icns(icon_name string, cache_dir string) string {
 	if icon_name == '' {
 		return ''
@@ -471,7 +500,7 @@ fn print_help() {
 	println('  -c, --c-only, --trans   Translate/export to standalone C source code (.c)')
 	println('  -cc <compiler>          Set C compiler (e.g. -cc gcc, -cc clang, -cc zig)')
 	println('  --flags <flags>         Pass additional flags directly to V compiler')
-	println('  -j, --jobs <n>          Number of concurrent compilation jobs (default: 6)')
+	println('  -j, --jobs <n>          Number of concurrent compilation jobs (default: auto-detect, max 4)')
 	println('  -o, --out <dir>         Override output directory (default: bin/<os>_<arch>/)')
 	println('  -h, --help              Show this help information')
 	println('')
@@ -502,7 +531,7 @@ fn main() {
 	mut target_os := os.user_os()
 	mut target_arch := ''
 	mut extra_flags := ''
-	mut batch_size := 6
+	mut batch_size := detect_default_job_count()
 	mut target_filter := ''
 	mut out_dir_arg := ''
 
