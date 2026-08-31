@@ -334,9 +334,14 @@ You can compile all 44 applications into standalone macOS `.app` bundles with na
 # Compile a specific application target
 ./compile_apps.vsh app_bundler_studio
 
-# Custom concurrency (e.g. 8 parallel jobs) and custom output folder
-./compile_apps.vsh -j 8 -o dist/
+# Safe default for constrained VM or low-core machines
+./compile_apps.vsh -j 1
+
+# Custom concurrency and custom output folder
+./compile_apps.vsh -j 2 -o dist/
 ```
+
+> `compile_apps.vsh` now auto-detects the host CPU and keeps the default parallelism low enough for Ubuntu VMs and other low-core machines. On a single-core or 2-core machine, it will automatically fall back to serial or very low concurrency. If you still hit resource limits, force a lower job count with `-j 1` or `-j 2`.
 
 ### Running Graphical Applications on WSL2 / WSLg
 Windows 11 and Windows 10 (WSL2) natively support graphical Linux applications out-of-the-box via **WSLg**.
