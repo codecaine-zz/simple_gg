@@ -97,7 +97,31 @@ Then run examples from the project directory or from any project that imports `s
 
 > If the package is later published to VPM under a matching name, the standard `v install ...` flow will work as usual. For this repo today, the GitHub clone + `~/.vmodules/simplegui` path is the reliable Linux/macOS workflow.
 
-### 2. Linux System Dependencies
+### 2. Install Homebrew dependencies (macOS)
+
+For a default install on macOS, run the project’s bundled Homebrew installer:
+
+```bash
+./install_homebrew_dependencies.sh
+```
+
+This installs the required runtime tools used by the project and apps, such as FFmpeg, ImageMagick, jq, rg, pandoc, sqlite, nmap, and related toolchain utilities.
+
+If you also want optional cross-compilation toolchains for Windows builds, install them explicitly:
+
+```bash
+./install_homebrew_dependencies.sh --optional
+```
+
+This adds `zig` and `mingw-w64`, which are only needed for Windows-targeted builds and are not required for the normal app runtime.
+
+You can also install only the base bundle directly:
+
+```bash
+brew bundle --file ./Brewfile
+```
+
+### 3. Linux System Dependencies
 
 On Linux (Debian / Ubuntu / Pop!\_OS / Mint), ensure standard X11/GL development headers are present:
 
@@ -110,7 +134,7 @@ sudo apt update
 sudo apt install -y libx11-dev libxcursor-dev libxi-dev libgl1-mesa-dev libasound2-dev xclip
 ```
 
-### 3. Naming & Import Convention
+### 4. Naming & Import Convention
 
 | Element                 | Name        | Description                                                               |
 | :---------------------- | :---------- | :------------------------------------------------------------------------ |

@@ -1,0 +1,5 @@
+# Optional cross-compilation tools for Windows builds
+# Install with: ./install_homebrew_dependencies.sh --optional
+
+brew "zig"
+brew "mingw-w64"
