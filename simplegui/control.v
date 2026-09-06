@@ -230,10 +230,12 @@ pub mut:
 	margin_left    f32 // Outer margin spacing to left of control
 	margin_right   f32 // Outer margin spacing to right of control
 	// Typography styling
-	font_size  int    // Font size in points/pixels
-	font_bold  bool   // Bold font weight flag
-	font_name  string // Font family name
-	text_align string // Horizontal text alignment ('left', 'center', 'right')
+	font_size    int    // Font size in points/pixels
+	font_bold    bool   // Bold font weight flag
+	font_type    string // Font family category ('sans', 'serif', 'mono', 'display')
+	font_subtype string // Font variant / subtype ('regular', 'bold', 'italic', 'condensed')
+	font_name    string // Font family name
+	text_align   string // Horizontal text alignment ('left', 'center', 'right')
 	// Border & Opacity
 	border_width  f32        // Thickness of outer stroke border line in pixels
 	border_color  string     // Color hex string for outer stroke border
@@ -498,6 +500,31 @@ pub fn (c &Control) set_font_bold(bold bool) &Control {
 	unsafe {
 		mut ptr := &Control(c)
 		ptr.font_bold = bold
+	}
+	return c
+}
+
+// set_font_type sets the font category for rendering text.
+pub fn (c &Control) set_font_type(font_type string) &Control {
+	unsafe {
+		mut ptr := &Control(c)
+		ptr.font_type = font_type
+		ptr.font_name = if font_type.to_lower().contains('mono') || font_type.to_lower().contains('code') {
+			'mono'
+		} else if font_type.to_lower().contains('serif') {
+			'serif'
+		} else {
+			'sans'
+		}
+	}
+	return c
+}
+
+// set_font_subtype sets the font variant for rendering text.
+pub fn (c &Control) set_font_subtype(font_subtype string) &Control {
+	unsafe {
+		mut ptr := &Control(c)
+		ptr.font_subtype = font_subtype
 	}
 	return c
 }

@@ -68,3 +68,22 @@ fn test_dynamic_control_font_styling() {
 	}
 }
 
+fn test_control_font_type_and_subtype_updates() {
+	mut win := new_simple_window('Font Type Test Window', 400, 300)
+	win.add_label('lbl_type', 'Type Test')
+
+	win.set_control_font_type('lbl_type', 'sans')
+	win.set_control_font_subtype('lbl_type', 'serif')
+	win.set_control_font_size('lbl_type', 26)
+
+	assert win.get_control_font_type('lbl_type') == 'sans'
+	assert win.get_control_font_subtype('lbl_type') == 'serif'
+	assert win.get_control_font_size('lbl_type') == 26
+
+	if ctrl := win.control_map['lbl_type'] {
+		assert ctrl.font_type == 'sans'
+		assert ctrl.font_subtype == 'serif'
+		assert ctrl.font_size == 26
+	}
+}
+

@@ -32,35 +32,98 @@ fn resolve_custom_font_for_platform() string {
 	return simplegui.resolve_window_font_path()
 }
 
-// apply_typography_styles updates font size, weight, monospace styling, and color across preview controls.
-fn apply_typography_styles(mut win simplegui.SimpleWindow, font_size int, is_bold bool, is_mono bool, hex_color string) {
-	font_mode_name := if is_mono { 'Monospace' } else { 'Sans-Serif' }
+fn resolve_preview_font_path(font_type string) string {
+	candidates := match font_type.to_lower() {
+		'mono' {
+			[
+				'/usr/share/fonts/truetype/ubuntu/UbuntuMono-R.ttf',
+				'/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf',
+				'/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf',
+			]
+		}
+		'serif' {
+			[
+				'/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf',
+				'/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf',
+				'/usr/share/fonts/truetype/freefont/FreeSerif.ttf',
+			]
+		}
+		else {
+			[
+				'/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf',
+				'/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+				'/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
+			]
+		}
+	}
+	for candidate in candidates {
+		if os.exists(candidate) {
+			return candidate
+		}
+	}
+	return simplegui.resolve_window_font_path()
+}
+
+// apply_typography_styles updates font size, type, subtype, and color across preview controls.
+fn apply_typography_styles(mut win simplegui.SimpleWindow, font_size int, is_bold bool, font_type string, hex_color string) {
+	font_mode_name := match font_type.to_lower() {
+		'mono' { 'Monospace' }
+		'serif' { 'Serif' }
+		else { 'Sans-Serif' }
+	}
+	font_subtype := if is_bold { 'bold' } else { 'regular' }
+	active_font_path := resolve_preview_font_path(font_type)
+	if active_font_path.len > 0 && os.exists(active_font_path) {
+		win.set_font_path(active_font_path)
+	}
+	actual_font_name := if active_font_path.len > 0 && os.exists(active_font_path) { active_font_path } else { font_type }
 
 	// 1. Headline Label
 	win.set_control_font_size('lbl_preview_headline', font_size + 8)
+	win.set_control_font_type('lbl_preview_headline', font_type)
+	win.set_control_font_subtype('lbl_preview_headline', font_subtype)
 	win.set_control_font_bold('lbl_preview_headline', is_bold)
 	win.set_control_font_color('lbl_preview_headline', hex_color)
-	win.set_control_font_name('lbl_preview_headline', if is_mono { 'mono' } else { 'sans' })
+	win.set_control_font_name('lbl_preview_headline', actual_font_name)
 
 	// 2. Subtitle / Body Label
 	win.set_control_font_size('lbl_preview_body', font_size)
+	win.set_control_font_type('lbl_preview_body', font_type)
+	win.set_control_font_subtype('lbl_preview_body', font_subtype)
 	win.set_control_font_bold('lbl_preview_body', is_bold)
 	win.set_control_font_color('lbl_preview_body', hex_color)
-	win.set_control_font_name('lbl_preview_body', if is_mono { 'mono' } else { 'sans' })
+	win.set_control_font_name('lbl_preview_body', actual_font_name)
 
 	// 3. CTA Action Button
 	win.set_control_font_size('btn_preview_cta', font_size)
+	win.set_control_font_type('btn_preview_cta', font_type)
+	win.set_control_font_subtype('btn_preview_cta', font_subtype)
 	win.set_control_font_bold('btn_preview_cta', is_bold)
-	win.set_control_font_name('btn_preview_cta', if is_mono { 'mono' } else { 'sans' })
+	win.set_control_font_name('btn_preview_cta', actual_font_name)
 
 	// 4. Sample Input Field
 	win.set_control_font_size('inp_preview_sample', font_size)
+	win.set_control_font_type('inp_preview_sample', font_type)
+	win.set_control_font_subtype('inp_preview_sample', font_subtype)
 	win.set_control_font_bold('inp_preview_sample', is_bold)
-	win.set_control_font_name('inp_preview_sample', if is_mono { 'mono' } else { 'sans' })
+	win.set_control_font_name('inp_preview_sample', actual_font_name)
 
 	// Update Status Summary
 	bold_status := if is_bold { 'Bold' } else { 'Regular' }
 	win.set_text('lbl_style_status', 'Active: ${font_mode_name} | ${font_size}px | ${bold_status} | ${hex_color}')
+
+	sample_headline := match font_type.to_lower() {
+		'mono' { 'MONOSPACE // A1B2C3 / 012345 / iIlL1' }
+		'serif' { 'SERIF EDITORIAL // Aa Bb Cc Dd / 012345' }
+		else { 'SANS SERIF // Aa Bb Cc Dd / 012345' }
+	}
+	body_text := match font_type.to_lower() {
+		'mono' { 'Monospace sample: The quick brown fox jumps over 13 lazy dogs. 0123456789.' }
+		'serif' { 'Serif sample: The quick brown fox jumps over 13 lazy dogs. 0123456789.' }
+		else { 'Sans sample: The quick brown fox jumps over 13 lazy dogs. 0123456789.' }
+	}
+	win.set_text('lbl_preview_headline', sample_headline)
+	win.set_text('lbl_preview_body', body_text)
 }
 
 fn main() {
@@ -78,6 +141,7 @@ fn main() {
 	win.set_state_int('font_size', 20)
 	win.set_state_bool('font_bold', true)
 	win.set_state_bool('font_mono', false)
+	win.set_state('font_mode', 'sans')
 	win.set_state('font_color', '#0a84ff')
 	win.set_state('active_font_name', initial_font_name)
 	win.set_state('active_font_path', if initial_font_path.len > 0 { initial_font_path } else { 'Default Sokol TTF' })
@@ -95,18 +159,28 @@ fn main() {
 		win.begin_row('row_font_modes')
 		win.add_button('btn_mode_sans', '[Sans-Serif] Proportional Mode')
 		win.add_button('btn_mode_mono', '[Monospace] Code & Terminal Mode')
+		win.add_button('btn_mode_serif', '[Serif] Editorial Mode')
 		win.end_row()
 
 		win.bind_click('btn_mode_sans', fn (mut win simplegui.SimpleWindow) {
 			win.set_state_bool('font_mono', false)
-			apply_typography_styles(mut win, win.get_state_int('font_size'), win.get_state_bool('font_bold'), false, win.get_state('font_color'))
+			win.set_state('font_mode', 'sans')
+			apply_typography_styles(mut win, win.get_state_int('font_size'), win.get_state_bool('font_bold'), 'sans', win.get_state('font_color'))
 			win.push_toast('Render Mode', 'Switched to Proportional Sans-Serif', 'info', 2000)
 		})
 
 		win.bind_click('btn_mode_mono', fn (mut win simplegui.SimpleWindow) {
 			win.set_state_bool('font_mono', true)
-			apply_typography_styles(mut win, win.get_state_int('font_size'), win.get_state_bool('font_bold'), true, win.get_state('font_color'))
+			win.set_state('font_mode', 'mono')
+			apply_typography_styles(mut win, win.get_state_int('font_size'), win.get_state_bool('font_bold'), 'mono', win.get_state('font_color'))
 			win.push_toast('Render Mode', 'Switched to Monospace Fixed-Width', 'info', 2000)
+		})
+
+		win.bind_click('btn_mode_serif', fn (mut win simplegui.SimpleWindow) {
+			win.set_state_bool('font_mono', false)
+			win.set_state('font_mode', 'serif')
+			apply_typography_styles(mut win, win.get_state_int('font_size'), win.get_state_bool('font_bold'), 'serif', win.get_state('font_color'))
+			win.push_toast('Render Mode', 'Switched to Serif Editorial', 'info', 2000)
 		})
 
 		candidates := get_platform_font_candidates()
@@ -123,8 +197,9 @@ fn main() {
 						win.set_state('active_font_name', font_filename)
 						win.set_state('active_font_path', candidate)
 						win.set_state_bool('font_mono', is_mono_cand)
+						win.set_state('font_mode', if is_mono_cand { 'mono' } else { 'sans' })
 						win.set_text('lbl_active_font', 'Startup TTF Font: ' + font_filename + ' (' + candidate + ')')
-						apply_typography_styles(mut win, win.get_state_int('font_size'), win.get_state_bool('font_bold'), is_mono_cand, win.get_state('font_color'))
+						apply_typography_styles(mut win, win.get_state_int('font_size'), win.get_state_bool('font_bold'), win.get_state('font_mode'), win.get_state('font_color'))
 						win.push_toast('Font Selected', 'Configured: ' + font_filename, 'success', 2500)
 					})
 				}
@@ -141,31 +216,36 @@ fn main() {
 			win.add_button('btn_size_12', '12px (Small)')
 			win.bind_click('btn_size_12', fn (mut win simplegui.SimpleWindow) {
 				win.set_state_int('font_size', 12)
-				apply_typography_styles(mut win, 12, win.get_state_bool('font_bold'), win.get_state_bool('font_mono'), win.get_state('font_color'))
+				mode := if win.get_state('font_mode').len > 0 { win.get_state('font_mode') } else if win.get_state_bool('font_mono') { 'mono' } else { 'sans' }
+				apply_typography_styles(mut win, 12, win.get_state_bool('font_bold'), mode, win.get_state('font_color'))
 			})
 
 			win.add_button('btn_size_16', '16px (Body)')
 			win.bind_click('btn_size_16', fn (mut win simplegui.SimpleWindow) {
 				win.set_state_int('font_size', 16)
-				apply_typography_styles(mut win, 16, win.get_state_bool('font_bold'), win.get_state_bool('font_mono'), win.get_state('font_color'))
+				mode := if win.get_state('font_mode').len > 0 { win.get_state('font_mode') } else if win.get_state_bool('font_mono') { 'mono' } else { 'sans' }
+				apply_typography_styles(mut win, 16, win.get_state_bool('font_bold'), mode, win.get_state('font_color'))
 			})
 
 			win.add_button('btn_size_22', '22px (Title)')
 			win.bind_click('btn_size_22', fn (mut win simplegui.SimpleWindow) {
 				win.set_state_int('font_size', 22)
-				apply_typography_styles(mut win, 22, win.get_state_bool('font_bold'), win.get_state_bool('font_mono'), win.get_state('font_color'))
+				mode := if win.get_state('font_mode').len > 0 { win.get_state('font_mode') } else if win.get_state_bool('font_mono') { 'mono' } else { 'sans' }
+				apply_typography_styles(mut win, 22, win.get_state_bool('font_bold'), mode, win.get_state('font_color'))
 			})
 
 			win.add_button('btn_size_30', '30px (Display)')
 			win.bind_click('btn_size_30', fn (mut win simplegui.SimpleWindow) {
 				win.set_state_int('font_size', 30)
-				apply_typography_styles(mut win, 30, win.get_state_bool('font_bold'), win.get_state_bool('font_mono'), win.get_state('font_color'))
+				mode := if win.get_state('font_mode').len > 0 { win.get_state('font_mode') } else if win.get_state_bool('font_mono') { 'mono' } else { 'sans' }
+				apply_typography_styles(mut win, 30, win.get_state_bool('font_bold'), mode, win.get_state('font_color'))
 			})
 
 			win.add_button('btn_toggle_weight', 'Toggle Bold / Regular')
 			win.bind_click('btn_toggle_weight', fn (mut win simplegui.SimpleWindow) {
 				is_bold := win.toggle_state_bool('font_bold')
-				apply_typography_styles(mut win, win.get_state_int('font_size'), is_bold, win.get_state_bool('font_mono'), win.get_state('font_color'))
+				mode := if win.get_state('font_mode').len > 0 { win.get_state('font_mode') } else if win.get_state_bool('font_mono') { 'mono' } else { 'sans' }
+				apply_typography_styles(mut win, win.get_state_int('font_size'), is_bold, mode, win.get_state('font_color'))
 			})
 		})
 
@@ -177,8 +257,9 @@ fn main() {
 				win.set_state_int('font_size', 30)
 				win.set_state_bool('font_bold', true)
 				win.set_state_bool('font_mono', false)
+				win.set_state('font_mode', 'sans')
 				win.set_state('font_color', '#0a84ff')
-				apply_typography_styles(mut win, 30, true, false, '#0a84ff')
+				apply_typography_styles(mut win, 30, true, 'sans', '#0a84ff')
 			})
 
 			win.add_button('btn_preset_code', '⌨ Code Studio')
@@ -187,8 +268,9 @@ fn main() {
 				win.set_state_int('font_size', 16)
 				win.set_state_bool('font_bold', false)
 				win.set_state_bool('font_mono', true)
+				win.set_state('font_mode', 'mono')
 				win.set_state('font_color', '#30d158')
-				apply_typography_styles(mut win, 16, false, true, '#30d158')
+				apply_typography_styles(mut win, 16, false, 'mono', '#30d158')
 			})
 
 			win.add_button('btn_preset_editorial', '✦ Warm Editorial')
@@ -197,8 +279,9 @@ fn main() {
 				win.set_state_int('font_size', 22)
 				win.set_state_bool('font_bold', true)
 				win.set_state_bool('font_mono', false)
+				win.set_state('font_mode', 'serif')
 				win.set_state('font_color', '#ff9f0a')
-				apply_typography_styles(mut win, 22, true, false, '#ff9f0a')
+				apply_typography_styles(mut win, 22, true, 'serif', '#ff9f0a')
 			})
 
 			win.add_button('btn_preset_cyber', '⚡ Cyber Violet')
@@ -207,8 +290,9 @@ fn main() {
 				win.set_state_int('font_size', 26)
 				win.set_state_bool('font_bold', true)
 				win.set_state_bool('font_mono', true)
+				win.set_state('font_mode', 'mono')
 				win.set_state('font_color', '#bf5af2')
-				apply_typography_styles(mut win, 26, true, true, '#bf5af2')
+				apply_typography_styles(mut win, 26, true, 'mono', '#bf5af2')
 			})
 		})
 	})
@@ -241,6 +325,8 @@ fn main() {
 		win.control('inp_preview_sample')
 			.set_width(460)
 			.set_font_size(16)
+
+		apply_typography_styles(mut win, 20, true, 'sans', '#0a84ff')
 
 		// Live-sync text typing to preview labels
 		win.bind_change('inp_preview_sample', fn (mut win simplegui.SimpleWindow) {

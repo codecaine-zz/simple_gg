@@ -3038,6 +3038,42 @@ pub fn (mut win SimpleWindow) set_control_font_bold(name string, bold bool) &Sim
 	return win
 }
 
+pub fn (mut win SimpleWindow) set_control_font_type(name string, font_type string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.font_type = font_type
+		normalized := font_type.to_lower()
+		ctrl.font_name = if normalized.contains('mono') || normalized.contains('code') {
+			'mono'
+		} else if normalized.contains('serif') {
+			'serif'
+		} else {
+			'sans'
+		}
+	}
+	return win
+}
+
+pub fn (win &SimpleWindow) get_control_font_type(name string) string {
+	if ctrl := win.control_map[name] {
+		return ctrl.font_type
+	}
+	return ''
+}
+
+pub fn (mut win SimpleWindow) set_control_font_subtype(name string, font_subtype string) &SimpleWindow {
+	if mut ctrl := win.get_control_ptr(name) {
+		ctrl.font_subtype = font_subtype
+	}
+	return win
+}
+
+pub fn (win &SimpleWindow) get_control_font_subtype(name string) string {
+	if ctrl := win.control_map[name] {
+		return ctrl.font_subtype
+	}
+	return ''
+}
+
 pub fn (mut win SimpleWindow) set_control_font_name(name string, font_name string) &SimpleWindow {
 	if mut ctrl := win.get_control_ptr(name) {
 		ctrl.font_name = font_name

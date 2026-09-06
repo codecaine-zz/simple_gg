@@ -18,6 +18,7 @@ module simplegui
 
 import gg
 import math
+import os
 import time
 
 // render_ui is called on every graphics frame refresh to render the complete window user interface.
@@ -66,30 +67,44 @@ pub fn (mut win SimpleWindow) render_ui() {
 				txt_c := if ctrl.font_color.len > 0 { parse_hex_color(ctrl.font_color) } else { fg }
 				lbl_txt := clean_text(if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.title })
 				lbl_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 15 }
-				is_mono := ctrl.font_name.len > 0 && (ctrl.font_name.to_lower().contains('mono') || ctrl.font_name.to_lower().contains('courier'))
+				mono_value := ctrl.font_name.to_lower() + '|' + ctrl.font_type.to_lower() + '|' + ctrl.font_subtype.to_lower()
+				is_mono := mono_value.contains('mono') || mono_value.contains('courier') || mono_value.contains('code')
+				family_path := if ctrl.font_name.len > 0 && (os.exists(ctrl.font_name) || ctrl.font_name.ends_with('.ttf') || ctrl.font_name.ends_with('.otf') || ctrl.font_name.ends_with('.ttc')) {
+					ctrl.font_name
+				} else {
+					''
+				}
 				win.gg_ctx.draw_text2(
-					x:     int(ctrl.x)
-					y:     int(ctrl.y + 4)
-					text:  lbl_txt
-					color: txt_c
-					size:  lbl_sz
-					bold:  ctrl.font_bold
-					mono:  is_mono
+					x:      int(ctrl.x)
+					y:      int(ctrl.y + 4)
+					text:   lbl_txt
+					color:  txt_c
+					size:   lbl_sz
+					bold:   ctrl.font_bold
+					mono:   is_mono
+					family: family_path
 				)
 			}
 			'heading' {
 				txt_c := if ctrl.font_color.len > 0 { parse_hex_color(ctrl.font_color) } else { fg }
 				hd_txt := clean_text(if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.title })
 				hd_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 22 }
-				is_mono := ctrl.font_name.len > 0 && (ctrl.font_name.to_lower().contains('mono') || ctrl.font_name.to_lower().contains('courier'))
+				mono_value := ctrl.font_name.to_lower() + '|' + ctrl.font_type.to_lower() + '|' + ctrl.font_subtype.to_lower()
+				is_mono := mono_value.contains('mono') || mono_value.contains('courier') || mono_value.contains('code')
+				family_path := if ctrl.font_name.len > 0 && (os.exists(ctrl.font_name) || ctrl.font_name.ends_with('.ttf') || ctrl.font_name.ends_with('.otf') || ctrl.font_name.ends_with('.ttc')) {
+					ctrl.font_name
+				} else {
+					''
+				}
 				win.gg_ctx.draw_text2(
-					x:     int(ctrl.x)
-					y:     int(ctrl.y)
-					text:  hd_txt
-					color: txt_c
-					size:  hd_sz
-					bold:  ctrl.font_bold
-					mono:  is_mono
+					x:      int(ctrl.x)
+					y:      int(ctrl.y)
+					text:   hd_txt
+					color:  txt_c
+					size:   hd_sz
+					bold:   ctrl.font_bold
+					mono:   is_mono
+					family: family_path
 				)
 				win.gg_ctx.draw_line(ctrl.x, ctrl.y + 28, ctrl.x + ctrl.w, ctrl.y + 28,
 					border_c)
@@ -97,15 +112,22 @@ pub fn (mut win SimpleWindow) render_ui() {
 			'link' {
 				link_txt := if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.title }
 				lnk_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 14 }
-				is_mono := ctrl.font_name.len > 0 && (ctrl.font_name.to_lower().contains('mono') || ctrl.font_name.to_lower().contains('courier'))
+				mono_value := ctrl.font_name.to_lower() + '|' + ctrl.font_type.to_lower() + '|' + ctrl.font_subtype.to_lower()
+				is_mono := mono_value.contains('mono') || mono_value.contains('courier') || mono_value.contains('code')
+				family_path := if ctrl.font_name.len > 0 && (os.exists(ctrl.font_name) || ctrl.font_name.ends_with('.ttf') || ctrl.font_name.ends_with('.otf') || ctrl.font_name.ends_with('.ttc')) {
+					ctrl.font_name
+				} else {
+					''
+				}
 				win.gg_ctx.draw_text2(
-					x:     int(ctrl.x)
-					y:     int(ctrl.y + 4)
-					text:  link_txt
-					color: accent
-					size:  lnk_sz
-					bold:  ctrl.font_bold
-					mono:  is_mono
+					x:      int(ctrl.x)
+					y:      int(ctrl.y + 4)
+					text:   link_txt
+					color:  accent
+					size:   lnk_sz
+					bold:   ctrl.font_bold
+					mono:   is_mono
+					family: family_path
 				)
 				win.gg_ctx.draw_line(ctrl.x, ctrl.y + 20, ctrl.x + f32(link_txt.len * 8),
 					ctrl.y + 20, accent)
@@ -155,15 +177,22 @@ pub fn (mut win SimpleWindow) render_ui() {
 				text_x := int(ctrl.x + btn_icon_offset + (ctrl.w - btn_icon_offset - text_w) / 2.0)
 				text_y := int(ctrl.y + (ctrl.h - f32(btn_sz)) / 2.0)
 
-				is_mono := ctrl.font_name.len > 0 && (ctrl.font_name.to_lower().contains('mono') || ctrl.font_name.to_lower().contains('courier'))
+				mono_value := ctrl.font_name.to_lower() + '|' + ctrl.font_type.to_lower() + '|' + ctrl.font_subtype.to_lower()
+				is_mono := mono_value.contains('mono') || mono_value.contains('courier') || mono_value.contains('code')
+				family_path := if ctrl.font_name.len > 0 && (os.exists(ctrl.font_name) || ctrl.font_name.ends_with('.ttf') || ctrl.font_name.ends_with('.otf') || ctrl.font_name.ends_with('.ttc')) {
+					ctrl.font_name
+				} else {
+					''
+				}
 				win.gg_ctx.draw_text2(
-					x:     math.max(int(ctrl.x + 8 + btn_icon_offset), text_x)
-					y:     text_y
-					text:  disp_title
-					color: btn_tc
-					size:  btn_sz
-					bold:  ctrl.font_bold
-					mono:  is_mono
+					x:      math.max(int(ctrl.x + 8 + btn_icon_offset), text_x)
+					y:      text_y
+					text:   disp_title
+					color:  btn_tc
+					size:   btn_sz
+					bold:   ctrl.font_bold
+					mono:   is_mono
+					family: family_path
 				)
 			}
 			'icon_button' {
@@ -189,15 +218,22 @@ pub fn (mut win SimpleWindow) render_ui() {
 					fg
 				}
 				txt_w := f32(ctrl.title.len) * (f32(ib_sz) * 0.55)
-				is_mono := ctrl.font_name.len > 0 && (ctrl.font_name.to_lower().contains('mono') || ctrl.font_name.to_lower().contains('courier'))
+				mono_value := ctrl.font_name.to_lower() + '|' + ctrl.font_type.to_lower() + '|' + ctrl.font_subtype.to_lower()
+				is_mono := mono_value.contains('mono') || mono_value.contains('courier') || mono_value.contains('code')
+				family_path := if ctrl.font_name.len > 0 && (os.exists(ctrl.font_name) || ctrl.font_name.ends_with('.ttf') || ctrl.font_name.ends_with('.otf') || ctrl.font_name.ends_with('.ttc')) {
+					ctrl.font_name
+				} else {
+					''
+				}
 				win.gg_ctx.draw_text2(
-					x:     int(ctrl.x + (ctrl.w - txt_w) / 2.0)
-					y:     int(ctrl.y + (ctrl.h - f32(ib_sz)) / 2.0)
-					text:  ctrl.title
-					color: icon_c
-					size:  ib_sz
-					bold:  ctrl.font_bold
-					mono:  is_mono
+					x:      int(ctrl.x + (ctrl.w - txt_w) / 2.0)
+					y:      int(ctrl.y + (ctrl.h - f32(ib_sz)) / 2.0)
+					text:   ctrl.title
+					color:  icon_c
+					size:   ib_sz
+					bold:   ctrl.font_bold
+					mono:   is_mono
+					family: family_path
 				)
 			}
 			'input', 'password', 'search_field', 'pin_code', 'number', 'time_picker', 'date_picker' {
