@@ -76,11 +76,19 @@ fn get_dependencies() []Dependency {
 	}
 	deps << Dependency{
 		category: 'Data & Text'
+		formula: 'yq'
+		bin_names: ['yq']
+		name: 'yq'
+		description: 'Portable command-line YAML, JSON, XML, and CSV processor'
+		studio_app: 'Format Converter Studio Pro, OmniTool Studio Pro'
+	}
+	deps << Dependency{
+		category: 'Data & Text'
 		formula: 'ripgrep'
 		bin_names: ['rg']
 		name: 'ripgrep (rg)'
 		description: 'Ultra-fast recursive regex pattern search engine'
-		studio_app: 'RG Studio'
+		studio_app: 'RG Studio, OmniTool Studio Pro'
 	}
 	deps << Dependency{
 		category: 'Data & Text'
@@ -88,7 +96,7 @@ fn get_dependencies() []Dependency {
 		bin_names: ['fd']
 		name: 'fd'
 		description: 'Simple, fast, and user-friendly alternative to find'
-		studio_app: 'FD Studio'
+		studio_app: 'FD Studio, OmniTool Studio Pro'
 	}
 	deps << Dependency{
 		category: 'Data & Text'
@@ -96,7 +104,31 @@ fn get_dependencies() []Dependency {
 		bin_names: ['sd']
 		name: 'sd'
 		description: 'Intuitive and fast find & replace CLI'
-		studio_app: 'SD Studio'
+		studio_app: 'SD Studio, OmniTool Studio Pro'
+	}
+	deps << Dependency{
+		category: 'Data & Text'
+		formula: 'eza'
+		bin_names: ['eza']
+		name: 'eza'
+		description: 'Modern replacement for ls with tree, git status, and icons'
+		studio_app: 'OmniTool Studio Pro'
+	}
+	deps << Dependency{
+		category: 'Data & Text'
+		formula: 'bat'
+		bin_names: ['bat']
+		name: 'bat'
+		description: 'Cat clone with syntax highlighting and Git integration'
+		studio_app: 'OmniTool Studio Pro'
+	}
+	deps << Dependency{
+		category: 'Data & Text'
+		formula: 'watchexec'
+		bin_names: ['watchexec']
+		name: 'Watchexec'
+		description: 'Continuous file watcher daemon and automated command runner'
+		studio_app: 'Watchexec Studio Pro, OmniTool Studio Pro'
 	}
 	deps << Dependency{
 		category: 'Data & Text'
@@ -120,7 +152,7 @@ fn get_dependencies() []Dependency {
 		bin_names: ['ouch']
 		name: 'Ouch'
 		description: 'Painless and ultra-fast compression/decompression tool'
-		studio_app: 'Ouch Studio'
+		studio_app: 'Ouch Studio, OmniTool Studio Pro'
 	}
 	deps << Dependency{
 		category: 'Data & Text'
@@ -128,7 +160,7 @@ fn get_dependencies() []Dependency {
 		bin_names: ['rip']
 		name: 'rip2 / rip'
 		description: 'Safe and ergonomic alternative to rm with graveyard recovery and seance'
-		studio_app: 'Rip Studio'
+		studio_app: 'Rip Studio, OmniTool Studio Pro'
 	}
 	deps << Dependency{
 		category: 'Data & Text'
@@ -144,7 +176,7 @@ fn get_dependencies() []Dependency {
 		bin_names: ['wget2', 'wget']
 		name: 'GNU Wget2'
 		description: 'Multi-threaded file download accelerator and web scraper'
-		studio_app: 'Wget2 Studio'
+		studio_app: 'Wget2 Studio, OmniTool Studio Pro'
 	}
 
 	// Network, Security & Reconnaissance
@@ -187,6 +219,14 @@ fn get_dependencies() []Dependency {
 		name: 'Subfinder'
 		description: 'Fast passive subdomain discovery tool'
 		studio_app: 'Subfinder Studio'
+	}
+	deps << Dependency{
+		category: 'Network & Security'
+		formula: 'qrencode'
+		bin_names: ['qrencode']
+		name: 'QR Code Encoder (qrencode)'
+		description: 'C library and utility for encoding data in a QR Code symbol'
+		studio_app: 'Crypto Studio'
 	}
 
 	// Mathematics & Scientific Calculators
