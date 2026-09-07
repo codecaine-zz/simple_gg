@@ -824,6 +824,7 @@ fn main() {
 		raw_in := w.get('txt_main_val')
 		parsed := parse_any_radix(raw_in) or {
 			w.alert('Parse Error', 'Invalid integer or radix format: "${raw_in}".\nUse 0x.. for Hex, 0b.. for Binary, 0o.. for Octal, or Plain Decimal.')
+			w.toast('Invalid number format: ' + raw_in)
 			return
 		}
 		state.current_val = parsed
@@ -871,73 +872,99 @@ fn main() {
 	})
 
 	win.on_click('btn_rol_1', fn [mut state, sync_all_views] (mut w simplegui.SimpleWindow) {
-		val := mask_value(state.current_val, state.word_size)
-		mut bit_len := 64
-		match state.word_size {
-			.ws_byte  { bit_len = 8 }
-			.ws_word  { bit_len = 16 }
-			.ws_dword { bit_len = 32 }
-			.ws_qword { bit_len = 64 }
+		bit_len := match state.word_size {
+			.ws_byte  { 8 }
+			.ws_word  { 16 }
+			.ws_dword { 32 }
+			.ws_qword { 64 }
 		}
-		high_bit := (val >> u64(bit_len - 1)) & 1
-		state.current_val = ((val << 1) | high_bit)
+		top_bit := (state.current_val >> u64(bit_len - 1)) & 1
+		state.current_val = (state.current_val << 1) | top_bit
 		sync_all_views(mut w, true)
 		w.toast('Rotated Left ROL 1')
 	})
 
 	win.on_click('btn_ror_1', fn [mut state, sync_all_views] (mut w simplegui.SimpleWindow) {
-		val := mask_value(state.current_val, state.word_size)
-		mut bit_len := 64
-		match state.word_size {
-			.ws_byte  { bit_len = 8 }
-			.ws_word  { bit_len = 16 }
-			.ws_dword { bit_len = 32 }
-			.ws_qword { bit_len = 64 }
+		bit_len := match state.word_size {
+			.ws_byte  { 8 }
+			.ws_word  { 16 }
+			.ws_dword { 32 }
+			.ws_qword { 64 }
 		}
-		low_bit := val & 1
-		state.current_val = ((val >> 1) | (low_bit << u64(bit_len - 1)))
+		low_bit := state.current_val & 1
+		state.current_val = (state.current_val >> 1) | (low_bit << u64(bit_len - 1))
 		sync_all_views(mut w, true)
 		w.toast('Rotated Right ROR 1')
 	})
 
 	// Secondary Operand Ops
 	win.on_click('btn_op_and', fn [mut state, sync_all_views] (mut w simplegui.SimpleWindow) {
-		y := parse_any_radix(w.get('txt_operand_y')) or { 0 }
+		raw_y := w.get('txt_operand_y')
+		y := parse_any_radix(raw_y) or {
+			w.alert('Parse Error', 'Invalid Operand Y format: "${raw_y}".')
+			w.toast('Invalid Operand Y')
+			return
+		}
 		state.current_val = state.current_val & y
 		sync_all_views(mut w, true)
 		w.toast('Applied AND (&)')
 	})
 
 	win.on_click('btn_op_or', fn [mut state, sync_all_views] (mut w simplegui.SimpleWindow) {
-		y := parse_any_radix(w.get('txt_operand_y')) or { 0 }
+		raw_y := w.get('txt_operand_y')
+		y := parse_any_radix(raw_y) or {
+			w.alert('Parse Error', 'Invalid Operand Y format: "${raw_y}".')
+			w.toast('Invalid Operand Y')
+			return
+		}
 		state.current_val = state.current_val | y
 		sync_all_views(mut w, true)
 		w.toast('Applied OR (|)')
 	})
 
 	win.on_click('btn_op_xor', fn [mut state, sync_all_views] (mut w simplegui.SimpleWindow) {
-		y := parse_any_radix(w.get('txt_operand_y')) or { 0 }
+		raw_y := w.get('txt_operand_y')
+		y := parse_any_radix(raw_y) or {
+			w.alert('Parse Error', 'Invalid Operand Y format: "${raw_y}".')
+			w.toast('Invalid Operand Y')
+			return
+		}
 		state.current_val = state.current_val ^ y
 		sync_all_views(mut w, true)
 		w.toast('Applied XOR (^)')
 	})
 
 	win.on_click('btn_op_nand', fn [mut state, sync_all_views] (mut w simplegui.SimpleWindow) {
-		y := parse_any_radix(w.get('txt_operand_y')) or { 0 }
+		raw_y := w.get('txt_operand_y')
+		y := parse_any_radix(raw_y) or {
+			w.alert('Parse Error', 'Invalid Operand Y format: "${raw_y}".')
+			w.toast('Invalid Operand Y')
+			return
+		}
 		state.current_val = ~(state.current_val & y)
 		sync_all_views(mut w, true)
 		w.toast('Applied NAND')
 	})
 
 	win.on_click('btn_op_nor', fn [mut state, sync_all_views] (mut w simplegui.SimpleWindow) {
-		y := parse_any_radix(w.get('txt_operand_y')) or { 0 }
+		raw_y := w.get('txt_operand_y')
+		y := parse_any_radix(raw_y) or {
+			w.alert('Parse Error', 'Invalid Operand Y format: "${raw_y}".')
+			w.toast('Invalid Operand Y')
+			return
+		}
 		state.current_val = ~(state.current_val | y)
 		sync_all_views(mut w, true)
 		w.toast('Applied NOR')
 	})
 
 	win.on_click('btn_apply_y', fn [mut state, sync_all_views] (mut w simplegui.SimpleWindow) {
-		y := parse_any_radix(w.get('txt_operand_y')) or { 0 }
+		raw_y := w.get('txt_operand_y')
+		y := parse_any_radix(raw_y) or {
+			w.alert('Parse Error', 'Invalid Operand Y format: "${raw_y}".')
+			w.toast('Invalid Operand Y')
+			return
+		}
 		state.current_val = state.current_val & y
 		sync_all_views(mut w, true)
 		w.toast('Applied Y')
@@ -952,6 +979,9 @@ fn main() {
 			state.current_val = state.current_val | (u64(1) << u64(idx))
 			sync_all_views(mut w, true)
 			w.toast('Set bit ${idx} to 1')
+		} else {
+			w.alert('Index Out of Bounds', 'Bit index must be between 0 and 63 (got ${idx}).')
+			w.toast('Bit index must be 0..63')
 		}
 	})
 
@@ -961,6 +991,9 @@ fn main() {
 			state.current_val = state.current_val & ~(u64(1) << u64(idx))
 			sync_all_views(mut w, true)
 			w.toast('Cleared bit ${idx} to 0')
+		} else {
+			w.alert('Index Out of Bounds', 'Bit index must be between 0 and 63 (got ${idx}).')
+			w.toast('Bit index must be 0..63')
 		}
 	})
 
@@ -970,6 +1003,9 @@ fn main() {
 			state.current_val = state.current_val ^ (u64(1) << u64(idx))
 			sync_all_views(mut w, true)
 			w.toast('Toggled bit ${idx}')
+		} else {
+			w.alert('Index Out of Bounds', 'Bit index must be between 0 and 63 (got ${idx}).')
+			w.toast('Bit index must be 0..63')
 		}
 	})
 

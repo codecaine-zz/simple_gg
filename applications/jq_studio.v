@@ -243,7 +243,9 @@ fn main() {
 					win_main.set_status('Query finished in ${elapsed_ms} ms.')
 					win_main.toast('JQ query evaluated successfully!')
 				} else {
-					win_main.append_console('jq_console', ' JQ Error:\n' + res.output + '\n', 3)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'JQ query failed (Exit code ${res.exit_code}). Check filter syntax or JSON validity.' }
+					win_main.set('txt_output_json', '// [JQ QUERY ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+					win_main.append_console('jq_console', ' JQ Error:\n' + err_msg + '\n', 3)
 					win_main.set('lbl_stats', ' Stats: ERROR (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('JQ evaluation error.')
 					win_main.toast('JQ error encountered.')

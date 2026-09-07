@@ -632,7 +632,10 @@ fn main() {
 					win_main.toast('Resurrected ${name}!')
 					refresh_all_views(mut win_main, rip_bin, current_graveyard)
 				} else {
-					win_main.set('txt_activity_log', ' Error:\n' + res.output)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Failed to resurrect "${name}".' }
+					win_main.set('txt_activity_log', ' Resurrection Error:\n' + err_msg)
+					win_main.set_status('Resurrection failed.')
+					win_main.toast('Failed to resurrect "${name}".')
 				}
 			})
 		}()
@@ -719,7 +722,10 @@ fn main() {
 					win_main.toast('Graveyard emptied!')
 					refresh_all_views(mut win_main, rip_bin, current_graveyard)
 				} else {
-					win_main.set('txt_activity_log', ' Decompose result:\n' + res.output)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Failed to empty graveyard.' }
+					win_main.set('txt_activity_log', ' Decompose Error:\n' + err_msg)
+					win_main.set_status('Failed to empty graveyard.')
+					win_main.toast('Decompose operation failed.')
 					refresh_all_views(mut win_main, rip_bin, current_graveyard)
 				}
 			})
@@ -862,7 +868,10 @@ fn main() {
 					win_main.set('txt_target_path', '')
 					refresh_all_views(mut win_main, rip_bin, current_graveyard)
 				} else {
-					win_main.set('txt_activity_log', ' Bury operation output (code ${res.exit_code}):\n' + res.output)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Failed to bury target item.' }
+					win_main.set('txt_activity_log', ' Bury Error (code ${res.exit_code}):\n' + err_msg)
+					win_main.set_status('Bury operation failed.')
+					win_main.toast('Failed to bury item!')
 					refresh_all_views(mut win_main, rip_bin, current_graveyard)
 				}
 			})

@@ -441,10 +441,11 @@ fn main() {
 				if res.exit_code == 0 {
 					win_main.append_console('say_console', ' Speech synthesis completed in ${elapsed_ms} ms.\n', 4)
 					win_main.set_status('Speech playback finished.')
-					win_main.toast('Speech playback finished!')
 				} else {
-					win_main.append_console('say_console', ' Speech synthesis error:\n' + res.output + '\n', 3)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Speech synthesis command failed' }
+					win_main.append_console('say_console', ' Speech synthesis error:\n' + err_msg + '\n', 3)
 					win_main.set_status('Error during speech synthesis.')
+					win_main.toast('Speech synthesis error!')
 				}
 			})
 		}()
@@ -564,8 +565,10 @@ fn main() {
 					win_main.set_status('Audio file exported successfully.')
 					win_main.toast('Exported audio file (${mb:.2f} MB)!')
 				} else {
-					win_main.append_console('say_console', ' Audio export error:\n' + res.output + '\n', 3)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Audio export command failed' }
+					win_main.append_console('say_console', ' Audio export error:\n' + err_msg + '\n', 3)
 					win_main.set_status('Error exporting audio.')
+					win_main.toast('Audio export failed!')
 				}
 			})
 		}()

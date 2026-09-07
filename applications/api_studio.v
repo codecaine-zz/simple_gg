@@ -196,7 +196,7 @@ fn main() {
 		silent := w.get('chk_silent') == 'true'
 
 		mut args := []string{}
-		if silent { args << '-s' }
+		if silent { args << ['-s', '-S'] }
 		if include_headers { args << '-i' }
 		if follow_redirects { args << '-L' }
 		if insecure_ssl { args << '-k' }
@@ -236,14 +236,13 @@ fn main() {
 		w.append_console('api_console', ' Sending [${method}] ${target_url}...\n', 1)
 		w.set_status('Sending ${method} request to ${target_url}...')
 
-		go fn [mut w, curl_bin, args, method] () {
+		go fn [mut w, curl_bin, args, method, target_url] () {
 			t0 := time.ticks()
 			res := simplegui.exec_safe(curl_bin, args)
 			elapsed_ms := time.ticks() - t0
 
-			w.run_on_main_thread(fn [res, elapsed_ms, method] (mut win_main simplegui.SimpleWindow) {
+			w.run_on_main_thread(fn [res, elapsed_ms, method, target_url] (mut win_main simplegui.SimpleWindow) {
 				out := res.output.trim_space()
-				win_main.set('txt_response_output', out)
 
 				// Extract status line if available
 				mut status_code := '200 OK'
@@ -257,15 +256,18 @@ fn main() {
 				}
 
 				if res.exit_code == 0 {
+					win_main.set('txt_response_output', out)
 					win_main.append_console('api_console', ' Response received in ${elapsed_ms} ms (${out.len} bytes)\n', 4)
 					win_main.set('lbl_stats', ' Stats: SUCCESS  |  Status: ${status_code}  |  Latency: ${elapsed_ms} ms  |  Size: ${out.len} B')
 					win_main.set_status('Completed ${method} in ${elapsed_ms} ms.')
 					win_main.toast('Response received in ${elapsed_ms} ms!')
 				} else {
-					win_main.append_console('api_console', ' Curl Error (Exit ${res.exit_code}):\n' + out + '\n', 3)
+					err_detail := if out != '' { out } else { 'Connection failed, timeout, or DNS resolution error (Exit code ${res.exit_code}).' }
+					win_main.set('txt_response_output', '// [HTTP REQUEST ERROR]\n// Exit Code: ${res.exit_code}\n// Target: ${target_url}\n// Method: ${method}\n// Error Details:\n${err_detail}\n')
+					win_main.append_console('api_console', ' Curl Error (Exit ${res.exit_code}):\n' + err_detail + '\n', 3)
 					win_main.set('lbl_stats', ' Stats: ERROR (Exit ${res.exit_code})  |  Latency: ${elapsed_ms} ms')
-					win_main.set_status('Request failed.')
-					win_main.toast('Request error.')
+					win_main.set_status('Request failed: ${err_detail.split_into_lines()[0]}')
+					win_main.toast('Request error (Exit ${res.exit_code})')
 				}
 			})
 		}()

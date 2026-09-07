@@ -130,18 +130,26 @@ fn main() {
 
 		go fn [mut w, target_dir, raw_target] () {
 			t0 := time.ticks()
-			res := os.execute('du -sh "${target_dir}"/* 2>/dev/null | sort -hr | head -n 40')
+			res := os.execute('du -sh "${target_dir}"/* 2>&1 | sort -hr | head -n 40')
 			elapsed_ms := time.ticks() - t0
 
-			w.run_on_main_thread(fn [res, elapsed_ms, target_dir, raw_target] (mut win_main simplegui.SimpleWindow) {
+			w.run_on_main_thread(fn [res, elapsed_ms, raw_target] (mut win_main simplegui.SimpleWindow) {
 				out := res.output.trim_space()
-				win_main.set('txt_disk_output', out)
-
-				lines_cnt := if out != '' { out.split_into_lines().len } else { 0 }
-				win_main.append_console('disk_console', ' Directory breakdown complete in ${elapsed_ms} ms (${lines_cnt} entries sorted by size).\n', 4)
-				win_main.set('lbl_stats', ' Stats: SUCCESS  |  Target: ${raw_target}  |  Entries: ${lines_cnt}  |  Duration: ${elapsed_ms} ms')
-				win_main.set_status('Disk usage analysis complete.')
-				win_main.toast('Disk breakdown calculated!')
+				if out != '' && !out.contains('No such file') && !out.contains('Permission denied') {
+					win_main.set('txt_disk_output', out)
+					lines_cnt := out.split_into_lines().len
+					win_main.append_console('disk_console', ' Directory breakdown complete in ${elapsed_ms} ms (${lines_cnt} entries sorted by size).\n', 4)
+					win_main.set('lbl_stats', ' Stats: SUCCESS  |  Target: ${raw_target}  |  Entries: ${lines_cnt}  |  Duration: ${elapsed_ms} ms')
+					win_main.set_status('Disk usage analysis complete.')
+					win_main.toast('Disk breakdown calculated!')
+				} else {
+					err_info := if out != '' { out } else { 'No readable subdirectories or files found in: ${raw_target} (directory may be empty or access restricted).' }
+					win_main.set('txt_disk_output', '// [NOTICE / ERROR] Failed to calculate breakdown for ${raw_target}\n\n' + err_info)
+					win_main.append_console('disk_console', ' [ERROR] Directory breakdown notice: ${err_info}\n', 2)
+					win_main.set('lbl_stats', ' Stats: ERROR / EMPTY  |  Target: ${raw_target}  |  Duration: ${elapsed_ms} ms')
+					win_main.set_status('Notice: ' + err_info)
+					win_main.toast('Notice: No entries or permission denied')
+				}
 			})
 		}()
 	})
@@ -161,18 +169,27 @@ fn main() {
 
 		go fn [mut w, target_dir, raw_target] () {
 			t0 := time.ticks()
-			cmd := 'find "${target_dir}" -type f -exec ls -lh {} + 2>/dev/null | awk \'{print $5, $9}\' | sort -hr | head -n 30'
+			cmd := 'find "${target_dir}" -type f -exec ls -lh {} + 2>&1 | awk \'{print $5, $9}\' | sort -hr | head -n 30'
 			res := os.execute(cmd)
 			elapsed_ms := time.ticks() - t0
 
-			w.run_on_main_thread(fn [res, elapsed_ms, target_dir, raw_target] (mut win_main simplegui.SimpleWindow) {
+			w.run_on_main_thread(fn [res, elapsed_ms, raw_target] (mut win_main simplegui.SimpleWindow) {
 				out := res.output.trim_space()
-				win_main.set('txt_disk_output', out)
-
-				win_main.append_console('disk_console', ' Top largest files located in ${elapsed_ms} ms.\n', 4)
-				win_main.set('lbl_stats', ' Stats: SUCCESS  |  Scope: ${raw_target}  |  Duration: ${elapsed_ms} ms')
-				win_main.set_status('Largest files found.')
-				win_main.toast('Largest files located!')
+				if out != '' && !out.contains('No such file') {
+					win_main.set('txt_disk_output', out)
+					lines_cnt := out.split_into_lines().len
+					win_main.append_console('disk_console', ' Top largest files located in ${elapsed_ms} ms (${lines_cnt} files).\n', 4)
+					win_main.set('lbl_stats', ' Stats: SUCCESS  |  Scope: ${raw_target}  |  Duration: ${elapsed_ms} ms')
+					win_main.set_status('Largest files found.')
+					win_main.toast('Largest files located!')
+				} else {
+					err_info := if out != '' { out } else { 'No accessible files found in: ${raw_target} (directory may be empty or access restricted).' }
+					win_main.set('txt_disk_output', '// [NOTICE / ERROR] No files found for ${raw_target}\n\n' + err_info)
+					win_main.append_console('disk_console', ' [NOTICE] No files located: ${err_info}\n', 2)
+					win_main.set('lbl_stats', ' Stats: NO FILES FOUND  |  Scope: ${raw_target}  |  Duration: ${elapsed_ms} ms')
+					win_main.set_status('Notice: No files found.')
+					win_main.toast('Notice: No files located')
+				}
 			})
 		}()
 	})

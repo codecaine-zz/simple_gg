@@ -330,7 +330,8 @@ fn main() {
 			win.set('lbl_status', ' Status: Transformed in ${elapsed_ms} ms  |  In: ${in_lines} lines  |  Out: ${out_lines} lines')
 			win.toast('Stream processed in ${elapsed_ms} ms!')
 		} else {
-			win.set('txt_output', ' sed error (exit code ${res.exit_code}):\n' + res.output)
+			err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'sed execution failed with exit code ${res.exit_code}' }
+			win.set('txt_output', '// [SED EXECUTION ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
 			win.set('lbl_status', ' sed execution error.')
 			win.toast('sed execution error!')
 		}
@@ -539,7 +540,9 @@ fn main() {
 				w.set('lbl_out_stats', '  (${res.output.len} chars, ${out_lines} lines)')
 				w.toast('File processed in ${elapsed_ms} ms!')
 			} else {
-				w.set('txt_output', ' sed error:\n' + res.output)
+				err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'sed execution failed with exit code ${res.exit_code}' }
+				w.set('txt_output', '// [SED FILE PROCESSING ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+				w.alert('sed Error', 'Error processing file:\n' + err_msg)
 			}
 		}
 	})
@@ -547,7 +550,7 @@ fn main() {
 	// Save Output to File
 	win.on_click('btn_save_out_to_file', fn (mut w simplegui.SimpleWindow) {
 		out_text := w.get('txt_output')
-		if out_text.trim_space() == '' || out_text.starts_with('') {
+		if out_text.trim_space() == '' || out_text.starts_with('// [SED') {
 			w.alert('Empty Output', 'There is no valid output stream to save.')
 			return
 		}

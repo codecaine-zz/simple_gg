@@ -62,15 +62,20 @@ fn run_probe_audio(mut w simplegui.SimpleWindow, audio_path string) {
 
 		w.run_on_main_thread(fn [res, elapsed_ms, audio_path] (mut win_main simplegui.SimpleWindow) {
 			out := res.output.trim_space()
-			win_main.set('txt_stream_info', out)
 
 			if res.exit_code == 0 {
+				win_main.set('txt_stream_info', out)
 				win_main.append_console('audio_console', ' Audio stream probed in ${elapsed_ms} ms.\n', 4)
 				win_main.set('lbl_stats', ' Stats: SUCCESS  |  File: ${os.file_name(audio_path)}  |  Duration: ${elapsed_ms} ms')
 				win_main.set_status('Audio metadata loaded.')
 				win_main.toast('Loaded ' + os.file_name(audio_path))
 			} else {
-				win_main.append_console('audio_console', ' Error probing audio stream.\n', 3)
+				err_msg := if out != '' { out } else { 'Failed to probe audio stream or format unsupported.' }
+				win_main.set('txt_stream_info', '// [AUDIO PROBE ERROR]\n// File: ${audio_path}\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+				win_main.append_console('audio_console', ' Error probing audio stream:\n' + err_msg + '\n', 3)
+				win_main.set('lbl_stats', ' Stats: ERROR (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
+				win_main.set_status('Error probing audio file.')
+				win_main.toast('Failed to load audio metadata.')
 			}
 		})
 	}()
@@ -314,6 +319,7 @@ fn main() {
 					run_probe_audio(mut win_main, path)
 				} else {
 					win_main.append_console('audio_console', ' Error writing tags: ' + res.output + '\n', 3)
+					win_main.set_status('Failed to write tags.')
 					win_main.toast('Failed to write tags.')
 				}
 			})
@@ -372,7 +378,9 @@ fn main() {
 					win_main.toast('Metadata removed!')
 					run_probe_audio(mut win_main, path)
 				} else {
-					win_main.append_console('audio_console', ' Error removing tags.\n', 3)
+					win_main.append_console('audio_console', ' Error removing tags: ' + res.output + '\n', 3)
+					win_main.set_status('Failed to remove tags.')
+					win_main.toast('Failed to remove tags.')
 				}
 			})
 		}()

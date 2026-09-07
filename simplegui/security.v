@@ -25,7 +25,7 @@ pub fn exec_safe(bin string, args []string) os.Result {
 	for a in args {
 		safe_args << quote_arg(a)
 	}
-	cmd := '${safe_bin} ${safe_args.join(' ')}'
+	cmd := '${safe_bin} ${safe_args.join(' ')} 2>&1'
 	return os.execute(cmd)
 }
 
@@ -36,7 +36,7 @@ pub fn exec_safe_stdin(bin string, args []string, input_file string) os.Result {
 	for a in args {
 		safe_args << quote_arg(a)
 	}
-	cmd := '${safe_bin} ${safe_args.join(' ')} < ${quote_path(input_file)}'
+	cmd := '${safe_bin} ${safe_args.join(' ')} < ${quote_path(input_file)} 2>&1'
 	return os.execute(cmd)
 }
 

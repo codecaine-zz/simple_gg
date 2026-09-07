@@ -325,9 +325,11 @@ fn main() {
 					win_main.set_status('Stream translated successfully (${char_count} chars in ${elapsed_ms} ms).')
 					win_main.toast('Translated ${char_count} chars in ${elapsed_ms} ms!')
 				} else {
-					win_main.set('txt_output_stream', ' TR Translation Error:\n\n' + res.output)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'tr command failed (Exit code ${res.exit_code}). Check character set parameters.' }
+					win_main.set('txt_output_stream', '// [TR TRANSLATION ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
 					win_main.set('lbl_stats', ' Stats: ERROR (Exit code ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('TR command returned an error.')
+					win_main.toast('TR translation error!')
 				}
 			})
 		}()

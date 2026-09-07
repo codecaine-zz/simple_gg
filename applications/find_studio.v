@@ -507,13 +507,23 @@ fn main() {
 			w.run_on_main_thread(fn [res, elapsed_ms] (mut win_main simplegui.SimpleWindow) {
 				if res.exit_code == 0 {
 					lines := res.output.split_into_lines().filter(it.trim_space() != '')
-					win_main.set('txt_results', res.output)
-					win_main.set('lbl_status', ' Status: Search complete  |  Matches: ${lines.len}  |  Elapsed: ${elapsed_ms} ms')
-					win_main.set_status('Find search completed.')
-					win_main.toast('Found ${lines.len} matching items!')
+					if lines.len > 0 {
+						win_main.set('txt_results', res.output)
+						win_main.set('lbl_status', ' Status: Search complete  |  Matches: ${lines.len}  |  Elapsed: ${elapsed_ms} ms')
+						win_main.set_status('Find search completed.')
+						win_main.toast('Found ${lines.len} matching items!')
+					} else {
+						win_main.set('txt_results', '// No files or directories matched the specified criteria.')
+						win_main.set('lbl_status', ' Status: No matches found  |  Elapsed: ${elapsed_ms} ms')
+						win_main.set_status('No matching items found.')
+						win_main.toast('No matching items found.')
+					}
 				} else {
-					win_main.set('txt_results', ' Find search error:\n' + res.output)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'find execution failed with exit code ${res.exit_code}' }
+					win_main.set('txt_results', '// [FIND SEARCH ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+					win_main.set('lbl_status', ' Status: ERROR (Exit code ${res.exit_code})')
 					win_main.set_status('Error executing find.')
+					win_main.toast('Find search error!')
 				}
 			})
 		}()
@@ -549,9 +559,23 @@ fn main() {
 					w.run_on_main_thread(fn [res, elapsed_ms] (mut win_main simplegui.SimpleWindow) {
 						if res.exit_code == 0 {
 							lines := res.output.split_into_lines().filter(it.trim_space() != '')
-							win_main.set('txt_results', res.output)
-							win_main.set('lbl_status', ' Status: Recipe complete  |  Matches: ${lines.len}  |  Elapsed: ${elapsed_ms} ms')
-							win_main.set_status('Recipe search complete.')
+							if lines.len > 0 {
+								win_main.set('txt_results', res.output)
+								win_main.set('lbl_status', ' Status: Recipe complete  |  Matches: ${lines.len}  |  Elapsed: ${elapsed_ms} ms')
+								win_main.set_status('Recipe search complete.')
+								win_main.toast('Found ${lines.len} items!')
+							} else {
+								win_main.set('txt_results', '// No files matched this recipe in the selected folder.')
+								win_main.set('lbl_status', ' Status: No matches found  |  Elapsed: ${elapsed_ms} ms')
+								win_main.set_status('No matching items found.')
+								win_main.toast('No items found.')
+							}
+						} else {
+							err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'find recipe execution failed with exit code ${res.exit_code}' }
+							win_main.set('txt_results', '// [FIND RECIPE ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+							win_main.set('lbl_status', ' Status: ERROR (Exit code ${res.exit_code})')
+							win_main.set_status('Recipe search failed.')
+							win_main.toast('Recipe search error!')
 						}
 					})
 				}()

@@ -347,7 +347,10 @@ fn main() {
 			update_history_view(mut w)
 			w.set('lbl_status_bar', ' Evaluated: ${clean} = ${res}')
 		} else {
-			w.set('lbl_status_bar', ' Syntax / Evaluation error: ' + res)
+			err_msg := if res != '' { res } else { 'Syntax or evaluation error in expression' }
+			w.set('txt_live_result', err_msg)
+			w.set('lbl_status_bar', ' Calculation Error: ' + err_msg.split_into_lines()[0])
+			w.toast('Calculation error!')
 		}
 		return res
 	}

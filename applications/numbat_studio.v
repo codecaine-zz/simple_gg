@@ -333,7 +333,10 @@ fn main() {
 			update_history_view(mut w)
 			w.set('lbl_status_bar', ' Evaluated: ${clean} = ${res}')
 		} else {
-			w.set('lbl_status_bar', ' Dimensional / Syntax error in expression')
+			err_msg := if res != '' { res } else { 'Dimensional or syntax error in expression' }
+			w.set('txt_live_result', err_msg)
+			w.set('lbl_status_bar', ' Error: ${err_msg.split_into_lines()[0]}')
+			w.toast('Calculation error!')
 		}
 		return res
 	}
@@ -421,9 +424,9 @@ fn main() {
 	// -------------------------------------------------------------
 	// Tab 2: Multi-Line Physics IDE
 	// -------------------------------------------------------------
-	win.on_click('btn_run_ide_script', fn [eval_expr_fn] (mut w simplegui.SimpleWindow) {
+	win.on_click('btn_run_ide_script', fn (mut w simplegui.SimpleWindow) {
 		script := w.get('txt_ide_script')
-		res := eval_expr_fn(mut w, script, 'Physics Script IDE')
+		ok, res := run_numbat(script)
 		mut out := []string{}
 		out << '========================================================================'
 		out << ' PHYSICS SCRIPT EXECUTION RESULTS'
@@ -431,7 +434,11 @@ fn main() {
 		out << res
 		out << '\n========================================================================\n'
 		w.set('txt_ide_output', out.join('\n'))
-		w.toast('Executed physics derivation script!')
+		if ok {
+			w.toast('Executed physics derivation script!')
+		} else {
+			w.toast('Physics script derivation error!')
+		}
 	})
 
 	win.on_click('btn_clear_ide', fn (mut w simplegui.SimpleWindow) {

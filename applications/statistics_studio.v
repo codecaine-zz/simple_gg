@@ -768,6 +768,12 @@ fn main() {
 	run_sample_a_analysis := fn [mut state, append_ledger] (mut w simplegui.SimpleWindow) {
 		raw_txt := w.get('txt_data_a')
 		nums := parse_numbers(raw_txt)
+		if nums.len == 0 {
+			w.set('txt_desc_report', '=== [INPUT DATA MISSING] ===\n\nPlease enter numeric observations separated by commas, spaces, or newlines.\nExample:\n  12.4, 15.2, 14.8, 19.5, 21.0, 18.3, 16.9')
+			w.alert('No Data', 'Please enter numeric observations for Sample A.')
+			w.toast('Please enter numeric data')
+			return
+		}
 		state.raw_data_a = nums
 		state.stats_a = compute_summary_stats(nums)
 		s := state.stats_a
@@ -839,7 +845,9 @@ fn main() {
 		a := parse_numbers(w.get('txt_hypo_a'))
 		b := parse_numbers(w.get('txt_hypo_b'))
 		if a.len == 0 || b.len == 0 {
+			w.set('txt_hypo_report', '=== [INPUT DATA MISSING] ===\n\nPlease enter numbers for both Sample A and Sample B.')
 			w.alert('Input Missing', 'Please enter numbers for both Sample A and Sample B.')
+			w.toast('Sample A and B required')
 			return
 		}
 		res := compute_two_sample_ttest(a, b, false)
@@ -874,7 +882,9 @@ fn main() {
 		a := parse_numbers(w.get('txt_hypo_a'))
 		b := parse_numbers(w.get('txt_hypo_b'))
 		if a.len != b.len || a.len == 0 {
+			w.set('txt_hypo_report', '=== [DIMENSION MISMATCH ERROR] ===\n\nPaired t-test requires exactly equal number of observations in Sample A and Sample B.\nCurrently: Sample A has ${a.len} items, Sample B has ${b.len} items.')
 			w.alert('Dimension Mismatch', 'Paired t-test requires exactly equal number of observations in Sample A and Sample B (A=${a.len}, B=${b.len}).')
+			w.toast('Paired test requires equal sample sizes')
 			return
 		}
 		res := compute_two_sample_ttest(a, b, true)
@@ -905,7 +915,9 @@ fn main() {
 		a := parse_numbers(w.get('txt_hypo_a'))
 		b := parse_numbers(w.get('txt_hypo_b'))
 		if a.len == 0 || b.len == 0 {
+			w.set('txt_hypo_report', '=== [INPUT DATA MISSING] ===\n\nEnter data for both groups.')
 			w.alert('Input Missing', 'Enter data for both groups.')
+			w.toast('Data required for both groups')
 			return
 		}
 		st_a := compute_summary_stats(a)
@@ -948,7 +960,9 @@ fn main() {
 		x := parse_numbers(w.get('txt_reg_x'))
 		y := parse_numbers(w.get('txt_reg_y'))
 		if x.len != y.len || x.len < 2 {
+			w.set('txt_reg_report', '=== [REGRESSION DIMENSION ERROR] ===\n\nX and Y must contain the same number of data points (at least 2).\nCurrently: X has ${x.len} points, Y has ${y.len} points.')
 			w.alert('Dimension Error', 'X and Y must contain the same number of data points (at least 2).')
+			w.toast('X and Y point counts must match')
 			return
 		}
 		reg := compute_regression(x, y)

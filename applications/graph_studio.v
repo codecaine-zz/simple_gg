@@ -755,7 +755,9 @@ fn main() {
 			}
 		}
 		if nums.len < 2 {
+			w.set('txt_series_report', '=== [DATA SERIES ERROR] ===\n\nPlease enter at least 2 numeric values separated by commas or spaces.\nExample:\n  12.5, 14.8, 19.2, 22.0, 18.5, 30.1')
 			w.alert('Input Missing', 'Please enter at least 2 data points.')
+			w.toast('Requires at least 2 numeric values')
 			return
 		}
 		w.set_chart_data('chart_series', nums)
@@ -781,7 +783,11 @@ fn main() {
 				if !math.is_nan(v) { nums << v }
 			}
 		}
-		if nums.len < 3 { return }
+		if nums.len < 3 {
+			w.alert('Insufficient Data', '3-point SMA smoothing requires at least 3 data points (currently ${nums.len}).')
+			w.toast('Requires at least 3 data points')
+			return
+		}
 
 		mut sma := []f64{}
 		for i in 0 .. nums.len {
@@ -813,7 +819,11 @@ fn main() {
 				if !math.is_nan(v) { nums << v }
 			}
 		}
-		if nums.len < 5 { return }
+		if nums.len < 5 {
+			w.alert('Insufficient Data', '5-point SMA smoothing requires at least 5 data points (currently ${nums.len}).')
+			w.toast('Requires at least 5 data points')
+			return
+		}
 
 		mut sma := []f64{}
 		for i in 0 .. nums.len {
@@ -848,7 +858,11 @@ fn main() {
 				if !math.is_nan(v) { nums << v }
 			}
 		}
-		if nums.len < 2 { return }
+		if nums.len < 2 {
+			w.alert('Insufficient Data', 'First differences require at least 2 data points (currently ${nums.len}).')
+			w.toast('Requires at least 2 data points')
+			return
+		}
 
 		mut diffs := []f64{}
 		for i in 1 .. nums.len {
@@ -874,7 +888,11 @@ fn main() {
 				if !math.is_nan(v) { nums << v }
 			}
 		}
-		if nums.len < 2 { return }
+		if nums.len < 2 {
+			w.alert('Insufficient Data', 'Cumulative sum requires at least 2 data points (currently ${nums.len}).')
+			w.toast('Requires at least 2 data points')
+			return
+		}
 
 		mut cum := []f64{}
 		mut acc := 0.0
@@ -897,6 +915,12 @@ fn main() {
 	win.on_click('btn_analyze_graph', fn [append_ledger] (mut w simplegui.SimpleWindow) {
 		spec := w.get('txt_graph_spec')
 		g := parse_graph(spec)
+		if g.nodes.len == 0 {
+			w.set('txt_graph_report', '=== [GRAPH SPECIFICATION ERROR] ===\n\nNo valid nodes or edges detected.\nFormat nodes and directed edges as: A -> B or undirected as: A -- B\nExample:\n  Server -> Database\n  Server -> Client')
+			w.alert('Empty Graph Specification', 'Please enter valid graph edges (e.g. NodeA -> NodeB).')
+			w.toast('No graph elements detected')
+			return
+		}
 		rep := analyze_graph(g)
 		w.set('txt_graph_report', rep)
 		w.set('lbl_status_bar', ' Evaluated network topology: |V| = ${g.nodes.len} nodes, |E| = ${g.edges.len} edges')
@@ -923,6 +947,11 @@ fn main() {
 	win.on_click('btn_copy_mermaid', fn (mut w simplegui.SimpleWindow) {
 		spec := w.get('txt_graph_spec')
 		g := parse_graph(spec)
+		if g.edges.len == 0 {
+			w.alert('Empty Graph', 'No graph edges to generate Mermaid diagram from.')
+			w.toast('No graph edges to copy')
+			return
+		}
 		mut lines := []string{}
 		lines << '```mermaid'
 		lines << 'graph LR'
@@ -958,7 +987,9 @@ fn main() {
 		}
 
 		if labels.len == 0 || total <= 0 {
+			w.set('txt_proportions_report', '=== [CATEGORICAL PARSE ERROR] ===\n\nPlease enter labels and values formatted as "Label: Value".\nExample:\n  Engineering: 45\n  Marketing: 25\n  Design: 15\n  Operations: 15')
 			w.alert('Input Error', 'Please enter labels and values formatted as "Label: Value".')
+			w.toast('Invalid format: use Label: Value')
 			return
 		}
 

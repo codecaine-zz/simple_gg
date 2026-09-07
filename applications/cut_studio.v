@@ -346,9 +346,11 @@ fn main() {
 					win_main.set_status('Stream sliced successfully (${count} lines in ${elapsed_ms} ms).')
 					win_main.toast('Sliced ${count} lines in ${elapsed_ms} ms!')
 				} else {
-					win_main.set('txt_output_stream', ' Cut Slicing Error:\n\n' + res.output)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'cut command failed (Exit code ${res.exit_code}). Check field range or delimiter settings.' }
+					win_main.set('txt_output_stream', '// [CUT SLICING ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
 					win_main.set('lbl_stats', ' Stats: ERROR (Exit code ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Cut command returned an error.')
+					win_main.toast('Cut slicing error!')
 				}
 			})
 		}()

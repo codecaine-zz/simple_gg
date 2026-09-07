@@ -142,9 +142,12 @@ fn main() {
 					win_main.set_status('${desc} complete.')
 					win_main.toast('${desc} complete!')
 				} else {
-					win_main.append_console('brew_console', ' Notice / Error (Exit ${res.exit_code}):\n' + out + '\n', 3)
-					win_main.set('lbl_stats', ' Stats: NOTICE (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
-					win_main.set_status('${desc} finished.')
+					err_msg := if out != '' { out } else { 'Homebrew command failed (Exit code ${res.exit_code}).' }
+					win_main.set('txt_brew_output', '// [HOMEBREW ERROR]\n// Action: ${desc}\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+					win_main.append_console('brew_console', ' Homebrew Error (Exit ${res.exit_code}):\n' + err_msg + '\n', 3)
+					win_main.set('lbl_stats', ' Stats: ERROR (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
+					win_main.set_status('${desc} failed.')
+					win_main.toast('Homebrew error!')
 				}
 			})
 		}()

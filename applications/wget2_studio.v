@@ -382,9 +382,11 @@ fn main() {
 					win_main.set_status('Wget2 completed in ${sec:.1f}s.')
 					win_main.toast('Wget2 download completed successfully!')
 				} else {
-					win_main.append_console('wget_console', ' Wget2 Error:\n' + res.output + '\n', 3)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Wget2 failed to connect or transfer files.' }
+					win_main.append_console('wget_console', ' Wget2 Error (Exit ${res.exit_code}):\n' + err_msg + '\n', 3)
 					win_main.set('lbl_stats', ' Status: ERROR (Exit code ${res.exit_code})')
-					win_main.set_status('Wget2 reported an error.')
+					win_main.set_status('Wget2 transfer failed: ${err_msg.split_into_lines()[0]}')
+					win_main.toast('Download failed (Exit ${res.exit_code})!')
 				}
 			})
 		}()

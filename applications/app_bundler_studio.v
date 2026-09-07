@@ -669,11 +669,15 @@ fn main() {
 		os.mkdir_all(macos_dir) or {
 			logs << '[ERROR] Failed to create MacOS folder: ${err}'
 			w.set_value('txt_bundler_log', logs.join('\n'))
+			w.alert('Directory Error', 'Failed to create MacOS folder: ${err}')
+			w.toast('Packaging failed!')
 			return
 		}
 		os.mkdir_all(resources_dir) or {
 			logs << '[ERROR] Failed to create Resources folder: ${err}'
 			w.set_value('txt_bundler_log', logs.join('\n'))
+			w.alert('Directory Error', 'Failed to create Resources folder: ${err}')
+			w.toast('Packaging failed!')
 			return
 		}
 		logs << 'Created bundle structure: Contents/{MacOS, Resources}'
@@ -688,6 +692,8 @@ fn main() {
 			os.cp(bin_path, cli_bin) or {
 				logs << '[ERROR] Failed to copy CLI binary to Resources: ${err}'
 				w.set_value('txt_bundler_log', logs.join('\n'))
+				w.alert('Copy Error', 'Failed to copy CLI binary: ${err}')
+				w.toast('Packaging failed!')
 				return
 			}
 			os.chmod(cli_bin, 0o755) or {}
@@ -699,6 +705,8 @@ osascript -e "tell application \\"Terminal\\" to do script \\"\'${cli_bin}\' ; e
 			os.write_file(target_bin, wrapper_script) or {
 				logs << '[ERROR] Failed to write wrapper script: ${err}'
 				w.set_value('txt_bundler_log', logs.join('\n'))
+				w.alert('Write Error', 'Failed to write wrapper script: ${err}')
+				w.toast('Packaging failed!')
 				return
 			}
 			os.chmod(target_bin, 0o755) or {}
@@ -709,6 +717,7 @@ osascript -e "tell application \\"Terminal\\" to do script \\"\'${cli_bin}\' ; e
 				logs << '[ERROR] Failed to copy binary: ${err}'
 				w.set_value('txt_bundler_log', logs.join('\n'))
 				w.alert('Copy Error', 'Failed to copy binary: ${err}')
+				w.toast('Packaging failed!')
 				return
 			}
 			os.chmod(target_bin, 0o755) or {}
@@ -721,6 +730,8 @@ osascript -e "tell application \\"Terminal\\" to do script \\"\'${cli_bin}\' ; e
 		os.write_file(plist_path, plist_content) or {
 			logs << '[ERROR] Failed to write Info.plist: ${err}'
 			w.set_value('txt_bundler_log', logs.join('\n'))
+			w.alert('Write Error', 'Failed to write Info.plist: ${err}')
+			w.toast('Packaging failed!')
 			return
 		}
 		logs << '[SUCCESS] Generated Info.plist (${plist_content.len} bytes)'

@@ -115,22 +115,22 @@ fn main() {
 				res := simplegui.exec_safe(whois_bin, [target])
 				output_str = res.output.trim_space()
 			} else if module_choice.starts_with('2.') || module_choice.contains('Geolocation') {
-				res := os.execute('curl -s "https://ipinfo.io/${target}/json"')
+				res := os.execute('curl -sS "https://ipinfo.io/${target}/json" 2>&1')
 				output_str = res.output.trim_space()
 			} else if module_choice.starts_with('3.') || module_choice.contains('crt.sh') {
-				res := os.execute('curl -s "https://crt.sh/?q=%25.${target}&output=json"')
+				res := os.execute('curl -sS "https://crt.sh/?q=%25.${target}&output=json" 2>&1')
 				if res.output.trim_space() != '' && !res.output.contains('html') {
 					output_str = res.output.trim_space()
 				} else {
-					output_str = 'No JSON response or rate limited from crt.sh. Checking DNS certificates...'
+					output_str = 'No JSON certificate records found or rate limited from crt.sh.'
 				}
 			} else if module_choice.starts_with('4.') || module_choice.contains('Headers') {
 				url := if target.starts_with('http') { target } else { 'https://' + target }
-				res := os.execute('curl -s -I -L --max-time 10 "${url}"')
+				res := os.execute('curl -sS -I -L --max-time 10 "${url}" 2>&1')
 				output_str = res.output.trim_space()
 			} else if module_choice.starts_with('5.') || module_choice.contains('Robots') {
 				url := if target.starts_with('http') { target } else { 'https://' + target }
-				res := os.execute('curl -s --max-time 10 "${url}/robots.txt"')
+				res := os.execute('curl -sS --max-time 10 "${url}/robots.txt" 2>&1')
 				output_str = if res.output.trim_space() != '' { res.output.trim_space() } else { 'No robots.txt found or unreachable.' }
 			} else {
 				res := simplegui.exec_safe(whois_bin, [target])
@@ -138,13 +138,23 @@ fn main() {
 			}
 
 			elapsed_ms := time.ticks() - t0
+			is_err := output_str == '' || output_str.contains('curl: (')
 
-			w.run_on_main_thread(fn [output_str, elapsed_ms, target, module_choice] (mut win_main simplegui.SimpleWindow) {
-				win_main.set('txt_recon_output', output_str)
-				win_main.append_console('recon_console', ' Completed OSINT query for ${target} in ${elapsed_ms} ms (${output_str.len} bytes)\n', 4)
-				win_main.set('lbl_stats', ' Stats: SUCCESS  |  Target: ${target}  |  Module: ${module_choice.split(" ")[0]}  |  Duration: ${elapsed_ms} ms')
-				win_main.set_status('OSINT reconnaissance complete in ${elapsed_ms} ms.')
-				win_main.toast('Recon data gathered!')
+			w.run_on_main_thread(fn [output_str, elapsed_ms, target, module_choice, is_err] (mut win_main simplegui.SimpleWindow) {
+				if is_err {
+					err_msg := if output_str != '' { output_str } else { 'Target host unreachable or query returned no data.' }
+					win_main.set('txt_recon_output', '// [RECON QUERY ERROR]\n// Target: ${target}\n// Module: ${module_choice}\n\n${err_msg}\n')
+					win_main.append_console('recon_console', ' OSINT query error for ${target} in ${elapsed_ms} ms:\n' + err_msg + '\n', 3)
+					win_main.set('lbl_stats', ' Stats: ERROR  |  Target: ${target}  |  Module: ${module_choice.split(" ")[0]}  |  Duration: ${elapsed_ms} ms')
+					win_main.set_status('OSINT reconnaissance query failed.')
+					win_main.toast('Recon query error.')
+				} else {
+					win_main.set('txt_recon_output', output_str)
+					win_main.append_console('recon_console', ' Completed OSINT query for ${target} in ${elapsed_ms} ms (${output_str.len} bytes)\n', 4)
+					win_main.set('lbl_stats', ' Stats: SUCCESS  |  Target: ${target}  |  Module: ${module_choice.split(" ")[0]}  |  Duration: ${elapsed_ms} ms')
+					win_main.set_status('OSINT reconnaissance complete in ${elapsed_ms} ms.')
+					win_main.toast('Recon data gathered!')
+				}
 			})
 		}()
 	}

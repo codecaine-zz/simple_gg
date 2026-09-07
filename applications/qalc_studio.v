@@ -417,7 +417,7 @@ fn main() {
 		angle_val := if w.get('dd_angle').contains('deg') { 'deg' } else if w.get('dd_angle').contains('gra') { 'gra' } else { 'rad' }
 
 		terse, _ := run_qalc(clean, prec_num, angle_val, 'dec', 'off')
-		if terse != '' {
+		if terse != '' && !terse.to_lower().contains('error') {
 			state.last_result = terse
 			w.set('txt_live_result', terse)
 
@@ -432,7 +432,10 @@ fn main() {
 			update_history_view(mut w)
 			w.set('lbl_status_bar', ' Evaluated: ${clean} = ${terse}')
 		} else {
-			w.set('lbl_status_bar', ' Failed to evaluate: ${clean}')
+			err_msg := if terse != '' { terse } else { 'Invalid expression or calculation error' }
+			w.set('txt_live_result', err_msg)
+			w.set('lbl_status_bar', ' Calculation Error: ${err_msg}')
+			w.toast('Calculation error!')
 		}
 		return terse
 	}

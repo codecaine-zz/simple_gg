@@ -300,7 +300,9 @@ fn main() {
 					win_main.set_status('Diagram compiled in ${elapsed_ms} ms.')
 					win_main.toast('Diagram rendered successfully!')
 				} else {
-					win_main.append_console('dot_console', ' Graphviz Compiler Error:\n' + res.output + '\n', 3)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Graphviz dot compiler failed with exit code ${res.exit_code}. Check syntax.' }
+					win_main.set('txt_svg_output', '<!-- [GRAPHVIZ COMPILATION ERROR] -->\n<!-- Exit Code: ${res.exit_code} -->\n\n${err_msg}\n')
+					win_main.append_console('dot_console', ' Graphviz Compiler Error:\n' + err_msg + '\n', 3)
 					win_main.set('lbl_stats', ' Stats: COMPILER ERROR (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Graphviz compilation failed.')
 					win_main.toast('Compilation error.')
@@ -325,9 +327,10 @@ fn main() {
 	win.on_click('btn_export_png', fn (mut w simplegui.SimpleWindow) {
 		dot_code := w.get('txt_dot_code')
 		if dot_code.trim_space() == '' {
-			w.toast('No DOT code to export.')
+			w.toast('DOT code is empty.')
 			return
 		}
+
 		save_path := w.save_file_picker()
 		if save_path != '' {
 			mut save_file := save_path
@@ -338,9 +341,13 @@ fn main() {
 
 			tmp_dot := os.join_path(os.temp_dir(), 'export_${time.ticks()}.dot')
 			os.write_file(tmp_dot, dot_code) or { return }
-			simplegui.exec_safe(dot_bin, ['-K' + layout_prog, '-Tpng', tmp_dot, '-o', save_file])
+			res := simplegui.exec_safe(dot_bin, ['-K' + layout_prog, '-Tpng', tmp_dot, '-o', save_file])
 			os.rm(tmp_dot) or {}
 
+			if res.exit_code != 0 {
+				w.alert('Export Error', 'Graphviz export failed:\n' + res.output.trim_space())
+				return
+			}
 			w.toast('Exported PNG to ' + os.file_name(save_file))
 			w.append_console('dot_console', ' Saved PNG diagram: ${save_file}\n', 4)
 		}
@@ -350,9 +357,10 @@ fn main() {
 	win.on_click('btn_export_svg', fn (mut w simplegui.SimpleWindow) {
 		dot_code := w.get('txt_dot_code')
 		if dot_code.trim_space() == '' {
-			w.toast('No DOT code to export.')
+			w.toast('DOT code is empty.')
 			return
 		}
+
 		save_path := w.save_file_picker()
 		if save_path != '' {
 			mut save_file := save_path
@@ -363,9 +371,13 @@ fn main() {
 
 			tmp_dot := os.join_path(os.temp_dir(), 'export_${time.ticks()}.dot')
 			os.write_file(tmp_dot, dot_code) or { return }
-			simplegui.exec_safe(dot_bin, ['-K' + layout_prog, '-Tsvg', tmp_dot, '-o', save_file])
+			res := simplegui.exec_safe(dot_bin, ['-K' + layout_prog, '-Tsvg', tmp_dot, '-o', save_file])
 			os.rm(tmp_dot) or {}
 
+			if res.exit_code != 0 {
+				w.alert('Export Error', 'Graphviz export failed:\n' + res.output.trim_space())
+				return
+			}
 			w.toast('Exported SVG to ' + os.file_name(save_file))
 			w.append_console('dot_console', ' Saved SVG diagram: ${save_file}\n', 4)
 		}
@@ -375,9 +387,10 @@ fn main() {
 	win.on_click('btn_export_pdf', fn (mut w simplegui.SimpleWindow) {
 		dot_code := w.get('txt_dot_code')
 		if dot_code.trim_space() == '' {
-			w.toast('No DOT code to export.')
+			w.toast('DOT code is empty.')
 			return
 		}
+
 		save_path := w.save_file_picker()
 		if save_path != '' {
 			mut save_file := save_path
@@ -388,9 +401,13 @@ fn main() {
 
 			tmp_dot := os.join_path(os.temp_dir(), 'export_${time.ticks()}.dot')
 			os.write_file(tmp_dot, dot_code) or { return }
-			simplegui.exec_safe(dot_bin, ['-K' + layout_prog, '-Tpdf', tmp_dot, '-o', save_file])
+			res := simplegui.exec_safe(dot_bin, ['-K' + layout_prog, '-Tpdf', tmp_dot, '-o', save_file])
 			os.rm(tmp_dot) or {}
 
+			if res.exit_code != 0 {
+				w.alert('Export Error', 'Graphviz export failed:\n' + res.output.trim_space())
+				return
+			}
 			w.toast('Exported PDF to ' + os.file_name(save_file))
 			w.append_console('dot_console', ' Saved PDF diagram: ${save_file}\n', 4)
 		}

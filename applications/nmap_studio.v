@@ -210,14 +210,18 @@ fn main() {
 				win_main.set('txt_scan_results', out)
 
 				if res.exit_code == 0 {
+					win_main.set('txt_scan_results', out)
 					win_main.append_console('nmap_console', ' Scan completed for ${target} in ${elapsed_ms} ms.\n', 4)
 					win_main.set('lbl_stats', ' Stats: SUCCESS  |  Target: ${target}  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Scan completed in ${elapsed_ms} ms.')
 					win_main.toast('Port scan finished successfully!')
 				} else {
-					win_main.append_console('nmap_console', ' Nmap Scan Notice (Exit ${res.exit_code}):\n' + out + '\n', 3)
-					win_main.set('lbl_stats', ' Stats: COMPLETED (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
-					win_main.set_status('Scan completed with notices.')
+					err_msg := if out != '' { out } else { 'Nmap scan failed (Exit code ${res.exit_code}). Target unreachable or elevated privileges required.' }
+					win_main.set('txt_scan_results', '// [NMAP SCAN ERROR]\n// Target: ${target}\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+					win_main.append_console('nmap_console', ' Nmap Error (Exit ${res.exit_code}):\n' + err_msg + '\n', 3)
+					win_main.set('lbl_stats', ' Stats: ERROR (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
+					win_main.set_status('Nmap scan failed.')
+					win_main.toast('Nmap scan error!')
 				}
 			})
 		}()

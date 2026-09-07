@@ -367,20 +367,24 @@ fn main() {
 			win.run_on_main_thread(fn [res, elapsed_ms] (mut win_main simplegui.SimpleWindow) {
 				if res.exit_code == 0 {
 					out_str := res.output.trim_space()
-					win_main.set('txt_results', out_str)
-					
-					mut count := 0
-					if out_str != '' {
-						count = out_str.split_into_lines().len
+					count := if out_str != '' { out_str.split_into_lines().len } else { 0 }
+					if count > 0 {
+						win_main.set('txt_results', out_str)
+						win_main.set('lbl_stats', ' Stats: SUCCESS  |  Files Found: ${count}  |  Duration: ${elapsed_ms} ms')
+						win_main.set_status('Found ${count} matching files in ${elapsed_ms} ms.')
+						win_main.toast('Found ${count} files in ${elapsed_ms} ms!')
+					} else {
+						win_main.set('txt_results', '// No files matching the criteria were found in this directory.')
+						win_main.set('lbl_stats', ' Stats: NO MATCHES  |  Files Found: 0  |  Duration: ${elapsed_ms} ms')
+						win_main.set_status('No matching files found.')
+						win_main.toast('No files found.')
 					}
-
-					win_main.set('lbl_stats', ' Stats: SUCCESS  |  Files Found: ${count}  |  Duration: ${elapsed_ms} ms')
-					win_main.set_status('Found ${count} matching files in ${elapsed_ms} ms.')
-					win_main.toast('Found ${count} files in ${elapsed_ms} ms!')
 				} else {
-					win_main.set('txt_results', ' FD Search Error:\n\n' + res.output)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'fd command failed with exit code ${res.exit_code}. Check pattern or directory permissions.' }
+					win_main.set('txt_results', '// [FD SEARCH ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
 					win_main.set('lbl_stats', ' Stats: ERROR (Exit code ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('FD search returned an error.')
+					win_main.toast('FD search error!')
 				}
 			})
 		}()

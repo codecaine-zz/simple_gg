@@ -193,14 +193,18 @@ fn main() {
 				chars_cnt := out.len
 
 				if res.exit_code == 0 {
+					win_main.set('txt_ocr_output', out)
 					win_main.append_console('ocr_console', ' OCR Extraction Complete: ${words_cnt} words (${chars_cnt} chars) in ${elapsed_ms} ms.\n', 4)
 					win_main.set('lbl_stats', ' Stats: SUCCESS  |  File: ${os.file_name(img_path)}  |  Words: ${words_cnt}  |  Chars: ${chars_cnt}  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('OCR finished in ${elapsed_ms} ms.')
 					win_main.toast('Text extracted successfully!')
 				} else {
-					win_main.append_console('ocr_console', ' Tesseract OCR Notice:\n' + out + '\n', 3)
-					win_main.set('lbl_stats', ' Stats: NOTICE (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
-					win_main.set_status('OCR completed with notices.')
+					err_msg := if out != '' { out } else { 'Tesseract OCR failed on image: ${os.file_name(img_path)} (Exit ${res.exit_code})' }
+					win_main.set('txt_ocr_output', '// [OCR EXTRACTION ERROR]\n// File: ${img_path}\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+					win_main.append_console('ocr_console', ' Tesseract OCR Error:\n' + err_msg + '\n', 3)
+					win_main.set('lbl_stats', ' Stats: ERROR (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
+					win_main.set_status('OCR extraction failed.')
+					win_main.toast('OCR extraction failed!')
 				}
 			})
 		}()
@@ -240,7 +244,10 @@ fn main() {
 						win_main.toast('Saved ${pdf_name}!')
 						win_main.set_status('PDF saved successfully.')
 					} else {
-						win_main.append_console('ocr_console', ' Error compiling PDF: ' + res.output + '\n', 3)
+						err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Failed to generate searchable PDF.' }
+						win_main.append_console('ocr_console', ' Error compiling PDF: ' + err_msg + '\n', 3)
+						win_main.set_status('PDF generation failed.')
+						win_main.toast('Failed to create PDF!')
 					}
 				})
 			}()

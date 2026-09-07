@@ -240,9 +240,11 @@ fn main() {
 					win_main.set_status('Converted ${from_fmt} to ${to_fmt} in ${elapsed_ms} ms.')
 					win_main.toast('Document converted in ${elapsed_ms} ms!')
 				} else {
-					win_main.set('txt_output_data', ' Pandoc Conversion Error:\n\n' + res.output)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Pandoc conversion failed (Exit code ${res.exit_code}). Check syntax and format compatibility.' }
+					win_main.set('txt_output_data', '// [PANDOC CONVERSION ERROR]\n// Format: ${from_fmt} -> ${to_fmt}\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
 					win_main.set('lbl_stats', ' Stats: ERROR (Exit code ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
-					win_main.set_status('Pandoc reported a conversion error.')
+					win_main.set_status('Pandoc conversion failed.')
+					win_main.toast('Pandoc conversion failed!')
 				}
 			})
 		}()

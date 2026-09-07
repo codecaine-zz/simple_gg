@@ -139,15 +139,19 @@ fn main() {
 				gps_status := if has_gps { 'GPS Detected ' } else { 'No GPS' }
 
 				if res.exit_code == 0 {
+					win_main.set('txt_metadata_report', out)
 					lines_cnt := if out != '' { out.split_into_lines().len } else { 0 }
 					win_main.append_console('exif_console', ' Extracted ${lines_cnt} metadata tags in ${elapsed_ms} ms (${gps_status}).\n', 4)
 					win_main.set('lbl_stats', ' Stats: SUCCESS  |  File: ${os.file_name(file_path)}  |  Tags: ${lines_cnt}  |  ${gps_status}  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Metadata extracted in ${elapsed_ms} ms.')
 					win_main.toast('Metadata extracted successfully!')
 				} else {
-					win_main.append_console('exif_console', ' ExifTool Notice:\n' + out + '\n', 3)
-					win_main.set('lbl_stats', ' Stats: NOTICE (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
-					win_main.set_status('ExifTool completed with notices.')
+					err_msg := if out != '' { out } else { 'ExifTool failed to extract metadata (Exit ${res.exit_code})' }
+					win_main.set('txt_metadata_report', '// [EXIF EXTRACTION ERROR]\n// File: ${file_path}\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+					win_main.append_console('exif_console', ' ExifTool Error:\n' + err_msg + '\n', 3)
+					win_main.set('lbl_stats', ' Stats: ERROR (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
+					win_main.set_status('ExifTool extraction failed.')
+					win_main.toast('Metadata extraction failed!')
 				}
 			})
 		}()
@@ -265,6 +269,8 @@ fn main() {
 					win_main.set('txt_metadata_report', re_res.output.trim_space())
 				} else {
 					win_main.append_console('exif_console', ' Error stripping metadata: ' + res.output + '\n', 3)
+					win_main.set_status('Failed to strip metadata.')
+					win_main.toast('Error scrubbing metadata.')
 				}
 			})
 		}()
@@ -283,6 +289,10 @@ fn main() {
 			if !save_file.ends_with('.json') { save_file += '.json' }
 			exiftool_bin := get_exiftool_bin()
 			res := simplegui.exec_safe(exiftool_bin, ['-json', path])
+			if res.exit_code != 0 {
+				w.alert('Export Error', 'ExifTool JSON export failed:\n' + res.output.trim_space())
+				return
+			}
 			os.write_file(save_file, res.output) or {
 				w.toast('Failed to save JSON.')
 				return

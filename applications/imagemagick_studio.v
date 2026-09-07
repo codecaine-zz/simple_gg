@@ -751,7 +751,8 @@ fn main() {
 
 		// Spawn background thread to prevent beach ball
 		go fn [mut w, cmd, out_path] () {
-			res := os.execute(cmd)
+			cmd_exec := if cmd.contains('2>&1') { cmd } else { cmd + ' 2>&1' }
+			res := os.execute(cmd_exec)
 
 			w.run_on_main_thread(fn [res, out_path] (mut win_main simplegui.SimpleWindow) {
 				if res.exit_code == 0 {
@@ -764,9 +765,11 @@ fn main() {
 					win_main.set_status('Image task completed with success.')
 					win_main.toast('Image processing finished successfully!')
 				} else {
-					win_main.append_console('log_console', ' Error during execution (Exit code ${res.exit_code}):\n' + res.output + '\n', 3)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'ImageMagick failed with exit code ${res.exit_code}. Check filter parameters or file format.' }
+					win_main.append_console('log_console', ' Error during execution (Exit code ${res.exit_code}):\n' + err_msg + '\n', 3)
 					win_main.set_status('Error executing ImageMagick.')
-					win_main.alert('ImageMagick Error', 'Failed to process image. Check console logs for details.')
+					win_main.toast('Image processing error!')
+					win_main.alert('ImageMagick Error', 'Failed to process image:\n' + err_msg.split_into_lines().last())
 				}
 			})
 		}()

@@ -2087,10 +2087,12 @@ fn main() {
 		} else {
 			out << '(Process exited with empty output stdout/stderr)'
 		}
-		out << '========================================================================\n'
-
 		w.set('txt_console_output', out.join('\n'))
-		w.toast('Execution finished in ${elapsed_ms}ms.')
+		if res.exit_code == 0 {
+			w.toast('Execution finished in ${elapsed_ms}ms.')
+		} else {
+			w.toast('Execution failed (Exit ${res.exit_code})!')
+		}
 	})
 
 	// -------------------------------------------------------------
@@ -2246,6 +2248,8 @@ fn main() {
 			state.is_dirty = true
 			update_telemetry(mut w, state)
 			w.toast('Prettified JSON!')
+		} else {
+			w.toast('Invalid JSON syntax!')
 		}
 	})
 

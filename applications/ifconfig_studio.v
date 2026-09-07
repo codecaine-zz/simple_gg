@@ -670,7 +670,9 @@ fn main() {
 		out << 'Response Time: ${elapsed_ms} ms'
 		out << '========================================================================'
 
-		if res.exit_code == 0 && res.output != '' {
+		mut is_err := res.exit_code != 0 || res.output.trim_space() == ''
+
+		if !is_err {
 			geo := json2.decode[IPApiResponse](res.output) or { IPApiResponse{} }
 			if geo.status == 'success' {
 				flag := country_code_to_flag(geo.country_code)
@@ -683,11 +685,14 @@ fn main() {
 				out << 'Autonomous System   : ' + geo.as_info
 				out << 'Timezone            : ' + geo.timezone
 			} else {
-				out << 'Lookup Status: ' + geo.status
-				out << 'Raw API Output: ' + res.output
+				is_err = true
+				out << '=== [TARGET LOOKUP ERROR] ==='
+				out << 'Lookup Status : ' + (if geo.status != '' { geo.status } else { 'Failed' })
+				out << 'Details       : ' + res.output.trim_space()
 			}
 		} else {
-			out << 'Failed to query remote IP endpoint: ' + res.output
+			out << '=== [TARGET LOOKUP ERROR] ==='
+			out << 'Failed to query remote IP endpoint: ' + (if res.output.trim_space() != '' { res.output.trim_space() } else { 'Connection failed or timed out.' })
 		}
 
 		// DNS lookup query using dig
@@ -698,7 +703,11 @@ fn main() {
 
 		out << '========================================================================\n'
 		w.set('txt_target_output', out.join('\n'))
-		w.toast('Inspection complete for ' + clean_target)
+		if is_err {
+			w.toast('Inspection failed for ' + clean_target)
+		} else {
+			w.toast('Inspection complete for ' + clean_target)
+		}
 	}
 
 	win.on_click('btn_inspect_target', fn [inspect_target_fn] (mut w simplegui.SimpleWindow) {
@@ -835,7 +844,11 @@ fn main() {
 
 	win.on_click('btn_lookup_dns', fn (mut w simplegui.SimpleWindow) {
 		host := w.get('txt_bench_host').trim_space()
-		if host == '' { return }
+		if host == '' {
+			w.alert('Host Required', 'Please enter a target domain or hostname.')
+			w.toast('Target host required')
+			return
+		}
 		w.toast('Resolving DNS records for ' + host + '...')
 
 		mut out := []string{}
@@ -844,38 +857,51 @@ fn main() {
 		out << '========================================================================'
 
 		record_types := ['A', 'AAAA', 'MX', 'TXT', 'NS', 'CNAME', 'SOA']
+		mut records_found := 0
 		for rtype in record_types {
 			res := simplegui.exec_safe('dig', ['+noall', '+answer', host, rtype])
 			if res.exit_code == 0 && res.output.trim_space() != '' {
+				records_found++
 				out << '\n[ ${rtype} RECORDS ]:\n' + res.output.trim_space()
 			}
 		}
+		if records_found == 0 {
+			out << '\nNo DNS records found or lookup failed for ' + host
+			w.toast('No DNS records returned for ' + host)
+		} else {
+			w.toast('DNS resolution completed for ' + host)
+		}
 		out << '\n========================================================================\n'
 		w.set('txt_benchmark_output', out.join('\n'))
-		w.toast('DNS resolution completed for ' + host)
 	})
 
 	win.on_click('btn_check_http_headers', fn (mut w simplegui.SimpleWindow) {
 		mut host := w.get('txt_bench_host').trim_space()
-		if host == '' { return }
+		if host == '' {
+			w.alert('Host Required', 'Please enter a target domain or hostname.')
+			w.toast('Target host required')
+			return
+		}
 		if !host.starts_with('http://') && !host.starts_with('https://') {
 			host = 'https://' + host
 		}
 		w.toast('Fetching HTTP headers from ' + host + '...')
 
-		res := simplegui.exec_safe('curl', ['-I', '-s', '--max-time', '6', host])
+		res := simplegui.exec_safe('curl', ['-I', '-sS', '--max-time', '6', host])
 		mut out := []string{}
 		out << '========================================================================'
 		out << ' HTTP/HTTPS RESPONSE HEADERS (curl -I ' + host + ')'
 		out << '========================================================================\n'
 		if res.exit_code == 0 && res.output.trim_space() != '' {
 			out << res.output.trim_space()
+			w.toast('HTTP headers fetched!')
 		} else {
-			out << 'Failed to fetch HTTP headers: ' + res.output
+			err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Connection failed or timed out.' }
+			out << '=== [HTTP HEADER FETCH ERROR] ===\n' + err_msg
+			w.toast('Failed to fetch HTTP headers for ' + host)
 		}
 		out << '\n========================================================================\n'
 		w.set('txt_benchmark_output', out.join('\n'))
-		w.toast('HTTP headers fetched!')
 	})
 
 	// -------------------------------------------------------------
@@ -889,21 +915,33 @@ fn main() {
 
 	win.on_click('btn_prettify_raw_json', fn (mut w simplegui.SimpleWindow) {
 		j := w.get('txt_raw_json').trim_space()
-		if j == '' { return }
+		if j == '' {
+			w.toast('No JSON data to prettify.')
+			return
+		}
 		res := simplegui.exec_safe_stdin('python3', ['-m', 'json.tool'], j)
 		if res.exit_code == 0 && res.output.trim_space() != '' {
 			w.set('txt_raw_json', res.output)
 			w.toast('Prettified JSON structure!')
+		} else {
+			w.alert('JSON Parse Error', 'Unable to prettify JSON:\n' + res.output.trim_space())
+			w.toast('JSON prettify failed')
 		}
 	})
 
 	win.on_click('btn_minify_raw_json', fn (mut w simplegui.SimpleWindow) {
 		j := w.get('txt_raw_json').trim_space()
-		if j == '' { return }
+		if j == '' {
+			w.toast('No JSON data to minify.')
+			return
+		}
 		res := simplegui.exec_safe_stdin('python3', ['-c', 'import sys, json; print(json.dumps(json.loads(sys.stdin.read()), separators=(",", ":")))'], j)
 		if res.exit_code == 0 && res.output.trim_space() != '' {
 			w.set('txt_raw_json', res.output.trim_space())
 			w.toast('Minified JSON to single line!')
+		} else {
+			w.alert('JSON Parse Error', 'Unable to minify JSON:\n' + res.output.trim_space())
+			w.toast('JSON minify failed')
 		}
 	})
 

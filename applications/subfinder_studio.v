@@ -233,9 +233,12 @@ fn main() {
 					win_main.set_status('Discovery completed: ${count} subdomains found.')
 					win_main.toast('Found ${count} subdomains in ${elapsed_ms} ms!')
 				} else {
-					win_main.append_console('subfinder_console', ' Subfinder Error:\n' + res.output + '\n', 3)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Subfinder failed to execute or target domain invalid.' }
+					win_main.set('txt_subdomains', '// [SUBFINDER ENUMERATION ERROR]\n// Target: ${domain_input}\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+					win_main.append_console('subfinder_console', ' Subfinder Error:\n' + err_msg + '\n', 3)
 					win_main.set('lbl_stats', ' Stats: ERROR (Exit code ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Subfinder reported an error.')
+					win_main.toast('Subdomain discovery error.')
 				}
 			})
 		}()

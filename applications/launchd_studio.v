@@ -192,14 +192,22 @@ fn main() {
 
 		go fn [mut w] () {
 			t0 := time.ticks()
-			res := os.execute('launchctl list | head -n 50')
+			res := os.execute('launchctl list 2>&1 | head -n 50')
 			elapsed_ms := time.ticks() - t0
 
 			w.run_on_main_thread(fn [res, elapsed_ms] (mut win_main simplegui.SimpleWindow) {
-				win_main.set('txt_job_output', res.output.trim_space())
-				win_main.append_console('job_console', ' Launchd services listed in ${elapsed_ms} ms.\n', 4)
-				win_main.set('lbl_stats', ' Stats: LAUNCHCTL ACTIVE SERVICES  |  Duration: ${elapsed_ms} ms')
-				win_main.set_status('Launchd services loaded.')
+				if res.exit_code != 0 {
+					win_main.set('txt_job_output', '=== [LAUNCHCTL QUERY ERROR] ===\nExit Code: ${res.exit_code}\n\n' + res.output.trim_space())
+					win_main.append_console('job_console', ' [ERROR] Failed to query launchctl (code ${res.exit_code}): ${res.output.trim_space()}\n', 3)
+					win_main.set('lbl_stats', ' Stats: ERROR  |  Duration: ${elapsed_ms} ms')
+					win_main.set_status('Launchctl query failed.')
+					win_main.toast('Failed to query launchctl services')
+				} else {
+					win_main.set('txt_job_output', res.output.trim_space())
+					win_main.append_console('job_console', ' Launchd services listed in ${elapsed_ms} ms.\n', 4)
+					win_main.set('lbl_stats', ' Stats: LAUNCHCTL ACTIVE SERVICES  |  Duration: ${elapsed_ms} ms')
+					win_main.set_status('Launchd services loaded.')
+				}
 			})
 		}()
 	})
@@ -216,10 +224,18 @@ fn main() {
 
 			w.run_on_main_thread(fn [res, elapsed_ms] (mut win_main simplegui.SimpleWindow) {
 				out := res.output.trim_space()
-				win_main.set('txt_job_output', if out != '' { out } else { 'No crontab entries installed for current user.' })
-				win_main.append_console('job_console', ' Crontab table read in ${elapsed_ms} ms.\n', 4)
-				win_main.set('lbl_stats', ' Stats: CRONTAB CHECKED  |  Duration: ${elapsed_ms} ms')
-				win_main.set_status('Crontab loaded.')
+				if res.exit_code != 0 && !out.contains('no crontab') {
+					win_main.set('txt_job_output', '=== [CRONTAB QUERY ERROR] ===\nExit Code: ${res.exit_code}\n\n' + out)
+					win_main.append_console('job_console', ' [ERROR] Crontab execution error: ${out}\n', 3)
+					win_main.set('lbl_stats', ' Stats: ERROR  |  Duration: ${elapsed_ms} ms')
+					win_main.set_status('Crontab query failed.')
+					win_main.toast('Crontab query failed')
+				} else {
+					win_main.set('txt_job_output', if out != '' { out } else { 'No crontab entries installed for current user.' })
+					win_main.append_console('job_console', ' Crontab table read in ${elapsed_ms} ms.\n', 4)
+					win_main.set('lbl_stats', ' Stats: CRONTAB CHECKED  |  Duration: ${elapsed_ms} ms')
+					win_main.set_status('Crontab loaded.')
+				}
 			})
 		}()
 	})
@@ -238,7 +254,8 @@ fn main() {
 			w.set('txt_job_output', out)
 			w.toast('Listed ${files.len} user launch agents.')
 		} else {
-			w.set('txt_job_output', 'No ~/Library/LaunchAgents directory found.')
+			w.set('txt_job_output', '=== [DIRECTORY NOTICE] ===\n\nNo ~/Library/LaunchAgents directory found on this system.')
+			w.toast('~/Library/LaunchAgents not found')
 		}
 	})
 
@@ -246,6 +263,7 @@ fn main() {
 	win.on_click('btn_save_plist', fn (mut w simplegui.SimpleWindow) {
 		job_def := w.get('txt_job_definition')
 		if job_def.trim_space() == '' {
+			w.alert('Empty Definition', 'No job definition or crontab text to save.')
 			w.toast('No job definition to save.')
 			return
 		}
@@ -256,7 +274,9 @@ fn main() {
 				save_file += '.plist'
 			}
 			os.write_file(save_file, job_def) or {
-				w.toast('Failed to save file.')
+				w.alert('Save Error', 'Failed to save file:\n${err}')
+				w.toast('Failed to save file: ${err}')
+				w.append_console('job_console', ' [ERROR] Failed to save file: ${err}\n', 3)
 				return
 			}
 			w.toast('Saved to ${os.file_name(save_file)}')
@@ -270,6 +290,8 @@ fn main() {
 		if out != '' {
 			w.copy_to_clipboard(out)
 			w.toast('Job definition copied to clipboard!')
+		} else {
+			w.toast('Nothing to copy.')
 		}
 	})
 

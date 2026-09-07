@@ -463,9 +463,11 @@ fn main() {
 					win_main.set_status('SD replaced successfully in ${elapsed_ms} ms.')
 					win_main.toast('Replaced in ${elapsed_ms} ms!')
 				} else {
-					win_main.set('txt_output_data', ' SD Execution Error:\n\n' + res.output)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'sd command failed (Exit code ${res.exit_code}). Check regex pattern or flags.' }
+					win_main.set('txt_output_data', '// [SD EXECUTION ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
 					win_main.set('lbl_exec_stats', ' Stats: ERROR (Exit code ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('SD reported an error.')
+					win_main.toast('SD execution error!')
 				}
 			})
 		}()

@@ -323,22 +323,24 @@ fn main() {
 			elapsed_ms := time.ticks() - t0
 
 			win.run_on_main_thread(fn [res, elapsed_ms] (mut win_main simplegui.SimpleWindow) {
-				if res.exit_code == 0 || res.exit_code == 1 {
+				if res.exit_code == 0 {
 					out_str := res.output.trim_space()
+					count := if out_str != '' { out_str.split_into_lines().len } else { 0 }
 					win_main.set('txt_results', out_str)
-					
-					mut count := 0
-					if out_str != '' {
-						count = out_str.split_into_lines().len
-					}
-
-					win_main.set('lbl_stats', ' Stats: SUCCESS  |  Lines / Matches: ${count}  |  Duration: ${elapsed_ms} ms')
+					win_main.set('lbl_stats', ' Stats: SUCCESS  |  Matches: ${count}  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Found ${count} lines matching query in ${elapsed_ms} ms.')
 					win_main.toast('Found ${count} matches in ${elapsed_ms} ms!')
+				} else if res.exit_code == 1 {
+					win_main.set('txt_results', '// No matching lines found for query.')
+					win_main.set('lbl_stats', ' Stats: NO MATCHES  |  Duration: ${elapsed_ms} ms')
+					win_main.set_status('No matches found for query in ${elapsed_ms} ms.')
+					win_main.toast('No matches found.')
 				} else {
-					win_main.set('txt_results', ' Ripgrep Error:\n\n' + res.output)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Ripgrep failed with exit code ${res.exit_code}. Check regex syntax or directory.' }
+					win_main.set('txt_results', '// [RIPGREP SEARCH ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
 					win_main.set('lbl_stats', ' Stats: ERROR (Exit code ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
-					win_main.set_status('Ripgrep returned an error.')
+					win_main.set_status('Ripgrep search failed.')
+					win_main.toast('Ripgrep search error!')
 				}
 			})
 		}()

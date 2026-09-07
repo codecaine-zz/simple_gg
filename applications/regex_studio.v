@@ -312,16 +312,18 @@ fn main() {
 
 			w.run_on_main_thread(fn [report, elapsed_ms] (mut win_main simplegui.SimpleWindow) {
 				win_main.set_text('txt_matches_out', report)
-				match_cnt := report.count('Match #')
-				if !report.starts_with('') {
+				is_err := report.starts_with('Regex Syntax Error') || report.starts_with('Regex Evaluation Error') || report.starts_with('Error writing')
+				if !is_err {
+					match_cnt := report.count('Match #')
 					win_main.append_console('regex_console', ' Found ${match_cnt} regex matches in ${elapsed_ms} ms.\n', 4)
 					win_main.set_text('lbl_stats', ' Stats: SUCCESS  |  Matches: ${match_cnt}  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Found ${match_cnt} matches in ${elapsed_ms} ms.')
 					win_main.toast('Found ${match_cnt} matches!')
 				} else {
-					win_main.append_console('regex_console', report + '\n', 3)
+					win_main.append_console('regex_console', ' ' + report + '\n', 3)
 					win_main.set_text('lbl_stats', ' Stats: REGEX ERROR  |  Duration: ${elapsed_ms} ms')
-					win_main.set_status('Regex evaluation error.')
+					win_main.set_status('Regex syntax or evaluation error.')
+					win_main.toast('Regex syntax error!')
 				}
 			})
 		}()
@@ -351,15 +353,17 @@ fn main() {
 
 			w.run_on_main_thread(fn [report, elapsed_ms] (mut win_main simplegui.SimpleWindow) {
 				win_main.set_text('txt_matches_out', report)
-				if !report.starts_with('') {
+				is_err := report.starts_with('Regex Syntax Error') || report.starts_with('Substitution Error') || report.starts_with('Error writing')
+				if !is_err {
 					win_main.append_console('regex_console', ' Substitution complete in ${elapsed_ms} ms.\n', 4)
 					win_main.set_text('lbl_stats', ' Stats: SUBSTITUTION COMPLETE  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Substitution completed.')
 					win_main.toast('Substitution complete!')
 				} else {
-					win_main.append_console('regex_console', report + '\n', 3)
+					win_main.append_console('regex_console', ' ' + report + '\n', 3)
 					win_main.set_text('lbl_stats', ' Stats: SUBSTITUTION ERROR  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Substitution error.')
+					win_main.toast('Regex substitution error!')
 				}
 			})
 		}()

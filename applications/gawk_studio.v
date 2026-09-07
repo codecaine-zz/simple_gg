@@ -609,11 +609,12 @@ fn main() {
 					bytes := out_str.len
 					win_main.set('lbl_exec_stats', ' Stats: SUCCESS  |  Lines: ${lines}  |  Duration: ${elapsed_ms} ms  |  Output: ${bytes} bytes')
 					win_main.set_status('GAWK program executed successfully in ${elapsed_ms} ms.')
-					win_main.toast('Completed in ${elapsed_ms} ms (${lines} lines generated)!')
 				} else {
-					win_main.set('txt_output_data', ' GAWK Execution Error:\n\n' + res.output)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'GAWK reported a syntax or runtime error.' }
+					win_main.set('txt_output_data', '// [GAWK EXECUTION ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
 					win_main.set('lbl_exec_stats', ' Stats: ERROR (Exit code ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
-					win_main.set_status('GAWK reported a syntax or runtime error.')
+					win_main.set_status('GAWK program failed.')
+					win_main.toast('GAWK execution error!')
 				}
 			})
 		}()

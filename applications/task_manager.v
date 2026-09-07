@@ -350,6 +350,7 @@ fn main() {
 				w.toast('Forcibly killed ${name} (PID ${pid}).')
 				refresh_processes(mut w)
 			} else {
+				w.toast('Failed to kill PID ${pid}')
 				w.alert('Kill Error', 'Failed to kill process PID ${pid}:\n${res.output}')
 			}
 		}
@@ -360,6 +361,7 @@ fn main() {
 		pid, name, _ := get_selected_pid_and_name(mut w)
 		if pid == '' {
 			w.alert('No Process Selected', 'Please click on a process in the table first.')
+			w.toast('No process selected')
 			return
 		}
 
@@ -368,6 +370,7 @@ fn main() {
 			w.toast('Sent SIGTERM to ${name} (PID ${pid}).')
 			refresh_processes(mut w)
 		} else {
+			w.toast('Failed to terminate PID ${pid}')
 			w.alert('Terminate Error', 'Failed to terminate PID ${pid}:\n${res.output}')
 		}
 	})
@@ -377,6 +380,7 @@ fn main() {
 		pid, name, _ := get_selected_pid_and_name(mut w)
 		if pid == '' {
 			w.alert('No Process Selected', 'Please click on a process in the table first.')
+			w.toast('No process selected')
 			return
 		}
 
@@ -385,6 +389,7 @@ fn main() {
 			w.toast('Suspended ${name} (PID ${pid}).')
 			refresh_processes(mut w)
 		} else {
+			w.toast('Failed to suspend PID ${pid}')
 			w.alert('Suspend Error', 'Failed to suspend PID ${pid}:\n${res.output}')
 		}
 	})
@@ -394,6 +399,7 @@ fn main() {
 		pid, name, _ := get_selected_pid_and_name(mut w)
 		if pid == '' {
 			w.alert('No Process Selected', 'Please click on a process in the table first.')
+			w.toast('No process selected')
 			return
 		}
 
@@ -402,6 +408,7 @@ fn main() {
 			w.toast('Resumed ${name} (PID ${pid}).')
 			refresh_processes(mut w)
 		} else {
+			w.toast('Failed to resume PID ${pid}')
 			w.alert('Resume Error', 'Failed to resume PID ${pid}:\n${res.output}')
 		}
 	})
@@ -411,6 +418,7 @@ fn main() {
 		pid, name, path := get_selected_pid_and_name(mut w)
 		if pid == '' {
 			w.alert('No Process Selected', 'Please click on a process in the table first.')
+			w.toast('No process selected')
 			return
 		}
 
@@ -426,7 +434,8 @@ fn main() {
 			if res.exit_code == 0 && res.output.trim_space() != '' {
 				details_text += ' Open Network Sockets & File Descriptors:\n' + res.output
 			} else {
-				details_text += 'Tip: No network sockets or restricted descriptor access (requires sudo for root processes).'
+				err_info := if res.output.trim_space() != '' { res.output.trim_space() } else { 'No open sockets or restricted access (requires elevated privileges).' }
+				details_text += '[LSOF DIAGNOSTIC]\n' + err_info
 			}
 
 			w.run_on_main_thread(fn [details_text] (mut win_main simplegui.SimpleWindow) {
@@ -441,6 +450,7 @@ fn main() {
 		_, _, path := get_selected_pid_and_name(mut w)
 		if path == '' {
 			w.alert('No Process Selected', 'Please select a process to reveal.')
+			w.toast('No process selected')
 			return
 		}
 
@@ -450,7 +460,8 @@ fn main() {
 			simplegui.reveal_in_finder(raw_exe)
 			w.toast('Revealed in Finder.')
 		} else {
-			w.toast('Executable path not on disk or virtual: ' + raw_exe)
+			w.alert('File Not Found', 'Executable path not found on disk:\n${raw_exe}')
+			w.toast('Executable path not found on disk')
 		}
 	})
 

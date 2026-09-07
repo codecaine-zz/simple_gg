@@ -237,8 +237,10 @@ fn main() {
 					win_main.append_console('dl_console', res.output + '\n', 4)
 					win_main.set_status('Formats inspection completed.')
 				} else {
-					win_main.append_console('dl_console', ' Error inspecting formats:\n' + res.output + '\n', 3)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Failed to inspect media stream formats.' }
+					win_main.append_console('dl_console', ' Error inspecting formats:\n' + err_msg + '\n', 3)
 					win_main.set_status('Failed to inspect formats.')
+					win_main.toast('Format inspection failed.')
 				}
 			})
 		}()
@@ -268,8 +270,10 @@ fn main() {
 					win_main.set_status('Title: ' + title)
 					win_main.toast('Loaded metadata: ' + title)
 				} else {
-					win_main.append_console('dl_console', ' Error fetching metadata: ' + res.output + '\n', 3)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Failed to fetch video title and metadata.' }
+					win_main.append_console('dl_console', ' Error fetching metadata:\n' + err_msg + '\n', 3)
 					win_main.set_status('Failed to fetch metadata.')
+					win_main.toast('Metadata fetch failed.')
 				}
 			})
 		}()
@@ -429,9 +433,11 @@ fn main() {
 					win_main.set_status('Download finished in ${sec:.1f}s.')
 					win_main.toast('Download finished successfully!')
 				} else {
-					win_main.append_console('dl_console', ' Download Error:\n' + res.output + '\n', 3)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Download failed. Check URL, network, or format availability.' }
+					win_main.append_console('dl_console', ' Download Error:\n' + err_msg + '\n', 3)
 					win_main.set('lbl_dl_stats', ' Status: ERROR (Exit code ${res.exit_code})')
 					win_main.set_status('Download encountered an error.')
+					win_main.toast('Download failed (Exit ${res.exit_code})!')
 				}
 			})
 		}()

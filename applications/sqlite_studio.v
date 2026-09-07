@@ -270,18 +270,20 @@ fn main() {
 
 			w.run_on_main_thread(fn [res, elapsed_ms, target_db] (mut win_main simplegui.SimpleWindow) {
 				out := res.output.trim_space()
-				win_main.set('txt_results_view', out)
-
+				
 				if res.exit_code == 0 {
+					win_main.set('txt_results_view', out)
 					lines_cnt := if out != '' { out.split_into_lines().len } else { 0 }
 					win_main.append_console('sqlite_console', ' SQL query executed successfully in ${elapsed_ms} ms (${out.len} bytes)\n', 4)
 					win_main.set('lbl_stats', ' Stats: SUCCESS  |  DB: ${os.file_name(target_db)}  |  Output: ${lines_cnt} lines  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Query finished in ${elapsed_ms} ms.')
 					win_main.toast('Query executed in ${elapsed_ms} ms!')
 				} else {
-					win_main.append_console('sqlite_console', ' SQLite Error:\n' + out + '\n', 3)
+					err_msg := if out != '' { out } else { 'Unknown SQLite execution error (Exit code ${res.exit_code})' }
+					win_main.set('txt_results_view', '-- [SQLITE EXECUTION ERROR]\n-- Database: ${target_db}\n-- Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+					win_main.append_console('sqlite_console', ' SQLite Error:\n' + err_msg + '\n', 3)
 					win_main.set('lbl_stats', ' Stats: ERROR (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
-					win_main.set_status('Query execution failed.')
+					win_main.set_status('Query execution failed: ${err_msg.split_into_lines()[0]}')
 					win_main.toast('SQL error encountered.')
 				}
 			})
@@ -304,10 +306,10 @@ fn main() {
 
 	// Copy Results
 	win.on_click('btn_copy_results', fn (mut w simplegui.SimpleWindow) {
-		out := w.get('txt_results_view')
-		if out != '' {
-			w.copy_to_clipboard(out)
-			w.toast('Query results copied to clipboard!')
+		res := w.get('txt_results_view')
+		if res != '' {
+			w.copy_to_clipboard(res)
+			w.toast('Results copied to clipboard!')
 		} else {
 			w.toast('No results to copy.')
 		}
@@ -329,6 +331,12 @@ fn main() {
 			target_db := if db_path == '' || db_path == ':memory:' { ':memory:' } else { db_path }
 			
 			res := simplegui.exec_safe(sqlite_bin, ['-csv', '-header', target_db, query_str])
+			if res.exit_code != 0 {
+				err := res.output.trim_space()
+				w.alert('Export Error', 'SQLite query failed:\n' + err)
+				w.append_console('sqlite_console', ' Export Error: ${err}\n', 3)
+				return
+			}
 			os.write_file(save_file, res.output) or {
 				w.toast('Failed to save file.')
 				return
@@ -354,6 +362,12 @@ fn main() {
 			target_db := if db_path == '' || db_path == ':memory:' { ':memory:' } else { db_path }
 			
 			res := simplegui.exec_safe(sqlite_bin, ['-json', target_db, query_str])
+			if res.exit_code != 0 {
+				err := res.output.trim_space()
+				w.alert('Export Error', 'SQLite query failed:\n' + err)
+				w.append_console('sqlite_console', ' Export Error: ${err}\n', 3)
+				return
+			}
 			os.write_file(save_file, res.output) or {
 				w.toast('Failed to save file.')
 				return

@@ -267,17 +267,19 @@ fn main() {
 				} else {
 					format_dig_output(out, domain, rec_type, server_raw, elapsed_ms)
 				}
-				win_main.set('txt_results', formatted)
-
 				if res.exit_code == 0 {
+					win_main.set('txt_results', formatted)
 					win_main.append_console('dns_console', ' DNS query completed for ${domain} (${rec_type}) in ${elapsed_ms} ms.\n', 4)
 					win_main.set('lbl_stats', ' Stats: SUCCESS  |  Domain: ${domain}  |  Record: ${rec_type}  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('DNS query completed in ${elapsed_ms} ms.')
 					win_main.toast('DNS records resolved!')
 				} else {
-					win_main.append_console('dns_console', ' DNS Query Error:\n' + out + '\n', 3)
+					err_msg := if out != '' { out } else { 'DNS lookup failed or nameserver unreachable.' }
+					win_main.set('txt_results', '; [DNS QUERY ERROR]\n; Domain: ${domain}\n; Record: ${rec_type}\n; Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+					win_main.append_console('dns_console', ' DNS Query Error:\n' + err_msg + '\n', 3)
 					win_main.set('lbl_stats', ' Stats: ERROR (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('DNS query failed.')
+					win_main.toast('DNS query error.')
 				}
 			})
 		}()
@@ -298,21 +300,25 @@ fn main() {
 
 		go fn [mut w, openssl_bin, target_host, domain] () {
 			t0 := time.ticks()
-			cmd := 'echo | ${openssl_bin} s_client -connect ${target_host} -servername ${domain} 2>/dev/null | ${openssl_bin} x509 -text -noout'
+			cmd := 'echo | ${openssl_bin} s_client -connect ${target_host} -servername ${domain} 2>&1 | ${openssl_bin} x509 -text -noout 2>&1'
 			res := os.execute(cmd)
 			elapsed_ms := time.ticks() - t0
 
 			w.run_on_main_thread(fn [res, elapsed_ms, domain] (mut win_main simplegui.SimpleWindow) {
 				out := res.output.trim_space()
-				if out != '' {
+				if out != '' && !out.contains('unable to load certificate') && !out.contains('connect:errno') {
 					win_main.set('txt_results', out)
 					win_main.append_console('dns_console', ' TLS Certificate extracted for ${domain} in ${elapsed_ms} ms.\n', 4)
 					win_main.set('lbl_stats', ' Stats: SSL CERT LOADED  |  Target: ${domain}  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('SSL certificate retrieved in ${elapsed_ms} ms.')
 					win_main.toast('SSL Certificate loaded!')
 				} else {
-					win_main.append_console('dns_console', ' Failed to connect to SSL on port 443.\n', 3)
+					err_msg := if out != '' { out } else { 'Connection refused or TLS handshake failed on port 443.' }
+					win_main.set('txt_results', '// [SSL/TLS CERTIFICATE ERROR]\n// Target: ${domain}:443\n// Failed to retrieve certificate or port 443 is unreachable.\n\n${err_msg}\n')
+					win_main.append_console('dns_console', ' Failed to connect to SSL on port 443:\n' + err_msg + '\n', 3)
+					win_main.set('lbl_stats', ' Stats: SSL ERROR  |  Target: ${domain}  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('SSL connection failed.')
+					win_main.toast('SSL retrieval failed.')
 				}
 			})
 		}()

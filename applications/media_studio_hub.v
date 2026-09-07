@@ -762,8 +762,10 @@ fn main() {
 					win_main.set_status('Conversion finished!')
 					win_main.toast('Converted to MP4!')
 				} else {
-					win_main.append_console('hub_log', ' Error:\n' + res.output + '\n', 2)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'FFmpeg conversion failed.' }
+					win_main.append_console('hub_log', ' Error:\n' + err_msg + '\n', 2)
 					win_main.set_status('Conversion failed.')
+					win_main.toast('Conversion to MP4 failed!')
 				}
 			})
 		}()
@@ -795,8 +797,10 @@ fn main() {
 					win_main.set_status('Discord compression done!')
 					win_main.toast('Discord video ready (${mb:.2f} MB)!')
 				} else {
-					win_main.append_console('hub_log', ' Error:\n' + res.output + '\n', 2)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Discord compression failed.' }
+					win_main.append_console('hub_log', ' Error:\n' + err_msg + '\n', 2)
 					win_main.set_status('Discord compression failed.')
+					win_main.toast('Discord compression failed!')
 				}
 			})
 		}()
@@ -828,7 +832,8 @@ fn main() {
 					win_main.toast('TikTok / Reels 9:16 ready!')
 				} else {
 					win_main.append_console('hub_log', ' Error:\n' + res.output + '\n', 2)
-					win_main.set_status('Crop failed.')
+					win_main.set_status('Vertical crop failed.')
+					win_main.toast('Vertical crop failed!')
 				}
 			})
 		}()
@@ -838,7 +843,7 @@ fn main() {
 	win.on_click('btn_q_mp3', fn [has_ffmpeg, ffmpeg_path] (mut w simplegui.SimpleWindow) {
 		file_path := w.get('txt_quick_in')
 		if file_path == '' || !os.exists(file_path) {
-			w.alert('File Required', 'Please pick an input video/audio file.')
+			w.alert('File Required', 'Please pick an input media file.')
 			return
 		}
 		if !has_ffmpeg {
@@ -847,7 +852,7 @@ fn main() {
 		}
 
 		out_file := file_path + '.extracted.mp3'
-		w.append_console('hub_log', ' Extracting MP3 Audio (320kbps): ${os.file_name(file_path)}...\n', 1)
+		w.append_console('hub_log', ' Extracting high-quality 320kbps MP3 audio: ${os.file_name(file_path)}...\n', 1)
 		w.set_status('Extracting MP3 audio...')
 
 		go fn [mut w, ffmpeg_path, file_path, out_file] () {
@@ -859,7 +864,8 @@ fn main() {
 					win_main.toast('Extracted MP3!')
 				} else {
 					win_main.append_console('hub_log', ' Error:\n' + res.output + '\n', 2)
-					win_main.set_status('Audio extraction failed.')
+					win_main.set_status('MP3 extraction failed.')
+					win_main.toast('MP3 extraction failed!')
 				}
 			})
 		}()
@@ -869,7 +875,7 @@ fn main() {
 	win.on_click('btn_q_loudnorm', fn [has_ffmpeg, ffmpeg_path] (mut w simplegui.SimpleWindow) {
 		file_path := w.get('txt_quick_in')
 		if file_path == '' || !os.exists(file_path) {
-			w.alert('File Required', 'Please pick an audio/video file.')
+			w.alert('File Required', 'Please pick an input media file.')
 			return
 		}
 		if !has_ffmpeg {
@@ -877,8 +883,8 @@ fn main() {
 			return
 		}
 
-		out_file := file_path + '.loudnorm.wav'
-		w.append_console('hub_log', ' Normalizing audio to EBU R128 (-14 LUFS): ${os.file_name(file_path)}...\n', 1)
+		out_file := file_path + '.normalized.mp3'
+		w.append_console('hub_log', ' Normalizing audio loudness (EBU R128 standard): ${os.file_name(file_path)}...\n', 1)
 		w.set_status('Normalizing audio...')
 
 		go fn [mut w, ffmpeg_path, file_path, out_file] () {
@@ -890,7 +896,8 @@ fn main() {
 					win_main.toast('EBU R128 Audio Normalized!')
 				} else {
 					win_main.append_console('hub_log', ' Error:\n' + res.output + '\n', 2)
-					win_main.set_status('Normalizing failed.')
+					win_main.set_status('Loudnorm audio normalization failed.')
+					win_main.toast('Audio normalization failed!')
 				}
 			})
 		}()

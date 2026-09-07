@@ -295,11 +295,19 @@ except Exception as e:
 			elapsed_ms := time.ticks() - t0
 
 			w.run_on_main_thread(fn [res, elapsed_ms] (mut win_main simplegui.SimpleWindow) {
-				win_main.set('txt_crypto_output', res.output.trim_space())
-				win_main.append_console('crypto_console', ' JWT Token decoded in ${elapsed_ms} ms.\n', 4)
-				win_main.set('lbl_stats', ' Stats: JWT DECODED  |  Duration: ${elapsed_ms} ms')
-				win_main.set_status('JWT decoded.')
-				win_main.toast('JWT Token decoded!')
+				out := res.output.trim_space()
+				win_main.set('txt_crypto_output', out)
+				if out.contains('JWT Decode Error') || res.exit_code != 0 {
+					win_main.append_console('crypto_console', ' ' + out + '\n', 3)
+					win_main.set('lbl_stats', ' Stats: ERROR  |  Duration: ${elapsed_ms} ms')
+					win_main.set_status('JWT decode failed.')
+					win_main.toast('Invalid JWT token!')
+				} else {
+					win_main.append_console('crypto_console', ' JWT Token decoded in ${elapsed_ms} ms.\n', 4)
+					win_main.set('lbl_stats', ' Stats: JWT DECODED  |  Duration: ${elapsed_ms} ms')
+					win_main.set_status('JWT decoded.')
+					win_main.toast('JWT Token decoded!')
+				}
 			})
 		}()
 	})

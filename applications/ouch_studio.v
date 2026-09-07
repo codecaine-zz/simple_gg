@@ -473,8 +473,10 @@ fn main() {
 					win_main.set_status('Compression completed successfully.')
 					win_main.toast('Archive created (${mb:.2f} MB)!')
 				} else {
-					win_main.set('txt_log', ' Compression error:\n' + res.output)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Compression failed with exit code ${res.exit_code}' }
+					win_main.set('txt_log', '// [OUCH COMPRESSION ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
 					win_main.set_status('Error compressing archive.')
+					win_main.toast('Compression failed!')
 				}
 			})
 		}()
@@ -519,8 +521,10 @@ fn main() {
 					win_main.set_status('Decompression finished.')
 					win_main.toast('Extraction completed!')
 				} else {
-					win_main.set('txt_log', ' Decompression error:\n' + res.output)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Extraction failed with exit code ${res.exit_code}' }
+					win_main.set('txt_log', '// [OUCH DECOMPRESSION ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
 					win_main.set_status('Error extracting archive.')
+					win_main.toast('Extraction failed!')
 				}
 			})
 		}()
@@ -560,8 +564,10 @@ fn main() {
 					win_main.set_status('Archive inspection complete.')
 					win_main.toast('Archive tree loaded!')
 				} else {
-					win_main.set('txt_log', ' List error:\n' + res.output)
+					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Archive listing failed with exit code ${res.exit_code}' }
+					win_main.set('txt_log', '// [OUCH LIST ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
 					win_main.set_status('Error listing archive.')
+					win_main.toast('Archive inspection failed!')
 				}
 			})
 		}()
