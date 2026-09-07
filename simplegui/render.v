@@ -620,10 +620,12 @@ pub fn (mut win SimpleWindow) render_ui() {
 				)
 			}
 			'dropdown' {
+				is_open := win.active_dropdown_name == ctrl.name
+				border_color := if is_open { accent } else { border_c }
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
 					surface)
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					border_c)
+					border_color)
 
 				display_txt := if ctrl.text_value.len > 0 {
 					ctrl.text_value
@@ -639,7 +641,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 					size:   14
 					family: family_path
 				)
-				draw_vector_chevron(win.gg_ctx, ctrl.x + ctrl.w - 18.0, ctrl.y + ctrl.h / 2.0, 5.0, if ctrl.is_expanded { 'up' } else { 'down' }, fg)
+				draw_vector_chevron(win.gg_ctx, ctrl.x + ctrl.w - 18.0, ctrl.y + ctrl.h / 2.0, 5.0, if is_open { 'up' } else { 'down' }, if is_open { accent } else { fg })
 			}
 			'skeleton' {
 				ticks := time.ticks()
@@ -1766,28 +1768,13 @@ pub fn (mut win SimpleWindow) render_ui() {
 				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 38), y: int(ctrl.y + 9), text: 'Next >', color: gg.Color{r: 255, g: 255, b: 255}, size: 11)
 			}
 			'combobox' {
+				is_open := win.active_dropdown_name == ctrl.name
+				border_color := if is_open { accent } else { border_c }
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, 32.0, 6.0, surface)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, 32.0, 6.0, border_c)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, 32.0, 6.0, border_color)
 				val_str := if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.placeholder }
 				win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(ctrl.y + 8), text: clean_text(val_str), color: fg, size: 12)
-				draw_vector_chevron(win.gg_ctx, ctrl.x + ctrl.w - 14.0, ctrl.y + 16.0, 4.5, if ctrl.is_expanded { 'up' } else { 'down' }, accent)
-
-				if ctrl.is_expanded {
-					pop_h := f32(math.min(150, ctrl.items.len * 26 + 8))
-					pop_y := ctrl.y + 34.0
-					win.gg_ctx.draw_rounded_rect_filled(ctrl.x, pop_y, ctrl.w, pop_h, 6.0, surface)
-					win.gg_ctx.draw_rounded_rect_empty(ctrl.x, pop_y, ctrl.w, pop_h, 6.0, accent)
-					mut opt_y := pop_y + 4.0
-					for item in ctrl.items {
-						if opt_y + 24.0 > pop_y + pop_h { break }
-						is_sel := item == ctrl.text_value
-						if is_sel {
-							win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 2, opt_y, ctrl.w - 4, 22.0, 4.0, accent)
-						}
-						win.gg_ctx.draw_text2(x: int(ctrl.x + 8), y: int(opt_y + 3), text: item, color: if is_sel { gg.Color{r: 255, g: 255, b: 255} } else { fg }, size: 12)
-						opt_y += 26.0
-					}
-				}
+				draw_vector_chevron(win.gg_ctx, ctrl.x + ctrl.w - 14.0, ctrl.y + 16.0, 4.5, if is_open { 'up' } else { 'down' }, if is_open { accent } else { fg })
 			}
 			'status_bar' {
 				bar_h := if ctrl.h > 0 { ctrl.h } else { 26.0 }
@@ -3184,6 +3171,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 	win.render_tooltip()
 	win.render_command_palette()
 	win.render_context_menu()
+	win.render_dropdown_overlay()
 	win.render_menu_bar()
 }
 
@@ -3299,6 +3287,92 @@ fn (mut win SimpleWindow) render_context_menu() {
 		if item.shortcut.len > 0 {
 			win.gg_ctx.draw_text2(x: int(mx + menu_w - 60), y: int(iy + 6), text: item.shortcut, color: gg.rgb(160, 165, 180), size: 11)
 		}
+	}
+}
+
+fn (mut win SimpleWindow) render_dropdown_overlay() {
+	if win.active_dropdown_name.len == 0 {
+		return
+	}
+	ctrl := win.control_map[win.active_dropdown_name] or {
+		win.active_dropdown_name = ''
+		return
+	}
+	if !ctrl.visible || ctrl.disabled || ctrl.items.len == 0 {
+		win.active_dropdown_name = ''
+		return
+	}
+
+	layout := win.get_dropdown_popup_layout(ctrl)
+	fg := parse_hex_color(win.theme.font_color)
+	border_c := if win.theme.is_dark { gg.rgb(70, 72, 85) } else { gg.rgb(210, 215, 220) }
+	accent := parse_hex_color(win.theme.accent_color)
+	pop_bg := if win.theme.is_dark {
+		gg.rgb(28, 30, 38)
+	} else {
+		gg.rgb(255, 255, 255)
+	}
+	hover_bg := if win.theme.is_dark {
+		gg.rgb(45, 50, 65)
+	} else {
+		gg.rgb(238, 242, 248)
+	}
+
+	// Multi-layer drop shadow for elevated floating card effect
+	shadow_1 := gg.Color{r: 0, g: 0, b: 0, a: if win.theme.is_dark { u8(80) } else { u8(40) }}
+	shadow_2 := gg.Color{r: 0, g: 0, b: 0, a: if win.theme.is_dark { u8(50) } else { u8(20) }}
+	win.gg_ctx.draw_rounded_rect_filled(layout.x + 2.0, layout.y + 3.0, layout.w, layout.h, 8.0, shadow_1)
+	win.gg_ctx.draw_rounded_rect_filled(layout.x + 4.0, layout.y + 6.0, layout.w, layout.h, 8.0, shadow_2)
+
+	// Elevated container background and border
+	win.gg_ctx.draw_rounded_rect_filled(layout.x, layout.y, layout.w, layout.h, 8.0, pop_bg)
+	win.gg_ctx.draw_rounded_rect_empty(layout.x, layout.y, layout.w, layout.h, 8.0, border_c)
+	win.gg_ctx.draw_rounded_rect_empty(layout.x + 0.5, layout.y + 0.5, layout.w - 1.0, layout.h - 1.0, 7.5, gg.Color{r: accent.r, g: accent.g, b: accent.b, a: 60})
+
+	// Draw menu items
+	for i in 0 .. layout.max_visible {
+		idx := layout.scroll_idx + i
+		if idx >= ctrl.items.len {
+			break
+		}
+		item := ctrl.items[idx]
+		item_y := layout.y + 4.0 + f32(i) * layout.item_h
+		is_sel := (item == ctrl.text_value)
+		is_hov := win.mouse_x >= layout.x + 4.0 && win.mouse_x <= layout.x + layout.w - 4.0 &&
+			win.mouse_y >= item_y && win.mouse_y < item_y + layout.item_h
+
+		if is_sel {
+			win.gg_ctx.draw_rounded_rect_filled(layout.x + 4.0, item_y, layout.w - 8.0, layout.item_h - 2.0, 5.0, accent)
+		} else if is_hov {
+			win.gg_ctx.draw_rounded_rect_filled(layout.x + 4.0, item_y, layout.w - 8.0, layout.item_h - 2.0, 5.0, hover_bg)
+		}
+
+		item_text_c := if is_sel {
+			gg.Color{r: 255, g: 255, b: 255, a: 255}
+		} else {
+			fg
+		}
+
+		prefix := if is_sel { '✓ ' } else { '   ' }
+		display_str := '${prefix}${clean_text(item)}'
+		win.gg_ctx.draw_text2(
+			x:     int(layout.x + 8.0)
+			y:     int(item_y + 5.0)
+			text:  display_str
+			color: item_text_c
+			size:  13
+		)
+	}
+
+	// Scrollbar if list exceeds visible height
+	if layout.max_scroll > 0 && layout.max_visible > 0 {
+		sb_w := f32(4.0)
+		sb_track_h := layout.h - 12.0
+		sb_thumb_h := f32(math.max(16.0, f64((f32(layout.max_visible) / f32(ctrl.items.len)) * sb_track_h)))
+		sb_thumb_y := f32(layout.y + 6.0 + (f32(layout.scroll_idx) / f32(layout.max_scroll)) * (sb_track_h - sb_thumb_h))
+		sb_x := layout.x + layout.w - sb_w - 4.0
+
+		win.gg_ctx.draw_rounded_rect_filled(sb_x, sb_thumb_y, sb_w, sb_thumb_h, 2.0, gg.Color{r: accent.r, g: accent.g, b: accent.b, a: 160})
 	}
 }
 

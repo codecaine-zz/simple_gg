@@ -89,6 +89,8 @@ pub mut:
 	active_menu_idx        int = -1          // Index of currently open menu dropdown (-1 if none)
 	menu_bar_visible       bool              // Whether application top Menu Bar is displayed
 	active_tab_map         map[string]int    // Map tracking selected tab index for container tabs
+	active_dropdown_name   string            // Name of the currently open floating dropdown/combobox overlay
+	active_dropdown_scroll f32               // Vertical scroll offset for long dropdown lists
 	// Window-level event callback handlers
 	on_key_down_cb  fn (mut win SimpleWindow, key gg.KeyCode) = unsafe { nil } // Triggered when key pressed
 	on_close_cb     fn (mut win SimpleWindow) bool            = unsafe { nil } // Triggered on close request
@@ -179,6 +181,101 @@ pub fn get_os_name() string {
 	}$else {
 		return 'Native'
 	}
+}
+
+// DropdownPopupLayout computes the floating dropdown popup geometry, clamping, and scroll parameters.
+pub struct DropdownPopupLayout {
+pub:
+	x           f32
+	y           f32
+	w           f32
+	h           f32
+	item_h      f32
+	max_visible int
+	max_scroll  int
+	scroll_idx  int
+	open_upward bool
+}
+
+// get_dropdown_popup_layout returns the exact bounding box and paging parameters for a dropdown/combobox overlay.
+pub fn (win &SimpleWindow) get_dropdown_popup_layout(ctrl &Control) DropdownPopupLayout {
+	item_h := f32(28.0)
+	mut max_item_w := f32(ctrl.w)
+	if win.gg_ctx != unsafe { nil } {
+		for it in ctrl.items {
+			tw := f32(win.gg_ctx.text_width(it) + 38)
+			if tw > max_item_w {
+				max_item_w = tw
+			}
+		}
+	}
+	pop_w := f32(math.max(f64(ctrl.w), math.min(360.0, f64(max_item_w))))
+	mut pop_x := ctrl.x
+	if pop_x + pop_w > f32(win.width) - 10.0 {
+		pop_x = f32(math.max(10.0, f64(f32(win.width) - pop_w - 10.0)))
+	}
+	total_content_h := f32(ctrl.items.len) * item_h + 8.0
+	max_pop_h := f32(math.min(300.0, f64(f32(win.height) * 0.55)))
+	pop_h := f32(math.min(f64(total_content_h), f64(max_pop_h)))
+	open_upward := (ctrl.y + ctrl.h + pop_h > f32(win.height) - 10.0) && (ctrl.y - pop_h > 10.0)
+	pop_y := if open_upward {
+		ctrl.y - pop_h - 3.0
+	} else {
+		ctrl.y + ctrl.h + 3.0
+	}
+	max_visible := int((pop_h - 8.0) / item_h)
+	max_scroll := math.max(0, ctrl.items.len - max_visible)
+	mut scroll_idx := int(win.active_dropdown_scroll / item_h)
+	if scroll_idx < 0 {
+		scroll_idx = 0
+	}
+	if scroll_idx > max_scroll {
+		scroll_idx = max_scroll
+	}
+	return DropdownPopupLayout{
+		x:           pop_x
+		y:           pop_y
+		w:           pop_w
+		h:           pop_h
+		item_h:      item_h
+		max_visible: max_visible
+		max_scroll:  max_scroll
+		scroll_idx:  scroll_idx
+		open_upward: open_upward
+	}
+}
+
+// close_dropdown closes any active dropdown overlay popup.
+pub fn (mut win SimpleWindow) close_dropdown() &SimpleWindow {
+	win.active_dropdown_name = ''
+	win.active_dropdown_scroll = 0
+	return win
+}
+
+// open_dropdown opens the specified dropdown/combobox overlay popup.
+pub fn (mut win SimpleWindow) open_dropdown(name string) &SimpleWindow {
+	if win.has_control(name) {
+		win.active_dropdown_name = name
+		win.active_dropdown_scroll = 0
+	}
+	return win
+}
+
+// toggle_dropdown toggles the specified dropdown/combobox overlay popup.
+pub fn (mut win SimpleWindow) toggle_dropdown(name string) &SimpleWindow {
+	if win.active_dropdown_name == name {
+		win.active_dropdown_name = ''
+		win.active_dropdown_scroll = 0
+	} else if win.has_control(name) {
+		win.active_dropdown_name = name
+		win.active_dropdown_scroll = 0
+	}
+	return win
+}
+
+// is_dropdown_open checks if any dropdown overlay popup is currently visible.
+pub fn (win &SimpleWindow) is_dropdown_open() bool {
+	return win.active_dropdown_name.len > 0
 }
 
 // gen_id generates a unique control ID name string using an internal counter.

@@ -124,6 +124,21 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 				}
 			}
 
+			if win.active_dropdown_name.len > 0 {
+				if d_ctrl := win.control_map[win.active_dropdown_name] {
+					d_layout := win.get_dropdown_popup_layout(d_ctrl)
+					if win.mouse_x >= d_layout.x && win.mouse_x <= d_layout.x + d_layout.w
+						&& win.mouse_y >= d_layout.y && win.mouse_y <= d_layout.y + d_layout.h {
+						win.cursor_name = 'hand'
+						for mut ctrl in win.controls {
+							ctrl.is_hovered = false
+						}
+						win.hovered_control = ''
+						return
+					}
+				}
+			}
+
 			mut new_hover := ''
 			// Hit-test mouse position against all active, visible controls
 			for mut ctrl in win.controls {
@@ -450,6 +465,39 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 				}
 			}
 
+			if win.active_dropdown_name.len > 0 {
+				if mut d_ctrl := win.get_control_ptr(win.active_dropdown_name) {
+					d_layout := win.get_dropdown_popup_layout(d_ctrl)
+					if win.mouse_x >= d_layout.x && win.mouse_x <= d_layout.x + d_layout.w
+						&& win.mouse_y >= d_layout.y && win.mouse_y <= d_layout.y + d_layout.h {
+						rel_y := win.mouse_y - (d_layout.y + 4.0)
+						row_idx := int(rel_y / d_layout.item_h)
+						clicked_idx := d_layout.scroll_idx + row_idx
+						if clicked_idx >= 0 && clicked_idx < d_ctrl.items.len {
+							d_ctrl.text_value = d_ctrl.items[clicked_idx]
+							d_ctrl.int_value = clicked_idx
+							win.active_dropdown_name = ''
+							win.active_dropdown_scroll = 0
+							trigger_control_change(mut win, d_ctrl)
+							return
+						}
+					} else if win.mouse_x >= d_ctrl.x && win.mouse_x <= d_ctrl.x + d_ctrl.w
+						&& win.mouse_y >= d_ctrl.y && win.mouse_y <= d_ctrl.y + d_ctrl.h {
+						// Clicked on the dropdown header itself while open: toggle close it
+						win.active_dropdown_name = ''
+						win.active_dropdown_scroll = 0
+						return
+					} else {
+						// Clicked outside dropdown popup: close it and proceed with normal click handling
+						win.active_dropdown_name = ''
+						win.active_dropdown_scroll = 0
+					}
+				} else {
+					win.active_dropdown_name = ''
+					win.active_dropdown_scroll = 0
+				}
+			}
+
 			mut clicked_ctrl := ''
 			for mut ctrl in win.controls {
 				if ctrl.visible && !ctrl.disabled {
@@ -580,8 +628,13 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 								ctrl.text_value = star.str()
 								trigger_control_change(mut win, ctrl)
 							}
-						} else if ctrl.kind == 'dropdown' {
-							if ctrl.items.len > 0 {
+						} else if ctrl.kind in ['dropdown', 'combobox'] {
+							if win.active_dropdown_name == ctrl.name {
+								win.active_dropdown_name = ''
+								win.active_dropdown_scroll = 0
+							} else {
+								win.active_dropdown_name = ctrl.name
+								win.active_dropdown_scroll = 0
 								mut cur_idx := 0
 								for idx, item in ctrl.items {
 									if item == ctrl.text_value {
@@ -589,10 +642,10 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 										break
 									}
 								}
-								next_idx := (cur_idx + 1) % ctrl.items.len
-								ctrl.text_value = ctrl.items[next_idx]
-								ctrl.int_value = next_idx
-								trigger_control_change(mut win, ctrl)
+								d_layout := win.get_dropdown_popup_layout(ctrl)
+								if cur_idx >= d_layout.max_visible && d_layout.max_visible > 0 {
+									win.active_dropdown_scroll = f32(cur_idx - d_layout.max_visible / 2) * d_layout.item_h
+								}
 							}
 						} else if ctrl.kind in ['segmented', 'mode_control', 'tab_pills', 'tabs',
 							'tab_container_start'] {
@@ -722,25 +775,6 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 									ctrl.items_selected << item
 								}
 								trigger_control_change(mut win, ctrl)
-							}
-						} else if ctrl.kind == 'combobox' {
-							hdr_h := f32(32.0)
-							if win.mouse_y <= ctrl.y + hdr_h {
-								ctrl.is_expanded = !ctrl.is_expanded
-								ctrl.h = if ctrl.is_expanded {
-									hdr_h + f32(math.min(150, ctrl.items.len * 26 + 8))
-								} else {
-									hdr_h
-								}
-							} else if ctrl.is_expanded {
-								rel_y := win.mouse_y - (ctrl.y + hdr_h + 4.0)
-								idx := int(rel_y / 26.0)
-								if idx >= 0 && idx < ctrl.items.len {
-									ctrl.text_value = ctrl.items[idx]
-									ctrl.is_expanded = false
-									ctrl.h = hdr_h
-									trigger_control_change(mut win, ctrl)
-								}
 							}
 						} else if ctrl.kind == 'color_palette' {
 							mut px := ctrl.x + 6.0
@@ -1273,6 +1307,12 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 				return
 			}
 
+			if win.active_dropdown_name.len > 0 && e.key_code == .escape {
+				win.active_dropdown_name = ''
+				win.active_dropdown_scroll = 0
+				return
+			}
+
 			if win.drawer_active && e.key_code == .escape {
 				win.hide_drawer()
 				return
@@ -1709,12 +1749,30 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 		.resized {
 			win.width = e.window_width
 			win.height = e.window_height
+			win.active_dropdown_name = ''
+			win.active_dropdown_scroll = 0
 			win.recalculate_layout()
 			if win.on_resize_cb != unsafe { nil } {
 				win.on_resize_cb(mut win, win.width, win.height)
 			}
 		}
 		.mouse_scroll {
+			if win.active_dropdown_name.len > 0 {
+				if mut ctrl := win.get_control_ptr(win.active_dropdown_name) {
+					d_layout := win.get_dropdown_popup_layout(ctrl)
+					if d_layout.max_scroll > 0 {
+						max_scroll_px := f32(d_layout.max_scroll) * d_layout.item_h
+						win.active_dropdown_scroll -= e.scroll_y * d_layout.item_h
+						if win.active_dropdown_scroll < 0 {
+							win.active_dropdown_scroll = 0
+						}
+						if win.active_dropdown_scroll > max_scroll_px {
+							win.active_dropdown_scroll = max_scroll_px
+						}
+						return
+					}
+				}
+			}
 			if win.hovered_control.len > 0 {
 				if mut ctrl := win.get_control_ptr(win.hovered_control) {
 					if ctrl.kind in ['table', 'grid'] {
