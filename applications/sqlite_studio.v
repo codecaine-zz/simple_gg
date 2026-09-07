@@ -59,7 +59,7 @@ fn main() {
 	})
 
 	sqlite_path := get_sqlite_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${sqlite_path}  |  Platform: macOS Cocoa  |  Mode: Async Worker')
+	win.add_label('lbl_engine_info', 'Engine: ${sqlite_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker')
 
 	// Database File Selection & Schema Browser
 	win.begin_group_box('grp_db_config', 'Database Connection & Schema Explorer')

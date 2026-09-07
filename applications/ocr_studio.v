@@ -47,7 +47,7 @@ fn main() {
 	})
 
 	tesseract_path := get_tesseract_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${tesseract_path}  |  Platform: macOS Cocoa  |  Mode: Async OCR Pipeline')
+	win.add_label('lbl_engine_info', 'Engine: ${tesseract_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async OCR Pipeline')
 
 	// File Selection & Language Scope
 	win.begin_group_box('grp_ocr_source', 'Source Document / Image & Language Configuration')

@@ -81,7 +81,7 @@ fn main() {
 		w.toast('Theme changed to ${selected}')
 	})
 	pandoc_path := get_pandoc_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${pandoc_path}  |  Platform: macOS Cocoa  |  Mode: Async Worker (Zero UI Freezes)')
+	win.add_label('lbl_engine_info', 'Engine: ${pandoc_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker (Zero UI Freezes)')
 
 	// -------------------------------------------------------------
 	// Format Selection & Transformation Matrix

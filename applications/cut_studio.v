@@ -154,7 +154,7 @@ fn main() {
 	})
 
 	cut_path := get_cut_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${cut_path}  |  Platform: macOS Cocoa  |  Mode: Async Worker (Zero UI Freezes)')
+	win.add_label('lbl_engine_info', 'Engine: ${cut_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker (Zero UI Freezes)')
 
 	all_recipes := get_all_cut_recipes()
 

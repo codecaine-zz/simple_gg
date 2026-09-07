@@ -101,7 +101,7 @@ fn main() {
 	})
 
 	ff_path := get_ffmpeg_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${ff_path} (FFmpeg & macOS CoreAudio)  |  Platform: macOS Cocoa')
+	win.add_label('lbl_engine_info', 'Engine: ${ff_path} (FFmpeg & macOS CoreAudio)  |  Platform: ${simplegui.get_platform_label()}')
 
 	// File Selection Bar
 	win.begin_group_box('grp_file_scope', 'Target Audio File (MP3, FLAC, M4A, AAC, WAV, OGG, AIFF)')

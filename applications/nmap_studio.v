@@ -47,7 +47,7 @@ fn main() {
 	})
 
 	nmap_path := get_nmap_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${nmap_path}  |  Platform: macOS Cocoa  |  Mode: Async Worker')
+	win.add_label('lbl_engine_info', 'Engine: ${nmap_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker')
 
 	// Target & Scan Profile Scope
 	win.begin_group_box('grp_target', 'Target Specification & Scan Profiles')

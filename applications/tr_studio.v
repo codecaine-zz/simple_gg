@@ -153,7 +153,7 @@ fn main() {
 	})
 
 	tr_path := get_tr_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${tr_path}  |  Platform: macOS Cocoa  |  Mode: Async Stream Worker (Zero UI Freezes)')
+	win.add_label('lbl_engine_info', 'Engine: ${tr_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Stream Worker (Zero UI Freezes)')
 
 	all_recipes := get_all_tr_recipes()
 

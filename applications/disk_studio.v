@@ -39,7 +39,7 @@ fn main() {
 		w.toast('Theme changed to ${selected}')
 	})
 
-	win.add_label('lbl_engine_info', 'Engine: macOS APFS Core Utilities (du, df, find)  |  Platform: macOS Cocoa  |  Mode: Async')
+	win.add_label('lbl_engine_info', 'Engine: macOS APFS Core Utilities (du, df, find)  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async')
 
 	// Directory Scope Selector
 	win.begin_group_box('grp_disk_scope', 'Target Directory & Filesystem Scope')

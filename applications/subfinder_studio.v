@@ -46,7 +46,8 @@ fn main() {
 		w.toast('Theme changed to ${selected}')
 	})
 	subfinder_path := get_subfinder_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${subfinder_path}  |  Platform: macOS Cocoa  |  Mode: Async Worker (Non-Blocking)')
+	platform_label := simplegui.get_platform_label()
+	win.add_label('lbl_engine_info', 'Engine: ${subfinder_path}  |  Platform: ${platform_label}  |  Mode: Async Worker (Non-Blocking)')
 
 	// -------------------------------------------------------------
 	// Target Domain Scope & Input

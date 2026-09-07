@@ -171,7 +171,7 @@ fn main() {
 		w.toast('Theme changed to ${selected}')
 	})
 
-	win.add_label('lbl_engine_info', 'Engine: High-Performance PCRE2 / Python Regex Engine  |  Platform: macOS Cocoa  |  Mode: Async')
+	win.add_label('lbl_engine_info', 'Engine: High-Performance PCRE2 / Python Regex Engine  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async')
 
 	// Regex Configuration & Pattern Bar
 	win.begin_group_box('grp_pattern_config', 'Regular Expression & Substitution Specification')

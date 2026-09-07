@@ -51,7 +51,7 @@ fn main() {
 	})
 
 	container_bin := get_container_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${container_bin} (Docker/Podman Daemon)  |  Platform: macOS  |  Mode: Async Worker')
+	win.add_label('lbl_engine_info', 'Engine: ${container_bin} (Docker/Podman Daemon)  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker')
 
 	// Container & Image Target Selection
 	win.begin_group_box('grp_target_box', 'Target Container / Image Specification')

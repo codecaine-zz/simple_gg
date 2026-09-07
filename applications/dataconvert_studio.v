@@ -194,7 +194,7 @@ fn main() {
 		w.toast('Theme changed to ${selected}')
 	})
 
-	win.add_label('lbl_engine_info', 'Engine: Multi-Format Translation Engine  |  Platform: macOS Cocoa  |  Mode: Async Non-Blocking')
+	win.add_label('lbl_engine_info', 'Engine: Multi-Format Translation Engine  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Non-Blocking')
 
 	// Format Selector & Preset Configuration
 	win.begin_group_box('grp_format_config', 'Format Direction & Data Templates')

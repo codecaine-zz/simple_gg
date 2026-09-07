@@ -28,7 +28,7 @@ const sample_dot_architecture = 'digraph SimpleGUIArchitecture {
     edge [color="#539bf5", fontcolor="#adbac7", fontname="Helvetica"];
 
     subgraph cluster_frontend {
-        label = "Native macOS Cocoa Frontend";
+        label = "Native SimpleGUI Frontend";
         fontcolor="#539bf5";
         color="#30363d";
         
@@ -94,7 +94,7 @@ fn main() {
 	})
 
 	dot_path := get_dot_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${dot_path} (Graphviz Suite)  |  Platform: macOS Cocoa  |  Mode: Async Compiler')
+	win.add_label('lbl_engine_info', 'Engine: ${dot_path} (Graphviz Suite)  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Compiler')
 
 	// Diagram Configuration & Presets Bar
 	win.begin_group_box('grp_diagram_config', 'Diagram Templates & Layout Engine Specification')

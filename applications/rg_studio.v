@@ -144,7 +144,7 @@ fn main() {
 	})
 
 	rg_path := get_rg_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${rg_path} (ripgrep)  |  Platform: macOS Cocoa  |  Mode: Async Worker (Zero Freezes)')
+	win.add_label('lbl_engine_info', 'Engine: ${rg_path} (ripgrep)  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker (Zero Freezes)')
 
 	all_recipes := get_all_rg_recipes()
 

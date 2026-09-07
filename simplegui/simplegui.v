@@ -155,6 +155,19 @@ pub fn new_window(title string, width int, height int) &SimpleWindow {
 	return new_simple_window(title, width, height)
 }
 
+// get_platform_label returns the current runtime platform label shown in GUI status bars.
+pub fn get_platform_label() string {
+	$if macos {
+		return 'macOS Cocoa'
+	}$else $if linux {
+		return 'Linux'
+	}$else $if windows {
+		return 'Windows'
+	}$else {
+		return 'Unknown'
+	}
+}
+
 // gen_id generates a unique control ID name string using an internal counter.
 fn (mut win SimpleWindow) gen_id(prefix string) string {
 	win.auto_id_counter++

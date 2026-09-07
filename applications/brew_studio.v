@@ -46,7 +46,7 @@ fn main() {
 	})
 
 	brew_path := get_brew_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${brew_path}  |  Platform: Apple Silicon / Intel macOS  |  Mode: Async Worker')
+	win.add_label('lbl_engine_info', 'Engine: ${brew_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker')
 
 	// Search & Quick Operation Bar
 	win.begin_group_box('grp_brew_search', 'Package Search & Information Inspection')

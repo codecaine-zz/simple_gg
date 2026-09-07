@@ -244,7 +244,7 @@ fn main() {
 	iconutil_ok := os.find_abs_path_of_executable('iconutil') or { '' } != ''
 	codesign_ok := os.find_abs_path_of_executable('codesign') or { '' } != ''
 
-	win.add_label('lbl_sys_status', 'Subsystems: sips [${sips_ok}] | iconutil [${iconutil_ok}] | codesign [${codesign_ok}]  |  Target: macOS Cocoa Application (.app)')
+	win.add_label('lbl_sys_status', 'Subsystems: sips [${sips_ok}] | iconutil [${iconutil_ok}] | codesign [${codesign_ok}]  |  Target: ${simplegui.get_platform_label()} Application (.app)')
 
 	// 1. Source Binary Selection
 	win.begin_group_box('grp_binary_input', '1. Source Mach-O Executable / CLI Binary')

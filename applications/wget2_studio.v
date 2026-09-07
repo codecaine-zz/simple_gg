@@ -57,7 +57,7 @@ fn main() {
 		w.toast('Theme changed to ${selected}')
 	})
 	wget2_path := get_wget2_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${wget2_path}  |  Platform: macOS Cocoa  |  Mode: Async Multi-Threaded Worker')
+	win.add_label('lbl_engine_info', 'Engine: ${wget2_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Multi-Threaded Worker')
 
 	// -------------------------------------------------------------
 	// Target URL & Destination Configuration

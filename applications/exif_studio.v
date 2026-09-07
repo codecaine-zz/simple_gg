@@ -47,7 +47,7 @@ fn main() {
 	})
 
 	exiftool_path := get_exiftool_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${exiftool_path}  |  Platform: macOS Cocoa  |  Mode: Async Non-Blocking')
+	win.add_label('lbl_engine_info', 'Engine: ${exiftool_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Non-Blocking')
 
 	// Media File Selection Bar
 	win.begin_group_box('grp_file_scope', 'Target Media File (JPEG, PNG, HEIC, TIFF, RAW, MP4, MOV)')

@@ -52,7 +52,7 @@ fn main() {
 		w.toast('Theme changed to ${selected}')
 	})
 
-	win.add_label('lbl_engine_info', 'Engine: macOS launchctl & crontab Subsystems  |  Platform: macOS Cocoa  |  Mode: Async')
+	win.add_label('lbl_engine_info', 'Engine: macOS launchctl & crontab Subsystems  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async')
 
 	// Job Scheduler Specification & Presets Bar
 	win.begin_group_box('grp_job_presets', 'Scheduled Task Templates & Cron Expression Builder')

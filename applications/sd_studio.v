@@ -314,7 +314,7 @@ fn main() {
 		w.toast('Theme changed to ${selected}')
 	})
 	sd_path := get_sd_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${sd_path}  |  Platform: macOS Cocoa  |  Mode: Async Worker (Zero UI Freezes)')
+	win.add_label('lbl_engine_info', 'Engine: ${sd_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker (Zero UI Freezes)')
 
 	all_recipes := get_all_sd_recipes()
 

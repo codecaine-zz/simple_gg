@@ -449,7 +449,7 @@ fn main() {
 		w.toast('Theme changed to ${selected}')
 	})
 	gawk_path := get_gawk_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${gawk_path}  |  Platform: macOS Cocoa  |  Mode: Async Worker')
+	win.add_label('lbl_engine_info', 'Engine: ${gawk_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker')
 
 	all_recipes := get_all_one_liners()
 

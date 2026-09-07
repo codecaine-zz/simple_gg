@@ -177,7 +177,7 @@ fn main() {
 	win.set_control_width('dd_theme_selector', 180)
 	win.end_row()
 
-	win.add_label('lbl_engine_info', 'Engine: ${find_bin} (POSIX/BSD find)  |  Platform: macOS Cocoa  |  Mode: Non-Blocking Safe Worker')
+	win.add_label('lbl_engine_info', 'Engine: ${find_bin} (POSIX/BSD find)  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Non-Blocking Safe Worker')
 
 	// -------------------------------------------------------------
 	// Scope & Target Directory

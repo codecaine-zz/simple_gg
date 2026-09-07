@@ -73,7 +73,7 @@ fn main() {
 	})
 
 	jq_path := get_jq_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${jq_path}  |  Platform: macOS Cocoa  |  Mode: Async Worker (Non-Blocking)')
+	win.add_label('lbl_engine_info', 'Engine: ${jq_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker (Non-Blocking)')
 
 	// Filter & Query Configuration Bar
 	win.begin_group_box('grp_query', 'JQ Filter Expression & Query Builder')

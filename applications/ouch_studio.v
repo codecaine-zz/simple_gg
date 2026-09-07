@@ -252,7 +252,7 @@ fn main() {
 	win.end_group_box()
 
 	win.begin_row('row_status')
-	win.add_label('lbl_status', 'Status: Ready  |  Engine: ouch  |  Platform: macOS Cocoa')
+	win.add_label('lbl_status', 'Status: Ready  |  Engine: ouch  |  Platform: ${simplegui.get_platform_label()}')
 	win.end_row()
 
 	// Helper to auto-update output path extension when format dropdown changes

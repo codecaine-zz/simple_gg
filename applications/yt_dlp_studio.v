@@ -55,7 +55,7 @@ fn main() {
 		w.toast('Theme changed to ${selected}')
 	})
 	ytdlp_path := get_yt_dlp_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${ytdlp_path}  |  Platform: macOS Cocoa  |  Mode: Async Worker (Zero UI Freezes)')
+	win.add_label('lbl_engine_info', 'Engine: ${ytdlp_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker (Zero UI Freezes)')
 
 	// -------------------------------------------------------------
 	// URL Input & Destination Directory

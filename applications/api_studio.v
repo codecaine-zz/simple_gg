@@ -54,7 +54,7 @@ fn main() {
 	})
 
 	curl_path := get_curl_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${curl_path}  |  Platform: macOS  |  Mode: Async Non-Blocking Worker')
+	win.add_label('lbl_engine_info', 'Engine: ${curl_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Non-Blocking Worker')
 
 	// Request URL & Method Bar
 	win.begin_group_box('grp_request_url', 'Target Endpoint & HTTP Method')
