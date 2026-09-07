@@ -168,6 +168,19 @@ pub fn get_platform_label() string {
 	}
 }
 
+// get_os_name returns the simplified operating system name ('macOS', 'Linux', 'Windows', or 'Native').
+pub fn get_os_name() string {
+	$if macos {
+		return 'macOS'
+	}$else $if linux {
+		return 'Linux'
+	}$else $if windows {
+		return 'Windows'
+	}$else {
+		return 'Native'
+	}
+}
+
 // gen_id generates a unique control ID name string using an internal counter.
 fn (mut win SimpleWindow) gen_id(prefix string) string {
 	win.auto_id_counter++

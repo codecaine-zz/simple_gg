@@ -4,7 +4,7 @@ This directory contains standalone, production-ready console applications, clien
 
 ---
 
-## 🛠️ Complete Applications Catalog (48 Console Utilities)
+## 🛠️ Complete Applications Catalog (49 Console Utilities)
 
 ### 1. DevOps, Infrastructure & Automation
 | Application | File | Description | Run Command |
@@ -92,4 +92,5 @@ This directory contains standalone, production-ready console applications, clien
 | :--- | :--- | :--- | :--- |
 | **Pandoc Studio CLI** | [`pandoc_cli.v`](pandoc_cli.v) | Markdown, HTML, PDF, Docx document converter | `v run cli_apps/pandoc_cli.v --interactive` |
 | **Ouch Archive CLI** | [`ouch_cli.v`](ouch_cli.v) | ZIP, TAR, GZ, 7Z, ZSTD compressor/extractor | `v run cli_apps/ouch_cli.v --interactive` |
+| **Rip Safe Deletion CLI** | [`rip_cli.v`](rip_cli.v) | Safe rm alternative with graveyard & seance | `v run cli_apps/rip_cli.v --interactive` |
 | **Wget2 Downloader CLI**| [`wget2_cli.v`](wget2_cli.v) | Fast HTTP/HTTPS file download manager | `v run cli_apps/wget2_cli.v --interactive` |

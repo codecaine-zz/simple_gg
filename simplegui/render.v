@@ -1906,8 +1906,11 @@ pub fn (mut win SimpleWindow) render_ui() {
 				if ctrl.placeholder.len > 0 {
 					delta_c := if ctrl.bool_value { gg.rgb(52, 211, 153) } else { gg.rgb(248, 113, 113) }
 					pill_bg := if ctrl.bool_value { gg.rgba(16, 185, 129, 35) } else { gg.rgba(239, 68, 68, 35) }
-					pill_txt := if ctrl.bool_value { '[+] ' + ctrl.placeholder } else { '[-] ' + ctrl.placeholder }
-					pill_w := f32(pill_txt.len * 6 + 12)
+					prefix := if ctrl.bool_value { '[+] ' } else { '[-] ' }
+					max_chars := math.max(6, int((ctrl.w - 48.0) / 6.5))
+					raw_txt := prefix + ctrl.placeholder
+					pill_txt := if raw_txt.len > max_chars { raw_txt[..max_chars - 3] + '...' } else { raw_txt }
+					pill_w := math.min(ctrl.w - 28.0, f32(pill_txt.len * 6 + 12))
 					win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 14, ctrl.y + 54, pill_w, 18.0, 4.0, pill_bg)
 					win.gg_ctx.draw_text2(x: int(ctrl.x + 20), y: int(ctrl.y + 56), text: pill_txt, color: delta_c, size: 10, bold: true)
 				}

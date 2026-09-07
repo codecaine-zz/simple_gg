@@ -225,10 +225,12 @@ fn main() {
 	win.add_checkbox('chk_gitignore', 'Respect .gitignore (-g)', true)
 	win.add_checkbox('chk_symlinks', 'Follow Symlinks (-S)', false)
 	win.add_checkbox('chk_remove_src', 'Remove Source on Decompress (-r)', false)
+	win.end_row()
 
+	win.begin_row('row_password')
 	win.add_label('lbl_pwd', 'Password (Optional):')
 	win.add_password('txt_password', '')
-	win.set_control_width('txt_password', 140)
+	win.set_control_width('txt_password', 220)
 	win.end_row()
 	win.end_group_box()
 

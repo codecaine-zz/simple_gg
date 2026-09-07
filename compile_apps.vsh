@@ -78,6 +78,7 @@ fn get_app_maps() map[string]AppConfig {
 	m['recon_studio.v'] = AppConfig{'Recon Studio', 'security.png', 'com.simplegui.reconstudio'}
 	m['regex_studio.v'] = AppConfig{'Regex Studio', 'regex_tester.png', 'com.simplegui.regexstudio'}
 	m['rg_studio.v'] = AppConfig{'RG Studio', 'snippet_manager.png', 'com.simplegui.rgstudio'}
+	m['rip_studio.v'] = AppConfig{'Rip Studio', 'file_manager.png', 'com.simplegui.ripstudio'}
 	m['say_studio.v'] = AppConfig{'Say Studio', 'voice_recorder.png', 'com.simplegui.saystudio'}
 	m['sd_studio.v'] = AppConfig{'SD Studio', 'text_editor.png', 'com.simplegui.sdstudio'}
 	m['sed_studio.v'] = AppConfig{'Sed Studio', 'text_editor.png', 'com.simplegui.sedstudio'}

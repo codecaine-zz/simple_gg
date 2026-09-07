@@ -237,9 +237,9 @@ See [CLI_API.md](CLI_API.md) for the complete SimpleCLI documentation and API re
 
 ---
 
-# 💻 Production Console Applications Suite (`cli_apps/` - 48 Utilities)
+# 💻 Production Console Applications Suite (`cli_apps/` - 49 Utilities)
 
-`simple_gg` includes 48 zero-window command-line applications and client versions of the GUI workstations in the [`cli_apps/`](cli_apps) directory:
+`simple_gg` includes 49 zero-window command-line applications and client versions of the GUI workstations in the [`cli_apps/`](cli_apps) directory:
 
 | Category               | Applications                                                                      | Key Highlights                                                      |
 | :--------------------- | :-------------------------------------------------------------------------------- | :------------------------------------------------------------------ |
@@ -251,13 +251,13 @@ See [CLI_API.md](CLI_API.md) for the complete SimpleCLI documentation and API re
 | **Math & Science**     | Numbat Units, Kalker Math, Qalc Studio, Programmer Calc, Stats, Graph CLI         | Physical dimensional analysis, arbitrary precision & ASCII charts.  |
 | **Docs & Archives**    | Pandoc CLI, Ouch Archive CLI, Wget2 Downloader, Text Editor CLI                   | Document conversion, universal archives (ZIP/7z/zstd) & downloader. |
 
-See the [`cli_apps/README.md`](cli_apps/README.md) for the complete catalog of all 48 command-line applications.
+See the [`cli_apps/README.md`](cli_apps/README.md) for the complete catalog of all 49 command-line applications.
 
 ---
 
-# Production Workstations & Studio Applications (44 Workstations)
+# Production Workstations & Studio Applications (45 Workstations)
 
-`simple_gg` includes 44 desktop applications in the [`applications/`](applications) directory, covering devtools, media studios, network utilities, data converters, and security workstations:
+`simple_gg` includes 45 desktop applications in the [`applications/`](applications) directory, covering devtools, media studios, network utilities, data converters, and security workstations:
 
 <p align="center">
   <img src="snapshots/apps/app_bundler_studio.png" width="48%" alt="App Bundler Studio Pro" />
@@ -282,7 +282,7 @@ See the [`cli_apps/README.md`](cli_apps/README.md) for the complete catalog of a
 | **[`imagemagick_studio.v`](applications/imagemagick_studio.v)** | Media        | Batch image manipulation, resizing, and filters.                                             | `v run applications/imagemagick_studio.v` | [Screenshot](snapshots/apps/imagemagick_studio.png) |
 | **[`nmap_studio.v`](applications/nmap_studio.v)**               | Security     | Network security scanner & port analyzer.                                                    | `v run applications/nmap_studio.v`        | [Screenshot](snapshots/apps/nmap_studio.png)        |
 | **[`brew_studio.v`](applications/brew_studio.v)**               | Package Mgr  | Homebrew package browser, installer, and updater.                                            | `v run applications/brew_studio.v`        | [Screenshot](snapshots/apps/brew_studio.png)        |
-| ... _(32 more)_                                                 | Various      | See complete visual gallery & catalog in [`applications/README.md`](applications/README.md). |                                           | [All Snapshots](applications/README.md)             |
+| ... _(33 more)_                                                 | Various      | See complete visual gallery & catalog in [`applications/README.md`](applications/README.md). |                                           | [All Snapshots](applications/README.md)             |
 
 ---
 
@@ -301,7 +301,7 @@ See the [`cli_apps/README.md`](cli_apps/README.md) for the complete catalog of a
 
 - **Full API Guide (GUI)**: See [API.md](API.md) for complete details on window configuration, controls, layout engine, themes, event callbacks, reactive state management (`state.v`), system calls (`sys.v`), and standard library extensions (`stdlib.v`).
 - **SimpleCLI Reference (Headless & Console)**: See [CLI_API.md](CLI_API.md) for complete details on the zero-window console utility framework, flag parsing, ANSI UI, interactive prompts, process management, hardware metrics, and stdlib utilities.
-- **Workstations Catalog**: See [applications/README.md](applications/README.md) for the complete list & visual showcase of 44 desktop applications.
+- **Workstations Catalog**: See [applications/README.md](applications/README.md) for the complete list & visual showcase of 45 desktop applications.
 - **Examples Guide**: See [examples/README.md](examples/README.md) for detailed descriptions of all example scripts.
 
 ---

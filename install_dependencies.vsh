@@ -124,6 +124,14 @@ fn get_dependencies() []Dependency {
 	}
 	deps << Dependency{
 		category: 'Data & Text'
+		formula: 'rip2'
+		bin_names: ['rip']
+		name: 'rip2 / rip'
+		description: 'Safe and ergonomic alternative to rm with graveyard recovery and seance'
+		studio_app: 'Rip Studio'
+	}
+	deps << Dependency{
+		category: 'Data & Text'
 		formula: 'sqlite'
 		bin_names: ['sqlite3']
 		name: 'SQLite3'
@@ -304,7 +312,7 @@ fn main() {
 	println('Platform: ${platform}')
 
 	mut brew_path := ''
-	if platform == 'darwin' {
+	if platform == 'darwin' || platform == 'macos' {
 		if p := os.find_abs_path_of_executable('brew') {
 			brew_path = p
 		} else if os.exists('/opt/homebrew/bin/brew') {

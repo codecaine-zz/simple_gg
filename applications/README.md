@@ -6,7 +6,7 @@ Native macOS GUI applications built with **SimpleGUI** for V, providing high-per
 
 ## 📦 Automatic Homebrew Dependencies Installation
 
-To inspect your system and automatically install any missing CLI tools used across the 44 applications:
+To inspect your system and automatically install any missing CLI tools used across the 45 applications:
 
 ```bash
 # Scan and inspect dependencies health (dry run)
@@ -24,7 +24,7 @@ To inspect your system and automatically install any missing CLI tools used acro
 
 ---
 
-# 📸 Visual Showcase of Applications (44 Workstations)
+# 📸 Visual Showcase of Applications (45 Workstations)
 
 ### Featured Workstations
 
@@ -125,6 +125,7 @@ To inspect your system and automatically install any missing CLI tools used acro
 </p>
 <p align="center">
   <img src="../snapshots/apps/find_studio.png" width="48%" alt="Find Studio Pro" />
+  <img src="../snapshots/apps/rip_studio.png" width="48%" alt="Rip Studio Pro" />
 </p>
 
 ---
@@ -145,7 +146,7 @@ To inspect your system and automatically install any missing CLI tools used acro
 
 ---
 
-# Complete Applications Suite (44 Workstations)
+# Complete Applications Suite (45 Workstations)
 
 | Application | Source File | Snapshot | Description |
 | :--- | :--- | :--- | :--- |
@@ -183,6 +184,7 @@ To inspect your system and automatically install any missing CLI tools used acro
 | **Text Editor Pro** | [`text_editor.v`](text_editor.v) | [Screenshot](../snapshots/apps/text_editor.png) | Ultimate native code editor & workspace: multi-buffer scratchpads, live WebKit Markdown HTML preview, integrated code runner (V, Python, Node, Bash, Ruby), unified diff comparison, regex search/replace, and telemetry. |
 | **Task Manager Pro** | [`task_manager.v`](task_manager.v) | [Screenshot](../snapshots/apps/task_manager.png) | macOS process manager & hardware telemetry monitor: real-time process data grid (PID, Name, CPU %, Memory RSS, State), hardware stats cards, filtering scopes, process signals (SIGKILL, SIGTERM), and `lsof` socket inspector. |
 | **Ouch Studio Pro** | [`ouch_studio.v`](ouch_studio.v) | [Screenshot](../snapshots/apps/ouch_studio.png) | Ultra-fast universal archive & compression workbench powered by `ouch`: lossless/high-density packaging across `.tar.zst`, `.tar.gz`, `.zip`, `.7z`, `.tar.xz`, `.tar.bz2`, compression tuning, and tree hierarchy explorer. |
+| **Rip Studio Pro** | [`rip_studio.v`](rip_studio.v) | [Screenshot](../snapshots/apps/rip_studio.png) | Safe deletion & graveyard recovery workbench powered by `rip2`: safe file/folder burying (alternative to `rm`), graveyard tomb inspection, selective/last unburying (`-u`), directory séance ghost inspection (`-s`), decomposition (`-d`), and disk footprint telemetry. |
 | **Sed Studio Pro** | [`sed_studio.v`](sed_studio.v) | [Screenshot](../snapshots/apps/sed_studio.png) | POSIX/BSD `sed` stream editor & regex transformation workbench: dual-pane live scratchpad, in-place disk file editing (`-i ''`), character/line counters, backup preservation, and 15 built-in recipes. |
 | **IFConfig Studio Pro** | [`ifconfig_studio.v`](ifconfig_studio.v) | — | Comprehensive native macOS IP intelligence & network diagnostics studio: Public IPv4 & IPv6 detection, rich geolocation (City, Country, GPS, ASN, ISP), 1-click Maps launcher, local interface scanner, and DNS latency ping. |
 | **Qalc Studio Pro** | [`qalc_studio.v`](qalc_studio.v) | [Screenshot](../snapshots/apps/qalc_studio.png) | Advanced symbolic mathematics & universal unit converter powered by `qalc` (`libqalculate`): arbitrary precision (up to 100 digits), symbolic equation solver, calculus derivatives/integrals, and 30+ formula presets. |
@@ -231,7 +233,7 @@ To inspect your system and automatically install any missing CLI tools used acro
 Ensure all underlying CLI engines and utilities are installed on macOS via [Homebrew](https://brew.sh):
 
 ```bash
-brew install ripgrep fd sd gawk ouch ffmpeg imagemagick pandoc wget2 yt-dlp subfinder jq libqalculate numbat kalker nmap exiftool tesseract graphviz
+brew install ripgrep fd sd gawk ouch rip2 ffmpeg imagemagick pandoc wget2 yt-dlp subfinder jq libqalculate numbat kalker nmap exiftool tesseract graphviz
 ```
 
 ---
@@ -281,6 +283,7 @@ v run applications/rg_studio.v
 v run applications/fd_studio.v
 v run applications/find_studio.v
 v run applications/ouch_studio.v
+v run applications/rip_studio.v
 v run applications/app_bundler_studio.v
 
 # Mathematics, Science & Cryptography
@@ -298,7 +301,7 @@ v run applications/text_editor.v
 
 ## 🔨 Batch Compiling Applications (macOS .app Bundles, Linux & Windows)
 
-You can compile all 44 applications into standalone macOS `.app` bundles with native icons, or cross-compile for Linux and Windows binaries using the multi-threaded V script `compile_apps.vsh`:
+You can compile all 45 applications into standalone macOS `.app` bundles with native icons, or cross-compile for Linux and Windows binaries using the multi-threaded V script `compile_apps.vsh`:
 
 ```bash
 # macOS Native (.app bundles with high-resolution .icns icons)

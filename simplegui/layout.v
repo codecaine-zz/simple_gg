@@ -59,6 +59,18 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 				}
 
 				if row_indices.len > 0 {
+					for idx in row_indices {
+						if win.controls[idx].kind == 'heading' && win.controls[idx].w <= 200.0 {
+							hd_title := if win.controls[idx].text_value.len > 0 { win.controls[idx].text_value } else { win.controls[idx].title }
+							win.controls[idx].w = f32(math.max(200.0, f32(hd_title.len * 14 + 32)))
+						} else if win.controls[idx].kind == 'label' && win.controls[idx].w == 200.0 {
+							lbl_title := if win.controls[idx].text_value.len > 0 { win.controls[idx].text_value } else { win.controls[idx].title }
+							win.controls[idx].w = f32(math.max(40.0, f32(lbl_title.len * 8 + 14)))
+						} else if win.controls[idx].kind in ['checkbox', 'toggle'] && win.controls[idx].w == 200.0 {
+							chk_title := if win.controls[idx].text_value.len > 0 { win.controls[idx].text_value } else { win.controls[idx].title }
+							win.controls[idx].w = f32(math.max(60.0, f32(chk_title.len * 8 + 36)))
+						}
+					}
 					mut fixed_w := f32(0.0)
 					mut auto_count := 0
 					for idx in row_indices {
@@ -74,12 +86,20 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 					item_w := if auto_count > 0 { remaining_w / f32(auto_count) } else { remaining_w }
 					mut max_h := f32(0.0)
 
+					scale := if auto_count == 0 && (fixed_w + gaps_w) > content_w && fixed_w > 0 {
+						f32(math.max(0.1, (content_w - gaps_w) / fixed_w))
+					} else {
+						f32(1.0)
+					}
+
 					mut cur_x := pad
 					for idx in row_indices {
 						win.controls[idx].x = cur_x
 						win.controls[idx].y = cur_y
 						if win.controls[idx].expand_fill || win.controls[idx].w <= 0 || win.controls[idx].w >= content_w * 0.75 {
 							win.controls[idx].w = item_w
+						} else if scale < 1.0 {
+							win.controls[idx].w = f32(math.max(20.0, win.controls[idx].w * scale))
 						}
 						if win.controls[idx].h > max_h {
 							max_h = win.controls[idx].h
@@ -194,6 +214,18 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 								}
 								if row_indices.len > 0 {
 									inner_content_w := content_w - group_inner_pad * 2.0
+									for idx in row_indices {
+										if win.controls[idx].kind == 'heading' && win.controls[idx].w <= 200.0 {
+											hd_title := if win.controls[idx].text_value.len > 0 { win.controls[idx].text_value } else { win.controls[idx].title }
+											win.controls[idx].w = f32(math.max(200.0, f32(hd_title.len * 14 + 32)))
+										} else if win.controls[idx].kind == 'label' && win.controls[idx].w == 200.0 {
+											lbl_title := if win.controls[idx].text_value.len > 0 { win.controls[idx].text_value } else { win.controls[idx].title }
+											win.controls[idx].w = f32(math.max(40.0, f32(lbl_title.len * 8 + 14)))
+										} else if win.controls[idx].kind in ['checkbox', 'toggle'] && win.controls[idx].w == 200.0 {
+											chk_title := if win.controls[idx].text_value.len > 0 { win.controls[idx].text_value } else { win.controls[idx].title }
+											win.controls[idx].w = f32(math.max(60.0, f32(chk_title.len * 8 + 36)))
+										}
+									}
 									mut fixed_w := f32(0.0)
 									mut auto_count := 0
 									for idx in row_indices {
@@ -209,12 +241,20 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 									item_w := if auto_count > 0 { remaining_w / f32(auto_count) } else { remaining_w }
 									mut max_h := f32(0.0)
 
+									scale := if auto_count == 0 && (fixed_w + gaps_w) > inner_content_w && fixed_w > 0 {
+										f32(math.max(0.1, (inner_content_w - gaps_w) / fixed_w))
+									} else {
+										f32(1.0)
+									}
+
 									mut cur_x := pad + group_inner_pad
 									for idx in row_indices {
 										win.controls[idx].x = cur_x
 										win.controls[idx].y = inner_y
 										if win.controls[idx].expand_fill || win.controls[idx].w <= 0 || win.controls[idx].w >= inner_content_w * 0.75 {
 											win.controls[idx].w = item_w
+										} else if scale < 1.0 {
+											win.controls[idx].w = f32(math.max(20.0, win.controls[idx].w * scale))
 										}
 										if win.controls[idx].h > max_h {
 											max_h = win.controls[idx].h

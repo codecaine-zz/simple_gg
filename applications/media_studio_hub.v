@@ -35,7 +35,8 @@ fn main() {
 	win.set_control_width('dd_hub_theme', 160)
 	win.end_row()
 
-	win.add_label('lbl_sub', 'Unified macOS Native Engineering Suite for Media, Security, Data, DevOps & Computing (45 Workstations)')
+	os_name := simplegui.get_os_name()
+	win.add_label('lbl_sub', 'Unified ${os_name} Native Engineering Suite for Media, Security, Data, DevOps & Computing (45 Workstations)')
 
 	// -------------------------------------------------------------
 	// System Diagnostics Bar
@@ -62,7 +63,7 @@ fn main() {
 	has_numbat, _ := check_bin('numbat', ['/opt/homebrew/bin/numbat', '/usr/local/bin/numbat'])
 	has_kalker, _ := check_bin('kalker', ['/opt/homebrew/bin/kalker', '/usr/local/bin/kalker'])
 
-	win.begin_group_box('grp_env', 'Core CLI Engines & macOS Subsystems Status')
+	win.begin_group_box('grp_env', 'Core CLI Engines & ${os_name} Subsystems Status')
 	win.begin_row('row_env_1')
 	win.add_label('lbl_stat_ffmpeg', if has_ffmpeg { ' FFmpeg' } else { ' FFmpeg' })
 	win.add_label('lbl_stat_ffprobe', if has_ffprobe { ' FFprobe' } else { ' FFprobe' })
@@ -74,6 +75,9 @@ fn main() {
 	win.add_label('lbl_stat_cut', if has_cut { ' cut' } else { ' cut' })
 	win.add_label('lbl_stat_tr', if has_tr { ' tr' } else { ' tr' })
 	win.add_label('lbl_stat_rg', if has_rg { ' ripgrep' } else { ' ripgrep' })
+	win.end_row()
+
+	win.begin_row('row_env_2')
 	win.add_label('lbl_stat_fd', if has_fd { ' FD' } else { ' FD' })
 	win.add_label('lbl_stat_sed', if has_sed { ' sed' } else { ' sed' })
 	win.add_label('lbl_stat_ouch', if has_ouch { ' ouch' } else { ' ouch' })
@@ -93,12 +97,19 @@ fn main() {
 	win.begin_group_box('grp_launchers', 'Dedicated Studio Workstations (Click to Launch Independent Workspace)')
 	
 	// Category 1: Files, Search & Text Processing
-	win.begin_row('row_apps_1')
+	win.begin_row('row_apps_1a')
 	win.add_label('lbl_cat_1', 'Files & Text:')
+	win.set_control_width('lbl_cat_1', 125)
 	win.add_button('btn_launch_editor', 'Text Editor')
 	win.add_button('btn_launch_taskman', 'Task Manager')
 	win.add_button('btn_launch_ouch', 'Ouch Archives')
+	win.add_button('btn_launch_rip', 'Rip Graveyard')
 	win.add_button('btn_launch_sed', 'Sed Studio')
+	win.end_row()
+
+	win.begin_row('row_apps_1b')
+	win.add_label('lbl_cat_1_sub', '')
+	win.set_control_width('lbl_cat_1_sub', 125)
 	win.add_button('btn_launch_cut', 'Cut Studio')
 	win.add_button('btn_launch_tr', 'TR Studio')
 	win.add_button('btn_launch_rg', 'Ripgrep')
@@ -107,12 +118,18 @@ fn main() {
 	win.end_row()
 
 	// Category 2: Media, Creative & Publishing
-	win.begin_row('row_apps_2')
+	win.begin_row('row_apps_2a')
 	win.add_label('lbl_cat_2', 'Media & Creative:')
+	win.set_control_width('lbl_cat_2', 125)
 	win.add_button('btn_launch_ffmpeg', 'FFmpeg Studio')
 	win.add_button('btn_launch_magick', 'ImageMagick')
-	win.add_button('btn_launch_ytdlp', 'Download yt-dlp Archiver')
+	win.add_button('btn_launch_ytdlp', 'yt-dlp Archiver')
 	win.add_button('btn_launch_audiotag', 'Audio Tag Studio')
+	win.end_row()
+
+	win.begin_row('row_apps_2b')
+	win.add_label('lbl_cat_2_sub', '')
+	win.set_control_width('lbl_cat_2_sub', 125)
 	win.add_button('btn_launch_ocr', 'Tesseract OCR')
 	win.add_button('btn_launch_exif', 'ExifTool Studio')
 	win.add_button('btn_launch_say', 'Say Voiceover')
@@ -120,26 +137,38 @@ fn main() {
 	win.end_row()
 
 	// Category 3: Data Engineering & Querying
-	win.begin_row('row_apps_3')
+	win.begin_row('row_apps_3a')
 	win.add_label('lbl_cat_3', 'Data & Query:')
+	win.set_control_width('lbl_cat_3', 125)
 	win.add_button('btn_launch_jq', 'JQ Studio')
 	win.add_button('btn_launch_convert', 'Format Converter')
 	win.add_button('btn_launch_sqlite', 'SQLite Studio')
 	win.add_button('btn_launch_regex', 'Regex Studio')
+	win.end_row()
+
+	win.begin_row('row_apps_3b')
+	win.add_label('lbl_cat_3_sub', '')
+	win.set_control_width('lbl_cat_3_sub', 125)
 	win.add_button('btn_launch_gawk', 'GAWK Engine')
 	win.add_button('btn_launch_sd', 'SD Replace')
 	win.add_button('btn_launch_dot', 'Graphviz Studio')
 	win.end_row()
 
 	// Category 4: Security, Network & DevOps
-	win.begin_row('row_apps_4')
+	win.begin_row('row_apps_4a')
 	win.add_label('lbl_cat_4', 'Security & DevOps:')
+	win.set_control_width('lbl_cat_4', 125)
 	win.add_button('btn_launch_api', 'API Studio')
 	win.add_button('btn_launch_nmap', 'Nmap Scanner')
 	win.add_button('btn_launch_dns', 'DNS & SSL')
 	win.add_button('btn_launch_recon', 'Recon Studio')
 	win.add_button('btn_launch_subfinder', 'Subfinder')
 	win.add_button('btn_launch_ifconfig', 'IFConfig IP')
+	win.end_row()
+
+	win.begin_row('row_apps_4b')
+	win.add_label('lbl_cat_4_sub', '')
+	win.set_control_width('lbl_cat_4_sub', 125)
 	win.add_button('btn_launch_crypto', 'Crypto & Hash')
 	win.add_button('btn_launch_brew', 'Homebrew')
 	win.add_button('btn_launch_docker', 'Docker')
@@ -148,15 +177,21 @@ fn main() {
 	win.end_row()
 
 	// Category 5: Mathematics, Science & Computation
-	win.begin_row('row_apps_5')
+	win.begin_row('row_apps_5a')
 	win.add_label('lbl_cat_5', 'Math & Science:')
+	win.set_control_width('lbl_cat_5', 125)
 	win.add_button('btn_launch_progcalc', 'Prog Calc Pro')
 	win.add_button('btn_launch_graph', 'Graph Studio Pro')
 	win.add_button('btn_launch_stats', 'Statistics Studio')
+	win.add_button('btn_launch_wget2', 'Wget2 Accelerator')
+	win.end_row()
+
+	win.begin_row('row_apps_5b')
+	win.add_label('lbl_cat_5_sub', '')
+	win.set_control_width('lbl_cat_5_sub', 125)
 	win.add_button('btn_launch_qalc', 'Qalc Symbolic')
 	win.add_button('btn_launch_numbat', 'Numbat Physics')
 	win.add_button('btn_launch_kalker', 'Kalker Calculus')
-	win.add_button('btn_launch_wget2', 'Wget2 Accelerator')
 	win.end_row()
 
 	win.end_group_box()
@@ -259,6 +294,16 @@ fn main() {
 			simplegui.exec_safe('v', ['run', app_path])
 		}()
 		w.toast('Ouch Studio Pro launched!')
+	})
+
+	// Launch Rip Studio
+	win.on_click('btn_launch_rip', fn (mut w simplegui.SimpleWindow) {
+		app_path := os.join_path(os.dir(@FILE), 'rip_studio.v')
+		w.append_console('hub_log', ' Launching Rip Studio Pro in background...\n', 1)
+		go fn [app_path] () {
+			simplegui.exec_safe('v', ['run', app_path])
+		}()
+		w.toast('Rip Studio Pro launched!')
 	})
 
 	// Launch Cut Studio
