@@ -71,7 +71,7 @@
 - **RAD Development Controls Suite**: Multi-select Tag Input, Dual-Thumb Range Slider, Monospace Code Editor, File Drop Zone, Property Grid Inspector, Sparkline Micro-Charts, Pagination Bar, Resizable Split View, Toast Notification Overlay Stack, Command Palette (`Ctrl+K`), and Context Menus.
 - **Complete Widget Set**: ListBox (interactive single/multi select), ComboBox, Transfer List, Console Output Viewer, Color Palette Swatch Grid, Status Bar, Step Slider, text/password inputs, steppers, range sliders, toggle switches, checkboxes, dropdowns, segmented controls, rating stars, date pickers, metric cards, charts, tree views, data tables, breadcrumbs, avatars, status badges, accordions, and alert banners.
 - **Layout Engine**: Automatic vertical stacking, horizontal rows (`begin_row`), multi-column grids (`begin_grid`), flexboxes (`begin_flex_box`), tab containers, and group cards.
-- **Reactive State Management (`state.v`)**: Key-value reactive store (`set_state`, `get_state`), typed accessors, reactive state listeners (`on_state_change`), atomic crash-proof disk persistence (`save_app_state`, `load_app_state`), window session restoration (`save_window_session`, `restore_window_session`), and auto-save on close.
+- **Reactive State Management & Universal Persistence (`state.v`)**: Key-value reactive store (`set_state`, `get_state`), typed accessors, reactive state listeners (`on_state_change`), atomic crash-proof disk persistence (`save_app_state`, `load_app_state`), automated per-application form state restoration on launch, global theme auto-save, and window session restoration (`save_window_session`, `restore_window_session`).
 - **OS & System Extensions (`sys.v`)**: Standardized user directory lookups for macOS (`~/Library`), Windows (`%APPDATA%`), and Linux (`$XDG_*`), path expansion with tilde (`~`) and environment variable resolution, native notifications, hardware metrics, process execution, clipboard, and file operations.
 - **Headless Console & RAD Toolkit (`simplecli`)**: Full-featured zero-window CLI framework with flag parsing, ANSI colors, tables, interactive prompts, multi-level logging, process control, hardware probing, and cryptography.
 - **V Standard Library Integrations (`stdlib.v`)**: Built-in fluent helpers for HTTP requests, RegEx matching, Cryptography (SHA256, MD5, AES, Bcrypt), Gzip/Zlib/Zstd compression, TOML parsing, SemVer checks, and WebSockets.
@@ -255,10 +255,14 @@ See the [`cli_apps/README.md`](cli_apps/README.md) for the complete catalog of a
 
 ---
 
-# Production Workstations & Studio Applications (45 Workstations)
+# Production Workstations & Studio Applications (47 Workstations)
 
-`simple_gg` includes 45 desktop applications in the [`applications/`](applications) directory, covering devtools, media studios, network utilities, data converters, and security workstations:
+`simple_gg` includes 47 desktop applications in the [`applications/`](applications) directory, covering devtools, media studios, network utilities, data converters, and security workstations:
 
+<p align="center">
+  <img src="snapshots/apps/omnitool_studio.png" width="48%" alt="OmniTool Studio Pro" />
+  <img src="snapshots/apps/watchexec_studio.png" width="48%" alt="Watchexec Studio Pro" />
+</p>
 <p align="center">
   <img src="snapshots/apps/app_bundler_studio.png" width="48%" alt="App Bundler Studio Pro" />
   <img src="snapshots/apps/media_studio_hub.png" width="48%" alt="Media & Data Studio Hub" />
@@ -270,6 +274,8 @@ See the [`cli_apps/README.md`](cli_apps/README.md) for the complete catalog of a
 
 | Application                                                     | Category     | Description                                                                                  | Run Command                               | Snapshot                                            |
 | :-------------------------------------------------------------- | :----------- | :------------------------------------------------------------------------------------------- | :---------------------------------------- | :-------------------------------------------------- |
+| **[`omnitool_studio.v`](applications/omnitool_studio.v)**       | DevTools     | AAA utility suite: fd, sd, watchexec, wget2, rg, rip, ouch, bat, eza.                         | `v run applications/omnitool_studio.v`   | [Screenshot](snapshots/apps/omnitool_studio.png)   |
+| **[`watchexec_studio.v`](applications/watchexec_studio.v)**     | DevTools     | Filesystem watcher, auto-reload runner, debounce & glob filters.                             | `v run applications/watchexec_studio.v`   | [Screenshot](snapshots/apps/watchexec_studio.png)   |
 | **[`app_bundler_studio.v`](applications/app_bundler_studio.v)** | DevTools     | macOS .app bundler, Retina .icns generator & packager.                                       | `v run applications/app_bundler_studio.v` | [Screenshot](snapshots/apps/app_bundler_studio.png) |
 | **[`api_studio.v`](applications/api_studio.v)**                 | DevTools     | Modern API testing client & HTTP request builder.                                            | `v run applications/api_studio.v`         | [Screenshot](snapshots/apps/api_studio.png)         |
 | **[`media_studio_hub.v`](applications/media_studio_hub.v)**     | Media        | Master workstation with instant one-click media tools.                                       | `v run applications/media_studio_hub.v`   | [Screenshot](snapshots/apps/media_studio_hub.png)   |
@@ -301,7 +307,7 @@ See the [`cli_apps/README.md`](cli_apps/README.md) for the complete catalog of a
 
 - **Full API Guide (GUI)**: See [API.md](API.md) for complete details on window configuration, controls, layout engine, themes, event callbacks, reactive state management (`state.v`), system calls (`sys.v`), and standard library extensions (`stdlib.v`).
 - **SimpleCLI Reference (Headless & Console)**: See [CLI_API.md](CLI_API.md) for complete details on the zero-window console utility framework, flag parsing, ANSI UI, interactive prompts, process management, hardware metrics, and stdlib utilities.
-- **Workstations Catalog**: See [applications/README.md](applications/README.md) for the complete list & visual showcase of 45 desktop applications.
+- **Workstations Catalog**: See [applications/README.md](applications/README.md) for the complete list & visual showcase of 47 desktop applications.
 - **Examples Guide**: See [examples/README.md](examples/README.md) for detailed descriptions of all example scripts.
 
 ---

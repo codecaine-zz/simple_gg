@@ -136,18 +136,21 @@ pub mut:
 	drawer_controls   []&Control // Controls contained within drawer panel
 	drawer_items      []DrawerItem // Structured items / navigation links within drawer
 	focused_ctrl_idx  int = -1  // Index for keyboard Tab navigation
+	app_id            string    // Unique identifier for persisting application-specific state
+	auto_save_state   bool = true // Whether to automatically persist and restore form and window state
 }
 
 // new_simple_window creates and initializes a new `SimpleWindow` instance with specified title, width, and height.
 pub fn new_simple_window(title string, width int, height int) &SimpleWindow {
 	mut win := &SimpleWindow{
-		title:       title
-		width:       width
-		height:      height
-		theme:       get_theme('Apple Light')
-		timers:      map[string]&IntervalTimer{}
-		image_cache: map[string]int{}
-		ui_scale:    1.0
+		title:           title
+		width:           width
+		height:          height
+		theme:           get_theme(get_saved_theme())
+		timers:          map[string]&IntervalTimer{}
+		image_cache:     map[string]int{}
+		ui_scale:        1.0
+		auto_save_state: true
 	}
 	return win
 }
@@ -401,6 +404,7 @@ pub fn (mut win SimpleWindow) apply_theme(t Theme) &SimpleWindow {
 
 pub fn (mut win SimpleWindow) set_theme(theme_name string) &SimpleWindow {
 	win.theme = get_theme(theme_name)
+	save_theme(win.theme.name)
 	return win
 }
 
@@ -979,6 +983,9 @@ pub fn (mut win SimpleWindow) align_window(pos string) &SimpleWindow {
 }
 
 pub fn (mut win SimpleWindow) close() &SimpleWindow {
+	if win.auto_save_state {
+		win.save_app_form_state() or {}
+	}
 	if win.gg_ctx != unsafe { nil } {
 		win.gg_ctx.quit()
 	}
@@ -1247,33 +1254,57 @@ pub fn (mut win SimpleWindow) add_slider(name string, value int) &SimpleWindow {
 }
 
 pub fn (mut win SimpleWindow) add_dropdown(name string, items []string, selected string) &SimpleWindow {
+	mut initial_idx := 0
+	for idx, item in items {
+		if item == selected {
+			initial_idx = idx
+			break
+		}
+	}
 	win.add_control(Control{
 		name:       name
 		kind:       'dropdown'
 		items:      items
 		text_value: selected
+		int_value:  initial_idx
 		h:          32
 	})
 	return win
 }
 
 pub fn (mut win SimpleWindow) add_segmented_control(name string, items []string, selected string) &SimpleWindow {
+	mut initial_idx := 0
+	for idx, item in items {
+		if item == selected {
+			initial_idx = idx
+			break
+		}
+	}
 	win.add_control(Control{
 		name:       name
 		kind:       'segmented'
 		items:      items
 		text_value: selected
+		int_value:  initial_idx
 		h:          32
 	})
 	return win
 }
 
 pub fn (mut win SimpleWindow) add_radio_group(name string, items []string, selected string) &SimpleWindow {
+	mut initial_idx := 0
+	for idx, item in items {
+		if item == selected {
+			initial_idx = idx
+			break
+		}
+	}
 	win.add_control(Control{
 		name:       name
 		kind:       'radio'
 		items:      items
 		text_value: selected
+		int_value:  initial_idx
 		h:          32
 	})
 	return win
@@ -2841,7 +2872,7 @@ pub fn (win &SimpleWindow) get_text_or(name string, fallback string) string {
 				return ctrl.text_value
 			}
 			return ctrl.f64_value.str()
-		} else if ctrl.kind in ['dropdown', 'select', 'combobox'] {
+		} else if ctrl.kind in ['dropdown', 'select', 'combobox', 'segmented', 'radio'] {
 			if ctrl.int_value >= 0 && ctrl.int_value < ctrl.items.len {
 				return ctrl.items[ctrl.int_value]
 			}
@@ -2867,7 +2898,7 @@ pub fn (mut win SimpleWindow) set_text(name string, value string) &SimpleWindow 
 			ctrl.int_value = value.int()
 		} else if ctrl.kind in ['step_slider', 'range_slider'] {
 			ctrl.f64_value = value.f64()
-		} else if ctrl.kind in ['dropdown', 'select', 'combobox'] {
+		} else if ctrl.kind in ['dropdown', 'select', 'combobox', 'segmented', 'radio'] {
 			for idx, item in ctrl.items {
 				if item == value {
 					ctrl.int_value = idx
@@ -4797,6 +4828,10 @@ fn event_cb(e &gg.Event, mut win SimpleWindow) {
 }
 
 pub fn (mut win SimpleWindow) run() {
+	if win.auto_save_state {
+		win.restore_app_form_state()
+	}
+
 	if win.fullscreen {
 		scr_w, scr_h := get_primary_screen_size()
 		if scr_w > 0 && scr_h > 0 {
@@ -4824,4 +4859,8 @@ pub fn (mut win SimpleWindow) run() {
 		font_path:        resolved_font
 	)
 	win.gg_ctx.run()
+
+	if win.auto_save_state {
+		win.save_app_form_state() or {}
+	}
 }

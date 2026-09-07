@@ -473,5 +473,236 @@ pub fn (mut win SimpleWindow) bind_value(control_name string, key string) &Simpl
 	return win.bind_state(control_name, key)
 }
 
+// =============================================================================
+// Form & Application State Auto-Persistence API
+// =============================================================================
+
+// should_persist_control determines whether a control's value should be automatically saved across sessions.
+pub fn should_persist_control(ctrl &Control) bool {
+	// Ignore controls without names or internal system controls
+	if ctrl.name.len == 0 || ctrl.name.starts_with('__') {
+		return false
+	}
+
+	// Supported input/preference control kinds
+	if ctrl.kind !in [
+		'input', 'textbox', 'search_bar', 'file_picker', 'date_picker', 'number',
+		'dropdown', 'select', 'combobox', 'segmented', 'radio',
+		'checkbox', 'switch', 'toggle',
+		'slider', 'step_slider', 'range_slider', 'stepper', 'rating',
+		'textarea'
+	] {
+		return false
+	}
+
+	lower := ctrl.name.to_lower()
+
+	// Exclude output consoles, live logs, diffs, previews, and status messages
+	if lower.contains('output') || lower.contains('stdout') || lower.contains('stderr')
+		|| lower.contains('terminal') || lower.contains('console') || lower.contains('live_output')
+		|| lower.contains('preview') || lower.contains('diff') || lower.contains('logs')
+		|| lower.contains('log_area') || lower.contains('results') || lower.contains('msg_box')
+		|| lower.contains('status_bar') || lower.contains('status_lbl') || lower.contains('telemetry')
+		|| lower.contains('summary_card') {
+		return false
+	}
+
+	// Exclude sensitive credentials, passwords, and tokens
+	if lower.contains('password') || lower.contains('secret') || lower.contains('auth_token')
+		|| lower.contains('private_key') {
+		return false
+	}
+
+	return true
+}
+
+// get_app_id returns the unique application identifier used for storing per-app state files.
+pub fn (win &SimpleWindow) get_app_id() string {
+	if win.app_id.len > 0 {
+		return win.app_id
+	}
+	if win.title.len > 0 {
+		clean := win.title.to_lower().replace(' ', '_').replace('-', '_')
+		mut res := ''
+		for ch in clean {
+			if (ch >= `a` && ch <= `z`) || (ch >= `0` && ch <= `9`) || ch == `_` {
+				res += ch.ascii_str()
+			}
+		}
+		if res.len > 0 {
+			return res
+		}
+	}
+	if os.args.len > 0 {
+		base := os.file_name(os.args[0]).all_before_last('.')
+		if base.len > 0 {
+			return base
+		}
+	}
+	return 'default_app'
+}
+
+// set_app_id explicitly sets a custom application identifier for state storage.
+pub fn (mut win SimpleWindow) set_app_id(id string) &SimpleWindow {
+	win.app_id = id
+	return win
+}
+
+// enable_auto_save enables automatic state persistence when the window closes.
+pub fn (mut win SimpleWindow) enable_auto_save() &SimpleWindow {
+	win.auto_save_state = true
+	return win
+}
+
+// disable_auto_save disables automatic state persistence for this window session.
+pub fn (mut win SimpleWindow) disable_auto_save() &SimpleWindow {
+	win.auto_save_state = false
+	return win
+}
+
+// save_app_form_state persists user-entered form inputs, toggles, dropdown selections,
+// window dimensions, active theme, and reactive state keys to `form_state.json`.
+pub fn (win &SimpleWindow) save_app_form_state(app_name ...string) ! {
+	app_id := if app_name.len > 0 && app_name[0].len > 0 { app_name[0] } else { win.get_app_id() }
+	mut data := map[string]string{}
+
+	// Persist window session geometry and theme
+	data['__win_width'] = win.width.str()
+	data['__win_height'] = win.height.str()
+	data['__win_theme'] = win.theme.name
+	data['__win_fullscreen'] = win.fullscreen.str()
+
+	// Persist reactive state store entries
+	for k, v in win.state_store {
+		data['__state_' + k] = v
+	}
+
+	// Persist all user-editable interactive form controls
+	for ctrl in win.controls {
+		if !should_persist_control(ctrl) {
+			continue
+		}
+		val := win.get_text(ctrl.name)
+		data[ctrl.name] = val
+	}
+
+	target_file := get_app_state_file(app_id, 'form_state.json')
+	save_state_to_file(target_file, data) or { return error(err.msg()) }
+}
+
+// save_app_form_state_or persists the form state, returning a boolean success indicator.
+pub fn (win &SimpleWindow) save_app_form_state_or(app_name ...string) bool {
+	win.save_app_form_state(...app_name) or { return false }
+	return true
+}
+
+// restore_app_form_state loads `form_state.json` and restores form inputs, selections,
+// theme, and window dimensions across application launches.
+pub fn (mut win SimpleWindow) restore_app_form_state(app_name ...string) bool {
+	app_id := if app_name.len > 0 && app_name[0].len > 0 { app_name[0] } else { win.get_app_id() }
+	mut target_file := get_app_state_file(app_id, 'form_state.json')
+	if !os.exists(target_file) {
+		target_file = get_app_config_file(app_id, 'form_state.json')
+		if !os.exists(target_file) {
+			// Even if no app-specific form state exists, ensure global theme is applied
+			saved_theme := get_saved_theme()
+			if saved_theme != '' && saved_theme != win.theme.name {
+				win.theme = get_theme(saved_theme)
+			}
+			return false
+		}
+	}
+
+	loaded := load_state_from_file(target_file) or { return false }
+
+	// Restore window geometry if reasonable
+	if w_str := loaded['__win_width'] {
+		w := w_str.int()
+		if w >= 300 && w <= 4000 {
+			win.width = w
+		}
+	}
+	if h_str := loaded['__win_height'] {
+		h := h_str.int()
+		if h >= 200 && h <= 3000 {
+			win.height = h
+		}
+	}
+	if f_str := loaded['__win_fullscreen'] {
+		if f_str == 'true' {
+			win.fullscreen = true
+		}
+	}
+
+	// Restore theme (either app session theme or global saved theme)
+	if theme_str := loaded['__win_theme'] {
+		if theme_str.len > 0 {
+			win.theme = get_theme(theme_str)
+		}
+	} else {
+		saved_theme := get_saved_theme()
+		if saved_theme != '' {
+			win.theme = get_theme(saved_theme)
+		}
+	}
+
+	// Restore state store keys
+	for k, v in loaded {
+		if k.starts_with('__state_') && k.len > 8 {
+			win.set_state(k[8..], v)
+		}
+	}
+
+	// Restore form controls
+	for mut ctrl in win.controls {
+		if val := loaded[ctrl.name] {
+			if should_persist_control(ctrl) {
+				ctrl.text_value = val
+				if ctrl.kind in ['checkbox', 'switch', 'toggle'] {
+					ctrl.bool_value = (val.to_lower().trim_space() in ['true', '1', 'yes', 'on'])
+				} else if ctrl.kind in ['slider', 'number', 'progress', 'stepper', 'rating', 'spinner'] {
+					ctrl.int_value = val.int()
+				} else if ctrl.kind in ['step_slider', 'range_slider'] {
+					ctrl.f64_value = val.f64()
+				} else if ctrl.kind in ['dropdown', 'select', 'combobox', 'segmented', 'radio'] {
+					for idx, item in ctrl.items {
+						if item == val {
+							ctrl.int_value = idx
+							ctrl.text_value = item
+							break
+						}
+					}
+				}
+			}
+		}
+
+		// Ensure theme dropdowns always display the active window theme
+		if ctrl.name in ['dd_app_theme', 'dd_theme', 'dd_theme_selector'] {
+			for idx, item in ctrl.items {
+				if item == win.theme.name {
+					ctrl.int_value = idx
+					ctrl.text_value = item
+					break
+				}
+			}
+		}
+	}
+	return true
+}
+
+// clear_app_form_state deletes the persisted form state file for an application.
+pub fn (win &SimpleWindow) clear_app_form_state(app_name ...string) ! {
+	app_id := if app_name.len > 0 && app_name[0].len > 0 { app_name[0] } else { win.get_app_id() }
+	state_file := get_app_state_file(app_id, 'form_state.json')
+	if os.exists(state_file) {
+		os.rm(state_file) or { return error('Failed to delete form state: ${err.msg()}') }
+	}
+	config_file := get_app_config_file(app_id, 'form_state.json')
+	if os.exists(config_file) {
+		os.rm(config_file) or {}
+	}
+}
+
+
 
 

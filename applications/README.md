@@ -6,7 +6,7 @@ Native macOS GUI applications built with **SimpleGUI** for V, providing high-per
 
 ## 📦 Automatic Homebrew Dependencies Installation
 
-To inspect your system and automatically install any missing CLI tools used across the 45 applications:
+To inspect your system and automatically install any missing CLI tools used across the 47 applications:
 
 ```bash
 # Scan and inspect dependencies health (dry run)
@@ -24,10 +24,14 @@ To inspect your system and automatically install any missing CLI tools used acro
 
 ---
 
-# 📸 Visual Showcase of Applications (45 Workstations)
+# 📸 Visual Showcase of Applications (47 Workstations)
 
 ### Featured Workstations
 
+<p align="center">
+  <img src="../snapshots/apps/omnitool_studio.png" width="48%" alt="OmniTool Studio Pro" />
+  <img src="../snapshots/apps/watchexec_studio.png" width="48%" alt="Watchexec Studio Pro" />
+</p>
 <p align="center">
   <img src="../snapshots/apps/app_bundler_studio.png" width="48%" alt="App Bundler Studio Pro" />
   <img src="../snapshots/apps/media_studio_hub.png" width="48%" alt="Media & Data Studio Hub" />
@@ -146,10 +150,12 @@ To inspect your system and automatically install any missing CLI tools used acro
 
 ---
 
-# Complete Applications Suite (45 Workstations)
+# Complete Applications Suite (47 Workstations)
 
 | Application | Source File | Snapshot | Description |
 | :--- | :--- | :--- | :--- |
+| **OmniTool Studio Pro** | [`omnitool_studio.v`](omnitool_studio.v) | [Screenshot](../snapshots/apps/omnitool_studio.png) | Ultimate AAA developer utility suite uniting **fd, sd, watchexec, wget2, rg, rip, ouch, bat, and eza**: pipeline chains, live code transforms, batch downloads, recursive watcher triggers, and graveyard safety. |
+| **Watchexec Studio Pro** | [`watchexec_studio.v`](watchexec_studio.v) | [Screenshot](../snapshots/apps/watchexec_studio.png) | Production-grade filesystem watcher & execution runner powered by `watchexec`: debounce configuration, clear-screen/post-mortem flags, glob/extension filters, process signals, and real-time live execution monitoring. |
 | **JQ Studio Pro** | [`jq_studio.v`](jq_studio.v) | [Screenshot](../snapshots/apps/jq_studio.png) | Interactive JSON query, formatting & filter workbench powered by `jq`: live query evaluations, 12 built-in transformation recipes, key/path inspection, minifier/prettifier, and error diagnostics. |
 | **API Studio Pro** | [`api_studio.v`](api_studio.v) | [Screenshot](../snapshots/apps/api_studio.png) | Full-featured REST API testing client powered by `curl`: HTTP method selector (GET, POST, PUT, PATCH, DELETE, HEAD), request headers/body editors, latency telemetry (DNS/TLS/TTFB), and 1-click `curl` command exporter. |
 | **Nmap Studio Pro** | [`nmap_studio.v`](nmap_studio.v) | [Screenshot](../snapshots/apps/nmap_studio.png) | High-speed port scanner & network discovery workbench powered by `nmap`: quick scan (-F), service versioning (-sV), OS detection (-O), aggressive timing (-T4), vulnerability scripts, and open port reports. |
@@ -198,10 +204,30 @@ To inspect your system and automatically install any missing CLI tools used acro
 
 ---
 
-# Theme Engine & Persistence (Save State)
+# 💾 Universal Save State & Theme Persistence Architecture
 
-- **Default Theme**: **GitHub Dark** (`#22272e` canvas, `#adbac7` text, `#539bf5` GitHub Blue accent).
-- **Persistent State Across Apps**: When you select any theme in any application, your choice is instantly saved to `~/.config/simplegui/theme.txt`. All studio applications automatically load and apply your saved theme upon launch!
+SimpleGUI features an automated, cross-application save state and configuration persistence engine:
+
+### 1. Global Theme Persistence
+- **Automatic Theme Memory**: When you choose any theme in any application, your choice is instantly saved to `~/.config/simplegui/theme.txt`.
+- **Universal Default Loading**: Every window created with `new_simple_window()` automatically defaults to your saved theme preference without requiring explicit configuration.
+- **Dynamic UI Sync**: Theme dropdowns (`dd_app_theme`, `dd_theme`, `dd_theme_selector`) automatically synchronize their active selection to the current window theme upon launch.
+
+### 2. Form & Session State Persistence (`form_state.json`)
+- **Automated Lifecycle**: Every `SimpleWindow` automatically restores user inputs upon startup in `win.run()` and saves them upon close (`win.close()`, `Cmd+Q`, `Cmd+W`, `Alt+F4`, or window frame close).
+- **Where Users Want State Saved**:
+  - Target paths, directories, and workspace roots (`txt_workspace`, `txt_watch_dir`, `txt_dir`, `txt_source`).
+  - Search queries, glob filters, and replacement strings (`txt_search`, `txt_query`, `txt_filter`, `txt_ext`).
+  - CLI execution arguments and custom flags (`txt_flags`, `txt_args`, `txt_exec_cmd`).
+  - Dropdown presets and format selections (`dd_mode`, `dd_preset`, `dd_format`, `dd_vcodec`, `dd_container`).
+  - Checkbox options and toggles (`chk_case`, `chk_hidden`, `chk_recursive`, `chk_clear_screen`, `chk_post_mortem`).
+  - Sliders and numeric ranges (`sl_depth`, `sl_rate`).
+  - User notes and configuration scratchpads (`txt_notes`, `txt_script`, `txt_template`).
+  - Window geometry (`width`, `height`, `fullscreen`).
+- **Zero Stale Outputs / Security First**:
+  - Ephemeral output logs, terminals, consoles (`txt_output`, `txt_live_output`, `txt_stdout`, `txt_stderr`, `txt_console`) are excluded, ensuring every app starts clean without leftover previous run text.
+  - Sensitive password fields (`txt_password`, `txt_secret`, `txt_token`) are excluded from persistence.
+  - Applications can opt out using `win.disable_auto_save()`.
 
 # Available 18 Curated Themes
 
@@ -233,7 +259,7 @@ To inspect your system and automatically install any missing CLI tools used acro
 Ensure all underlying CLI engines and utilities are installed on macOS via [Homebrew](https://brew.sh):
 
 ```bash
-brew install ripgrep fd sd gawk ouch rip2 ffmpeg imagemagick pandoc wget2 yt-dlp subfinder jq libqalculate numbat kalker nmap exiftool tesseract graphviz
+brew install ripgrep fd sd gawk ouch rip2 ffmpeg imagemagick pandoc wget2 yt-dlp subfinder jq libqalculate numbat kalker nmap exiftool tesseract graphviz watchexec bat eza
 ```
 
 ---
@@ -243,6 +269,10 @@ brew install ripgrep fd sd gawk ouch rip2 ffmpeg imagemagick pandoc wget2 yt-dlp
 Run any workstation directly with `v run`:
 
 ```bash
+# Developer Utilities & Workstation Suites
+v run applications/omnitool_studio.v
+v run applications/watchexec_studio.v
+
 # Data & Structure
 v run applications/jq_studio.v
 v run applications/dataconvert_studio.v
@@ -301,7 +331,7 @@ v run applications/text_editor.v
 
 ## 🔨 Batch Compiling Applications (macOS .app Bundles, Linux & Windows)
 
-You can compile all 45 applications into standalone macOS `.app` bundles with native icons, or cross-compile for Linux and Windows binaries using the multi-threaded V script `compile_apps.vsh`:
+You can compile all 47 applications into standalone macOS `.app` bundles with native icons, or cross-compile for Linux and Windows binaries using the multi-threaded V script `compile_apps.vsh`:
 
 ```bash
 # macOS Native (.app bundles with high-resolution .icns icons)

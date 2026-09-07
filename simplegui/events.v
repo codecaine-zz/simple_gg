@@ -1448,7 +1448,7 @@ pub fn (mut win SimpleWindow) handle_event(e &gg.Event) {
 			}
 
 			if win.close_shortcut_enabled {
-				if ((is_super || is_ctrl) && e.key_code == .q) || (is_alt && e.key_code == .f4) {
+				if ((is_super || is_ctrl) && (e.key_code == .q || e.key_code == .w)) || (is_alt && e.key_code == .f4) {
 					mut should_close := true
 					if win.on_close_cb != unsafe { nil } {
 						should_close = win.on_close_cb(mut win)

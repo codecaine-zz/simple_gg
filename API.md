@@ -1493,6 +1493,61 @@ simplegui.save_state_to_file('~/config.json', state_map) or {}
 loaded_map := simplegui.load_state_from_file('~/config.json') or { map[string]string{} }
 ```
 
+### Universal Theme Persistence & Form State Auto-Persistence
+
+SimpleGUI includes an automated persistence engine that works out-of-the-box across all applications with zero extra configuration:
+
+#### 1. Global Theme Persistence
+- **Automatic Theme Loading**: Every new window created with `new_simple_window()` automatically defaults to the user's preferred saved theme (`simplegui.get_saved_theme()`).
+- **Immediate Theme Persistence**: Calling `win.set_theme(theme_name)` automatically saves the selection to `~/.config/simplegui/theme.txt` via `simplegui.save_theme(theme_name)`. When a user changes themes from any application's theme dropdown, that theme becomes active across all future application launches.
+- **Theme Dropdown Auto-Sync**: Any dropdown named `dd_app_theme`, `dd_theme`, or `dd_theme_selector` automatically synchronizes its selected item with the active window theme upon launch.
+
+```v
+// Global theme helper methods
+theme_name := simplegui.get_saved_theme()   // e.g. "GitHub Dark", "Tokyo Night"
+simplegui.save_theme('Dracula')             // Persists theme preference to disk
+win.restore_saved_theme()                   // Loads and applies saved theme to window
+```
+
+#### 2. Automatic Form & Session State Persistence (`form_state.json`)
+Every `SimpleWindow` has `auto_save_state: true` enabled by default:
+- **On Application Startup (`win.run()`)**: Automatically calls `win.restore_app_form_state()` before the graphics context is initialized. Window geometry (width/height), active theme, reactive state keys, and user form inputs are restored before the first frame renders.
+- **On Application Close (`win.close()`, `Cmd+Q`, `Cmd+W`, `Alt+F4`, or window frame close)**: Automatically calls `win.save_app_form_state()`.
+- **Application Identification (`app_id`)**: The state file is saved under the application's unique ID. If not explicitly set with `win.set_app_id('my_id')`, `win.get_app_id()` automatically derives a clean, snake_case identifier from the window title (e.g. `'OmniTool Studio Pro'` -> `'omnitool_studio_pro'`).
+
+```v
+// Form state methods
+win.save_app_form_state() or {}        // Explicitly save form state
+win.save_app_form_state_or()           // Non-error boolean version
+win.restore_app_form_state()           // Manually restore form state
+win.clear_app_form_state() or {}       // Clear persisted form state
+
+// App ID customization
+app_id := win.get_app_id()             // Cleaned title or binary name
+win.set_app_id('custom_studio_v2')     // Custom namespace for state files
+
+// Opting in / out of auto-persistence
+win.disable_auto_save()                // Disables auto save/restore on lifecycle
+win.enable_auto_save()                 // Re-enables auto save/restore
+```
+
+#### 3. Intelligent Control Filtering (`should_persist_control`)
+To maintain a clean developer experience without stale command outputs or security leaks, SimpleGUI intelligently filters controls:
+
+| Control Type | Examples | Persisted? | Rationale |
+| :--- | :--- | :---: | :--- |
+| **Directory & Paths** | `txt_workspace`, `txt_watch_dir`, `txt_target` | **Yes** | Users expect their last working directory to stay configured. |
+| **Search Queries & Filters** | `txt_search`, `txt_query`, `txt_filter`, `txt_ext` | **Yes** | Keeps current work context across sessions. |
+| **CLI Arguments & Flags** | `txt_flags`, `txt_args`, `txt_exec_cmd` | **Yes** | Custom flags and command invocations are preserved. |
+| **Dropdown Modes & Presets** | `dd_mode`, `dd_preset`, `dd_format`, `dd_vcodec` | **Yes** | Selected tool modes, formats, and codecs stay selected. |
+| **Checkbox Options & Toggles** | `chk_case`, `chk_hidden`, `chk_recursive`, `chk_clear` | **Yes** | Feature toggles remain active. |
+| **Sliders & Numeric Ranges** | `sl_depth`, `sl_rate`, `sl_volume` | **Yes** | Numeric preferences and tuners are restored. |
+| **User Notes & Templates** | `txt_notes`, `txt_script`, `txt_template` | **Yes** | Content in non-log textareas is preserved. |
+| **Window Geometry & Theme** | `width`, `height`, `fullscreen`, theme | **Yes** | Window size and display mode are restored. |
+| **Output Logs & Consoles** | `txt_output`, `txt_live_output`, `txt_stdout`, `txt_console` | **No** | Applications start clean without stale terminal output. |
+| **Sensitive Passwords** | `txt_password`, `txt_secret`, `txt_token` | **No** | Protects user security and credentials. |
+| **Stateless UI Elements** | `btn_*`, `lbl_*`, headings, dividers, charts | **No** | Visual structure is defined by application code. |
+
 ---
 
 ## 13. OS System Calls & Hardware API
