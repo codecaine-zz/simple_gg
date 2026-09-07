@@ -87,3 +87,47 @@ fn test_control_font_type_and_subtype_updates() {
 	}
 }
 
+fn test_resolve_font_path_by_category() {
+	mono_path := resolve_font_path_by_category('mono')
+	serif_path := resolve_font_path_by_category('serif')
+	sans_path := resolve_font_path_by_category('sans')
+
+	$if macos {
+		assert mono_path.len > 0
+		assert os.exists(mono_path)
+		assert serif_path.len > 0
+		assert os.exists(serif_path)
+		assert sans_path.len > 0
+		assert os.exists(sans_path)
+	}
+}
+
+fn test_form_controls_font_customization() {
+	mut win := new_simple_window('Form Typography Test', 400, 300)
+	win.add_input('inp_test', 'Initial text')
+	win.add_checkbox('chk_test', 'Test Checkbox', true)
+	win.add_switch('sw_test', 'Test Switch', false)
+
+	win.set_control_font_name('inp_test', '/custom/font.ttf')
+	win.set_control_font_size('inp_test', 18)
+	win.set_control_font_bold('inp_test', true)
+
+	win.set_control_font_name('chk_test', '/custom/font.ttf')
+	win.set_control_font_size('chk_test', 16)
+
+	win.set_control_font_name('sw_test', '/custom/font.ttf')
+
+	if inp := win.control_map['inp_test'] {
+		assert inp.font_name == '/custom/font.ttf'
+		assert inp.font_size == 18
+		assert inp.font_bold == true
+	}
+	if chk := win.control_map['chk_test'] {
+		assert chk.font_name == '/custom/font.ttf'
+		assert chk.font_size == 16
+	}
+	if sw := win.control_map['sw_test'] {
+		assert sw.font_name == '/custom/font.ttf'
+	}
+}
+

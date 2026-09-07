@@ -2474,15 +2474,133 @@ pub fn macos_font_candidates() []string {
 		'/System/Library/Fonts/Supplemental/Arial.ttf',
 		'/System/Library/Fonts/Supplemental/Helvetica.ttf',
 		'/System/Library/Fonts/Supplemental/Verdana.ttf',
+		'/System/Library/Fonts/Supplemental/Trebuchet MS.ttf',
 		// Monospace candidates
-		'/System/Library/Fonts/Monaco.ttf',
 		'/System/Library/Fonts/Supplemental/Courier New.ttf',
+		'/System/Library/Fonts/Supplemental/Andale Mono.ttf',
+		'/System/Library/Fonts/Monaco.ttf',
 		'/System/Library/Fonts/Menlo.ttc',
 		// Serif candidates
 		'/System/Library/Fonts/Supplemental/Times New Roman.ttf',
 		'/System/Library/Fonts/Supplemental/Georgia.ttf',
+		// Display & Casual candidates
+		'/System/Library/Fonts/Supplemental/Impact.ttf',
+		'/System/Library/Fonts/Supplemental/Comic Sans MS.ttf',
 		'/Library/Fonts/Arial.ttf',
 	]
+}
+
+// resolve_font_path_by_category maps generic font categories (sans, mono, serif, display, casual)
+// to standard platform TrueType font files on macOS, Linux, and Windows.
+pub fn resolve_font_path_by_category(category string) string {
+	cat := category.to_lower()
+	$if macos {
+		candidates := match cat {
+			'mono', 'monospace', 'code' {
+				[
+					'/System/Library/Fonts/Supplemental/Courier New.ttf',
+					'/System/Library/Fonts/Supplemental/Andale Mono.ttf',
+					'/System/Library/Fonts/Monaco.ttf',
+				]
+			}
+			'serif', 'editorial' {
+				[
+					'/System/Library/Fonts/Supplemental/Times New Roman.ttf',
+					'/System/Library/Fonts/Supplemental/Georgia.ttf',
+				]
+			}
+			'display', 'impact' {
+				[
+					'/System/Library/Fonts/Supplemental/Impact.ttf',
+					'/System/Library/Fonts/Supplemental/Trebuchet MS.ttf',
+				]
+			}
+			'casual', 'comic' {
+				[
+					'/System/Library/Fonts/Supplemental/Comic Sans MS.ttf',
+				]
+			}
+			'sans', 'sans-serif', 'proportional' {
+				[
+					'/System/Library/Fonts/Supplemental/Arial.ttf',
+					'/System/Library/Fonts/Supplemental/Helvetica.ttf',
+					'/System/Library/Fonts/Supplemental/Verdana.ttf',
+					'/System/Library/Fonts/Supplemental/Trebuchet MS.ttf',
+				]
+			}
+			else {
+				[]string{}
+			}
+		}
+		for c in candidates {
+			if os.exists(c) {
+				return c
+			}
+		}
+	} $else $if linux {
+		candidates := match cat {
+			'mono', 'monospace', 'code' {
+				[
+					'/usr/share/fonts/truetype/ubuntu/UbuntuMono-R.ttf',
+					'/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf',
+					'/usr/share/fonts/truetype/liberation/LiberationMono-Regular.ttf',
+					'/usr/share/fonts/truetype/freefont/FreeMono.ttf',
+				]
+			}
+			'serif', 'editorial' {
+				[
+					'/usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf',
+					'/usr/share/fonts/truetype/liberation/LiberationSerif-Regular.ttf',
+					'/usr/share/fonts/truetype/freefont/FreeSerif.ttf',
+				]
+			}
+			'sans', 'sans-serif', 'proportional' {
+				[
+					'/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf',
+					'/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+					'/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf',
+				]
+			}
+			else {
+				[]string{}
+			}
+		}
+		for c in candidates {
+			if os.exists(c) {
+				return c
+			}
+		}
+	} $else $if windows {
+		candidates := match cat {
+			'mono', 'monospace', 'code' {
+				[
+					'C:\\Windows\\Fonts\\consola.ttf',
+					'C:\\Windows\\Fonts\\cour.ttf',
+				]
+			}
+			'serif', 'editorial' {
+				[
+					'C:\\Windows\\Fonts\\times.ttf',
+					'C:\\Windows\\Fonts\\georgia.ttf',
+				]
+			}
+			'sans', 'sans-serif', 'proportional' {
+				[
+					'C:\\Windows\\Fonts\\arial.ttf',
+					'C:\\Windows\\Fonts\\verdana.ttf',
+				]
+			}
+			else {
+				[]string{}
+			}
+		}
+		for c in candidates {
+			if os.exists(c) {
+				return c
+			}
+		}
+	}
+	return ''
 }
 
 // resolve_window_font_path resolves custom or system font path for smooth text rendering.

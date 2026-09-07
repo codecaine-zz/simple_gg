@@ -21,6 +21,29 @@ import math
 import os
 import time
 
+// resolve_control_family_path determines the active font file path for rendering a control's text.
+// It checks explicit font_name paths, font_type category mapping, and window-level font_path fallback.
+fn resolve_control_family_path(ctrl &Control, win &SimpleWindow) string {
+	if ctrl.font_name.len > 0 && (os.exists(ctrl.font_name) || ctrl.font_name.ends_with('.ttf') || ctrl.font_name.ends_with('.otf') || ctrl.font_name.ends_with('.ttc')) {
+		return ctrl.font_name
+	}
+	if ctrl.font_type.len > 0 && (os.exists(ctrl.font_type) || ctrl.font_type.ends_with('.ttf') || ctrl.font_type.ends_with('.otf') || ctrl.font_type.ends_with('.ttc')) {
+		return ctrl.font_type
+	}
+	// Check category keyword in font_name or font_type
+	target_cat := if ctrl.font_name.len > 0 && ctrl.font_name != 'sans' { ctrl.font_name } else { ctrl.font_type }
+	if target_cat.len > 0 {
+		resolved := resolve_font_path_by_category(target_cat)
+		if resolved.len > 0 && os.exists(resolved) {
+			return resolved
+		}
+	}
+	if win.font_path.len > 0 && (os.exists(win.font_path) || win.font_path.ends_with('.ttf') || win.font_path.ends_with('.otf') || win.font_path.ends_with('.ttc')) {
+		return win.font_path
+	}
+	return ''
+}
+
 // render_ui is called on every graphics frame refresh to render the complete window user interface.
 // It recalculates layout coordinates, clears the window canvas, and renders every visible control.
 pub fn (mut win SimpleWindow) render_ui() {
@@ -69,11 +92,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 				lbl_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 15 }
 				mono_value := ctrl.font_name.to_lower() + '|' + ctrl.font_type.to_lower() + '|' + ctrl.font_subtype.to_lower()
 				is_mono := mono_value.contains('mono') || mono_value.contains('courier') || mono_value.contains('code')
-				family_path := if ctrl.font_name.len > 0 && (os.exists(ctrl.font_name) || ctrl.font_name.ends_with('.ttf') || ctrl.font_name.ends_with('.otf') || ctrl.font_name.ends_with('.ttc')) {
-					ctrl.font_name
-				} else {
-					''
-				}
+				family_path := resolve_control_family_path(ctrl, win)
 				win.gg_ctx.draw_text2(
 					x:      int(ctrl.x)
 					y:      int(ctrl.y + 4)
@@ -91,11 +110,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 				hd_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 22 }
 				mono_value := ctrl.font_name.to_lower() + '|' + ctrl.font_type.to_lower() + '|' + ctrl.font_subtype.to_lower()
 				is_mono := mono_value.contains('mono') || mono_value.contains('courier') || mono_value.contains('code')
-				family_path := if ctrl.font_name.len > 0 && (os.exists(ctrl.font_name) || ctrl.font_name.ends_with('.ttf') || ctrl.font_name.ends_with('.otf') || ctrl.font_name.ends_with('.ttc')) {
-					ctrl.font_name
-				} else {
-					''
-				}
+				family_path := resolve_control_family_path(ctrl, win)
 				win.gg_ctx.draw_text2(
 					x:      int(ctrl.x)
 					y:      int(ctrl.y)
@@ -114,11 +129,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 				lnk_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 14 }
 				mono_value := ctrl.font_name.to_lower() + '|' + ctrl.font_type.to_lower() + '|' + ctrl.font_subtype.to_lower()
 				is_mono := mono_value.contains('mono') || mono_value.contains('courier') || mono_value.contains('code')
-				family_path := if ctrl.font_name.len > 0 && (os.exists(ctrl.font_name) || ctrl.font_name.ends_with('.ttf') || ctrl.font_name.ends_with('.otf') || ctrl.font_name.ends_with('.ttc')) {
-					ctrl.font_name
-				} else {
-					''
-				}
+				family_path := resolve_control_family_path(ctrl, win)
 				win.gg_ctx.draw_text2(
 					x:      int(ctrl.x)
 					y:      int(ctrl.y + 4)
@@ -133,7 +144,9 @@ pub fn (mut win SimpleWindow) render_ui() {
 					ctrl.y + 20, accent)
 			}
 			'button', 'action' {
-				mut btn_bg := if ctrl.accent_color.len > 0 {
+				mut btn_bg := if ctrl.bg_color.len > 0 {
+					parse_hex_color(ctrl.bg_color)
+				} else if ctrl.accent_color.len > 0 {
 					parse_hex_color(ctrl.accent_color)
 				} else {
 					accent
@@ -179,11 +192,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 
 				mono_value := ctrl.font_name.to_lower() + '|' + ctrl.font_type.to_lower() + '|' + ctrl.font_subtype.to_lower()
 				is_mono := mono_value.contains('mono') || mono_value.contains('courier') || mono_value.contains('code')
-				family_path := if ctrl.font_name.len > 0 && (os.exists(ctrl.font_name) || ctrl.font_name.ends_with('.ttf') || ctrl.font_name.ends_with('.otf') || ctrl.font_name.ends_with('.ttc')) {
-					ctrl.font_name
-				} else {
-					''
-				}
+				family_path := resolve_control_family_path(ctrl, win)
 				win.gg_ctx.draw_text2(
 					x:      math.max(int(ctrl.x + 8 + btn_icon_offset), text_x)
 					y:      text_y
@@ -220,11 +229,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 				txt_w := f32(ctrl.title.len) * (f32(ib_sz) * 0.55)
 				mono_value := ctrl.font_name.to_lower() + '|' + ctrl.font_type.to_lower() + '|' + ctrl.font_subtype.to_lower()
 				is_mono := mono_value.contains('mono') || mono_value.contains('courier') || mono_value.contains('code')
-				family_path := if ctrl.font_name.len > 0 && (os.exists(ctrl.font_name) || ctrl.font_name.ends_with('.ttf') || ctrl.font_name.ends_with('.otf') || ctrl.font_name.ends_with('.ttc')) {
-					ctrl.font_name
-				} else {
-					''
-				}
+				family_path := resolve_control_family_path(ctrl, win)
 				win.gg_ctx.draw_text2(
 					x:      int(ctrl.x + (ctrl.w - txt_w) / 2.0)
 					y:      int(ctrl.y + (ctrl.h - f32(ib_sz)) / 2.0)
@@ -325,15 +330,17 @@ pub fn (mut win SimpleWindow) render_ui() {
 					}
 				}
 
+				family_path := resolve_control_family_path(ctrl, win)
 				is_mono := ctrl.font_name.len > 0 && (ctrl.font_name.to_lower().contains('mono') || ctrl.font_name.to_lower().contains('courier'))
 				win.gg_ctx.draw_text2(
-					x:     int(ctrl.x + 10 + in_offset_x)
-					y:     int(ctrl.y + (ctrl.h - f32(inp_sz)) / 2.0)
-					text:  clipped_txt
-					color: txt_color
-					size:  inp_sz
-					bold:  ctrl.font_bold
-					mono:  is_mono
+					x:      int(ctrl.x + 10 + in_offset_x)
+					y:      int(ctrl.y + (ctrl.h - f32(inp_sz)) / 2.0)
+					text:   clipped_txt
+					color:  txt_color
+					size:   inp_sz
+					bold:   ctrl.font_bold
+					mono:   is_mono
+					family: family_path
 				)
 
 				if ctrl.is_focused {
@@ -402,19 +409,21 @@ pub fn (mut win SimpleWindow) render_ui() {
 					}
 				}
 
+				family_path := resolve_control_family_path(ctrl, win)
 				for line in lines {
 					if line_y + line_h > ctrl.y + ctrl.h - 4.0 {
 						break
 					}
 					is_mono := ctrl.font_name.len > 0 && (ctrl.font_name.to_lower().contains('mono') || ctrl.font_name.to_lower().contains('courier'))
 					win.gg_ctx.draw_text2(
-						x:     int(ctrl.x + 10)
-						y:     int(line_y)
-						text:  line
-						color: txt_c
-						size:  txt_sz
-						bold:  ctrl.font_bold
-						mono:  is_mono
+						x:      int(ctrl.x + 10)
+						y:      int(line_y)
+						text:   line
+						color:  txt_c
+						size:   txt_sz
+						bold:   ctrl.font_bold
+						mono:   is_mono
+						family: family_path
 					)
 					line_y += line_h
 				}
@@ -465,13 +474,15 @@ pub fn (mut win SimpleWindow) render_ui() {
 
 				chk_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 14 }
 				chk_tc := if ctrl.font_color.len > 0 { parse_hex_color(ctrl.font_color) } else { fg }
+				family_path := resolve_control_family_path(ctrl, win)
 				win.gg_ctx.draw_text2(
-					x:     int(ctrl.x + box_size + 10)
-					y:     int(ctrl.y + (ctrl.h - f32(chk_sz)) / 2.0)
-					text:  ctrl.title
-					color: chk_tc
-					size:  chk_sz
-					bold:  ctrl.font_bold
+					x:      int(ctrl.x + box_size + 10)
+					y:      int(ctrl.y + (ctrl.h - f32(chk_sz)) / 2.0)
+					text:   ctrl.title
+					color:  chk_tc
+					size:   chk_sz
+					bold:   ctrl.font_bold
+					family: family_path
 				)
 			}
 			'switch' {
@@ -501,13 +512,15 @@ pub fn (mut win SimpleWindow) render_ui() {
 
 				sw_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 14 }
 				sw_tc := if ctrl.font_color.len > 0 { parse_hex_color(ctrl.font_color) } else { fg }
+				family_path := resolve_control_family_path(ctrl, win)
 				win.gg_ctx.draw_text2(
-					x:     int(ctrl.x + sw_w + 12)
-					y:     int(ctrl.y + (ctrl.h - f32(sw_sz)) / 2.0)
-					text:  ctrl.title
-					color: sw_tc
-					size:  sw_sz
-					bold:  ctrl.font_bold
+					x:      int(ctrl.x + sw_w + 12)
+					y:      int(ctrl.y + (ctrl.h - f32(sw_sz)) / 2.0)
+					text:   ctrl.title
+					color:  sw_tc
+					size:   sw_sz
+					bold:   ctrl.font_bold
+					family: family_path
 				)
 			}
 			'slider' {
@@ -617,12 +630,14 @@ pub fn (mut win SimpleWindow) render_ui() {
 				} else {
 					if ctrl.items.len > 0 { ctrl.items[0] } else { ctrl.title }
 				}
+				family_path := resolve_control_family_path(ctrl, win)
 				win.gg_ctx.draw_text2(
-					x:     int(ctrl.x + 10)
-					y:     int(ctrl.y + (ctrl.h - 16.0) / 2.0)
-					text:  display_txt
-					color: fg
-					size:  14
+					x:      int(ctrl.x + 10)
+					y:      int(ctrl.y + (ctrl.h - 16.0) / 2.0)
+					text:   display_txt
+					color:  fg
+					size:   14
+					family: family_path
 				)
 				draw_vector_chevron(win.gg_ctx, ctrl.x + ctrl.w - 18.0, ctrl.y + ctrl.h / 2.0, 5.0, if ctrl.is_expanded { 'up' } else { 'down' }, fg)
 			}
@@ -704,6 +719,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 					border_c)
 
 				if ctrl.items.len > 0 {
+					family_path := resolve_control_family_path(ctrl, win)
 					seg_w := ctrl.w / f32(ctrl.items.len)
 					for idx, item in ctrl.items {
 						item_x := ctrl.x + f32(idx) * seg_w
@@ -723,20 +739,23 @@ pub fn (mut win SimpleWindow) render_ui() {
 						}
 						text_w := f32(item.len * 7)
 						win.gg_ctx.draw_text2(
-							x:     int(item_x + math.max(4.0, (seg_w - text_w) / 2.0))
-							y:     int(ctrl.y + (ctrl.h - 14.0) / 2.0)
-							text:  item
-							color: item_c
-							size:  12
+							x:      int(item_x + math.max(4.0, (seg_w - text_w) / 2.0))
+							y:      int(ctrl.y + (ctrl.h - 14.0) / 2.0)
+							text:   item
+							color:  item_c
+							size:   12
+							family: family_path
 						)
 					}
 				} else {
+					family_path := resolve_control_family_path(ctrl, win)
 					win.gg_ctx.draw_text2(
-						x:     int(ctrl.x + 10)
-						y:     int(ctrl.y + (ctrl.h - 16.0) / 2.0)
-						text:  if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.title }
-						color: fg
-						size:  14
+						x:      int(ctrl.x + 10)
+						y:      int(ctrl.y + (ctrl.h - 16.0) / 2.0)
+						text:   if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.title }
+						color:  fg
+						size:   14
+						family: family_path
 					)
 				}
 			}
@@ -1551,19 +1570,22 @@ pub fn (mut win SimpleWindow) render_ui() {
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 10.0,
 					border_c)
 
+				family_path := resolve_control_family_path(ctrl, win)
 				win.gg_ctx.draw_text2(
-					x:     int(ctrl.x + 12)
-					y:     int(ctrl.y + 10)
-					text:  ctrl.title
-					color: fg
-					size:  13
+					x:      int(ctrl.x + 12)
+					y:      int(ctrl.y + 10)
+					text:   ctrl.title
+					color:  fg
+					size:   13
+					family: family_path
 				)
 				win.gg_ctx.draw_text2(
-					x:     int(ctrl.x + 12)
-					y:     int(ctrl.y + 32)
-					text:  ctrl.text_value
-					color: accent
-					size:  18
+					x:      int(ctrl.x + 12)
+					y:      int(ctrl.y + 32)
+					text:   ctrl.text_value
+					color:  accent
+					size:   18
+					family: family_path
 				)
 
 				if ctrl.placeholder.len > 0 {

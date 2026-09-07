@@ -224,6 +224,41 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 									inner_y += max_h + sp
 								}
 							}
+							'grid_start' {
+								cols := if win.controls[i].int_value > 0 { win.controls[i].int_value } else { 2 }
+								grid_sp := if win.controls[i].min_val > 0 { f32(win.controls[i].min_val) } else { sp }
+
+								mut grid_indices := []int{}
+								i++
+								for i < win.controls.len && win.controls[i].kind != 'grid_end' {
+									if win.controls[i].visible {
+										grid_indices << i
+									}
+									i++
+								}
+
+								if grid_indices.len > 0 {
+									inner_content_w := content_w - group_inner_pad * 2.0
+									gaps_w := (f32(cols) - 1.0) * grid_sp
+									col_w := (inner_content_w - gaps_w) / f32(cols)
+									mut max_h_in_row := f32(0.0)
+
+									for idx_num, idx in grid_indices {
+										col := idx_num % cols
+										if col == 0 && idx_num > 0 {
+											inner_y += max_h_in_row + grid_sp
+											max_h_in_row = 0.0
+										}
+										win.controls[idx].x = pad + group_inner_pad + f32(col) * (col_w + grid_sp)
+										win.controls[idx].y = inner_y
+										win.controls[idx].w = col_w
+										if win.controls[idx].h > max_h_in_row {
+											max_h_in_row = win.controls[idx].h
+										}
+									}
+									inner_y += max_h_in_row + sp
+								}
+							}
 							else {
 								win.controls[i].x = pad + group_inner_pad + win.controls[i].margin_left
 								win.controls[i].y = inner_y + win.controls[i].margin_top
