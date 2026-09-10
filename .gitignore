@@ -19,6 +19,10 @@ bin/
 # ENV
 .env
 
+# Local scratch program
+practice.v
+cache_plan.c
+
 # vweb and database
 *.db
 *.js
