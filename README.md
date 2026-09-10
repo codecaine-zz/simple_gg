@@ -312,6 +312,20 @@ See the [`cli_apps/README.md`](cli_apps/README.md) for the complete catalog of a
 
 ---
 
-# Related Projects
+# Related GUI & RAD Desktop Projects
 
-- **[Bun RAD Studio](https://github.com/codecaine-zz/bun_rad_studio)** - A high-performance Rapid Application Development (RAD) Visual IDE for Bun and Webview-Bun, inspired by classic Borland Delphi and Visual Basic 6.
+Explore sister projects and complementary GUI frameworks, templates, and RAD visual design suites:
+
+| Project | Primary Stack | Architecture & Description |
+| :--- | :--- | :--- |
+| **[Vlang Webview RAD Studio](https://github.com/codecaine-zz/vlang_webview_rad_studio)** | V (vlang) + Native OS Webview | Cross-platform visual Rapid Application Development (RAD) IDE & enterprise desktop suite. Borland Delphi/VB-inspired form designer with 70+ controls, 42 desktop themes, 16 enterprise studio applications, 16 companion CLIs, and standalone `.app`/`.exe`/ELF packager. |
+| **[Bun RAD Studio](https://github.com/codecaine-zz/bun_rad_studio)** | Bun + TypeScript / Webview-Bun | High-performance visual RAD IDE for Bun and Webview-Bun, featuring instant hot-reload, drag-and-drop form canvas, full TypeScript type safety, and 42 desktop themes. |
+| **[Vlang macOS Webview App Template](https://github.com/codecaine-zz/vlang_macos_webview_app_template)** | V (vlang) + Cocoa Webview | Standalone native macOS `.app` desktop application template for V using `ttytm.webview`, Cocoa Objective-C window helper integration (`window_helper.m`), 9-point screen placement geometry, stay-on-top pinning, and two-way IPC. |
+| **[vlang_simplegui](https://github.com/codecaine-zz/vlang_simplegui)** | V (vlang) + Native GUI | Declarative macOS-native GUI starter framework written in V, featuring fluent builder syntax, reactive two-way value synchronization, KPI dashboards, sortable tables, and dynamic live theme switching across 42 themes. |
+
+### Notable Open-Source Webview Frameworks
+
+- **[pywebview](https://github.com/r0x0r/pywebview)** - Lightweight, cross-platform native GUI window wrapper around OS webviews for Python applications by Roman Sirokov (`r0x0r`) and community.
+- **[Neutralinojs](https://github.com/neutralinojs/neutralinojs)** - Portable, lightweight cross-platform desktop application development framework using web technologies and native webview by the Neutralinojs organization.
+
+
