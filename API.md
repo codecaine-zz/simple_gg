@@ -21,6 +21,7 @@ v install --git https://github.com/codecaine-zz/simple_gg
 
 - **V Module Import**: `import simplegui` (unified on macOS, Linux, and Windows)
 - **Headless CLI Import**: `import simplecli`
+- **30 Utility Modules**: `import <modulename>` (e.g., `import strutils`, `import cacheutils`, `import sqliteutils`). Complete manual: [UTILS_API.md](UTILS_API.md)
 
 ---
 

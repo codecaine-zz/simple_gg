@@ -156,7 +156,7 @@ pub fn (cli &SimpleCli) crypto_bcrypt_verify(password string, hash string) bool 
 // crypto_aes_encrypt encrypts plaintext using AES-256-CTR with a 32-byte key.
 pub fn (cli &SimpleCli) crypto_aes_encrypt(key_str string, plaintext string) !string {
 	key_hash := sha256.sum(key_str.bytes())
-	block := aes.new_cipher(key_hash)
+	block := aes.new_cipher(key_hash)!
 	iv := rand.bytes(aes.block_size) or { return error('Failed to generate random IV') }
 	mut stream := cipher.new_ctr(block, iv)
 	mut ciphertext := []u8{len: plaintext.len}
@@ -177,7 +177,7 @@ pub fn (cli &SimpleCli) crypto_aes_decrypt(key_str string, b64_ciphertext string
 	iv := combined[..aes.block_size]
 	cipher_bytes := combined[aes.block_size..]
 	key_hash := sha256.sum(key_str.bytes())
-	block := aes.new_cipher(key_hash)
+	block := aes.new_cipher(key_hash)!
 	mut stream := cipher.new_ctr(block, iv)
 	mut plaintext := []u8{len: cipher_bytes.len}
 	stream.xor_key_stream(mut plaintext, cipher_bytes)
