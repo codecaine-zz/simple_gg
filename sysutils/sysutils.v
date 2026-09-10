@@ -258,7 +258,7 @@ pub fn get_uptime() i64 {
 		content := os.read_file('/proc/uptime') or { '' }
 		fields := content.fields()
 		if fields.len > 0 {
-			return fields[0].f64().i64()
+			return i64(fields[0].f64())
 		}
 	}
 	return 0
