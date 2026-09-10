@@ -14,7 +14,7 @@ fn test_relative_time() {
 	past_1d := now.add(-86400 * time.second)
 	assert time_ago(past_1d) == 'yesterday'
 
-	future_10m := now.add(600 * time.second)
+	future_10m := now.add(605 * time.second)
 	assert time_until(future_10m) == 'in 10 minutes'
 
 	future_1d := now.add(86400 * time.second)
@@ -99,4 +99,3 @@ fn test_benchmark_fn() {
 	assert res.ops_per_sec > 0.0
 	assert res.str().contains('arithmetic_test')
 }
-

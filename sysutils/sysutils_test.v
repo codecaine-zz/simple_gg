@@ -83,4 +83,3 @@ fn test_runtime_and_pipe() {
 	piped := pipe_commands('echo "antigravity rocks"', 'grep "rocks"') or { panic(err) }
 	assert piped.contains('antigravity rocks')
 }
-

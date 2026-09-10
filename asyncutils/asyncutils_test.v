@@ -41,7 +41,7 @@ pub mut:
 
 fn test_parallel_each() {
 	nums := [10, 20, 30, 40]
-	counter_ref := &SharedCounter{val: 0}
+	counter_ref := &SharedCounter{ val: 0 }
 	parallel_each[int](nums, 2, fn [counter_ref] (n int) {
 		stdatomic.add_u64(&counter_ref.val, n)
 	})
@@ -50,7 +50,7 @@ fn test_parallel_each() {
 
 fn test_waitgroup() {
 	mut wg := new_waitgroup()
-	counter_ref := &SharedCounter{val: 0}
+	counter_ref := &SharedCounter{ val: 0 }
 
 	for _ in 0 .. 5 {
 		wg.add(1)
@@ -71,7 +71,7 @@ fn test_worker_pool() {
 		pool.stop()
 	}
 
-	counter_ref := &SharedCounter{val: 0}
+	counter_ref := &SharedCounter{ val: 0 }
 	for _ in 0 .. 6 {
 		pool.submit(fn [counter_ref] () {
 			time.sleep(5 * time.millisecond)

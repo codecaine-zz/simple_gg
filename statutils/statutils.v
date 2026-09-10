@@ -366,9 +366,9 @@ pub fn stats_linear_regression(x []f64, y []f64) !LinearRegressionResult {
 	r_sq := corr * corr
 
 	return LinearRegressionResult{
-		slope:       slope
-		intercept:   intercept
-		r_squared:   r_sq
+		slope: slope
+		intercept: intercept
+		r_squared: r_sq
 		correlation: corr
 	}
 }
@@ -536,22 +536,22 @@ pub fn stats_summary(arr []f64) SummaryStats {
 	max_v := stats_max(arr) or { 0.0 }
 
 	return SummaryStats{
-		count:           arr.len
-		min:             min_v
-		max:             max_v
-		range:           max_v - min_v
-		sum:             stats_sum(arr)
-		mean:            stats_mean(arr)
-		median:          q2
-		variance:        stats_variance(arr)
+		count: arr.len
+		min: min_v
+		max: max_v
+		range: max_v - min_v
+		sum: stats_sum(arr)
+		mean: stats_mean(arr)
+		median: q2
+		variance: stats_variance(arr)
 		sample_variance: stats_sample_variance(arr)
-		std_dev:         stats_std_dev(arr)
-		sample_std_dev:  stats_sample_std_dev(arr)
-		sem:             stats_standard_error(arr)
-		q1:              q1
-		q3:              q3
-		iqr:             q3 - q1
-		skewness:        stats_skewness(arr)
-		kurtosis:        stats_kurtosis(arr)
+		std_dev: stats_std_dev(arr)
+		sample_std_dev: stats_sample_std_dev(arr)
+		sem: stats_standard_error(arr)
+		q1: q1
+		q3: q3
+		iqr: q3 - q1
+		skewness: stats_skewness(arr)
+		kurtosis: stats_kurtosis(arr)
 	}
 }

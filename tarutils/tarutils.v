@@ -23,21 +23,21 @@ pub fn pack_bytes(entries []TarEntry) []u8 {
 			}
 			header[i] = entry.name[i]
 		}
-		mode := if entry.is_dir { '0000755\0' } else { '0000644\0' }
+		mode := if entry.is_dir { '0000755\x00' } else { '0000644\x00' }
 		for i in 0 .. mode.len {
 			header[100 + i] = mode[i]
 		}
-		uid := '0000000\0'
+		uid := '0000000\x00'
 		for i in 0 .. uid.len {
 			header[108 + i] = uid[i]
 			header[116 + i] = uid[i]
 		}
 
-		size_oct := '${entry.size:011o}\0'
+		size_oct := '${entry.size:011o}\x00'
 		for i in 0 .. size_oct.len {
 			header[124 + i] = size_oct[i]
 		}
-		mtime := '00000000000\0'
+		mtime := '00000000000\x00'
 		for i in 0 .. mtime.len {
 			header[136 + i] = mtime[i]
 		}
@@ -45,7 +45,7 @@ pub fn pack_bytes(entries []TarEntry) []u8 {
 			header[148 + i] = ` `
 		}
 		header[156] = if entry.is_dir { `5` } else { `0` }
-		magic := 'ustar\0'
+		magic := 'ustar\x00'
 		for i in 0 .. magic.len {
 			header[257 + i] = magic[i]
 		}
@@ -56,7 +56,7 @@ pub fn pack_bytes(entries []TarEntry) []u8 {
 		for b in header {
 			sum += int(b)
 		}
-		chk := '${sum:06o}\0 '
+		chk := '${sum:06o}\x00 '
 		for i in 0 .. chk.len {
 			header[148 + i] = chk[i]
 		}

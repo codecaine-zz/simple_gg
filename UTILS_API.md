@@ -1,6 +1,6 @@
 # V Developer Utility Suite (`vlang_utils`) - Complete API Reference
 
-Welcome to the comprehensive API reference manual for the **30 production-grade developer utility modules** integrated directly into `simple_gg`.
+Welcome to the comprehensive API reference manual for the **30 production-grade developer utility modules** in `vlang_utils`.
 
 Every module is zero-dependency, self-contained, and designed for Rapid Application Development (RAD). You can import any module directly across GUI apps, CLI tools, services, and background workers (e.g. `import strutils`, `import sqliteutils`, `import cacheutils`).
 
@@ -20,6 +20,48 @@ The examples use a few V conventions that are worth knowing before you start:
 - `println(...)` displays a result in the terminal. `assert ...` checks that an example produced the expected answer; it prints nothing when the check passes.
 
 Examples that contact a website, read a file, use the clipboard, or ask a question in the terminal need that service, file, or user input to be available. Their surrounding text names the required input and explains the expected result.
+
+### 🚀 Ready-to-Run Demos
+
+All 30 utility modules have standalone, fully functional demo scripts located in the [`demos/`](demos/) directory.
+
+- **Run all 30 demos sequentially with execution timing:**
+  ```bash
+  v run demos/run_all_demos.v
+  ```
+
+| Module | Demo Script | Command |
+| :--- | :--- | :--- |
+| [`archiveutils`](#archiveutils-api) | [`demo_archiveutils.v`](demos/demo_archiveutils.v) | `v run demos/demo_archiveutils.v` |
+| [`asyncutils`](#asyncutils-api) | [`demo_asyncutils.v`](demos/demo_asyncutils.v) | `v run demos/demo_asyncutils.v` |
+| [`bitutils`](#bitutils-api) | [`demo_bitutils.v`](demos/demo_bitutils.v) | `v run demos/demo_bitutils.v` |
+| [`cacheutils`](#cacheutils-api) | [`demo_cacheutils.v`](demos/demo_cacheutils.v) | `v run demos/demo_cacheutils.v` |
+| [`cliutils`](#cliutils-api) | [`demo_cliutils.v`](demos/demo_cliutils.v) | `v run demos/demo_cliutils.v` |
+| [`colorutils`](#colorutils-api) | [`demo_colorutils.v`](demos/demo_colorutils.v) | `v run demos/demo_colorutils.v` |
+| [`compressutils`](#compressutils-api) | [`demo_compressutils.v`](demos/demo_compressutils.v) | `v run demos/demo_compressutils.v` |
+| [`cryptoutils`](#cryptoutils-api) | [`demo_cryptoutils.v`](demos/demo_cryptoutils.v) | `v run demos/demo_cryptoutils.v` |
+| [`envutils`](#envutils-api) | [`demo_envutils.v`](demos/demo_envutils.v) | `v run demos/demo_envutils.v` |
+| [`fileutils`](#fileutils-api) | [`demo_fileutils.v`](demos/demo_fileutils.v) | `v run demos/demo_fileutils.v` |
+| [`flowutils`](#flowutils-api) | [`demo_flowutils.v`](demos/demo_flowutils.v) | `v run demos/demo_flowutils.v` |
+| [`htmlutils`](#htmlutils-api) | [`demo_htmlutils.v`](demos/demo_htmlutils.v) | `v run demos/demo_htmlutils.v` |
+| [`httputils`](#httputils-api) | [`demo_httputils.v`](demos/demo_httputils.v) | `v run demos/demo_httputils.v` |
+| [`logutils`](#logutils-api) | [`demo_logutils.v`](demos/demo_logutils.v) | `v run demos/demo_logutils.v` |
+| [`mockutils`](#mockutils-api) | [`demo_mockutils.v`](demos/demo_mockutils.v) | `v run demos/demo_mockutils.v` |
+| [`netutils`](#netutils-api) | [`demo_netutils.v`](demos/demo_netutils.v) | `v run demos/demo_netutils.v` |
+| [`regexutils`](#regexutils-api) | [`demo_regexutils.v`](demos/demo_regexutils.v) | `v run demos/demo_regexutils.v` |
+| [`semverutils`](#semverutils-api) | [`demo_semverutils.v`](demos/demo_semverutils.v) | `v run demos/demo_semverutils.v` |
+| [`sliceutils`](#sliceutils-api) | [`demo_sliceutils.v`](demos/demo_sliceutils.v) | `v run demos/demo_sliceutils.v` |
+| [`sqliteutils`](#sqliteutils-api) | [`demo_sqliteutils.v`](demos/demo_sqliteutils.v) | `v run demos/demo_sqliteutils.v` |
+| [`stateutils`](#stateutils-api) | [`demo_stateutils.v`](demos/demo_stateutils.v) | `v run demos/demo_stateutils.v` |
+| [`statutils`](#statutils-api) | [`demo_statutils.v`](demos/demo_statutils.v) | `v run demos/demo_statutils.v` |
+| [`structutils`](#structutils-api) | [`demo_structutils.v`](demos/demo_structutils.v) | `v run demos/demo_structutils.v` |
+| [`strutils`](#strutils-api) | [`demo_strutils.v`](demos/demo_strutils.v) | `v run demos/demo_strutils.v` |
+| [`sysutils`](#sysutils-api) | [`demo_sysutils.v`](demos/demo_sysutils.v) | `v run demos/demo_sysutils.v` |
+| [`tarutils`](#tarutils-api) | [`demo_tarutils.v`](demos/demo_tarutils.v) | `v run demos/demo_tarutils.v` |
+| [`templateutils`](#templateutils-api) | [`demo_templateutils.v`](demos/demo_templateutils.v) | `v run demos/demo_templateutils.v` |
+| [`timeutils`](#timeutils-api) | [`demo_timeutils.v`](demos/demo_timeutils.v) | `v run demos/demo_timeutils.v` |
+| [`tomlutils`](#tomlutils-api) | [`demo_tomlutils.v`](demos/demo_tomlutils.v) | `v run demos/demo_tomlutils.v` |
+| [`validutils`](#validutils-api) | [`demo_validutils.v`](demos/demo_validutils.v) | `v run demos/demo_validutils.v` |
 
 ---
 
@@ -70,7 +112,12 @@ Examples that contact a website, read a file, use the clipboard, or ask a questi
 #### 3. System Telemetry, OS & CLI
 
 - **[`cliutils`](#cliutils-api)** — ANSI terminal colors, FlagParser, interactive prompts, progress bars, tables
-- **[`envutils`](#envutils-api)** — Type-safe environment variable access, .env file loader, variable expansion
+- **[`envutils`](#envutils-api)** — Type-safe environment variable access, setters, inspection, .env persistence, variable expansion
+  - [Programmatic Setters](#envutils-setters)
+  - [State & Inspection](#envutils-inspection)
+  - [Typed Getters](#envutils-getters)
+  - [Dotenv (.env) Persistence](#envutils-dotenv)
+  - [String Interpolation](#envutils-expansion)
 - **[`logutils`](#logutils-api)** — Leveled structured logging (.debug, .info, .warn, .error, .fatal)
 - **[`sysutils`](#sysutils-api)** — CPU/RAM/disk telemetry, system uptime, safe command execution, clipboard
 
@@ -1977,13 +2024,137 @@ max_f := sliceutils.max_f64(floats) or { 0.0 } // 8.2
 
 # envutils API
 
-**Plain-language purpose:** Use these tools to read app settings that live outside your program, such as a port number, a feature switch, or a secret key. The examples show safe defaults so your app can still run when a setting is absent.
+**Plain-language purpose:** Use these tools to read and set app settings that live in the process environment, such as a port number, a feature switch, or a secret key. The examples show typed getters with safe defaults, programmatic setters, inspection, .env persistence, and string interpolation.
 
 Import statement:
 
 ```v
 import envutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+<a id="envutils-setters"></a>
+
+## Programmatic Setters
+
+### `set(key string, val string)`
+
+Sets an environment variable to a string value in the current process.
+
+```v
+envutils.set('APP_ENV', 'production')
+```
+
+---
+
+### `set_int(key string, val int)`
+
+Sets an environment variable to an integer formatted as a string.
+
+```v
+envutils.set_int('PORT', 8080)
+```
+
+---
+
+### `set_bool(key string, val bool)`
+
+Sets an environment variable to `'true'` or `'false'`.
+
+```v
+envutils.set_bool('DEBUG', true)
+```
+
+---
+
+### `set_f64(key string, val f64)`
+
+Sets an environment variable to a floating-point number formatted as a string.
+
+```v
+envutils.set_f64('RATE_LIMIT_RATIO', 1.25)
+```
+
+---
+
+### `set_default(key string, val string)`
+
+Sets an environment variable **only if it is currently unset or empty**. If the variable already has a value, it remains untouched.
+
+```v
+// Preserves runtime environment overrides if already defined
+envutils.set_default('HOST', '127.0.0.1')
+```
+
+---
+
+### `set_map(vars map[string]string)`
+
+Sets multiple environment variables at once from a key-value map.
+
+```v
+envutils.set_map({
+    'SERVICE_NAME': 'payments',
+    'REGION':       'us-east-1',
+    'ENV':          'staging'
+})
+```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+<a id="envutils-inspection"></a>
+
+## State & Inspection
+
+### `is_set(key string) bool` & `has(key string) bool`
+
+Checks whether an environment variable exists and is non-empty.
+
+```v
+if envutils.is_set('DATABASE_URL') {
+    println('Database URL is configured')
+}
+if envutils.has('REDIS_URL') {
+    println('Redis URL is configured')
+}
+```
+
+---
+
+### `unset(key string)`
+
+Removes an environment variable from the OS environment.
+
+```v
+envutils.unset('TEMP_TOKEN')
+```
+
+---
+
+### `all() map[string]string`
+
+Returns a map snapshot of all environment variables currently active in the process.
+
+```v
+current_env := envutils.all()
+println('Total environment variables: ${current_env.len}')
+for k, v in current_env {
+    println('${k}=${v}')
+}
+```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+<a id="envutils-getters"></a>
+
+## Typed Getters
 
 ### `get_str(key string, default_val string) string`
 
@@ -1997,10 +2168,20 @@ host := envutils.get_str('APP_HOST', 'localhost')
 
 ### `get_int(key string, default_val int) int`
 
-Gets environment variable parsed as integer, or fallback.
+Gets environment variable parsed as integer, or fallback if unset or invalid.
 
 ```v
 port := envutils.get_int('PORT', 8080)
+```
+
+---
+
+### `get_i64(key string, default_val i64) i64`
+
+Gets environment variable parsed as a 64-bit integer, or fallback if unset or invalid. Ideal for timestamps and large byte limits.
+
+```v
+max_bytes := envutils.get_i64('MAX_UPLOAD_BYTES', 10737418240)
 ```
 
 ---
@@ -2015,6 +2196,30 @@ debug := envutils.get_bool('DEBUG', false)
 
 ---
 
+### `get_f64(key string, default_val f64) f64`
+
+Gets environment variable parsed as float, or fallback if unset or invalid.
+
+```v
+scale := envutils.get_f64('SCALE_FACTOR', 1.0)
+```
+
+---
+
+### `get_opt(key string) ?string`
+
+Returns an Option `?string` with the variable value if set and non-empty, or `none`. Allows idiomatic V `if val := envutils.get_opt(...)` checks without throwing errors.
+
+```v
+if token := envutils.get_opt('GITHUB_TOKEN') {
+    println('Found API token: ${token}')
+} else {
+    println('Running in anonymous mode')
+}
+```
+
+---
+
 ### `get_required(key string) !string`
 
 Returns the environment variable value or errors if missing/empty.
@@ -2024,6 +2229,26 @@ secret := envutils.get_required('JWT_SECRET')!
 ```
 
 ---
+
+### `get_list(key string, delimiter string, default_val []string) []string`
+
+Splits an environment variable by delimiter into trimmed, non-empty tokens. Falls back to `default_val` if unset, empty, or whitespace.
+
+```v
+// Splits comma-delimited origins and trims whitespace
+origins := envutils.get_list('ALLOWED_ORIGINS', ',', ['http://localhost:3000'])
+for origin in origins {
+    println('Allowed: ${origin}')
+}
+```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+<a id="envutils-dotenv"></a>
+
+## Dotenv (.env) Persistence
 
 ### `load_dotenv(path string) !map[string]string`
 
@@ -2052,6 +2277,20 @@ if env_vars.len > 0 {
 
 ---
 
+### `save_dotenv(path string, vars map[string]string) !`
+
+Writes or overwrites a `.env` file with the provided key-value map. Keys are written in sorted order, and values containing spaces, newlines, hashes, or quotes are automatically quoted and escaped.
+
+```v
+envutils.save_dotenv('.env', {
+    'APP_ENV':     'production',
+    'PORT':        '8080',
+    'DATABASE_URL': 'postgres://user:pass@localhost:5432/app'
+})!
+```
+
+---
+
 ### `parse_dotenv_content(content string) map[string]string`
 
 Parses raw `.env` formatted content string without touching the OS environment.
@@ -2062,7 +2301,13 @@ assert env_map['PORT'] == '8080'
 assert env_map['DB_PASS'] == 'secret #1'
 ```
 
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
+
+<a id="envutils-expansion"></a>
+
+## String Interpolation
 
 ### `expand_env(input string) string`
 
@@ -5373,7 +5618,4 @@ println('Ops/Sec: ${res.ops_per_sec}')
 var_bm := timeutils.BenchmarkResult{ name: 'demo', iterations: 10 }
 ```
 
-```
-
 [▲ Back to Table of Contents](#table-of-contents)
-```

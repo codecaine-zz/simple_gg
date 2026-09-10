@@ -175,10 +175,10 @@ pub fn new_worker_pool(worker_count int, queue_size int) !&WorkerPool {
 	}
 	q_size := if queue_size <= 0 { 64 } else { queue_size }
 	mut pool := &WorkerPool{
-		tasks:       chan TaskFn{cap: q_size}
-		workers:     worker_count
-		wg:          sync.new_waitgroup()
-		is_closed:   false
+		tasks: chan TaskFn{ cap: q_size }
+		workers: worker_count
+		wg: sync.new_waitgroup()
+		is_closed: false
 		worker_done: sync.new_waitgroup()
 	}
 

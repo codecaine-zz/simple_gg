@@ -138,13 +138,19 @@ pub fn get_memory_stats() (u64, u64, f64) {
 		for line in content.split_into_lines() {
 			if line.starts_with('MemTotal:') {
 				parts := line.fields()
-				if parts.len >= 2 { total = parts[1].u64() * 1024 }
+				if parts.len >= 2 {
+					total = parts[1].u64() * 1024
+				}
 			} else if line.starts_with('MemFree:') {
 				parts := line.fields()
-				if parts.len >= 2 { free = parts[1].u64() * 1024 }
+				if parts.len >= 2 {
+					free = parts[1].u64() * 1024
+				}
 			} else if line.starts_with('MemAvailable:') {
 				parts := line.fields()
-				if parts.len >= 2 { avail = parts[1].u64() * 1024 }
+				if parts.len >= 2 {
+					avail = parts[1].u64() * 1024
+				}
 			}
 		}
 		if total > 0 {
@@ -321,7 +327,7 @@ pub fn exec_safe(bin string, args []string) (string, int) {
 	for a in args {
 		quoted_args << quote_arg(a)
 	}
-	cmd := '${quote_arg(bin)} ${quoted_args.join(" ")}'
+	cmd := '${quote_arg(bin)} ${quoted_args.join(' ')}'
 	res := os.execute(cmd)
 	return res.output, res.exit_code
 }
@@ -342,13 +348,13 @@ pub fn exec_timeout(cmd string, timeout_ms int) ExecTimeoutResult {
 	duration_ms := (time.now() - start).milliseconds()
 	if duration_ms > timeout_ms {
 		return ExecTimeoutResult{
-			output:    res.output
+			output: res.output
 			exit_code: res.exit_code
 			timed_out: true
 		}
 	}
 	return ExecTimeoutResult{
-		output:    res.output
+		output: res.output
 		exit_code: res.exit_code
 		timed_out: false
 	}
@@ -375,9 +381,9 @@ pub fn exec_retry(cmd string, retries int, delay_ms int) ExecRetryResult {
 		last_code = res.exit_code
 		if res.exit_code == 0 {
 			return ExecRetryResult{
-				output:    res.output
+				output: res.output
 				exit_code: 0
-				attempts:  attempt
+				attempts: attempt
 			}
 		}
 		if attempt < max_attempts && delay_ms > 0 {
@@ -385,9 +391,9 @@ pub fn exec_retry(cmd string, retries int, delay_ms int) ExecRetryResult {
 		}
 	}
 	return ExecRetryResult{
-		output:    last_output
+		output: last_output
 		exit_code: last_code
-		attempts:  attempt
+		attempts: attempt
 	}
 }
 
@@ -534,13 +540,27 @@ pub fn get_app_log_dir(app_name string) string {
 pub fn get_system_path(folder_name string) string {
 	home := os.home_dir()
 	match folder_name.to_lower() {
-		'desktop' { return os.join_path(home, 'Desktop') }
-		'downloads' { return os.join_path(home, 'Downloads') }
-		'documents' { return os.join_path(home, 'Documents') }
-		'pictures' { return os.join_path(home, 'Pictures') }
-		'music' { return os.join_path(home, 'Music') }
-		'videos' { return os.join_path(home, 'Videos') }
-		else { return os.join_path(home, folder_name) }
+		'desktop' {
+			return os.join_path(home, 'Desktop')
+		}
+		'downloads' {
+			return os.join_path(home, 'Downloads')
+		}
+		'documents' {
+			return os.join_path(home, 'Documents')
+		}
+		'pictures' {
+			return os.join_path(home, 'Pictures')
+		}
+		'music' {
+			return os.join_path(home, 'Music')
+		}
+		'videos' {
+			return os.join_path(home, 'Videos')
+		}
+		else {
+			return os.join_path(home, folder_name)
+		}
 	}
 }
 
@@ -608,7 +628,7 @@ pub fn get_clipboard_text() !string {
 
 // beep produces an audible terminal bell alert.
 pub fn beep() {
-	print('\x07')
+	print('\a')
 	os.flush()
 }
 
@@ -682,4 +702,3 @@ pub fn pipe_commands(cmd1 string, cmd2 string) !string {
 	}
 	return res.output.trim_space()
 }
-

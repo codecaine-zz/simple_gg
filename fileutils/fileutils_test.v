@@ -11,10 +11,10 @@ fn test_save_and_load_struct_array() {
 	file_path := '/tmp/person_array.json'
 	people := [Person{
 		name: 'Alice'
-		age:  30
+		age: 30
 	}, Person{
 		name: 'Bob'
-		age:  25
+		age: 25
 	}]
 
 	save_struct_array_to_file(file_path, people) or { panic(err) }
@@ -33,7 +33,7 @@ fn test_save_and_load_struct() {
 	file_path := '/tmp/person.json'
 	person := Person{
 		name: 'Charlie'
-		age:  40
+		age: 40
 	}
 
 	save_struct_to_file(file_path, person) or { panic(err) }
@@ -155,7 +155,7 @@ fn test_write_and_read_json_file() {
 	file_path := '/tmp/json/person.json'
 	person := Person{
 		name: 'Dana'
-		age:  35
+		age: 35
 	}
 
 	write_json_file(file_path, person) or { panic(err) }
@@ -172,11 +172,11 @@ fn test_append_json_line() {
 	os.rm(file_path) or {}
 	person1 := Person{
 		name: 'Eli'
-		age:  28
+		age: 28
 	}
 	person2 := Person{
 		name: 'Fay'
-		age:  32
+		age: 32
 	}
 
 	append_json_line(file_path, person1) or { panic(err) }
@@ -268,4 +268,3 @@ fn test_temp_helpers() {
 	assert os.is_dir(td)
 	remove_dir(td) or {}
 }
-

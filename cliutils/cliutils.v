@@ -9,18 +9,49 @@ import time
 // ANSI Color & Text Style Formatting
 // ============================================================================
 
-pub fn bold(s string) string      { return '\x1b[1m${s}\x1b[0m' }
-pub fn dim(s string) string       { return '\x1b[2m${s}\x1b[0m' }
-pub fn italic(s string) string    { return '\x1b[3m${s}\x1b[0m' }
-pub fn underline(s string) string { return '\x1b[4m${s}\x1b[0m' }
+pub fn bold(s string) string {
+	return '\x1b[1m${s}\x1b[0m'
+}
 
-pub fn red(s string) string       { return '\x1b[31m${s}\x1b[0m' }
-pub fn green(s string) string     { return '\x1b[32m${s}\x1b[0m' }
-pub fn yellow(s string) string    { return '\x1b[33m${s}\x1b[0m' }
-pub fn blue(s string) string      { return '\x1b[34m${s}\x1b[0m' }
-pub fn magenta(s string) string   { return '\x1b[35m${s}\x1b[0m' }
-pub fn cyan(s string) string      { return '\x1b[36m${s}\x1b[0m' }
-pub fn gray(s string) string      { return '\x1b[90m${s}\x1b[0m' }
+pub fn dim(s string) string {
+	return '\x1b[2m${s}\x1b[0m'
+}
+
+pub fn italic(s string) string {
+	return '\x1b[3m${s}\x1b[0m'
+}
+
+pub fn underline(s string) string {
+	return '\x1b[4m${s}\x1b[0m'
+}
+
+pub fn red(s string) string {
+	return '\x1b[31m${s}\x1b[0m'
+}
+
+pub fn green(s string) string {
+	return '\x1b[32m${s}\x1b[0m'
+}
+
+pub fn yellow(s string) string {
+	return '\x1b[33m${s}\x1b[0m'
+}
+
+pub fn blue(s string) string {
+	return '\x1b[34m${s}\x1b[0m'
+}
+
+pub fn magenta(s string) string {
+	return '\x1b[35m${s}\x1b[0m'
+}
+
+pub fn cyan(s string) string {
+	return '\x1b[36m${s}\x1b[0m'
+}
+
+pub fn gray(s string) string {
+	return '\x1b[90m${s}\x1b[0m'
+}
 
 // strip_ansi removes all ANSI escape codes from a string.
 pub fn strip_ansi(s string) string {
@@ -103,8 +134,8 @@ pub mut:
 pub fn new_progress_bar(total int, width int) ProgressBar {
 	w := if width > 0 { width } else { 30 }
 	return ProgressBar{
-		total:   total
-		width:   w
+		total: total
+		width: w
 		current: 0
 	}
 }
@@ -165,54 +196,54 @@ pub mut:
 // new_flag_parser creates a new CLI FlagParser instance.
 pub fn new_flag_parser(app_name string, description string) FlagParser {
 	return FlagParser{
-		app_name:    app_name
+		app_name: app_name
 		description: description
-		flags:       []FlagDef{}
-		parsed:      map[string]string{}
-		positional:  []string{}
+		flags: []FlagDef{}
+		parsed: map[string]string{}
+		positional: []string{}
 	}
 }
 
 pub fn (mut fp FlagParser) add_flag_string(name string, short string, default_val string, desc string) {
 	fp.flags << FlagDef{
-		name:        name
-		short:       short
+		name: name
+		short: short
 		default_val: default_val
 		description: desc
-		kind:        'string'
+		kind: 'string'
 	}
 	fp.parsed[name] = default_val
 }
 
 pub fn (mut fp FlagParser) add_flag_int(name string, short string, default_val int, desc string) {
 	fp.flags << FlagDef{
-		name:        name
-		short:       short
+		name: name
+		short: short
 		default_val: '${default_val}'
 		description: desc
-		kind:        'int'
+		kind: 'int'
 	}
 	fp.parsed[name] = '${default_val}'
 }
 
 pub fn (mut fp FlagParser) add_flag_bool(name string, short string, default_val bool, desc string) {
 	fp.flags << FlagDef{
-		name:        name
-		short:       short
+		name: name
+		short: short
 		default_val: if default_val { 'true' } else { 'false' }
 		description: desc
-		kind:        'bool'
+		kind: 'bool'
 	}
 	fp.parsed[name] = if default_val { 'true' } else { 'false' }
 }
 
 pub fn (mut fp FlagParser) add_flag_float(name string, short string, default_val f64, desc string) {
 	fp.flags << FlagDef{
-		name:        name
-		short:       short
+		name: name
+		short: short
 		default_val: '${default_val}'
 		description: desc
-		kind:        'float'
+		kind: 'float'
 	}
 	fp.parsed[name] = '${default_val}'
 }
@@ -307,7 +338,11 @@ pub fn (fp FlagParser) format_help() string {
 	sb.write_string('Usage:\n  ${fp.app_name} [flags] [arguments]\n\nFlags:\n')
 	for flag in fp.flags {
 		short_str := if flag.short.len > 0 { '-${flag.short}, ' } else { '    ' }
-		padded_name := flag.name + strings.repeat(` `, if flag.name.len < 15 { 15 - flag.name.len } else { 1 })
+		padded_name := flag.name + strings.repeat(` `, if flag.name.len < 15 {
+			15 - flag.name.len
+		} else {
+			1
+		})
 		sb.write_string('  ${short_str}--${padded_name} ${flag.description} (default: ${flag.default_val})\n')
 	}
 	sb.write_string('  -h, --help            Show this help message\n')
@@ -337,14 +372,14 @@ pub mut:
 
 pub fn new_pipeline(name string) Pipeline {
 	return Pipeline{
-		name:  name
+		name: name
 		steps: []PipelineStep{}
 	}
 }
 
 pub fn (mut p Pipeline) add_step(name string, action fn () bool) {
 	p.steps << PipelineStep{
-		name:   name
+		name: name
 		action: action
 	}
 }
@@ -390,7 +425,7 @@ pub mut:
 
 pub fn new_logger(level LogLevel, log_file string) Logger {
 	return Logger{
-		level:    level
+		level: level
 		log_file: log_file
 		no_color: false
 	}
@@ -413,12 +448,29 @@ fn (mut l Logger) log(level LogLevel, tag string, colored_tag string, msg string
 	}
 }
 
-pub fn (mut l Logger) trace(msg string)   { l.log(.trace, '[TRACE]', gray('[TRACE]'), msg) }
-pub fn (mut l Logger) debug(msg string)   { l.log(.debug, '[DEBUG]', cyan('[DEBUG]'), msg) }
-pub fn (mut l Logger) info(msg string)    { l.log(.info, '[INFO]', blue('[INFO]'), msg) }
-pub fn (mut l Logger) success(msg string) { l.log(.info, '[SUCCESS]', green('[SUCCESS]'), msg) }
-pub fn (mut l Logger) warn(msg string)    { l.log(.warn, '[WARN]', yellow('[WARN]'), msg) }
-pub fn (mut l Logger) error(msg string)   { l.log(.error_level, '[ERROR]', red('[ERROR]'), msg) }
+pub fn (mut l Logger) trace(msg string) {
+	l.log(.trace, '[TRACE]', gray('[TRACE]'), msg)
+}
+
+pub fn (mut l Logger) debug(msg string) {
+	l.log(.debug, '[DEBUG]', cyan('[DEBUG]'), msg)
+}
+
+pub fn (mut l Logger) info(msg string) {
+	l.log(.info, '[INFO]', blue('[INFO]'), msg)
+}
+
+pub fn (mut l Logger) success(msg string) {
+	l.log(.info, '[SUCCESS]', green('[SUCCESS]'), msg)
+}
+
+pub fn (mut l Logger) warn(msg string) {
+	l.log(.warn, '[WARN]', yellow('[WARN]'), msg)
+}
+
+pub fn (mut l Logger) error(msg string) {
+	l.log(.error_level, '[ERROR]', red('[ERROR]'), msg)
+}
 
 // ============================================================================
 // RAD Console Visualizations (Sparklines, Bar Charts, Gauges, Trees, Diffs)
@@ -433,14 +485,20 @@ pub fn sparkline(values []f64) string {
 	mut min_val := values[0]
 	mut max_val := values[0]
 	for v in values[1..] {
-		if v < min_val { min_val = v }
-		if v > max_val { max_val = v }
+		if v < min_val {
+			min_val = v
+		}
+		if v > max_val {
+			max_val = v
+		}
 	}
 	delta := max_val - min_val
 	mut sb := strings.new_builder(values.len)
 	for v in values {
 		idx := if delta == 0.0 { 0 } else { int((v - min_val) / delta * 7.0) }
-		clamped := if idx < 0 { 0 } else if idx > 7 { 7 } else { idx }
+		clamped := if idx < 0 {
+			0
+		} else if idx > 7 { 7 } else { idx }
 		sb.write_rune(glyphs[clamped])
 	}
 	return sb.str()
@@ -452,8 +510,12 @@ pub fn bar_chart(title string, items map[string]f64, max_width int) string {
 	mut max_val := 0.0
 	mut max_label_len := 0
 	for k, v in items {
-		if v > max_val { max_val = v }
-		if k.len > max_label_len { max_label_len = k.len }
+		if v > max_val {
+			max_val = v
+		}
+		if k.len > max_label_len {
+			max_label_len = k.len
+		}
 	}
 	mut sb := strings.new_builder(items.len * 50)
 	if title.len > 0 {
@@ -463,7 +525,11 @@ pub fn bar_chart(title string, items map[string]f64, max_width int) string {
 		ratio := if max_val > 0.0 { v / max_val } else { 0.0 }
 		bar_len := int(ratio * f64(w))
 		bar := '█'.repeat(bar_len)
-		padded_k := k + strings.repeat(` `, if max_label_len > k.len { max_label_len - k.len } else { 0 })
+		padded_k := k + strings.repeat(` `, if max_label_len > k.len {
+			max_label_len - k.len
+		} else {
+			0
+		})
 		sb.write_string('  ${padded_k} | ${cyan(bar)} ${v:.1f}\n')
 	}
 	return sb.str()
@@ -477,7 +543,9 @@ pub fn gauge(label string, current f64, max f64, unit string) string {
 	filled := int(ratio * f64(width))
 	bar := '█'.repeat(if filled > width { width } else { filled })
 	empty := '░'.repeat(if width > filled { width - filled } else { 0 })
-	status := if pct > 90.0 { red('[CRITICAL]') } else if pct > 75.0 { yellow('[WARN]') } else { green('[OK]') }
+	status := if pct > 90.0 {
+		red('[CRITICAL]')
+	} else if pct > 75.0 { yellow('[WARN]') } else { green('[OK]') }
 	return '${label}: [${cyan(bar)}${empty}] ${current:.1f}/${max:.1f} ${unit} (${pct:.1f}%) ${status}'
 }
 
@@ -490,7 +558,7 @@ pub mut:
 
 pub fn new_tree_node(label string) TreeNode {
 	return TreeNode{
-		label:    label
+		label: label
 		children: []TreeNode{}
 	}
 }
@@ -630,7 +698,11 @@ pub fn banner(title string, subtitle string) string {
 // panel renders a framed panel box with title and content.
 pub fn panel(title string, content string) string {
 	width := 60
-	top := '┌─ ${bold(title)} ' + strings.repeat(`─`, if width > title.len + 4 { width - title.len - 4 } else { 2 }) + '┐'
+	top := '┌─ ${bold(title)} ' + strings.repeat(`─`, if width > title.len + 4 {
+		width - title.len - 4
+	} else {
+		2
+	}) + '┐'
 	bot := '└' + strings.repeat(`─`, width) + '┘'
 	return '${top}\n│ ${content}\n${bot}'
 }
@@ -683,4 +755,3 @@ pub fn read_from_clipboard() string {
 	}
 	return cb.paste()
 }
-

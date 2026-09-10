@@ -39,12 +39,12 @@ fn test_direct_app_state_helpers() {
 	}
 
 	profile := TestProfile{
-		username:      'alex_dev'
-		theme:         'monokai'
-		window_width:  1280
+		username: 'alex_dev'
+		theme: 'monokai'
+		window_width: 1280
 		window_height: 720
-		tags:          ['vlang', 'rad', 'utils']
-		is_admin:      true
+		tags: ['vlang', 'rad', 'utils']
+		is_admin: true
 	}
 
 	assert app_state_exists(app, 'profile.json') == false
@@ -74,12 +74,12 @@ fn test_app_state_store() {
 	}
 
 	default_state := TestProfile{
-		username:      'default_user'
-		theme:         'light'
-		window_width:  800
+		username: 'default_user'
+		theme: 'light'
+		window_width: 800
 		window_height: 600
-		tags:          ['guest']
-		is_admin:      false
+		tags: ['guest']
+		is_admin: false
 	}
 
 	mut store := new_app_state[TestProfile](app, default_state)
@@ -104,12 +104,12 @@ fn test_app_state_store() {
 	// Change state again with auto_save enabled
 	store.auto_save = true
 	store.set(TestProfile{
-		username:      'modified_user'
-		theme:         'solarized'
-		window_width:  1024
+		username: 'modified_user'
+		theme: 'solarized'
+		window_width: 1024
 		window_height: 768
-		tags:          ['custom']
-		is_admin:      true
+		tags: ['custom']
+		is_admin: true
 	}) or { panic(err) }
 
 	// New store instance should load the auto-saved data from disk

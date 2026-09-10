@@ -106,8 +106,7 @@ pub fn escape_html(s string) string {
 
 // unescape_html replaces common HTML entities with their character equivalents.
 pub fn unescape_html(s string) string {
-	return s.replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;',
-		'"').replace('&#39;', "'").replace('&apos;', "'")
+	return s.replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"').replace('&#39;', "'").replace('&apos;', "'")
 }
 
 // strip_tags removes all HTML/XML tags from the input string.

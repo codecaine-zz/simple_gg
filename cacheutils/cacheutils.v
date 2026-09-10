@@ -22,8 +22,8 @@ pub fn new_lru[T](capacity int) !LRUCache[T] {
 	}
 	return LRUCache[T]{
 		capacity: capacity
-		items:    map[string]T{}
-		order:    []string{cap: capacity}
+		items: map[string]T{}
+		order: []string{cap: capacity}
 	}
 }
 
@@ -142,7 +142,7 @@ mut:
 pub fn new_ttl[T](default_ttl time.Duration) TTLCache[T] {
 	return TTLCache[T]{
 		default_ttl: default_ttl
-		items:       map[string]TTLEntry[T]{}
+		items: map[string]TTLEntry[T]{}
 	}
 }
 
@@ -155,7 +155,7 @@ pub fn (mut c TTLCache[T]) set(key string, val T) {
 pub fn (mut c TTLCache[T]) set_with_ttl(key string, val T, ttl time.Duration) {
 	now := time.now()
 	c.items[key] = TTLEntry[T]{
-		val:        val
+		val: val
 		expires_at: now.add(ttl)
 	}
 }

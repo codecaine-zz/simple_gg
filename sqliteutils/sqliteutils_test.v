@@ -99,12 +99,12 @@ fn test_json_struct_store_helpers() {
 	assert table_exists(mut db, 'items') or { panic(err) } == true
 
 	item1 := Item{
-		id:    'item_1'
+		id: 'item_1'
 		title: 'Keyboard'
 		price: 100
 	}
 	item2 := Item{
-		id:    'item_2'
+		id: 'item_2'
 		title: 'Mouse'
 		price: 50
 	}
@@ -335,7 +335,7 @@ fn test_struct_exists() {
 	create_json_store(mut db, 'products') or { panic(err) }
 
 	item := Item{
-		id:    'p1'
+		id: 'p1'
 		title: 'Widget'
 		price: 5
 	}
@@ -397,8 +397,9 @@ fn test_query_maps_params_and_query_one_map_params() {
 	}
 
 	// query_maps_params — filter by department
-	rows := query_maps_params(mut db, 'SELECT name, salary FROM employees WHERE dept = ? ORDER BY salary DESC',
-		['Eng']) or { panic(err) }
+	rows := query_maps_params(mut db, 'SELECT name, salary FROM employees WHERE dept = ? ORDER BY salary DESC', [
+		'Eng',
+	]) or { panic(err) }
 	assert rows.len == 2
 	assert rows[0]['name'] == 'Alice'
 	assert rows[1]['name'] == 'Bob'
@@ -450,8 +451,9 @@ fn test_query_column() {
 	exec_sql(mut db, 'CREATE TABLE tags (name TEXT, active INT);') or { panic(err) }
 	exec_sql(mut db, "INSERT INTO tags VALUES ('v',1),('vlang',1),('draft',0);") or { panic(err) }
 
-	active := query_column(mut db, 'SELECT name FROM tags WHERE active = ? ORDER BY name',
-		['1']) or { panic(err) }
+	active := query_column(mut db, 'SELECT name FROM tags WHERE active = ? ORDER BY name', [
+		'1',
+	]) or { panic(err) }
 	assert active == ['v', 'vlang']
 
 	// No matching rows — returns empty slice, not an error
@@ -469,15 +471,15 @@ fn test_execute_batch_params() {
 
 	stmts := [
 		ParamStatement{
-			query:  'INSERT INTO log VALUES (?, ?)'
+			query: 'INSERT INTO log VALUES (?, ?)'
 			params: ['boot', 'INFO']
 		},
 		ParamStatement{
-			query:  'INSERT INTO log VALUES (?, ?)'
+			query: 'INSERT INTO log VALUES (?, ?)'
 			params: ['ready', 'INFO']
 		},
 		ParamStatement{
-			query:  'INSERT INTO log VALUES (?, ?)'
+			query: 'INSERT INTO log VALUES (?, ?)'
 			params: ['error', 'ERROR']
 		},
 	]
@@ -487,11 +489,11 @@ fn test_execute_batch_params() {
 	// Rollback on error: inject a bad statement into the batch
 	bad_stmts := [
 		ParamStatement{
-			query:  'INSERT INTO log VALUES (?, ?)'
+			query: 'INSERT INTO log VALUES (?, ?)'
 			params: ['tx_start', 'INFO']
 		},
 		ParamStatement{
-			query:  'INSERT INTO nonexistent VALUES (?)'
+			query: 'INSERT INTO nonexistent VALUES (?)'
 			params: ['x']
 		},
 	]
@@ -566,15 +568,15 @@ fn test_add_columns_batch() {
 
 	new_cols := [
 		ColumnDef{
-			name:     'price'
+			name: 'price'
 			sql_type: 'REAL'
 		},
 		ColumnDef{
-			name:     'stock'
+			name: 'stock'
 			sql_type: 'INTEGER NOT NULL DEFAULT 0'
 		},
 		ColumnDef{
-			name:     'sku'
+			name: 'sku'
 			sql_type: 'TEXT'
 		},
 	]
@@ -591,11 +593,11 @@ fn test_add_columns_rollback_on_bad_name() {
 	// Second column has an invalid name — should rollback both
 	bad_cols := [
 		ColumnDef{
-			name:     'valid_col'
+			name: 'valid_col'
 			sql_type: 'TEXT'
 		},
 		ColumnDef{
-			name:     'bad col!'
+			name: 'bad col!'
 			sql_type: 'TEXT'
 		}, // space + bang disallowed
 	]
@@ -753,7 +755,9 @@ fn test_sqlite_security_and_injection_defense() {
 
 	// Verify table still exists and payload was stored as pure text
 	assert table_exists(mut db, 'users') or { false }
-	records := select_rows(mut db, 'users', ['id', 'username', 'bio'], 'username = ?', ['attacker']) or { panic(err) }
+	records := select_rows(mut db, 'users', ['id', 'username', 'bio'], 'username = ?', [
+		'attacker',
+	]) or { panic(err) }
 	assert records.len == 1
 	assert records[0]['bio'] == injection_payload
 
@@ -771,7 +775,7 @@ fn test_sqlite_security_and_injection_defense() {
 	assert remaining == 0
 
 	// 6. Path null-byte rejection
-	open_db('test\0bad.db') or {
+	open_db('test\x00bad.db') or {
 		assert err.msg().contains('null byte')
 	}
 }

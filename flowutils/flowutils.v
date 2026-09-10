@@ -26,10 +26,10 @@ pub fn new_rate_limiter(capacity int, refill_rate_per_sec f64) !RateLimiter {
 	}
 
 	return RateLimiter{
-		capacity:            f64(capacity)
-		tokens:              f64(capacity)
+		capacity: f64(capacity)
+		tokens: f64(capacity)
 		refill_rate_per_sec: refill_rate_per_sec
-		last_refill:         time.now()
+		last_refill: time.now()
 	}
 }
 
@@ -110,12 +110,12 @@ pub fn new_circuit_breaker(failure_threshold int, recovery_timeout time.Duration
 		return error('Failure threshold must be greater than 0, got ${failure_threshold}')
 	}
 	return CircuitBreaker{
-		failure_threshold:     failure_threshold
-		recovery_timeout:      recovery_timeout
-		state:                 .closed
-		failure_count:         0
-		last_failure_time:     time.Time{}
-		success_threshold:     2
+		failure_threshold: failure_threshold
+		recovery_timeout: recovery_timeout
+		state: .closed
+		failure_count: 0
+		last_failure_time: time.Time{}
+		success_threshold: 2
 		consecutive_successes: 0
 	}
 }
@@ -238,7 +238,7 @@ mut:
 // new_debouncer initializes a debouncer with the specified minimum interval between triggers.
 pub fn new_debouncer(interval time.Duration) Debouncer {
 	return Debouncer{
-		interval:     interval
+		interval: interval
 		last_trigger: time.Time{}
 	}
 }

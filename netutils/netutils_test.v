@@ -38,11 +38,9 @@ fn test_tcp_framing() {
 		send_framed_msg(mut client, 'REPLY: ${msg.bytestr()}'.bytes()) or { return }
 		client.close() or {}
 	}(mut listener)
-
 	mut client := net.dial_tcp('127.0.0.1:${port}') or { panic(err) }
 	send_framed_msg(mut client, 'test frame'.bytes()) or { panic(err) }
 	res := read_framed_msg(mut client, 8192) or { panic(err) }
 	assert res.bytestr() == 'REPLY: test frame'
 	client.close() or {}
 }
-

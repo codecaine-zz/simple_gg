@@ -106,10 +106,10 @@ pub fn list_entries(zip_file string) ![]ZipEntry {
 		is_dir := z.is_dir() or { false }
 		crc := z.crc32()
 		entries << ZipEntry{
-			name:   name
-			size:   size
+			name: name
+			size: size
 			is_dir: is_dir
-			crc32:  crc
+			crc32: crc
 		}
 		z.close_entry()
 	}

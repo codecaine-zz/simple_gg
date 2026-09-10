@@ -45,7 +45,7 @@ fn ensure_db_dir(path string) ! {
 	if path == ':memory:' || path == '' {
 		return
 	}
-	if path.contains('\0') {
+	if path.contains('\x00') {
 		return error('Database path contains illegal null bytes')
 	}
 	dir := os.dir(path)
@@ -118,8 +118,7 @@ pub fn exec_sql_param(mut db sqlite.DB, query string, param string) ! {
 
 // Checks if a table exists in the database.
 pub fn table_exists(mut db sqlite.DB, table_name string) !bool {
-	rows := db.exec_param("SELECT name FROM sqlite_master WHERE type='table' AND name=?",
-		table_name) or { return err }
+	rows := db.exec_param("SELECT name FROM sqlite_master WHERE type='table' AND name=?", table_name) or { return err }
 	return rows.len > 0
 }
 
@@ -161,8 +160,11 @@ pub fn create_kv_table(mut db sqlite.DB, table_name string) ! {
 pub fn set_kv(mut db sqlite.DB, table_name string, key string, val string) ! {
 	tbl := sanitize_identifier(table_name)!
 	// val is passed twice: once for INSERT and once for the ON CONFLICT UPDATE.
-	db.exec_param_many('INSERT INTO "${tbl}" (key, val) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET val=?',
-		[key, val, val]) or { return err }
+	db.exec_param_many('INSERT INTO "${tbl}" (key, val) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET val=?', [
+		key,
+		val,
+		val,
+	]) or { return err }
 }
 
 // Gets the value for a key in a key-value table, returning an error if key is not found.
@@ -209,8 +211,11 @@ pub fn save_struct[T](mut db sqlite.DB, table_name string, id string, data T) ! 
 	tbl := sanitize_identifier(table_name)!
 	encoded := json2.encode(data)
 	// encoded is passed twice: for the INSERT value and for the ON CONFLICT UPDATE.
-	db.exec_param_many('INSERT INTO "${tbl}" (id, json_data) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET json_data=?',
-		[id, encoded, encoded]) or { return err }
+	db.exec_param_many('INSERT INTO "${tbl}" (id, json_data) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET json_data=?', [
+		id,
+		encoded,
+		encoded,
+	]) or { return err }
 }
 
 // Loads a struct from a JSON document by ID.

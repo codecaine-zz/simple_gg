@@ -49,9 +49,9 @@ pub fn find_matches(pattern string, text string) []Match {
 		end := spans[i + 1]
 		if start >= 0 && end <= text.len && start <= end {
 			matches << Match{
-				text:  text[start..end]
+				text: text[start..end]
 				start: start
-				end:   end
+				end: end
 			}
 		}
 	}

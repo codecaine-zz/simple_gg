@@ -145,4 +145,3 @@ fn test_clipboard() {
 		}
 	}
 }
-

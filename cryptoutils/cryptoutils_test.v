@@ -69,7 +69,7 @@ fn test_aes_encryption() {
 fn test_bcrypt_and_entropy() {
 	pass := 'my_secure_p@ssw0rd'
 	hashed := bcrypt_hash(pass) or { panic(err) }
-	assert hashed.starts_with('$2')
+	assert hashed.starts_with('\$2')
 	assert bcrypt_verify(pass, hashed) == true
 	assert bcrypt_verify('wrong_pass', hashed) == false
 

@@ -62,9 +62,9 @@ pub fn lorem_text(paragraphs int, sentences int, words int) string {
 	s := if sentences <= 0 { 3 } else { sentences }
 	w := if words <= 0 { 8 } else { words }
 	return lorem.generate(lorem.LoremCfg{
-		paragraphs:              p
+		paragraphs: p
 		sentences_per_paragraph: s
-		words_per_sentence:      w
+		words_per_sentence: w
 	})
 }
 
@@ -72,18 +72,18 @@ pub fn lorem_text(paragraphs int, sentences int, words int) string {
 pub fn lorem_words(count int) string {
 	c := if count <= 0 { 5 } else { count }
 	return lorem.generate(lorem.LoremCfg{
-		paragraphs:              1
+		paragraphs: 1
 		sentences_per_paragraph: 1
-		words_per_sentence:      c
+		words_per_sentence: c
 	})
 }
 
 // lorem_sentence generates a single lorem sentence.
 pub fn lorem_sentence() string {
 	return lorem.generate(lorem.LoremCfg{
-		paragraphs:              1
+		paragraphs: 1
 		sentences_per_paragraph: 1
-		words_per_sentence:      7
+		words_per_sentence: 7
 	})
 }
 
@@ -146,12 +146,12 @@ pub fn mock_user() MockUser {
 	ip := mock_ipv4()
 	r_idx := rand.int_in_range(0, mockutils.roles.len) or { 0 }
 	return MockUser{
-		id:    id
-		name:  name
+		id: id
+		name: name
 		email: email
 		phone: phone
-		ip:    ip
-		role:  mockutils.roles[r_idx]
+		ip: ip
+		role: mockutils.roles[r_idx]
 	}
 }
 
@@ -162,12 +162,12 @@ pub fn mock_users(count int) []MockUser {
 	for i in 0 .. c {
 		u := mock_user()
 		users << MockUser{
-			id:    i + 1
-			name:  u.name
+			id: i + 1
+			name: u.name
 			email: u.email
 			phone: u.phone
-			ip:    u.ip
-			role:  u.role
+			ip: u.ip
+			role: u.role
 		}
 	}
 	return users

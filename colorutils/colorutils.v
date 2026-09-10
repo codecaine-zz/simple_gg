@@ -258,9 +258,15 @@ pub fn contrast_ratio(c1 RGB, c2 RGB) f64 {
 pub fn is_accessible(foreground RGB, background RGB, level string) bool {
 	ratio := contrast_ratio(foreground, background)
 	match level {
-		'AAA' { return ratio >= 7.0 }
-		'AA_large' { return ratio >= 3.0 }
-		else { return ratio >= 4.5 }
+		'AAA' {
+			return ratio >= 7.0
+		}
+		'AA_large' {
+			return ratio >= 3.0
+		}
+		else {
+			return ratio >= 4.5
+		}
 	}
 }
 

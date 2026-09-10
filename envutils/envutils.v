@@ -4,6 +4,48 @@ import os
 import strconv
 import strings
 
+// set sets an environment variable to a string value.
+pub fn set(key string, val string) {
+	os.setenv(key, val, true)
+}
+
+// set_int sets an environment variable to an integer formatted as a string.
+pub fn set_int(key string, val int) {
+	os.setenv(key, val.str(), true)
+}
+
+// set_bool sets an environment variable to 'true' or 'false'.
+pub fn set_bool(key string, val bool) {
+	os.setenv(key, val.str(), true)
+}
+
+// set_f64 sets an environment variable to an f64 formatted as a string.
+pub fn set_f64(key string, val f64) {
+	os.setenv(key, val.str(), true)
+}
+
+// set_map sets multiple environment variables from a key-value map.
+pub fn set_map(vars map[string]string) {
+	for k, v in vars {
+		os.setenv(k, v, true)
+	}
+}
+
+// unset removes an environment variable from the OS environment.
+pub fn unset(key string) {
+	os.unsetenv(key)
+}
+
+// is_set returns true if the environment variable exists and is non-empty.
+pub fn is_set(key string) bool {
+	return os.getenv(key).len > 0
+}
+
+// has returns true if the environment variable exists and is non-empty (alias of is_set).
+pub fn has(key string) bool {
+	return is_set(key)
+}
+
 // get_str returns the string value of the environment variable key, or default_val if unset/empty.
 pub fn get_str(key string, default_val string) string {
 	val := os.getenv(key)
@@ -104,6 +146,77 @@ pub fn load_dotenv(path string) !map[string]string {
 	return parsed
 }
 
+// set_default sets an environment variable only if it is currently unset or empty.
+pub fn set_default(key string, val string) {
+	if !is_set(key) {
+		set(key, val)
+	}
+}
+
+// all returns a copy of all current environment variables as a map.
+pub fn all() map[string]string {
+	return os.environ()
+}
+
+// get_opt returns an option ?string: the variable value if set and non-empty, or none.
+pub fn get_opt(key string) ?string {
+	val := os.getenv(key)
+	if val.len == 0 {
+		return none
+	}
+	return val
+}
+
+// get_i64 returns the 64-bit integer value of key, or default_val if unset or invalid.
+pub fn get_i64(key string, default_val i64) i64 {
+	val := os.getenv(key)
+	if val.len == 0 {
+		return default_val
+	}
+	n := val.i64()
+	return if n == 0 && val != '0' { default_val } else { n }
+}
+
+// get_list returns the environment variable split by delimiter into trimmed non-empty tokens,
+// or default_val if unset, empty, or containing only whitespace.
+pub fn get_list(key string, delimiter string, default_val []string) []string {
+	val := os.getenv(key).trim_space()
+	if val.len == 0 {
+		return default_val
+	}
+	delim := if delimiter.len == 0 { ',' } else { delimiter }
+	raw_parts := val.split(delim)
+	mut res := []string{cap: raw_parts.len}
+	for part in raw_parts {
+		trimmed := part.trim_space()
+		if trimmed.len > 0 {
+			res << trimmed
+		}
+	}
+	if res.len == 0 {
+		return default_val
+	}
+	return res
+}
+
+// save_dotenv writes or overwrites a .env file with the provided key-value pairs.
+// Keys are written in sorted order, and values containing spaces, hashes, or quotes are quoted.
+pub fn save_dotenv(path string, vars map[string]string) ! {
+	mut sb := strings.new_builder(vars.len * 32)
+	mut keys := vars.keys()
+	keys.sort()
+	for key in keys {
+		val := vars[key]
+		if val.contains('\n') || val.contains('"') || val.contains(' ') || val.contains('#') {
+			escaped := val.replace('\\', '\\\\').replace('"', '\\"')
+			sb.writeln('${key}="${escaped}"')
+		} else {
+			sb.writeln('${key}=${val}')
+		}
+	}
+	os.write_file(path, sb.str()) or { return error('failed to save dotenv file: ${err}') }
+}
+
 // load_dotenv_auto searches for a .env file starting in the current directory and traversing parent directories.
 pub fn load_dotenv_auto() !map[string]string {
 	mut dir := os.getwd()
@@ -127,7 +240,7 @@ fn is_env_char(r rune) bool {
 
 // expand_env replaces ${VAR} or $VAR in the input string with their corresponding environment variable values.
 pub fn expand_env(input string) string {
-	if !input.contains('$') {
+	if !input.contains('\$') {
 		return input
 	}
 	mut sb := strings.new_builder(input.len + 16)

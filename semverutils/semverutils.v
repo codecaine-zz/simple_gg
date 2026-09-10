@@ -66,11 +66,11 @@ pub fn parse(raw string) !SemVer {
 	}
 
 	return SemVer{
-		major:      major
-		minor:      minor
-		patch:      patch
+		major: major
+		minor: minor
+		patch: patch
 		prerelease: prerelease
-		build:      build
+		build: build
 	}
 }
 
@@ -173,11 +173,11 @@ pub fn bump_patch(s SemVer) SemVer {
 // bump_prerelease updates the prerelease identifier of the version.
 pub fn bump_prerelease(s SemVer, tag string) SemVer {
 	return SemVer{
-		major:      s.major
-		minor:      s.minor
-		patch:      s.patch
+		major: s.major
+		minor: s.minor
+		patch: s.patch
 		prerelease: tag
-		build:      s.build
+		build: s.build
 	}
 }
 

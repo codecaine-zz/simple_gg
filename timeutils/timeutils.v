@@ -170,7 +170,7 @@ mut:
 pub fn new_stopwatch() Stopwatch {
 	mut sw := Stopwatch{
 		start_time: time.now()
-		running:    true
+		running: true
 	}
 	return sw
 }
@@ -262,4 +262,3 @@ pub fn benchmark_fn(name string, iterations int, f fn ()) BenchmarkResult {
 		ops_per_sec: ops_sec
 	}
 }
-

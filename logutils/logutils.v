@@ -33,7 +33,7 @@ pub enum LogOutput {
 // LoggerConfig configures a Logger instance.
 pub struct LoggerConfig {
 pub mut:
-	level          LogLevel  = .info
+	level          LogLevel = .info
 	output         LogOutput = .console
 	file_path      string
 	use_color      bool = true
@@ -84,12 +84,13 @@ pub fn (l Logger) format_message(level LogLevel, msg string, now time.Time, colo
 	mut prefix := '[${level.str()}]'
 	if colored {
 		prefix = match level {
-			.debug { '\033[36m[DEBUG]\033[0m' } // cyan
-			.info { '\033[32m[INFO]\033[0m' }   // green
-			.warn { '\033[33m[WARN]\033[0m' }   // yellow
-			.error { '\033[31m[ERROR]\033[0m' } // red
-			.fatal { '\033[35m[FATAL]\033[0m' } // magenta
+			.debug { '\x1b[36m[DEBUG]\x1b[0m' } // cyan
+			.info { '\x1b[32m[INFO]\x1b[0m' } // green
+			.warn { '\x1b[33m[WARN]\x1b[0m' } // yellow
+			.error { '\x1b[31m[ERROR]\x1b[0m' } // red
+			.fatal { '\x1b[35m[FATAL]\x1b[0m' }
 		}
+		// magenta
 	}
 
 	return '${ts}${prefix} ${msg}'
