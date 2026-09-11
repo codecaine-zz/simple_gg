@@ -528,6 +528,7 @@ Finds all files in `dir` matching a specific extension (e.g. `'json'` or `'.json
 
 ```v
 configs := fileutils.list_files_with_ext('conf', 'json', false)!
+println('Found ${configs.len} config files')
 ```
 
 ---
@@ -559,7 +560,8 @@ println('Size: ${readable}') // "12.45 MB"
 Returns the file extension without the leading dot.
 
 ```v
-ext := fileutils.file_extension('image.png') // "png"
+ext := fileutils.file_extension('image.png')
+println(ext) // "png"
 ```
 
 ---
@@ -569,7 +571,8 @@ ext := fileutils.file_extension('image.png') // "png"
 Returns the base filename without extension or directory prefix.
 
 ```v
-stem := fileutils.file_stem('/var/logs/app.conf') // "app"
+stem := fileutils.file_stem('/var/logs/app.conf')
+println(stem) // "app"
 ```
 
 ---
@@ -734,6 +737,7 @@ Strictly validates table and column identifiers against injection. Valid identif
 import sqliteutils
 
 safe_table := sqliteutils.sanitize_identifier('user_accounts')!
+println(safe_table)
 assert sqliteutils.is_valid_identifier('users') == true
 assert sqliteutils.is_valid_identifier('users; DROP TABLE users;') == false
 ```
@@ -743,7 +747,8 @@ assert sqliteutils.is_valid_identifier('users; DROP TABLE users;') == false
 Doubles single quotes according to SQL-92 standards (`'` -> `''`). Parameterized queries should always be favored over string interpolation.
 
 ```v
-safe_literal := sqliteutils.escape_string("O'Connor") // "O''Connor"
+safe_literal := sqliteutils.escape_string("O'Connor")
+println(safe_literal) // "O''Connor"
 ```
 
 #### `sanitize_sql_type(sql_type string) !string`
@@ -752,6 +757,7 @@ Validates that a SQL column type definition (e.g. `TEXT`, `INTEGER NOT NULL`, `V
 
 ```v
 safe_type := sqliteutils.sanitize_sql_type('VARCHAR(255) NOT NULL')!
+println(safe_type)
 ```
 
 #### `apply_secure_pragmas(mut db sqlite.DB) !`
@@ -1761,6 +1767,7 @@ Generates a random string of the specified length using custom runes from `chars
 
 ```v
 custom_code := strutils.random_string(8, 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789')
+println(custom_code)
 ```
 
 ---
@@ -1771,6 +1778,7 @@ Generates a random string containing letters (A-Z, a-z) and digits (0-9).
 
 ```v
 token := strutils.random_alphanumeric(16)
+println(token)
 ```
 
 ---
@@ -1781,6 +1789,7 @@ Generates a random lowercase hexadecimal string of length `len`.
 
 ```v
 hex_token := strutils.random_hex(32)
+println(hex_token)
 ```
 
 ---
@@ -1822,6 +1831,7 @@ Wraps a string so that lines do not exceed the specified width.
 
 ```v
 wrapped := strutils.word_wrap('one two three four five', 10)
+println(wrapped)
 ```
 
 ---
@@ -1841,7 +1851,8 @@ assert strutils.levenshtein_distance('kitten', 'sitting') == 3
 Returns similarity score between 0.0 (completely different) and 1.0 (identical).
 
 ```v
-score := strutils.similarity('hello', 'hallo') // ~0.8
+score := strutils.similarity('hello', 'hallo')
+println(score) // ~0.8
 ```
 
 [▲ Back to Table of Contents](#table-of-contents)
@@ -1905,7 +1916,8 @@ assert sliceutils.union_slices([1, 2], [2, 3]) == [1, 2, 3]
 Splits a slice into smaller chunks of given size.
 
 ```v
-chunks := sliceutils.chunk([1, 2, 3, 4, 5], 2) // [[1, 2], [3, 4], [5]]
+chunks := sliceutils.chunk([1, 2, 3, 4, 5], 2)
+println(chunks) // [[1, 2], [3, 4], [5]]
 ```
 
 ---
@@ -1925,7 +1937,8 @@ assert sliceutils.flatten([[1, 2], [3, 4]]) == [1, 2, 3, 4]
 Finds the index of the first item matching the predicate, or `none`.
 
 ```v
-idx := sliceutils.find_index([10, 20, 30], fn (x int) bool { return x > 15 }) // 1
+idx := sliceutils.find_index([10, 20, 30], fn (x int) bool { return x > 15 })
+println(idx) // 1
 ```
 
 ---
@@ -1936,6 +1949,8 @@ Partitions elements into two slices: those matching the predicate and those that
 
 ```v
 evens, odds := sliceutils.partition([1, 2, 3, 4], fn (x int) bool { return x % 2 == 0 })
+println(evens) // [2, 4]
+println(odds)  // [1, 3]
 ```
 
 ---
@@ -1956,6 +1971,7 @@ Randomly selects `n` items without replacement.
 
 ```v
 picks := sliceutils.sample([1, 2, 3, 4, 5], 3)
+println(picks)
 ```
 
 ---
@@ -1988,8 +2004,9 @@ Finds the minimum and maximum integers in a slice, returning `none` if empty.
 
 ```v
 nums := [42, 10, 88, 3]
-min_val := sliceutils.min_int(nums) or { 0 } // 3
-max_val := sliceutils.max_int(nums) or { 0 } // 88
+min_val := sliceutils.min_int(nums) or { 0 }
+max_val := sliceutils.max_int(nums) or { 0 }
+println('min: ${min_val}, max: ${max_val}') // min: 3, max: 88
 ```
 
 ---
@@ -2012,8 +2029,9 @@ Finds the minimum and maximum floating point values in a slice, returning `none`
 
 ```v
 floats := [1.5, -2.5, 8.2]
-min_f := sliceutils.min_f64(floats) or { 0.0 } // -2.5
-max_f := sliceutils.max_f64(floats) or { 0.0 } // 8.2
+min_f := sliceutils.min_f64(floats) or { 0.0 }
+max_f := sliceutils.max_f64(floats) or { 0.0 }
+println('min: ${min_f}, max: ${max_f}') // min: -2.5, max: 8.2
 ```
 
 [▲ Back to Table of Contents](#table-of-contents)
@@ -2162,6 +2180,7 @@ Gets environment variable string, or fallback if unset/empty.
 
 ```v
 host := envutils.get_str('APP_HOST', 'localhost')
+println(host)
 ```
 
 ---
@@ -2172,6 +2191,7 @@ Gets environment variable parsed as integer, or fallback if unset or invalid.
 
 ```v
 port := envutils.get_int('PORT', 8080)
+println(port)
 ```
 
 ---
@@ -2182,6 +2202,7 @@ Gets environment variable parsed as a 64-bit integer, or fallback if unset or in
 
 ```v
 max_bytes := envutils.get_i64('MAX_UPLOAD_BYTES', 10737418240)
+println(max_bytes)
 ```
 
 ---
@@ -2192,6 +2213,7 @@ Interprets `'true'`, `'1'`, `'yes'`, `'on'` as `true`, and `'false'`, `'0'`, `'n
 
 ```v
 debug := envutils.get_bool('DEBUG', false)
+println(debug)
 ```
 
 ---
@@ -2202,6 +2224,7 @@ Gets environment variable parsed as float, or fallback if unset or invalid.
 
 ```v
 scale := envutils.get_f64('SCALE_FACTOR', 1.0)
+println(scale)
 ```
 
 ---
@@ -2226,6 +2249,7 @@ Returns the environment variable value or errors if missing/empty.
 
 ```v
 secret := envutils.get_required('JWT_SECRET')!
+println(secret)
 ```
 
 ---
@@ -2373,8 +2397,10 @@ Encodes bytes into hexadecimal and decodes hexadecimal strings back to raw bytes
 
 ```v
 raw := [u8(0xde), u8(0xad), u8(0xbe), u8(0xef)]
-hex_str := cryptoutils.to_hex(raw) // "deadbeef"
+hex_str := cryptoutils.to_hex(raw)
+println(hex_str) // "deadbeef"
 bytes := cryptoutils.from_hex('deadbeef')!
+println(bytes)
 ```
 
 ---
@@ -2385,6 +2411,7 @@ Computes HMAC-SHA256 digest in hex.
 
 ```v
 mac := cryptoutils.hmac_sha256('my-secret-key', 'message payload')
+println(mac)
 ```
 
 ---
@@ -2396,6 +2423,7 @@ Standard Base64 encoding and decoding.
 ```v
 encoded := cryptoutils.base64_encode('Hello V')
 decoded := cryptoutils.base64_decode(encoded)!
+println(decoded)
 ```
 
 ---
@@ -2406,6 +2434,7 @@ URL-safe Base64 encoding and decoding without padding.
 
 ```v
 url_safe := cryptoutils.base64_url_encode('Hello V')
+println(url_safe)
 ```
 
 ---
@@ -2426,7 +2455,8 @@ assert cryptoutils.is_valid_uuid(id)
 Generates a cryptographically random hexadecimal string of given byte length.
 
 ```v
-token := cryptoutils.secure_token(32) // 64 hex characters
+token := cryptoutils.secure_token(32)
+println(token) // 64 hex characters
 ```
 
 [▲ Back to Table of Contents](#table-of-contents)
@@ -2483,6 +2513,7 @@ Serializes and parses ISO 8601 / RFC 3339 timestamps.
 ```v
 iso := timeutils.to_iso8601(time.now())
 parsed := timeutils.from_iso8601(iso)!
+println(parsed)
 ```
 
 ---
@@ -2493,6 +2524,7 @@ Returns 00:00:00.000 or 23:59:59.999 for the given date.
 
 ```v
 today_start := timeutils.start_of_day(time.now())
+println(today_start)
 ```
 
 ---
@@ -2560,7 +2592,8 @@ import httputils
 Encodes parameter map into URL query string.
 
 ```v
-qs := httputils.build_query_string({ 'page': '1', 'search': 'vlang' }) // "page=1&search=vlang"
+qs := httputils.build_query_string({ 'page': '1', 'search': 'vlang' })
+println(qs) // "page=1&search=vlang"
 ```
 
 ---
@@ -2571,6 +2604,7 @@ Parses query string into key-value map.
 
 ```v
 params := httputils.parse_query_string('?page=1&search=vlang')
+println(params)
 ```
 
 ---
@@ -2581,6 +2615,7 @@ Fetches a URL and returns text body.
 
 ```v
 body := httputils.get_text('https://httpbin.org/get', {})!
+println(body)
 ```
 
 ---
@@ -2593,6 +2628,7 @@ Sends an HTTP POST request with raw text payload and returns the response body.
 res := httputils.post_text('https://httpbin.org/post', 'hello world', {
     'Content-Type': 'text/plain'
 })!
+println(res.body)
 ```
 
 ---
@@ -2607,6 +2643,7 @@ struct UserInfo {
     name string
 }
 user := httputils.get_json[UserInfo]('https://api.example.com/user/1', {})!
+println(user.name)
 ```
 
 ---
@@ -2628,6 +2665,7 @@ struct UserResponse {
 
 req := CreateUserReq{ name: 'Alice', email: 'alice@example.com' }
 user_res := httputils.post_json[CreateUserReq, UserResponse]('https://api.example.com/users', req, {})!
+println(user_res.name)
 ```
 
 ---
@@ -2655,6 +2693,7 @@ res := httputils.fetch_with_retry(mut req, httputils.RetryConfig{
     initial_delay_ms: 250
     backoff_factor: 2.0
 })!
+println(res.body)
 ```
 
 [▲ Back to Table of Contents](#table-of-contents)
@@ -2967,6 +3006,7 @@ println('Positional arguments: ${pos_args}')
 
 // Programmatic help printing
 help_text := fp.format_help()
+println(help_text)
 fp.print_help()
 ```
 
@@ -3058,7 +3098,7 @@ total_ram, used_ram, ram_pct := sysutils.get_memory_stats()
 println('RAM: ${used_ram / (1024 * 1024)} MB / ${total_ram / (1024 * 1024)} MB (${ram_pct:.1f}%)')
 
 total_swap, used_swap, swap_pct := sysutils.get_swap_stats()
-println('Swap: ${used_swap / (1024 * 1024)} MB / ${total_swap / (1024 * 1024)} MB')
+println('Swap: ${used_swap / (1024 * 1024)} MB / ${total_swap / (1024 * 1024)} MB (${swap_pct:.1f}%)')
 ```
 
 #### `get_disk_stats(path string) (u64, u64, f64)`
@@ -3163,6 +3203,7 @@ import sysutils
 safe_arg := sysutils.quote_arg('hello; rm -rf /')
 safe_path := sysutils.quote_path('~/My Documents/Report.pdf')
 clean_name := sysutils.sanitize_filename('../../etc/passwd') // "passwd"
+println('${safe_arg}, ${safe_path}, ${clean_name}')
 ```
 
 #### `has_command(name string) bool`, `is_process_running(pid int) bool`, `kill_process(pid int) bool`, `get_command_path(name string) ?string`
@@ -3178,6 +3219,7 @@ if sysutils.has_command('docker') {
     println('Docker located at: ${path}')
 }
 running := sysutils.is_process_running(os.getpid())
+println('Process running: ${running}')
 // Terminate process: sysutils.kill_process(pid)
 ```
 
@@ -3211,7 +3253,7 @@ import sysutils
 
 data_dir := sysutils.get_app_data_dir('my_app')
 cfg_file := sysutils.get_app_config_path('my_app', 'settings.json')
-println('Config file path: ${cfg_file}')
+println('Data dir: ${data_dir}, Config file path: ${cfg_file}')
 ```
 
 #### User & System Directories
@@ -3241,6 +3283,7 @@ import sysutils
 // System Clipboard
 sysutils.copy_to_clipboard('Copied API Key: 12345')!
 clip := sysutils.get_clipboard_text()!
+println('Clipboard: ${clip}')
 
 // Desktop notification & speech
 sysutils.notify('Build Complete', 'All 15 modules compiled successfully!')
@@ -3389,6 +3432,12 @@ uuid_ok := validutils.validate_uuid('e74a81d1-4db5-4b06-a077-80f0c0576395') // t
 
 // JSON syntax validation
 json_ok := validutils.validate_json('{"status": "ok", "code": 200}') // true
+
+println('Emails: ${valid_email}, ${bad_email}')
+println('URLs: ${valid_url}, ${bad_url}')
+println('IPs: ${v4_ok}, ${v6_ok}')
+println('Phone: ${phone_ok}, User: ${user_ok}')
+println('Range: ${range_ok}, Len: ${len_ok}, UUID: ${uuid_ok}, JSON: ${json_ok}')
 ```
 
 [▲ Back to Table of Contents](#table-of-contents)
@@ -3424,6 +3473,7 @@ item := stack.pop() or { '' }             // "third"
 println('Popped: ${item}, Remaining: ${stack.len()}')
 
 items := stack.to_array() // ['first', 'second']
+println(items)
 stack.clear()
 println('Is empty: ${stack.is_empty()}') // true
 ```
@@ -3463,6 +3513,7 @@ ring.push('log_4') // automatically overwrites 'log_1'
 // Contents: ['log_2', 'log_3', 'log_4']
 println('Recent logs: ${ring.to_array()}')
 oldest := ring.pop() or { '' } // "log_2"
+println('Oldest: ${oldest}')
 ```
 
 ### Priority Queue: `SimpleMinHeap`
@@ -3479,8 +3530,9 @@ heap.push(3.0)
 heap.push(25.0)
 
 println('Smallest: ${heap.peek() or { 0.0 }}') // 3.0
-val1 := heap.pop() or { 0.0 } // 3.0
-val2 := heap.pop() or { 0.0 } // 12.5
+val1 := heap.pop() or { 0.0 }
+val2 := heap.pop() or { 0.0 }
+println('Popped: ${val1}, ${val2}') // 3.0, 12.5
 ```
 
 [▲ Back to Table of Contents](#table-of-contents)
@@ -3529,6 +3581,9 @@ w_mean := statutils.stats_weighted_mean(dataset, weights)!
 
 // Trimmed Mean (discards 10% from lower and upper bounds)
 t_mean := statutils.stats_trimmed_mean(dataset, 0.1)!
+
+println('sum=${total}, mean=${mean}, median=${median}, mode=${mode}')
+println('geom=${geom_mean}, harm=${harm_mean}, rms=${rms}, weighted=${w_mean}, trimmed=${t_mean}')
 ```
 
 ---
@@ -3565,6 +3620,11 @@ iqr := statutils.stats_iqr(dataset)                   // Q3 - Q1
 // Relative Dispersion
 cov := statutils.stats_coefficient_of_variation(dataset) // std_dev / mean
 mad := statutils.stats_median_abs_deviation(dataset)     // Median Absolute Deviation
+
+println('min=${min_val}, max=${max_val}, span=${span}')
+println('variance: pop=${pop_var}, sample=${sample_var}; std_dev: pop=${pop_std}, sample=${sample_std}')
+println('sem=${sem}, p50=${p50}, p95=${p95}, quartiles=(${q1}, ${q2}, ${q3}), iqr=${iqr}')
+println('cov=${cov}, mad=${mad}')
 ```
 
 ---
@@ -3581,6 +3641,8 @@ skew := statutils.stats_skewness(dataset)
 
 // Excess Kurtosis: measures tailedness relative to normal distribution (0 = normal, >0 leptokurtic)
 kurt := statutils.stats_kurtosis(dataset)
+
+println('Skewness: ${skew}, Kurtosis: ${kurt}')
 ```
 
 ---
@@ -3602,6 +3664,8 @@ pearson_r := statutils.stats_pearson_correlation(x, y)!
 
 // Spearman Rank Correlation Coefficient r_s
 spearman_r := statutils.stats_spearman_correlation(x, y)!
+
+println('Cov: ${cov}, Sample Cov: ${sample_cov}, Pearson: ${pearson_r}, Spearman: ${spearman_r}')
 
 // Ordinary Least Squares (OLS) Linear Regression: y = slope * x + intercept
 reg := statutils.stats_linear_regression(x, y)! // returns statutils.LinearRegressionResult
@@ -3628,6 +3692,9 @@ standardized_data := statutils.stats_z_scores([10.0, 20.0, 30.0])
 
 // Min-Max Normalization (scales values to [0.0, 1.0])
 normalized := statutils.stats_min_max_normalize([10.0, 20.0, 30.0]) // [0.0, 0.5, 1.0]
+
+println('PDF: ${pdf}, CDF: ${cdf}, Z: ${single_z}')
+println('Standardized: ${standardized_data}, Normalized: ${normalized}')
 ```
 
 ---
@@ -3663,6 +3730,8 @@ sma := statutils.stats_moving_average(series, 3)!
 
 // Exponential Moving Average (EMA) with smoothing factor alpha
 ema := statutils.stats_exponential_moving_average(series, 0.3)!
+println('SMA: ${sma}')
+println('EMA: ${ema}')
 ```
 
 ---
@@ -3720,7 +3789,7 @@ import stateutils
 
 data_dir := stateutils.get_app_dir('my_app', .data)
 config_dir := stateutils.get_app_dir('my_app', .config)
-println('App data dir: ${data_dir}')
+println('App data dir: ${data_dir}, config dir: ${config_dir}')
 ```
 
 #### `get_state_path(app_name string, filename string, loc StateLocation) string`
@@ -3823,6 +3892,7 @@ mut store := stateutils.new_app_state[Settings]('my_app', Settings{
 
 // Or custom filename & directory location:
 mut custom_store := stateutils.new_app_state_with_file[Settings]('my_app', 'workspace.json', Settings{}, .config)
+println('Custom store theme: ${custom_store.get().theme}')
 
 // Access current state
 println('Window width: ${store.get().window_w}')
@@ -3837,6 +3907,7 @@ store.save()! // persists atomically
 
 // Backup & Rollback
 bak_file := store.backup()! // saves ${path}.bak
+println('Backup saved: ${bak_file}')
 store.set(Settings{ window_w: 800, window_h: 600, theme: 'light' })!
 store.rollback()! // reverts from .bak
 
@@ -3861,6 +3932,7 @@ kv.auto_save = true
 
 // Or custom file/location:
 mut custom_kv := stateutils.new_kv_state_with_file('my_app', 'tokens.json', .config)
+println('Custom KV keys: ${custom_kv.keys()}')
 
 // Typed setters & getters with fallbacks
 kv.set_str('current_profile', 'guest')!
@@ -3872,12 +3944,14 @@ profile := kv.get_str('current_profile', 'default')
 volume  := kv.get_int('volume', 100)
 notify  := kv.get_bool('notifications', false)
 scale   := kv.get_f64('scale', 1.0)
+println('${profile}, vol=${volume}, notify=${notify}, scale=${scale}')
 
 // Management
 println('Has volume: ${kv.has("volume")}')
 kv.delete('scale')!
 keys := kv.keys()
 all_data := kv.all()
+println('All data: ${all_data}')
 
 kv.clear()!
 kv.reset()! // clears memory and deletes state file from disk
@@ -4524,6 +4598,7 @@ import colorutils
 blue := colorutils.RGB{0, 100, 200}
 lighter := colorutils.lighten(blue, 0.2) // 20% lighter
 darker  := colorutils.darken(blue, 0.2)  // 20% darker
+println('Lighter: ${lighter}, Darker: ${darker}')
 ```
 
 ---
@@ -4536,7 +4611,8 @@ Computes the inverted / photographic negative of an RGB color.
 import colorutils
 
 white := colorutils.RGB{255, 255, 255}
-black := colorutils.invert(white) // RGB{0, 0, 0}
+black := colorutils.invert(white)
+println(black) // RGB{0, 0, 0}
 ```
 
 ---
@@ -4550,7 +4626,8 @@ import colorutils
 
 red := colorutils.RGB{255, 0, 0}
 blue := colorutils.RGB{0, 0, 255}
-purple := colorutils.blend(red, blue, 0.5) // Halfway blend
+purple := colorutils.blend(red, blue, 0.5)
+println(purple) // Halfway blend
 ```
 
 ---
@@ -4564,6 +4641,7 @@ import colorutils
 
 c := colorutils.RGB{255, 200, 50}
 gray := colorutils.grayscale(c)
+println(gray)
 ```
 
 [▲ Back to Table of Contents](#table-of-contents)
@@ -5238,6 +5316,7 @@ tags = [ "prod", "db" ]
 
 doc := tomlutils.parse(toml_text) or { panic(err) }
 file_doc := tomlutils.parse_file('config.toml') or { doc }
+println('File doc: ' + file_doc.get_string('title', ''))
 
 title := doc.get_string('title', 'untitled')
 server := doc.get_string('database.server', 'localhost')
@@ -5289,16 +5368,20 @@ raw_html := '<!DOCTYPE html><html><head><title>Test Page</title></head><body><h1
 
 mut doc := htmlutils.parse(raw_html)
 file_doc := htmlutils.parse_file('page.html') or { doc }
+println('File doc: ' + file_doc.title())
 
 page_title := doc.title()
+println('Title: ${page_title}')
 h1 := doc.get_element_by_id('main-heading') or { panic('missing') }
 println('Header: ${h1.text}, Classes: ${h1.classes}')
 
 paragraphs := doc.get_elements_by_class('desc')
 divs := doc.get_elements_by_tag('p')
+println('Paragraphs: ${paragraphs.len}, Divs: ${divs.len}')
 
 escaped := htmlutils.escape_html('<div class="box">Hello & "world"</div>')
 unescaped := htmlutils.unescape_html(escaped)
+println(unescaped)
 plain := htmlutils.strip_tags('<b>Bold</b> and <i>Italic</i>')
 println(plain) // "Bold and Italic"
 ```
@@ -5342,6 +5425,7 @@ bs.set(5)
 bs.toggle(5)
 is_set := bs.get(0) // true
 count := bs.count_set() // 1
+println('is_set: ${is_set}, count: ${count}')
 
 mut b1 := bitutils.from_binary_string('1100') or { panic(err) }
 mut b2 := bitutils.from_binary_string('1010') or { panic(err) }
@@ -5350,16 +5434,19 @@ and_res := b1.and_op(b2)
 or_res := b1.or_op(b2)
 xor_res := b1.xor_op(b2)
 not_res := b1.not_op()
+println('and: ${and_res}, or: ${or_res}, xor: ${xor_res}, not: ${not_res}')
 
 ones := bitutils.popcount(0b1011001) // 4
 bin_str := bitutils.to_binary(42, 8)  // "00101010"
 num := bitutils.from_binary('00101010') or { 0 } // 42
+println('ones: ${ones}, bin: ${bin_str}, num: ${num}')
 
 flag_read := u64(1)
 flag_write := u64(2)
 mut perms := bitutils.set_flag(0, flag_read)
 perms = bitutils.set_flag(perms, flag_write)
 can_read := bitutils.has_flag(perms, flag_read) // true
+println('can_read: ${can_read}')
 perms = bitutils.clear_flag(perms, flag_read)
 perms = bitutils.toggle_flag(perms, flag_write)
 ```
@@ -5432,6 +5519,12 @@ uni_c := compressutils.compress(.zstd, payload.bytes()) or { panic(err) }
 uni_d := compressutils.decompress(.zstd, uni_c) or { panic(err) }
 ratio := compressutils.compression_ratio(payload.len, uni_c.len)
 println('Zstandard version: ${zstd_v}, ratio: ${ratio:.1f}%')
+
+println('Gzip: dec_len=${gz_dec_bytes.len}, text=${gz_text}')
+println('Zlib: dec_len=${zl_dec_bytes.len}, text=${zl_text}')
+println('Deflate: dec_len=${df_dec_bytes.len}, text=${df_text}')
+println('Zstd: dec_len=${zs_dec_bytes.len}, text=${zs_text}')
+println('Uni decompress len: ${uni_d.len}')
 ```
 
 [▲ Back to Table of Contents](#table-of-contents)
@@ -5472,11 +5565,14 @@ entries := [
 ]
 tar_bytes := tarutils.pack_bytes(entries)
 unpacked := tarutils.unpack_bytes(tar_bytes) or { panic(err) }
+println('Unpacked ${unpacked.len} entries')
 
 // Disk TAR archive creation and extraction
 tarutils.create_tar('backup.tar', ['file1.txt', 'file2.txt']) or { panic(err) }
 files_in_tar := tarutils.list_tar_entries('backup.tar') or { panic(err) }
+println('Files in tar: ${files_in_tar}')
 content := tarutils.read_tar_file('backup.tar', 'file1.txt') or { '' }
+println('Content: ${content}')
 tarutils.extract_tar('backup.tar', './output_dir') or { panic(err) }
 ```
 
@@ -5513,21 +5609,27 @@ raw_cipher := cryptoutils.aes_encrypt_cbc(key, iv, 'Secret Payload'.bytes()) or 
 raw_dec := cryptoutils.aes_decrypt_cbc(key, iv, raw_cipher) or { panic(err) }
 decrypted := cryptoutils.aes_decrypt_string(key, iv, ciphertext) or { panic(err) }
 
+println('Decrypted raw len: ${raw_dec.len}, decrypted text: ${decrypted}')
+
 // Password hashing with Bcrypt
 hash := cryptoutils.bcrypt_hash('user_password') or { panic(err) }
 ok := cryptoutils.bcrypt_verify('user_password', hash)
+println('Password ok: ${ok}')
 
 // Secure Entropy
 random_hex := cryptoutils.secure_random_hex(16) or { '' }
+println('Random hex: ${random_hex}')
 
 // Fast non-cryptographic hashes
 fnv32 := cryptoutils.fnv1a_32('string to hash')
 c32 := cryptoutils.crc32_hash('string to hash')
+println('FNV32: ${fnv32}, CRC32: ${c32}')
 
 // Asymmetric Ed25519 digital signatures
 pub_k, priv_k := cryptoutils.generate_ed25519_keypair() or { panic(err) }
 sig := cryptoutils.ed25519_sign(priv_k, 'message'.bytes()) or { panic(err) }
 valid := cryptoutils.ed25519_verify(pub_k, 'message'.bytes(), sig)
+println('Ed25519 signature valid: ${valid}')
 ```
 
 ### `netutils` Framed TCP & UDP
@@ -5540,6 +5642,7 @@ import net
 mut conn := net.dial_tcp('127.0.0.1:9000') or { panic(err) }
 netutils.send_framed_msg(mut conn, 'Framed Payload'.bytes()) or { panic(err) }
 reply := netutils.read_framed_msg(mut conn, 8192) or { panic(err) }
+println('Received reply len: ${reply.len}')
 
 // UDP datagram transmission
 netutils.send_udp('127.0.0.1', 9001, 'UDP Packet'.bytes()) or { panic(err) }
@@ -5558,12 +5661,14 @@ s.add_all(['second', 'third'])
 has_val := s.contains('first')
 arr := s.to_array()
 var_set := structutils.GenericSet[string]{ set: s.set }
+println('s_arr size: ${s_arr.size()}, has_val: ${has_val}, arr: ${arr}, var_set size: ${var_set.size()}')
 
 // BloomFilter
 mut bf := structutils.new_bloom_filter(64, 3) or { panic(err) }
 bf.add('item1')
 exists := bf.contains('item1')
 var_bf := structutils.BloomFilter{}
+println('exists: ${exists}, var_bf: ${var_bf}')
 
 // BinarySearchTree[T]
 mut bst := structutils.new_bstree[int]()
@@ -5574,6 +5679,7 @@ sorted_order := bst.in_order()
 smallest := bst.min()
 largest := bst.max()
 var_bst := structutils.BinarySearchTree[int]{}
+println('sorted: ${sorted_order}, min: ${smallest}, max: ${largest}, var_bst empty: ${var_bst.is_empty()}')
 
 // SinglyLinkedList[T]
 mut ll := structutils.new_linked_list[int]()
@@ -5581,6 +5687,7 @@ ll.push(10)
 item := ll.pop()
 first_item := ll.shift()
 var_ll := structutils.SinglyLinkedList[int]{}
+println('item: ${item}, first: ${first_item}, var_ll len: ${var_ll.len()}')
 
 // DoublyLinkedList[T]
 mut dll := structutils.new_doubly_linked_list[string]()
@@ -5589,6 +5696,7 @@ dll.push_front('head')
 popped_tail := dll.pop_back()
 popped_head := dll.pop_front()
 var_dll := structutils.DoublyLinkedList[string]{}
+println('popped tail: ${popped_tail}, popped head: ${popped_head}, var_dll len: ${var_dll.len()}')
 ```
 
 ### `sysutils` Runtime Info (`RuntimeInfo`) & Shell Piping
@@ -5599,6 +5707,7 @@ import sysutils
 info := sysutils.runtime_system_info()
 println('OS: ${info.os_name}, Arch: ${info.arch}, CPUs: ${info.num_cpus}, 64bit: ${info.is_64bit}')
 var_rt := sysutils.RuntimeInfo{ os_name: 'macos', arch: 'arm64' }
+println('Runtime info: ${var_rt.os_name}')
 
 piped_output := sysutils.pipe_commands('echo "antigravity toolkit"', 'grep "antigravity"') or { '' }
 println(piped_output)
@@ -5616,6 +5725,7 @@ res := timeutils.benchmark_fn('loop_benchmark', 1000, fn () {
 println(res.str())
 println('Ops/Sec: ${res.ops_per_sec}')
 var_bm := timeutils.BenchmarkResult{ name: 'demo', iterations: 10 }
+println('Benchmark result: ${var_bm.name}')
 ```
 
 [▲ Back to Table of Contents](#table-of-contents)
