@@ -23,6 +23,30 @@ v install --git https://github.com/codecaine-zz/simple_gg
 - **Headless CLI Import**: `import simplecli`
 - **30 Utility Modules**: `import <modulename>` (e.g., `import strutils`, `import cacheutils`, `import sqliteutils`). Complete manual: [UTILS_API.md](UTILS_API.md)
 
+### V Compiler Compatibility & Maintenance (`v up`)
+
+`simplegui` is built and validated against **V 0.5.2** (commit `9e9f7f05` / V3 compiler backend). All 43 test suites, 30 GUI demos, 29 examples, and 47 desktop workstations pass on this build.
+
+> [!WARNING]
+> **Caution Regarding `v up`**:
+> Running `v up` pulls rolling commits directly from the V repository master branch, which can intermittently introduce compiler bootstrap issues (such as `EmbedFileData error: files ... cheaders.v do not exist`) or codegen regressions with generic interfaces (such as `json2` / `io.Reader`).
+>
+> If running `v up` breaks your V compiler, restore it cleanly from official bootstrap C sources:
+> ```bash
+> cd /path/to/v
+> git fetch origin && git checkout 9e9f7f05
+> git clone --depth 1 https://github.com/vlang/vc /tmp/vc
+> cc -std=gnu99 -w -o v /tmp/vc/v.c -lm -lpthread
+> ./v self
+> rm -rf ~/.cache/v/v1-fallback
+> ```
+>
+> **Environment Flags (`VFLAGS`)**:
+> On macOS with Homebrew, avoid embedded quotes in `~/.zshrc`:
+> ```bash
+> export VFLAGS="-ldflags -L/opt/homebrew/lib -ldflags -L/usr/local/lib"
+> ```
+
 ---
 
 ## Quick Navigation Index

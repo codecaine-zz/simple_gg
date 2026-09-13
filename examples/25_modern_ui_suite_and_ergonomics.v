@@ -229,7 +229,7 @@ fn main() {
 	// Zoom UI Scaling Handler
 	win.on_click('btn_zoom', fn (mut win simplegui.SimpleWindow) {
 		cur_scale := win.get_ui_scale()
-		new_scale := if cur_scale >= 1.5 { 1.0 } else { cur_scale + 0.25 }
+		new_scale := if cur_scale >= 1.5 { f32(1.0) } else { cur_scale + 0.25 }
 		win.set_ui_scale(new_scale)
 		win.set_text('btn_zoom', '[+] Zoom Scale (${new_scale:.2f}x)')
 		win.info('UI Zoom Scaled', 'Global scaling factor set to ${new_scale:.2f}x')

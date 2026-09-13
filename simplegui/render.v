@@ -745,10 +745,11 @@ pub fn (mut win SimpleWindow) render_ui() {
 					}
 				} else {
 					family_path := resolve_control_family_path(ctrl, win)
+					seg_title := if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.title }
 					win.gg_ctx.draw_text2(
 						x:      int(ctrl.x + 10)
 						y:      int(ctrl.y + (ctrl.h - 16.0) / 2.0)
-						text:   if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.title }
+						text:   seg_title
 						color:  fg
 						size:   14
 						family: family_path
@@ -2141,7 +2142,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 						win.gg_ctx.draw_rounded_rect_filled(tab_x, ctrl.y + 4.0, t_w, 20.0, 4.0, gg.rgb(35, 41, 58))
 						win.gg_ctx.draw_line(tab_x + 4.0, ctrl.y + 24.0, tab_x + t_w - 4.0, ctrl.y + 24.0, accent)
 					}
-					win.gg_ctx.draw_text2(x: int(tab_x + 8), y: int(ctrl.y + 6), text: tab_name, color: if is_active { gg.Color{r: 255, g: 255, b: 255} } else { gg.rgb(156, 163, 175) }, size: 11, bold: is_active)
+					tab_c := if is_active { gg.Color{r: 255, g: 255, b: 255} } else { gg.rgb(156, 163, 175) }
+					win.gg_ctx.draw_text2(x: int(tab_x + 8), y: int(ctrl.y + 6), text: tab_name, color: tab_c, size: 11, bold: is_active)
 					tab_x += t_w + 6.0
 				}
 
@@ -2155,7 +2157,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 
 				// Log outputs
 				mut log_y := ctrl.y + 32.0
-				for idx, line in ctrl.items_selected {
+				for log_idx, line in ctrl.items_selected {
 					if log_y + 18.0 > ctrl.y + ctrl.h { break }
 					line_c := if line.contains('[ERR]') || line.contains('[ERROR]') {
 						gg.rgb(248, 113, 113)
@@ -2168,7 +2170,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 					} else {
 						gg.rgb(226, 232, 240)
 					}
-					win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(log_y), text: '${idx + 1:2d} | ${line}', color: line_c, size: 11, mono: true)
+					win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(log_y), text: '${log_idx + 1:2d} | ${line}', color: line_c, size: 11, mono: true)
 					log_y += 18.0
 				}
 			}
@@ -2180,7 +2182,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 8.0, ctrl.y + 6.0, ctrl.w - 16.0, 22.0, 4.0, gg.rgb(24, 27, 38))
 				draw_vector_search_icon(win.gg_ctx, ctrl.x + 18.0, ctrl.y + 17.0, 3.5, gg.rgb(156, 163, 175))
 				search_txt := if ctrl.search_query.len > 0 { ctrl.search_query } else { 'Filter ${ctrl.rows.len} records...' }
-				win.gg_ctx.draw_text2(x: int(ctrl.x + 32), y: int(ctrl.y + 10), text: search_txt, color: if ctrl.search_query.len > 0 { fg } else { gg.rgb(148, 163, 184) }, size: 11)
+				search_c := if ctrl.search_query.len > 0 { fg } else { gg.rgb(148, 163, 184) }
+				win.gg_ctx.draw_text2(x: int(ctrl.x + 32), y: int(ctrl.y + 10), text: search_txt, color: search_c, size: 11)
 
 				// Column Headers
 				hdr_y := ctrl.y + 32.0
@@ -2192,7 +2195,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 				for c_idx, hdr in ctrl.headers {
 					hx := ctrl.x + 8.0 + f32(c_idx) * col_w
 					sort_sym := if ctrl.sort_col == c_idx { if ctrl.sort_asc { ' ^' } else { ' v' } } else { '' }
-					win.gg_ctx.draw_text2(x: int(hx), y: int(hdr_y + 5), text: hdr + sort_sym, color: if ctrl.sort_col == c_idx { accent } else { fg }, size: 11, bold: true)
+					sort_c := if ctrl.sort_col == c_idx { accent } else { fg }
+					win.gg_ctx.draw_text2(x: int(hx), y: int(hdr_y + 5), text: hdr + sort_sym, color: sort_c, size: 11, bold: true)
 				}
 
 				// Data Rows (Paginated 5 items)
@@ -2264,7 +2268,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 
 						// Step title label
 						step_txt_w := f32(step_title.len) * 5.5
-						win.gg_ctx.draw_text2(x: int(cx - step_txt_w / 2.0), y: int(cy + 18), text: step_title, color: if idx == ctrl.int_value { fg } else { gg.rgb(156, 163, 175) }, size: 10, bold: idx == ctrl.int_value)
+						step_c := if idx == ctrl.int_value { fg } else { gg.rgb(156, 163, 175) }
+						win.gg_ctx.draw_text2(x: int(cx - step_txt_w / 2.0), y: int(cy + 18), text: step_title, color: step_c, size: 10, bold: idx == ctrl.int_value)
 					}
 				}
 			}
@@ -2286,7 +2291,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 					} else {
 						win.gg_ctx.draw_rounded_rect_filled(ax, ctrl.y + 6.0, act_w, ctrl.h - 12.0, 14.0, gg.rgb(38, 43, 60))
 					}
-					win.gg_ctx.draw_text2(x: int(ax + 10), y: int(ctrl.y + 13), text: act, color: if is_sel { gg.Color{r: 255, g: 255, b: 255} } else { fg }, size: 11, bold: is_sel)
+					act_c := if is_sel { gg.Color{r: 255, g: 255, b: 255} } else { fg }
+					win.gg_ctx.draw_text2(x: int(ax + 10), y: int(ctrl.y + 13), text: act, color: act_c, size: 11, bold: is_sel)
 					ax += act_w + 8.0
 				}
 			}
@@ -2426,11 +2432,12 @@ pub fn (mut win SimpleWindow) render_ui() {
 					disp_role := truncate_text_to_width(win, role_txt, max_role_w - 14.0)
 					role_w := measure_text_width(win, disp_role) + 14.0
 					win.gg_ctx.draw_rounded_rect_filled(badge_x, ctrl.y + 32.0, role_w, 18.0, 4.0, if win.theme.is_dark { gg.rgb(30, 58, 138) } else { gg.rgb(219, 234, 254) })
+					role_c := if win.theme.is_dark { gg.rgb(147, 197, 253) } else { gg.rgb(29, 78, 216) }
 					win.gg_ctx.draw_text2(
 						x: int(badge_x + 7)
 						y: int(ctrl.y + 35)
 						text: disp_role
-						color: if win.theme.is_dark { gg.rgb(147, 197, 253) } else { gg.rgb(29, 78, 216) }
+						color: role_c
 						size: 10
 						bold: true
 					)
@@ -2441,11 +2448,12 @@ pub fn (mut win SimpleWindow) render_ui() {
 				if bio_txt.len > 0 {
 					max_bio_w := ctrl.w - 104.0
 					disp_bio := truncate_text_to_width(win, bio_txt, max_bio_w)
+					bio_c := if win.theme.is_dark { gg.rgb(203, 213, 225) } else { gg.rgb(71, 85, 105) }
 					win.gg_ctx.draw_text2(
 						x: int(text_left)
 						y: int(ctrl.y + 58)
 						text: disp_bio
-						color: if win.theme.is_dark { gg.rgb(203, 213, 225) } else { gg.rgb(71, 85, 105) }
+						color: bio_c
 						size: 11
 					)
 				}
@@ -3555,11 +3563,12 @@ fn (mut win SimpleWindow) render_modal() {
 	if is_close_hov {
 		win.gg_ctx.draw_rounded_rect_filled(layout.close_x - 3.0, layout.close_y - 3.0, layout.close_sz + 6.0, layout.close_sz + 6.0, 4.0, if win.theme.is_dark { gg.rgb(45, 48, 62) } else { gg.rgb(235, 238, 245) })
 	}
+	close_c := if is_close_hov { fg } else { muted_fg }
 	win.gg_ctx.draw_text2(
 		x: int(layout.close_x + 3)
 		y: int(layout.close_y)
 		text: 'x'
-		color: if is_close_hov { fg } else { muted_fg }
+		color: close_c
 		size: 14
 		bold: true
 	)
@@ -4347,12 +4356,14 @@ fn (mut win SimpleWindow) render_drawer() {
 			badge_w := f32(item.badge.len * 7 + 14)
 			badge_x := item_pad_x + item_w - badge_w - 8.0
 			badge_y := item_y + (item_h - 20.0) / 2.0
-			win.gg_ctx.draw_rounded_rect_filled(badge_x, badge_y, badge_w, 20.0, 10.0, if item.is_active { accent } else { hover_bg })
+			badge_bg := if item.is_active { accent } else { hover_bg }
+			win.gg_ctx.draw_rounded_rect_filled(badge_x, badge_y, badge_w, 20.0, 10.0, badge_bg)
+			badge_c := if item.is_active { gg.rgb(255, 255, 255) } else { muted_fg }
 			win.gg_ctx.draw_text2(
 				x:     int(badge_x + 7)
 				y:     int(badge_y + 3)
 				text:  item.badge
-				color: if item.is_active { gg.rgb(255, 255, 255) } else { muted_fg }
+				color: badge_c
 				size:  10
 				bold:  true
 			)

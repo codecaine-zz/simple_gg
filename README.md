@@ -143,6 +143,50 @@ sudo apt install -y libx11-dev libxcursor-dev libxi-dev libgl1-mesa-dev libasoun
 | **V Module Name**       | `simplegui` | Used in all code across **macOS, Linux, and Windows**: `import simplegui` |
 | **Headless CLI Module** | `simplecli` | Zero-window terminal apps across all platforms: `import simplecli`        |
 
+### 5. V Compiler Version & `v up` Maintenance
+
+`simple_gg` is developed and validated against **V 0.5.2** (commit `9e9f7f05` / V3 compiler backend). All 43 test suites, 30 GUI demos, 29 examples, 47 desktop workstations, and 49 CLI tools are tested and verified on this build.
+
+#### ⚠️ Caution with `v up`
+Running `v up` directly pulls rolling changes from the V master branch, which can occasionally introduce compiler bootstrap issues or codegen regressions:
+- **`cheaders.v` / `EmbedFileData` Panic**: If `v up` pulls a commit where embedded C headers are restructured before the bootstrap pre-built `vc` sources are synchronized, running `v` will fail with:
+  ```
+  V panic: EmbedFileData error: files ... cheaders.v do not exist
+  ```
+- **Interface Dispatch Mismatches (`json2`, `io.Reader`)**: Upstream master changes can affect generic interface method dispatch parameter resolution (e.g., when streaming `io.Reader` in `json2` encounters types with zero-parameter `read` methods).
+
+#### 🔄 How to Safely Rebuild / Recover V
+If running `v up` leaves your V installation broken or unable to compile, restore it cleanly from bootstrap C code (`vc`):
+
+```bash
+cd /path/to/v
+
+# 1. Fetch latest changes or pin to verified commit
+git fetch origin
+git checkout 9e9f7f05   # Verified working commit (or master)
+
+# 2. Bootstrap from the official vc repository
+git clone --depth 1 https://github.com/vlang/vc /tmp/vc
+cc -std=gnu99 -w -o v /tmp/vc/v.c -lm -lpthread
+
+# 3. Recompile V self-hosted
+./v self
+
+# 4. Clean out any obsolete fallback caches
+rm -rf ~/.cache/v/v1-fallback
+```
+
+#### 💡 Environment Flag (`VFLAGS`) Best Practice
+On macOS with Homebrew, if you set library search paths via `VFLAGS` in `~/.zshrc` or `~/.bashrc`, specify `-ldflags` separately for each path to avoid argument-splitting failures during recursive sub-invocations (e.g. `v test` or `v crun`):
+
+```bash
+# ✅ Recommended (avoids nested quoting errors in subshells):
+export VFLAGS="-ldflags -L/opt/homebrew/lib -ldflags -L/usr/local/lib"
+
+# ❌ Avoid (inner quotes break argument tokenization in V child processes):
+# export VFLAGS="-ldflags '-L/opt/homebrew/lib -L/usr/local/lib'"
+```
+
 ---
 
 # Quick Start

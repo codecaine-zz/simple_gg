@@ -2,6 +2,9 @@
 
 `simplecli` is a comprehensive, lightweight, zero-window console utility framework and Rapid Application Development (RAD) toolkit for the V programming language. It brings all the cross-platform OS system calls, hardware resource monitoring, desktop notifications, speech synthesis, standard path resolvers, cryptography, HTTP, generic data structures, string similarity metrics, multi-level logging, CLI flag parsing, and stdlib wrappers directly to command-line utilities and automation scripts without requiring any graphical window backend (no `gg`/`sokol` GUI dependencies).
 
+> [!NOTE]
+> **V Compiler Compatibility**: `simplecli` is tested and verified on **V 0.5.2** (`9e9f7f05`). Avoid running unpinned `v up` on rolling master without verifying stability. See the main [`README.md`](README.md#5-v-compiler-version--v-up-maintenance) for compiler setup, recovery steps, and `VFLAGS` guidance.
+
 ---
 
 ## Table of Contents

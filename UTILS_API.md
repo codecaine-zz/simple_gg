@@ -4,6 +4,9 @@ Welcome to the comprehensive API reference manual for the **30 production-grade 
 
 Every module is zero-dependency, self-contained, and designed for Rapid Application Development (RAD). You can import any module directly across GUI apps, CLI tools, services, and background workers (e.g. `import strutils`, `import sqliteutils`, `import cacheutils`).
 
+> [!NOTE]
+> **V Compiler Compatibility**: All 30 modules in `vlang_utils` are verified and tested against **V 0.5.2** (`9e9f7f05`). This includes full support for `json2` streaming serialization, generics, and native SQLite bindings. For compiler maintenance, `v up` troubleshooting, and `VFLAGS` setup, refer to [`README.md`](README.md#5-v-compiler-version--v-up-maintenance).
+
 ---
 
 ## Start Here: How To Read Any Example

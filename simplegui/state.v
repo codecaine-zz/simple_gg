@@ -13,8 +13,6 @@ import json2
 import os
 import time
 
-// StringEventCallback is a callback function invoked with a string parameter (e.g. state value change).
-pub type StringEventCallback = fn (mut win SimpleWindow, value string)
 
 // FileDropCallback is a callback function invoked when files are drag-and-dropped onto the window.
 pub type FileDropCallback = fn (mut win SimpleWindow, files []string)

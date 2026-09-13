@@ -22,6 +22,8 @@ To inspect your system and automatically install any missing CLI tools used acro
 ./install_dependencies.vsh --all -y
 ```
 
+> **Note on V Compiler Version**: All 47 applications are verified on **V 0.5.2** (`9e9f7f05`). See the main [README.md](../README.md#5-v-compiler-version--v-up-maintenance) for compiler setup, `v up` troubleshooting, and `VFLAGS` configuration.
+
 ---
 
 # 📸 Visual Showcase of Applications (47 Workstations)
