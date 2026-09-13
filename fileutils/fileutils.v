@@ -252,34 +252,73 @@ pub fn file_stem(path string) string {
 	return name
 }
 
+// parse_csv parses CSV or TSV content into rows. Delimiter defaults to ',' if it is 0.
+pub fn parse_csv(content string, delimiter u8) [][]string {
+	delim := if delimiter == 0 { `,` } else { delimiter }
+	mut rows := [][]string{}
+	mut row := []string{}
+	mut field := []u8{}
+	mut in_quotes := false
+	mut at_line_start := true
+	mut is_comment := false
+	mut index := 0
+	for index < content.len {
+		ch := content[index]
+		if is_comment {
+			if ch == `\n` || ch == `\r` {
+				is_comment = false
+				at_line_start = true
+				if ch == `\r` && index + 1 < content.len && content[index + 1] == `\n` {
+					index++
+				}
+			}
+			index++
+			continue
+		}
+		if at_line_start && row.len == 0 && field.len == 0 && ch == `#` {
+			is_comment = true
+			index++
+			continue
+		}
+		at_line_start = false
+		if ch == `"` {
+			if in_quotes && index + 1 < content.len && content[index + 1] == `"` {
+				field << `"`
+				index++
+			} else {
+				in_quotes = !in_quotes
+			}
+		} else if ch == delim && !in_quotes {
+			row << field.bytestr()
+			field.clear()
+		} else if (ch == `\n` || ch == `\r`) && !in_quotes {
+			if row.len > 0 || field.len > 0 {
+				row << field.bytestr()
+				rows << row
+				row = []string{}
+				field.clear()
+			}
+			at_line_start = true
+			if ch == `\r` && index + 1 < content.len && content[index + 1] == `\n` {
+				index++
+			}
+		} else {
+			field << ch
+		}
+		index++
+	}
+	if row.len > 0 || field.len > 0 {
+		row << field.bytestr()
+		rows << row
+	}
+	return rows
+}
+
 // read_csv reads a CSV or TSV file into a 2D slice of strings. Delimiter defaults to ',' if rune is 0.
 pub fn read_csv(path string, delimiter rune) ![][]string {
 	content := os.read_file(path) or { return err }
-	delim := if delimiter == 0 { `,` } else { delimiter }
-	lines := content.split_into_lines()
-	mut rows := [][]string{}
-	for line in lines {
-		trimmed := line.trim_space()
-		if trimmed.len == 0 {
-			continue
-		}
-		mut cols := []string{}
-		mut current := ''
-		mut in_quotes := false
-		for r in trimmed.runes() {
-			if r == `"` {
-				in_quotes = !in_quotes
-			} else if r == delim && !in_quotes {
-				cols << current.trim_space()
-				current = ''
-			} else {
-				current += r.str()
-			}
-		}
-		cols << current.trim_space()
-		rows << cols
-	}
-	return rows
+	delim := if delimiter == 0 { `,` } else { u8(delimiter) }
+	return parse_csv(content, delim)
 }
 
 // write_csv writes a 2D slice of strings to disk as a CSV or TSV file. Delimiter defaults to ',' if rune is 0.

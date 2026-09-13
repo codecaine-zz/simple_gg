@@ -88,6 +88,9 @@ fn test_stdlib_collections_and_string_metrics() {
 	assert app.json_get_int(raw_json, 'port', 0) == 5000
 	assert app.json_get_bool(raw_json, 'enabled', false) == true
 
+	rows := app.csv_parse('name,notes\r\nAda,"JSON, CSV"')
+	assert rows == [['name', 'notes'], ['Ada', 'JSON, CSV']]
+
 	// Lorem Generator
 	words := app.lorem_words(5)
 	assert words.split(' ').len == 5

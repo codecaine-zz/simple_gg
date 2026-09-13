@@ -257,6 +257,17 @@ fn test_csv_operations() {
 	remove_file(csv_path) or {}
 }
 
+fn test_parse_csv_handles_quotes_newlines_and_comments() {
+	content := '# ignored\r\nid,name,notes\r\n1,Alice,"Hello, ""world"""\r\n2,Bob,"two\nlines"'
+	rows := parse_csv(content, `,`)
+
+	assert rows == [
+		['id', 'name', 'notes'],
+		['1', 'Alice', 'Hello, "world"'],
+		['2', 'Bob', 'two\nlines'],
+	]
+}
+
 fn test_temp_helpers() {
 	tf := temp_file('prefix', '.tmp') or { '' }
 	assert tf.len > 0

@@ -26,12 +26,12 @@ import rand
 import json2
 import encoding.hex
 import encoding.base64
-import encoding.csv
 import toml
 import semver
 import math
 import math.stats
 import strings
+import fileutils
 
 // =============================================================================
 // 1. HTTP Client Utilities & URL Parser
@@ -161,7 +161,7 @@ pub fn (cli &SimpleCli) crypto_aes_encrypt(key_str string, plaintext string) !st
 	mut stream := cipher.new_ctr(block, iv)
 	mut ciphertext := []u8{len: plaintext.len}
 	stream.xor_key_stream(mut ciphertext, plaintext.bytes())
-	
+
 	mut combined := []u8{cap: iv.len + ciphertext.len}
 	combined << iv
 	combined << ciphertext
@@ -360,13 +360,7 @@ pub fn (cli &SimpleCli) validate_length(text string, min_len int, max_len int) b
 
 // csv_parse parses a CSV string into a 2D array of rows and column cells.
 pub fn (cli &SimpleCli) csv_parse(csv_content string) [][]string {
-	mut reader := csv.new_reader(csv_content)
-	mut rows := [][]string{}
-	for {
-		row := reader.read() or { break }
-		rows << row
-	}
-	return rows
+	return fileutils.parse_csv(csv_content, `,`)
 }
 
 // toml_parse parses TOML text into a toml.Doc.

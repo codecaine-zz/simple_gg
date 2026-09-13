@@ -47,13 +47,13 @@ import math.stats
 import arrays
 import strings
 import encoding.utf8
-import encoding.csv
 import crypto.ed25519
 import crypto.pbkdf2
 import sync
 import math.complex
 import crypto.rand as crand
 import hash as vhash
+import fileutils
 
 // =============================================================================
 // 1. HTTP Client Utilities (net.http)
@@ -2074,13 +2074,7 @@ pub fn (win &SimpleWindow) new_string_builder() SimpleStringBuilder {
 
 // csv_parse parses a CSV formatted string into a 2D matrix of row strings.
 pub fn csv_parse(content string) [][]string {
-	mut r := csv.new_reader(content)
-	mut rows := [][]string{}
-	for {
-		row := r.read() or { break }
-		rows << row
-	}
-	return rows
+	return fileutils.parse_csv(content, `,`)
 }
 
 // csv_parse delegates to standalone csv_parse.
