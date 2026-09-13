@@ -91,12 +91,12 @@ If you cloned the project manually, put it in your V module path so imports reso
 ```bash
 git clone https://github.com/codecaine-zz/simple_gg.git
 mkdir -p ~/.vmodules
-ln -s "$PWD/simple_gg" ~/.vmodules/simplegui
+ln -s "$PWD/simple_gg/simplegui" ~/.vmodules/simplegui
 ```
 
 Then run examples from the project directory or from any project that imports `simplegui`.
 
-> If the package is later published to VPM under a matching name, the standard `v install ...` flow will work as usual. For this repo today, the GitHub clone + `~/.vmodules/simplegui` path is the reliable Linux/macOS workflow.
+> If the package is later published to VPM under a matching name, the standard `v install ...` flow will work as usual. For this repo today, linking the repository's `simplegui/` directory at `~/.vmodules/simplegui` is the reliable Linux/macOS workflow.
 
 ### 2. Install Homebrew dependencies (macOS)
 
