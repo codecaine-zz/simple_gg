@@ -61,20 +61,14 @@ pub fn (mut win SimpleWindow) render_ui() {
 	bg := parse_hex_color(win.theme.background_color)
 	fg := parse_hex_color(win.theme.font_color)
 	accent := parse_hex_color(win.theme.accent_color)
-	surface := if win.theme.is_dark { gg.rgb(40, 42, 54) } else { gg.rgb(240, 242, 245) }
-	border_c := if win.theme.is_dark { gg.rgb(70, 72, 85) } else { gg.rgb(210, 215, 220) }
+	surface := win.theme.surface()
+	border_c := win.theme.border()
 	hover_c := if win.theme.hover_color.len > 0 {
 		parse_hex_color(win.theme.hover_color)
 	} else {
 		accent
 	}
-	surface_hover := if win.theme.surface_hover.len > 0 {
-		parse_hex_color(win.theme.surface_hover)
-	} else if win.theme.is_dark {
-		gg.rgb(55, 58, 72)
-	} else {
-		gg.rgb(225, 230, 238)
-	}
+	surface_hover := win.theme.hovered_surface()
 
 	// Step 3: Clear window background canvas
 	win.gg_ctx.draw_rect_filled(0, 0, f32(win.width), f32(win.height), bg)
@@ -174,7 +168,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 				btn_tc := if ctrl.font_color.len > 0 {
 					parse_hex_color(ctrl.font_color)
 				} else {
-					gg.Color{ r: 255, g: 255, b: 255 }
+					win.theme.button_text()
 				}
 
 				btn_icon_offset := if has_btn_icon { btn_icon_sz + 8.0 } else { f32(0.0) }
@@ -1037,19 +1031,10 @@ pub fn (mut win SimpleWindow) render_ui() {
 							win.gg_ctx.draw_rect_filled(ctrl.x + 2, row_y + 1, ctrl.w - 4,
 								24.0, accent)
 						} else if is_row_hover {
-							hover_bg := if win.theme.is_dark {
-								gg.rgb(60, 63, 78)
-							} else {
-								gg.rgb(232, 236, 241)
-							}
 							win.gg_ctx.draw_rect_filled(ctrl.x + 2, row_y + 1, ctrl.w - 4,
-								24.0, hover_bg)
+								24.0, surface_hover)
 						} else if r_idx % 2 == 1 {
-							row_bg := if win.theme.is_dark {
-								gg.rgb(32, 34, 44)
-							} else {
-								gg.rgb(248, 249, 250)
-							}
+							row_bg := mix_theme_color(surface, bg, 0.45)
 							win.gg_ctx.draw_rect_filled(ctrl.x + 2, row_y + 1, ctrl.w - 4,
 								24.0, row_bg)
 						}
@@ -3179,6 +3164,9 @@ fn (mut win SimpleWindow) render_toasts() {
 	if win.toasts.len == 0 { return }
 	mut active_toasts := []Toast{}
 	mut ty := f32(20.0)
+	surface := win.theme.surface()
+	fg := parse_hex_color(win.theme.font_color)
+	muted_fg := win.theme.muted_text()
 
 	for mut toast in win.toasts {
 		toast.remaining -= 0.016
@@ -3201,8 +3189,7 @@ fn (mut win SimpleWindow) render_toasts() {
 			else { parse_hex_color('#3b82f6') }
 		}
 
-		// Dark glass backdrop card
-		win.gg_ctx.draw_rounded_rect_filled(tx, ty, t_w, t_h, 8.0, gg.rgb(32, 35, 46))
+		win.gg_ctx.draw_rounded_rect_filled(tx, ty, t_w, t_h, 8.0, surface)
 		win.gg_ctx.draw_rounded_rect_empty(tx, ty, t_w, t_h, 8.0, t_color)
 		win.gg_ctx.draw_rect_filled(tx, ty, 4.0, t_h, t_color)
 
@@ -3215,9 +3202,9 @@ fn (mut win SimpleWindow) render_toasts() {
 			tx + 16.0
 		}
 
-		win.gg_ctx.draw_text2(x: int(text_left), y: int(ty + 9), text: clean_text(toast.title), color: gg.Color{r: 255, g: 255, b: 255}, size: 13, bold: true)
-		win.gg_ctx.draw_text2(x: int(text_left), y: int(ty + 29), text: clean_text(toast.message), color: gg.rgb(200, 205, 215), size: 11)
-		win.gg_ctx.draw_text2(x: int(tx + t_w - 18), y: int(ty + 8), text: 'x', color: gg.rgb(180, 185, 200), size: 12, bold: true)
+		win.gg_ctx.draw_text2(x: int(text_left), y: int(ty + 9), text: clean_text(toast.title), color: fg, size: 13, bold: true)
+		win.gg_ctx.draw_text2(x: int(text_left), y: int(ty + 29), text: clean_text(toast.message), color: muted_fg, size: 11)
+		win.gg_ctx.draw_text2(x: int(tx + t_w - 18), y: int(ty + 8), text: 'x', color: muted_fg, size: 12, bold: true)
 
 		active_toasts << toast
 		ty += t_h + 10.0
@@ -3234,12 +3221,17 @@ fn (mut win SimpleWindow) render_command_palette() {
 	box_h := f32(300.0)
 	bx := (f32(win.width) - box_w) / 2.0
 	by := f32(80.0)
+	surface := win.theme.surface()
+	border_c := win.theme.border()
+	fg := parse_hex_color(win.theme.font_color)
+	muted_fg := win.theme.muted_text()
+	selected_fg := win.theme.button_text()
 
-	win.gg_ctx.draw_rounded_rect_filled(bx, by, box_w, box_h, 10.0, gg.rgb(30, 32, 44))
+	win.gg_ctx.draw_rounded_rect_filled(bx, by, box_w, box_h, 10.0, surface)
 	win.gg_ctx.draw_rounded_rect_empty(bx, by, box_w, box_h, 10.0, parse_hex_color(win.theme.accent_color))
 
-	win.gg_ctx.draw_text2(x: int(bx + 16), y: int(by + 16), text: 'Find: ${win.command_palette_query}_', color: gg.Color{r: 255, g: 255, b: 255}, size: 15)
-	win.gg_ctx.draw_line(bx, by + 48, bx + box_w, by + 48, gg.rgb(60, 64, 80))
+	win.gg_ctx.draw_text2(x: int(bx + 16), y: int(by + 16), text: 'Find: ${win.command_palette_query}_', color: fg, size: 15)
+	win.gg_ctx.draw_line(bx, by + 48, bx + box_w, by + 48, border_c)
 
 	mut item_y := by + 56.0
 	for idx, item in win.command_palette_items {
@@ -3258,9 +3250,10 @@ fn (mut win SimpleWindow) render_command_palette() {
 			title_x = bx + 42.0
 		}
 
-		win.gg_ctx.draw_text2(x: int(title_x), y: int(item_y + 6), text: item.title, color: gg.Color{r: 255, g: 255, b: 255}, size: 13)
+		item_fg := if idx == win.command_palette_sel { selected_fg } else { fg }
+		win.gg_ctx.draw_text2(x: int(title_x), y: int(item_y + 6), text: item.title, color: item_fg, size: 13)
 		if item.shortcut.len > 0 {
-			win.gg_ctx.draw_text2(x: int(bx + box_w - 80), y: int(item_y + 6), text: item.shortcut, color: gg.rgb(180, 185, 200), size: 11)
+			win.gg_ctx.draw_text2(x: int(bx + box_w - 80), y: int(item_y + 6), text: item.shortcut, color: muted_fg, size: 11)
 		}
 		item_y += 32.0
 	}
@@ -3272,8 +3265,10 @@ fn (mut win SimpleWindow) render_context_menu() {
 	menu_h := f32(win.context_menu_items.len * 30 + 10)
 	mx := win.context_menu_x
 	my := win.context_menu_y
+	fg := parse_hex_color(win.theme.font_color)
+	muted_fg := win.theme.muted_text()
 
-	win.gg_ctx.draw_rounded_rect_filled(mx, my, menu_w, menu_h, 6.0, gg.rgb(35, 38, 50))
+	win.gg_ctx.draw_rounded_rect_filled(mx, my, menu_w, menu_h, 6.0, win.theme.surface())
 	win.gg_ctx.draw_rounded_rect_empty(mx, my, menu_w, menu_h, 6.0, parse_hex_color(win.theme.accent_color))
 
 	for idx, item in win.context_menu_items {
@@ -3283,9 +3278,9 @@ fn (mut win SimpleWindow) render_context_menu() {
 			win.draw_image_fit(item.icon_path, mx + 10.0, iy + 6.0, 16.0, 16.0, '')
 			text_x = mx + 32.0
 		}
-		win.gg_ctx.draw_text2(x: int(text_x), y: int(iy + 6), text: item.title, color: gg.Color{r: 255, g: 255, b: 255}, size: 13)
+		win.gg_ctx.draw_text2(x: int(text_x), y: int(iy + 6), text: item.title, color: fg, size: 13)
 		if item.shortcut.len > 0 {
-			win.gg_ctx.draw_text2(x: int(mx + menu_w - 60), y: int(iy + 6), text: item.shortcut, color: gg.rgb(160, 165, 180), size: 11)
+			win.gg_ctx.draw_text2(x: int(mx + menu_w - 60), y: int(iy + 6), text: item.shortcut, color: muted_fg, size: 11)
 		}
 	}
 }
@@ -3305,18 +3300,10 @@ fn (mut win SimpleWindow) render_dropdown_overlay() {
 
 	layout := win.get_dropdown_popup_layout(ctrl)
 	fg := parse_hex_color(win.theme.font_color)
-	border_c := if win.theme.is_dark { gg.rgb(70, 72, 85) } else { gg.rgb(210, 215, 220) }
+	border_c := win.theme.border()
 	accent := parse_hex_color(win.theme.accent_color)
-	pop_bg := if win.theme.is_dark {
-		gg.rgb(28, 30, 38)
-	} else {
-		gg.rgb(255, 255, 255)
-	}
-	hover_bg := if win.theme.is_dark {
-		gg.rgb(45, 50, 65)
-	} else {
-		gg.rgb(238, 242, 248)
-	}
+	pop_bg := win.theme.surface()
+	hover_bg := win.theme.hovered_surface()
 
 	// Multi-layer drop shadow for elevated floating card effect
 	shadow_1 := gg.Color{r: 0, g: 0, b: 0, a: if win.theme.is_dark { u8(80) } else { u8(40) }}
@@ -3347,11 +3334,7 @@ fn (mut win SimpleWindow) render_dropdown_overlay() {
 			win.gg_ctx.draw_rounded_rect_filled(layout.x + 4.0, item_y, layout.w - 8.0, layout.item_h - 2.0, 5.0, hover_bg)
 		}
 
-		item_text_c := if is_sel {
-			gg.Color{r: 255, g: 255, b: 255, a: 255}
-		} else {
-			fg
-		}
+		item_text_c := if is_sel { win.theme.button_text() } else { fg }
 
 		prefix := if is_sel { '✓ ' } else { '   ' }
 		display_str := '${prefix}${clean_text(item)}'
@@ -3386,9 +3369,9 @@ fn (mut win SimpleWindow) render_menu_bar() {
 
 	fg := parse_hex_color(win.theme.font_color)
 	accent := parse_hex_color(win.theme.accent_color)
-	bar_bg := if win.theme.is_dark { gg.rgb(28, 30, 38) } else { gg.rgb(238, 240, 244) }
-	bar_border := if win.theme.is_dark { gg.rgb(55, 60, 75) } else { gg.rgb(215, 220, 228) }
-	hover_bg := if win.theme.is_dark { gg.rgb(45, 50, 65) } else { gg.rgb(222, 226, 234) }
+	bar_bg := win.theme.surface()
+	bar_border := win.theme.border()
+	hover_bg := win.theme.hovered_surface()
 
 	// Draw top menubar background and bottom border
 	win.gg_ctx.draw_rect_filled(0, 0, bar_w, bar_h, bar_bg)
@@ -3409,7 +3392,7 @@ fn (mut win SimpleWindow) render_menu_bar() {
 			win.gg_ctx.draw_rounded_rect_filled(cur_x, 3.0, txt_w, bar_h - 6.0, 4.0, hover_bg)
 		}
 
-		cat_txt_c := if is_cat_active { gg.rgb(255, 255, 255) } else { fg }
+		cat_txt_c := if is_cat_active { win.theme.button_text() } else { fg }
 		win.gg_ctx.draw_text2(
 			x: int(cur_x + 8.0)
 			y: int((bar_h - 14.0) / 2.0)
@@ -3437,10 +3420,10 @@ fn (mut win SimpleWindow) render_menu_bar() {
 				}
 			}
 
-			popup_bg := if win.theme.is_dark { gg.rgb(32, 35, 45) } else { gg.rgb(255, 255, 255) }
-			popup_border := if win.theme.is_dark { gg.rgb(65, 72, 90) } else { gg.rgb(205, 212, 222) }
+			popup_bg := win.theme.surface()
+			popup_border := win.theme.border()
 			popup_hover := accent
-			popup_muted := if win.theme.is_dark { gg.rgb(150, 155, 175) } else { gg.rgb(125, 130, 145) }
+			popup_muted := win.theme.muted_text()
 
 			// Drop shadow
 			win.gg_ctx.draw_rounded_rect_filled(menu_x + 2.0, menu_y + 2.0, menu_w, total_menu_h, 6.0, gg.rgba(0, 0, 0, 40))
@@ -3463,7 +3446,7 @@ fn (mut win SimpleWindow) render_menu_bar() {
 					item_fg := if item.disabled {
 						popup_muted
 					} else if is_item_hover {
-						gg.rgb(255, 255, 255)
+						win.theme.button_text()
 					} else {
 						fg
 					}
@@ -3478,7 +3461,7 @@ fn (mut win SimpleWindow) render_menu_bar() {
 					)
 
 					if item.shortcut.len > 0 {
-						sc_color := if is_item_hover { gg.rgb(230, 235, 255) } else { popup_muted }
+						sc_color := if is_item_hover { win.theme.button_text() } else { popup_muted }
 						win.gg_ctx.draw_text2(
 							x: int(menu_x + menu_w - 65.0)
 							y: int(item_y + 5.0)
@@ -3553,11 +3536,11 @@ fn (mut win SimpleWindow) render_modal() {
 
 	layout := win.get_modal_layout()
 
-	modal_bg := if win.theme.is_dark { gg.rgb(24, 27, 36) } else { gg.rgb(255, 255, 255) }
+	modal_bg := win.theme.surface()
 	accent := win.get_dialog_accent_color()
 	fg := parse_hex_color(win.theme.font_color)
-	border_c := if win.theme.is_dark { gg.rgb(55, 60, 75) } else { gg.rgb(215, 220, 230) }
-	muted_fg := if win.theme.is_dark { gg.rgb(150, 155, 175) } else { gg.rgb(115, 120, 135) }
+	border_c := win.theme.border()
+	muted_fg := win.theme.muted_text()
 
 	// Main Card Background
 	win.gg_ctx.draw_rounded_rect_filled(layout.bx, layout.by, layout.bw, layout.bh, 14.0, modal_bg)
@@ -3992,9 +3975,9 @@ fn (mut win SimpleWindow) draw_image_fit(file_path string, x f32, y f32, w f32, 
 
 
 	// Fallback vector placeholder card if file is missing or loading
-	surface := if win.theme.is_dark { gg.rgb(35, 38, 50) } else { gg.rgb(230, 234, 242) }
-	border_c := if win.theme.is_dark { gg.rgb(65, 70, 85) } else { gg.rgb(200, 205, 215) }
-	muted_fg := if win.theme.is_dark { gg.rgb(130, 135, 155) } else { gg.rgb(120, 125, 140) }
+	surface := win.theme.surface()
+	border_c := win.theme.border()
+	muted_fg := win.theme.muted_text()
 	win.gg_ctx.draw_rounded_rect_filled(x, y, w, h, 6.0, surface)
 	win.gg_ctx.draw_rounded_rect_empty(x, y, w, h, 6.0, border_c)
 
@@ -4249,12 +4232,12 @@ fn (mut win SimpleWindow) render_drawer() {
 	dr_x := if win.drawer_side == 'left' { f32(0.0) } else { f32(win.width) - dr_w }
 	dr_y := f32(0.0)
 
-	surface := if win.theme.is_dark { gg.rgb(24, 27, 36) } else { gg.rgb(255, 255, 255) }
-	border_c := if win.theme.is_dark { gg.rgb(55, 60, 75) } else { gg.rgb(215, 220, 230) }
+	surface := win.theme.surface()
+	border_c := win.theme.border()
 	fg := parse_hex_color(win.theme.font_color)
-	muted_fg := if win.theme.is_dark { gg.rgb(140, 145, 165) } else { gg.rgb(120, 125, 140) }
+	muted_fg := win.theme.muted_text()
 	accent := parse_hex_color(win.theme.accent_color)
-	hover_bg := if win.theme.is_dark { gg.rgb(36, 40, 54) } else { gg.rgb(240, 243, 250) }
+	hover_bg := win.theme.hovered_surface()
 	active_bg := gg.Color{
 		r: accent.r
 		g: accent.g
@@ -4378,4 +4361,3 @@ fn (mut win SimpleWindow) render_drawer() {
 		item_y += item_h + 4.0
 	}
 }
-

@@ -69,7 +69,7 @@ This directory contains beginner-friendly, well-commented examples demonstrating
 | Example File                                                           | Description                      | Features Covered                                                                                                                                          | Snapshot                               |
 | :--------------------------------------------------------------------- | :------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------- |
 | **[`01_quickstart.v`](01_quickstart.v)**                               | Beginner starter app             | Window creation, theme, form fields, checkbox, buttons, click callbacks.                                                                                  | [📸 Snapshot](../snapshots/ex1.png)   |
-| **[`02_theme_gallery.v`](02_theme_gallery.v)**                         | Theme gallery & switcher         | Live dropdown selector to switch themes dynamically across 17 production palettes.                                                                        | [📸 Snapshot](../snapshots/ex2.png)   |
+| **[`02_theme_gallery.v`](02_theme_gallery.v)**                         | Complete theme/control gallery   | Always-visible combobox for all 87 themes plus tabbed previews of forms, pickers, selectors, lists, tables, metrics, navigation, feedback, and developer controls. | [📸 Snapshot](../snapshots/ex2.png)   |
 | **[`03_layout_containers.v`](03_layout_containers.v)**                 | Layout & Group containers        | Horizontal rows (`begin_row`), multi-column grids (`begin_grid`), and group cards.                                                                        | [📸 Snapshot](../snapshots/ex3.png)   |
 | **[`04_widgets_and_forms.v`](04_widgets_and_forms.v)**                 | Form component gallery           | Form inputs, password field, number stepper, range slider, toggle switch, rating stars, date picker, progress bar, metric cards, alert banner.            | [📸 Snapshot](../snapshots/ex4.png)   |
 | **[`05_nameless_shortcuts.v`](05_nameless_shortcuts.v)**               | Rapid prototyping                | Nameless control shortcuts (`win.input()`, `win.checkbox()`, `win.number()`, `win.button()`).                                                             | [📸 Snapshot](../snapshots/ex5.png)   |
@@ -177,4 +177,3 @@ v run examples/24_custom_image_dialogs_showcase.v
 # Run Modern UI Suite & Ergonomic Enhancements Demo
 v run examples/25_modern_ui_suite_and_ergonomics.v
 ```
-

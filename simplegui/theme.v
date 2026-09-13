@@ -15,14 +15,18 @@ import os
 // Controls reference these colors to render consistent backgrounds, text, accents, and hover states.
 pub struct Theme {
 pub mut:
+	key              string // Stable snake_case identifier used by the Bun RAD Studio catalog
 	name             string // Human-readable name of the theme (e.g., 'Apple Dark', 'Nord')
 	background_color string // Main window canvas background color in hex (e.g., '#1c1c1e')
 	font_color       string // Primary text font color in hex (e.g., '#f2f2f7')
 	accent_color     string // Active interactive highlight color for buttons/sliders (e.g., '#0a84ff')
+	secondary_accent string // Complementary accent used for hover and secondary emphasis
+	surface_color    string // Card, input, menu, and elevated surface background
+	border_color     string // Border and divider color for themed surfaces
 	hover_color      string // Hover highlight tint color when mouse is positioned over elements
 	surface_hover    string // Background tint color for hovered containers or list rows
 	description      string // Brief description of theme aesthetics
-	is_dark          bool   // True for dark mode palettes, false for light mode palettes
+	is_dark          bool // True for dark mode palettes, false for light mode palettes
 }
 
 // hex_char_val converts a single ASCII hex character byte (`0`-`9`, `a`-`f`, `A`-`F`)
@@ -57,8 +61,104 @@ pub fn parse_hex_color(hex string) gg.Color {
 	return gg.rgb(r, g, b)
 }
 
-// list_themes returns a list of all pre-packaged visual theme names supported by SimpleGUI.
+fn normalized_theme_name(theme_name string) string {
+	return theme_name.to_lower().replace(' ', '').replace('_', '').replace('-', '').replace('é', 'e').replace("'", '')
+}
+
+fn mix_theme_color(from gg.Color, to gg.Color, amount f32) gg.Color {
+	return gg.rgb(
+		u8(f32(from.r) + (f32(to.r) - f32(from.r)) * amount),
+		u8(f32(from.g) + (f32(to.g) - f32(from.g)) * amount),
+		u8(f32(from.b) + (f32(to.b) - f32(from.b)) * amount),
+	)
+}
+
+pub fn (theme &Theme) surface() gg.Color {
+	if theme.surface_color.len > 0 {
+		return parse_hex_color(theme.surface_color)
+	}
+	return if theme.is_dark { gg.rgb(40, 42, 54) } else { gg.rgb(240, 242, 245) }
+}
+
+pub fn (theme &Theme) border() gg.Color {
+	if theme.border_color.len > 0 {
+		return parse_hex_color(theme.border_color)
+	}
+	return if theme.is_dark { gg.rgb(70, 72, 85) } else { gg.rgb(210, 215, 220) }
+}
+
+pub fn (theme &Theme) hovered_surface() gg.Color {
+	if theme.surface_hover.len > 0 {
+		return parse_hex_color(theme.surface_hover)
+	}
+	return mix_theme_color(theme.surface(), parse_hex_color(theme.accent_color), if theme.is_dark {
+		f32(0.22)
+	} else {
+		f32(0.12)
+	})
+}
+
+pub fn (theme &Theme) muted_text() gg.Color {
+	return mix_theme_color(parse_hex_color(theme.font_color), parse_hex_color(theme.background_color), if theme.is_dark {
+		f32(0.42)
+	} else {
+		f32(0.36)
+	})
+}
+
+pub fn (theme &Theme) button_text() gg.Color {
+	accent := parse_hex_color(theme.accent_color)
+	luminance := f32(accent.r) * 0.299 + f32(accent.g) * 0.587 + f32(accent.b) * 0.114
+	return if luminance > 180 { gg.rgb(0, 0, 0) } else { gg.rgb(255, 255, 255) }
+}
+
+// list_themes returns every Bun RAD Studio theme plus SimpleGUI's additional legacy themes.
 pub fn list_themes() []string {
+	mut names := []string{}
+	mut seen := map[string]bool{}
+	for theme in bun_rad_studio_themes() {
+		names << theme.name
+		seen[normalized_theme_name(theme.name)] = true
+	}
+	for name in legacy_theme_names() {
+		normalized := normalized_theme_name(name)
+		if normalized !in seen {
+			names << name
+			seen[normalized] = true
+		}
+	}
+	return names
+}
+
+// list_theme_keys returns stable identifiers for the canonical Bun RAD Studio themes.
+pub fn list_theme_keys() []string {
+	return bun_rad_studio_themes().map(it.key)
+}
+
+// get_theme resolves canonical keys, display names, compatibility aliases, and legacy themes.
+pub fn get_theme(theme_name string) Theme {
+	mut normalized := normalized_theme_name(theme_name)
+	normalized = match normalized {
+		'c64' { 'commodore64' }
+		'macclassic', 'system7' { 'macintoshsystem7' }
+		'matrix' { 'matrixphosphor' }
+		'synth', 'synthwave' { 'synthwave84' }
+		'catppuccinmocha' { 'catppuccin' }
+		'gruvbox' { 'gruvboxdark' }
+		'onedark' { 'onedarkpro' }
+		else { normalized }
+	}
+	for theme in bun_rad_studio_themes() {
+		if normalized == normalized_theme_name(theme.key)
+			|| normalized == normalized_theme_name(theme.name) {
+			return theme
+		}
+	}
+	return get_legacy_theme(theme_name)
+}
+
+// list_themes returns a list of all pre-packaged visual theme names supported by SimpleGUI.
+fn legacy_theme_names() []string {
 	return [
 		'Apple Light',
 		'Apple Dark',
@@ -99,8 +199,8 @@ pub fn list_themes() []string {
 
 // get_theme looks up a `Theme` preset configuration by name (case-insensitive, ignoring spaces and dashes).
 // If an unknown theme name is supplied, it gracefully defaults to 'Apple Light'.
-pub fn get_theme(theme_name string) Theme {
-	normalized := theme_name.to_lower().replace(' ', '').replace('_', '').replace('-', '').replace('é', 'e')
+fn get_legacy_theme(theme_name string) Theme {
+	normalized := normalized_theme_name(theme_name)
 	return match normalized {
 		'appledark', 'dark' {
 			Theme{
@@ -554,4 +654,3 @@ pub fn (mut win SimpleWindow) restore_saved_theme() &SimpleWindow {
 	win.set_theme(saved)
 	return win
 }
-

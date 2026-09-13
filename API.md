@@ -391,7 +391,7 @@ win.show()
 
 ## 3. Built-in Themes & Styling
 
-`simplegui` includes 34 curated light and dark themes across macOS, Futuristic/Sci-Fi, Business/Corporate, and Developer categories with interactive hover palettes (`hover_color` and `surface_hover`). Setting a theme instantly updates all controls, fonts, hover states, cards, and background colors.
+`simplegui` includes 87 curated light and dark themes: the complete 76-theme Bun RAD Studio catalog plus 11 SimpleGUI exclusives. Themes provide interactive hover palettes and dedicated secondary accent, surface, and border tokens. Setting a theme instantly updates controls, fonts, hover states, cards, menus, dialogs, and background colors.
 
 ```v
 // Apply theme by name
@@ -408,6 +408,9 @@ custom_t := simplegui.Theme{
     background_color: '#0f172a'
     font_color: '#f8fafc'
     accent_color: '#3b82f6'
+    secondary_accent: '#8b5cf6'
+    surface_color: '#1e293b'
+    border_color: '#334155'
     hover_color: '#60a5fa'
     surface_hover: '#1e293b'
     is_dark: true
@@ -421,21 +424,23 @@ win.set_font_color('#f5c2e7')
 // Parse CSS hex color string to V `gg.Color` (RGB byte values)
 color := simplegui.parse_hex_color('#0a84ff') // or shorthand '#07f'
 
-// List all available theme names (34 built-in themes)
+// List all available theme names (87 built-in themes)
 themes := simplegui.list_themes()
 
-// Get Theme struct by alias
-theme := simplegui.get_theme('executive') // Accepts 'dark', 'nord', 'synthwave', 'corporate', 'matrix', etc.
-// Theme fields include: theme.background_color, theme.font_color, theme.accent_color, theme.hover_color, theme.surface_hover
+// Get Theme struct by stable key, display name, or compatibility alias
+theme := simplegui.get_theme('codefreelance')
+// Canonical Bun RAD Studio keys are also available separately
+theme_keys := simplegui.list_theme_keys()
+// Theme fields include background, font, accent, secondary accent, surface, border, and hover colors
 ```
 
-### Themes Reference Table
+### Selected Themes Reference
 
 | Theme Name              | Style Description                       | Background | Accent Color | Hover Color | Type  |
 | :---------------------- | :-------------------------------------- | :--------- | :----------- | :---------- | :---- |
-| **`Apple Light`**       | Default clean macOS light mode          | `#ffffff`  | `#007aff`    | `#3395ff`   | Light |
-| **`Apple Dark`**        | Modern macOS dark mode                  | `#1c1c1e`  | `#0a84ff`    | `#409cff`   | Dark  |
-| **`Synthwave 84`**      | Retro 80s synthwave neon twilight       | `#261535`  | `#ff7edb`    | `#36f9f6`   | Dark  |
+| **`Apple Light`**       | Default clean macOS light mode          | `#f5f5f7`  | `#0071e3`    | `#5e5ce6`   | Light |
+| **`Apple Dark`**        | Modern macOS dark mode                  | `#161618`  | `#0a84ff`    | `#bf5af2`   | Dark  |
+| **`Synthwave '84`**     | Retro 80s synthwave neon twilight       | `#262335`  | `#f92aad`    | `#36f9f6`   | Dark  |
 | **`Neon Matrix`**       | Digital phosphor green cyber terminal   | `#05100a`  | `#39ff14`    | `#00ffaa`   | Dark  |
 | **`Holodeck Cyan`**     | Futuristic glowing holographic cyan     | `#050b14`  | `#00f0ff`    | `#70f3ff`   | Dark  |
 | **`Sci-Fi HUD Orange`** | Tactical amber cockpit HUD              | `#121316`  | `#ff6600`    | `#ffcc00`   | Dark  |
@@ -447,19 +452,19 @@ theme := simplegui.get_theme('executive') // Accepts 'dark', 'nord', 'synthwave'
 | **`Modern Minimalist`** | Stark high-contrast monochrome          | `#ffffff`  | `#18181b`    | `#3f3f46`   | Light |
 | **`Pro Charcoal`**      | Sleek pro charcoal SaaS dark mode       | `#18181b`  | `#6366f1`    | `#818cf8`   | Dark  |
 | **`Tokyo Night`**       | Iconic Tokyo neon night IDE theme       | `#1a1b26`  | `#7aa2f7`    | `#bb9af7`   | Dark  |
-| **`One Dark Pro`**      | Atom One Dark editor palette            | `#282c34`  | `#61afef`    | `#c678dd`   | Dark  |
+| **`One Dark Pro`**      | Atom One Dark editor palette            | `#21252b`  | `#61afef`    | `#98c379`   | Dark  |
 | **`Gruvbox Dark`**      | Retro warm orange/green developer theme | `#282828`  | `#fabd2f`    | `#fe8019`   | Dark  |
-| **`Monokai Pro`**       | Classic Monokai vivid dark palette      | `#2d2a2e`  | `#ff6188`    | `#ffd866`   | Dark  |
-| **`Rosé Pine`**         | Natural rose gold & purple theme        | `#191724`  | `#ebbcba`    | `#c4a7e7`   | Dark  |
+| **`Monokai Pro`**       | Classic Monokai vivid dark palette      | `#2d2a2e`  | `#ffd866`    | `#ff6188`   | Dark  |
+| **`Rosé Pine`**         | Natural rose gold & purple theme        | `#191724`  | `#eb6f92`    | `#9ccfd8`   | Dark  |
 | **`Coffee Roast`**      | Warm cozy espresso dark mode            | `#1c1613`  | `#d97706`    | `#f59e0b`   | Dark  |
 | **`Nord`**              | Cool arctic frost blue palette          | `#2e3440`  | `#88c0d0`    | `#81a1c1`   | Dark  |
 | **`Dracula`**           | Classic vampire dark purple             | `#282a36`  | `#bd93f9`    | `#ff79c6`   | Dark  |
-| **`Cyberpunk`**         | High-contrast neon dark vibe            | `#0d0d15`  | `#ff007f`    | `#7000ff`   | Dark  |
+| **`Cyberpunk`**         | High-contrast neon dark vibe            | `#0a0b12`  | `#ff007f`    | `#fee440`   | Dark  |
 | **`Catppuccin Mocha`**  | Smooth pastel dark theme                | `#1e1e2e`  | `#cba6f7`    | `#f5c2e7`   | Dark  |
-| **`GitHub Dark`**       | Official GitHub dark mode               | `#0d1117`  | `#58a6ff`    | `#79c0ff`   | Dark  |
-| **`GitHub Light`**      | Official GitHub light mode              | `#ffffff`  | `#0969da`    | `#218bff`   | Light |
-| **`Sonoma Emerald`**    | Dark forest glass layout                | `#0d1f18`  | `#30d158`    | `#4ade80`   | Dark  |
-| **`Ventura Amber`**     | Warm sunset dark palette                | `#211815`  | `#ff9500`    | `#ffaa33`   | Dark  |
+| **`GitHub Dark`**       | Official GitHub dark mode               | `#0d1117`  | `#58a6ff`    | `#3fb950`   | Dark  |
+| **`GitHub Light`**      | Official GitHub light mode              | `#f6f8fa`  | `#0969da`    | `#1a7f37`   | Light |
+| **`Sonoma Emerald`**    | Dark forest glass layout                | `#091811`  | `#30d158`    | `#34d399`   | Dark  |
+| **`Ventura Amber`**     | Warm sunset dark palette                | `#1c140e`  | `#ff9500`    | `#f97316`   | Dark  |
 
 ---
 
