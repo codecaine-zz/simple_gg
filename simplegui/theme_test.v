@@ -11,6 +11,13 @@ fn test_bun_rad_studio_theme_catalog_is_available() {
 	assert themes.len == 87
 	assert 'CodeFreelance' in themes
 	assert 'Corporate Navy' in themes
+
+	for i in 0 .. (keys.len - 1) {
+		assert keys[i] <= keys[i + 1]
+	}
+	for i in 0 .. (themes.len - 1) {
+		assert themes[i] <= themes[i + 1]
+	}
 }
 
 fn test_bun_rad_studio_theme_tokens_override_legacy_palette() {

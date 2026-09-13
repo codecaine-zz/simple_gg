@@ -127,12 +127,15 @@ pub fn list_themes() []string {
 			seen[normalized] = true
 		}
 	}
+	names.sort()
 	return names
 }
 
 // list_theme_keys returns stable identifiers for the canonical Bun RAD Studio themes.
 pub fn list_theme_keys() []string {
-	return bun_rad_studio_themes().map(it.key)
+	mut keys := bun_rad_studio_themes().map(it.key)
+	keys.sort()
+	return keys
 }
 
 // get_theme resolves canonical keys, display names, compatibility aliases, and legacy themes.

@@ -233,23 +233,23 @@ SimpleGUI features an automated, cross-application save state and configuration 
 
 | Theme Name | Background | Text Color | Accent | Signature Personality |
 | :--- | :--- | :--- | :--- | :--- |
-| **GitHub Dark** | `#22272e` | `#adbac7` | `#539bf5` | Official GitHub Dark Dimmed developer canvas (Default) |
-| **Apple Light** | `#f6f6f7` | `#1d1d1f` | `#0071e3` | Clean Apple macOS Aqua studio interface |
 | **Apple Dark** | `#1c1c1e` | `#f5f5f7` | `#0a84ff` | Refined Apple macOS Pro Dark Titanium surface |
-| **Deep Space OLED** | `#090a0f` | `#e2e8f0` | `#6366f1` | Ultra-deep pitch OLED dark theme with electric indigo |
-| **Tokyo Night** | `#1a1b26` | `#c0caf5` | `#7aa2f7` | Iconic Japanese twilight deep indigo theme |
-| **Nord Arctic** | `#2e3440` | `#eceff4` | `#88c0d0` | Arctic polar night slate with frosty cyan contrast |
-| **Dracula Vampire** | `#282a36` | `#f8f8f2` | `#bd93f9` | High-contrast gothic slate purple developer theme |
-| **Cyberpunk Neon** | `#120e24` | `#00f0ff` | `#ff007f` | Electric midnight purple with hot cyan & neon pink |
+| **Apple Light** | `#f6f6f7` | `#1d1d1f` | `#0071e3` | Clean Apple macOS Aqua studio interface |
 | **Catppuccin Mocha** | `#1e1e2e` | `#cdd6f4` | `#f5c2e7` | Soothing modern lavender pastel dark mode |
-| **Monokai Pro** | `#2d2a2e` | `#fcfcfa` | `#ffd866` | Warm dark charcoal with radiant gold accents |
-| **Gruvbox Dark** | `#282828` | `#ebdbb2` | `#fe8019` | Warm retro earthy dark canvas with burnt orange |
 | **Cobalt Blue** | `#0a192f` | `#ccd6f6` | `#64ffda` | Deep submarine oceanic navy with glowing aqua teal |
+| **Cyberpunk Neon** | `#120e24` | `#00f0ff` | `#ff007f` | Electric midnight purple with hot cyan & neon pink |
+| **Deep Space OLED** | `#090a0f` | `#e2e8f0` | `#6366f1` | Ultra-deep pitch OLED dark theme with electric indigo |
+| **Dracula Vampire** | `#282a36` | `#f8f8f2` | `#bd93f9` | High-contrast gothic slate purple developer theme |
 | **Emerald Forest** | `#062319` | `#ecfdf5` | `#10b981` | Deep evergreen botanical pine with vivid emerald |
-| **Sunset Dusk** | `#231123` | `#fff1f2` | `#f43f5e` | Rich twilight velvet plum with warm sunset coral |
+| **GitHub Dark** | `#22272e` | `#adbac7` | `#539bf5` | Official GitHub Dark Dimmed developer canvas (Default) |
 | **GitHub Light** | `#ffffff` | `#1f2328` | `#0969da` | Crisp high-contrast GitHub light interface |
+| **Gruvbox Dark** | `#282828` | `#ebdbb2` | `#fe8019` | Warm retro earthy dark canvas with burnt orange |
+| **Monokai Pro** | `#2d2a2e` | `#fcfcfa` | `#ffd866` | Warm dark charcoal with radiant gold accents |
+| **Nord Arctic** | `#2e3440` | `#eceff4` | `#88c0d0` | Arctic polar night slate with frosty cyan contrast |
 | **Solarized Dark** | `#002b36` | `#93a1a1` | `#268bd2` | Precision engineered scientific teal dark theme |
 | **Solarized Light** | `#fdf6e3` | `#586e75` | `#b58900` | Warm linen parchment precision light palette |
+| **Sunset Dusk** | `#231123` | `#fff1f2` | `#f43f5e` | Rich twilight velvet plum with warm sunset coral |
+| **Tokyo Night** | `#1a1b26` | `#c0caf5` | `#7aa2f7` | Iconic Japanese twilight deep indigo theme |
 | **Warm Paper & Ink** | `#fbf8f2` | `#18181b` | `#78716c` | Tactile Japanese fine washi paper with sumi ink text |
 
 ---
