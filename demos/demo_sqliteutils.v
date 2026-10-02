@@ -35,9 +35,9 @@ fn main() {
 	// 2. Document Store (JSON persistence for structs)
 	sqliteutils.create_json_store(mut db, 'users')!
 	alice := UserProfile{
-		id: 'usr_01'
-		name: 'Alice Developer'
-		email: 'alice@example.com'
+		id:     'usr_01'
+		name:   'Alice Developer'
+		email:  'alice@example.com'
 		points: 250
 	}
 	sqliteutils.save_struct(mut db, 'users', alice.id, alice)!

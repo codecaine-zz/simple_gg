@@ -38,8 +38,8 @@ fn main() {
 
 	// 5. Symmetric AES-CBC Encryption
 	println('\n5. AES-256-CBC Encryption & Decryption:')
-	key := [u8(1), 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
-		24, 25, 26, 27, 28, 29, 30, 31, 32]
+	key := [u8(1), 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+		23, 24, 25, 26, 27, 28, 29, 30, 31, 32]
 	iv := [u8(1), 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
 	ciphertext := cryptoutils.aes_encrypt_string(key, iv, data) or {
 		eprintln('Encryption failed: ${err}')

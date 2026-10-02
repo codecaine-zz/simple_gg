@@ -82,3 +82,39 @@ fn test_sample_and_shuffle() {
 	shuffle(mut to_shuffle)
 	assert to_shuffle.len == 5
 }
+
+fn test_advanced_slice_ops() {
+	a := ['a', 'b', 'c']
+	b := [1, 2, 3, 4]
+	zipped := zip[string, int](a, b)
+	assert zipped.len == 3
+	assert zipped[0].first == 'a'
+	assert zipped[0].second == 1
+	assert zipped[2].first == 'c'
+	assert zipped[2].second == 3
+
+	words := ['apple', 'banana', 'apple', 'cherry', 'apple', 'banana']
+	freq := frequency[string](words)
+	assert freq['apple'] == 3
+	assert freq['banana'] == 2
+	assert freq['cherry'] == 1
+
+	nums := [1, 2, 3, 4, 5, 6]
+	groups := group_by[int, string](nums, fn (n int) string {
+		return if n % 2 == 0 { 'even' } else { 'odd' }
+	})
+	assert groups['even'] == [2, 4, 6]
+	assert groups['odd'] == [1, 3, 5]
+
+	windows := window[int]([1, 2, 3, 4, 5], 3, 1)
+	assert windows.len == 3
+	assert windows[0] == [1, 2, 3]
+	assert windows[1] == [2, 3, 4]
+	assert windows[2] == [3, 4, 5]
+
+	sorted := [10, 20, 30, 40, 50, 60]
+	assert binary_search[int](sorted, 30) == 2
+	assert binary_search[int](sorted, 10) == 0
+	assert binary_search[int](sorted, 60) == 5
+	assert binary_search[int](sorted, 99) == -1
+}

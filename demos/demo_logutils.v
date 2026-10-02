@@ -14,10 +14,10 @@ fn main() {
 	}
 
 	mut logger := logutils.new_logger(logutils.LoggerConfig{
-		level: .debug
-		output: .both
-		file_path: log_file
-		use_color: true
+		level:          .debug
+		output:         .both
+		file_path:      log_file
+		use_color:      true
 		show_timestamp: true
 	})
 

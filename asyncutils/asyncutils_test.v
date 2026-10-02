@@ -54,7 +54,7 @@ fn test_waitgroup() {
 
 	for _ in 0 .. 5 {
 		wg.add(1)
-		spawn fn (mut wg WaitGroup, c &SharedCounter) {
+		spawn fn (mut wg &WaitGroup, c &SharedCounter) {
 			time.sleep(10 * time.millisecond)
 			stdatomic.add_u64(&c.val, 1)
 			wg.done()

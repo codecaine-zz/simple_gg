@@ -115,18 +115,18 @@ pub fn to_iso8601(t time.Time) string {
 // from_iso8601 parses an ISO 8601 or RFC 3339 formatted string into a time.Time.
 pub fn from_iso8601(s string) !time.Time {
 	// Try parsing as rfc3339 first, fallback to parse_iso8601
-	return time.parse_rfc3339(s) or { time.parse_iso8601(s) }
+	return time.parse_rfc3339(s) or { time.parse_iso8601(s)! }
 }
 
 // start_of_day returns a Time set to 00:00:00.000 for the date of t.
 pub fn start_of_day(t time.Time) time.Time {
 	return time.new(time.Time{
-		year: t.year
-		month: t.month
-		day: t.day
-		hour: 0
-		minute: 0
-		second: 0
+		year:       t.year
+		month:      t.month
+		day:        t.day
+		hour:       0
+		minute:     0
+		second:     0
 		nanosecond: 0
 	})
 }
@@ -134,12 +134,12 @@ pub fn start_of_day(t time.Time) time.Time {
 // end_of_day returns a Time set to 23:59:59.999999999 for the date of t.
 pub fn end_of_day(t time.Time) time.Time {
 	return time.new(time.Time{
-		year: t.year
-		month: t.month
-		day: t.day
-		hour: 23
-		minute: 59
-		second: 59
+		year:       t.year
+		month:      t.month
+		day:        t.day
+		hour:       23
+		minute:     59
+		second:     59
 		nanosecond: 999_999_999
 	})
 }
@@ -170,7 +170,7 @@ mut:
 pub fn new_stopwatch() Stopwatch {
 	mut sw := Stopwatch{
 		start_time: time.now()
-		running: true
+		running:    true
 	}
 	return sw
 }
@@ -255,10 +255,110 @@ pub fn benchmark_fn(name string, iterations int, f fn ()) BenchmarkResult {
 	ops_sec := if total_sec > 0.0 { f64(iters) / total_sec } else { 0.0 }
 
 	return BenchmarkResult{
-		name: name
-		iterations: iters
+		name:              name
+		iterations:        iters
 		total_duration_ms: total_ms
-		avg_duration_ms: avg_ms
-		ops_per_sec: ops_sec
+		avg_duration_ms:   avg_ms
+		ops_per_sec:       ops_sec
 	}
+}
+
+// parse_duration parses a human duration string (e.g. "1h 30m", "500ms", "10s", "2d") into time.Duration.
+pub fn parse_duration(s string) !time.Duration {
+	clean := s.trim_space().to_lower()
+	if clean.len == 0 {
+		return error('empty duration string')
+	}
+	mut total_ns := i64(0)
+	mut num_buf := ''
+	mut i := 0
+	for i < clean.len {
+		ch := clean[i]
+		if (ch >= `0` && ch <= `9`) || ch == `.` {
+			num_buf += ch.ascii_str()
+			i++
+		} else if ch == ` ` || ch == `\t` {
+			i++
+		} else {
+			// Extract unit
+			mut unit_buf := ''
+			for i < clean.len && clean[i] >= `a` && clean[i] <= `z` {
+				unit_buf += clean[i].ascii_str()
+				i++
+			}
+			if num_buf.len == 0 {
+				return error('missing numeric value before unit: ${unit_buf}')
+			}
+			val := num_buf.f64()
+			num_buf = ''
+			match unit_buf {
+				'ns' {
+					total_ns += i64(val)
+				}
+				'us', 'µs' {
+					total_ns += i64(val * 1_000.0)
+				}
+				'ms' {
+					total_ns += i64(val * 1_000_000.0)
+				}
+				's', 'sec', 'seconds' {
+					total_ns += i64(val * 1_000_000_000.0)
+				}
+				'm', 'min', 'minutes' {
+					total_ns += i64(val * 60_000_000_000.0)
+				}
+				'h', 'hr', 'hours' {
+					total_ns += i64(val * 3_600_000_000_000.0)
+				}
+				'd', 'day', 'days' {
+					total_ns += i64(val * 86_400_000_000_000.0)
+				}
+				else {
+					return error('unknown duration unit: ${unit_buf}')
+				}
+			}
+		}
+	}
+	return time.Duration(total_ns)
+}
+
+// add_business_days adds or subtracts N business days to t, skipping Saturdays and Sundays.
+pub fn add_business_days(start time.Time, days int) time.Time {
+	if days == 0 {
+		return start
+	}
+	step := if days > 0 { 1 } else { -1 }
+	mut remaining := if days > 0 { days } else { -days }
+	mut current := start
+	for remaining > 0 {
+		current = current.add_days(step)
+		dow := current.day_of_week()
+		// 1=Mon .. 5=Fri, 6=Sat, 7=Sun
+		if dow >= 1 && dow <= 5 {
+			remaining--
+		}
+	}
+	return current
+}
+
+// TimeRange represents an inclusive time span between start and end.
+pub struct TimeRange {
+pub:
+	start time.Time
+	end   time.Time
+}
+
+// contains returns true if the specified time is within this range.
+pub fn (r TimeRange) contains(t time.Time) bool {
+	return t >= r.start && t <= r.end
+}
+
+// overlaps returns true if this range intersects with another TimeRange.
+pub fn (r TimeRange) overlaps(other TimeRange) bool {
+	return r.start <= other.end && r.end >= other.start
+}
+
+// duration returns the total duration between start and end.
+pub fn (r TimeRange) duration() time.Duration {
+	return r.end - r.start
 }

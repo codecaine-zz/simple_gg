@@ -33,7 +33,7 @@ pub enum LogOutput {
 // LoggerConfig configures a Logger instance.
 pub struct LoggerConfig {
 pub mut:
-	level          LogLevel = .info
+	level          LogLevel  = .info
 	output         LogOutput = .console
 	file_path      string
 	use_color      bool = true
@@ -53,10 +53,10 @@ pub mut:
 // new_logger creates a configured Logger.
 pub fn new_logger(cfg LoggerConfig) Logger {
 	return Logger{
-		level: cfg.level
-		output: cfg.output
-		file_path: cfg.file_path
-		use_color: cfg.use_color
+		level:          cfg.level
+		output:         cfg.output
+		file_path:      cfg.file_path
+		use_color:      cfg.use_color
 		show_timestamp: cfg.show_timestamp
 	}
 }

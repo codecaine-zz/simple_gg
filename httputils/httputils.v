@@ -5,6 +5,7 @@ import net.urllib
 import os
 import time
 import json2
+import encoding.base64
 
 // build_query_string converts a map of parameters into an encoded query string (e.g. "key=val&a=b").
 pub fn build_query_string(params map[string]string) string {
@@ -131,4 +132,50 @@ pub fn fetch_with_retry(mut req http.Request, config RetryConfig) !http.Response
 		return res
 	}
 	return error('request failed after retries')
+}
+
+// bearer_auth_header creates an Authorization header map containing a Bearer token.
+pub fn bearer_auth_header(token string) map[string]string {
+	return {
+		'Authorization': 'Bearer ${token}'
+	}
+}
+
+// basic_auth_header creates an Authorization header map with Basic username/password authentication.
+pub fn basic_auth_header(username string, password string) map[string]string {
+	encoded := base64.encode_str('${username}:${password}')
+	return {
+		'Authorization': 'Basic ${encoded}'
+	}
+}
+
+// merge_headers merges multiple header maps into a single map, with later headers overriding earlier ones.
+pub fn merge_headers(header_maps ...map[string]string) map[string]string {
+	mut res := map[string]string{}
+	for h in header_maps {
+		for k, v in h {
+			res[k] = v
+		}
+	}
+	return res
+}
+
+// is_success_status returns true if status_code is in the 2xx range.
+pub fn is_success_status(status_code int) bool {
+	return status_code >= 200 && status_code < 300
+}
+
+// is_redirect_status returns true if status_code is in the 3xx range.
+pub fn is_redirect_status(status_code int) bool {
+	return status_code >= 300 && status_code < 400
+}
+
+// is_client_error returns true if status_code is in the 4xx range.
+pub fn is_client_error(status_code int) bool {
+	return status_code >= 400 && status_code < 500
+}
+
+// is_server_error returns true if status_code is in the 5xx range.
+pub fn is_server_error(status_code int) bool {
+	return status_code >= 500 && status_code < 600
 }

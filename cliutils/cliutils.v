@@ -134,8 +134,8 @@ pub mut:
 pub fn new_progress_bar(total int, width int) ProgressBar {
 	w := if width > 0 { width } else { 30 }
 	return ProgressBar{
-		total: total
-		width: w
+		total:   total
+		width:   w
 		current: 0
 	}
 }
@@ -196,54 +196,54 @@ pub mut:
 // new_flag_parser creates a new CLI FlagParser instance.
 pub fn new_flag_parser(app_name string, description string) FlagParser {
 	return FlagParser{
-		app_name: app_name
+		app_name:    app_name
 		description: description
-		flags: []FlagDef{}
-		parsed: map[string]string{}
-		positional: []string{}
+		flags:       []FlagDef{}
+		parsed:      map[string]string{}
+		positional:  []string{}
 	}
 }
 
 pub fn (mut fp FlagParser) add_flag_string(name string, short string, default_val string, desc string) {
 	fp.flags << FlagDef{
-		name: name
-		short: short
+		name:        name
+		short:       short
 		default_val: default_val
 		description: desc
-		kind: 'string'
+		kind:        'string'
 	}
 	fp.parsed[name] = default_val
 }
 
 pub fn (mut fp FlagParser) add_flag_int(name string, short string, default_val int, desc string) {
 	fp.flags << FlagDef{
-		name: name
-		short: short
+		name:        name
+		short:       short
 		default_val: '${default_val}'
 		description: desc
-		kind: 'int'
+		kind:        'int'
 	}
 	fp.parsed[name] = '${default_val}'
 }
 
 pub fn (mut fp FlagParser) add_flag_bool(name string, short string, default_val bool, desc string) {
 	fp.flags << FlagDef{
-		name: name
-		short: short
+		name:        name
+		short:       short
 		default_val: if default_val { 'true' } else { 'false' }
 		description: desc
-		kind: 'bool'
+		kind:        'bool'
 	}
 	fp.parsed[name] = if default_val { 'true' } else { 'false' }
 }
 
 pub fn (mut fp FlagParser) add_flag_float(name string, short string, default_val f64, desc string) {
 	fp.flags << FlagDef{
-		name: name
-		short: short
+		name:        name
+		short:       short
 		default_val: '${default_val}'
 		description: desc
-		kind: 'float'
+		kind:        'float'
 	}
 	fp.parsed[name] = '${default_val}'
 }
@@ -372,14 +372,14 @@ pub mut:
 
 pub fn new_pipeline(name string) Pipeline {
 	return Pipeline{
-		name: name
+		name:  name
 		steps: []PipelineStep{}
 	}
 }
 
 pub fn (mut p Pipeline) add_step(name string, action fn () bool) {
 	p.steps << PipelineStep{
-		name: name
+		name:   name
 		action: action
 	}
 }
@@ -425,7 +425,7 @@ pub mut:
 
 pub fn new_logger(level LogLevel, log_file string) Logger {
 	return Logger{
-		level: level
+		level:    level
 		log_file: log_file
 		no_color: false
 	}
@@ -498,7 +498,11 @@ pub fn sparkline(values []f64) string {
 		idx := if delta == 0.0 { 0 } else { int((v - min_val) / delta * 7.0) }
 		clamped := if idx < 0 {
 			0
-		} else if idx > 7 { 7 } else { idx }
+		} else if idx > 7 {
+			7
+		} else {
+			idx
+		}
 		sb.write_rune(glyphs[clamped])
 	}
 	return sb.str()
@@ -545,7 +549,11 @@ pub fn gauge(label string, current f64, max f64, unit string) string {
 	empty := '░'.repeat(if width > filled { width - filled } else { 0 })
 	status := if pct > 90.0 {
 		red('[CRITICAL]')
-	} else if pct > 75.0 { yellow('[WARN]') } else { green('[OK]') }
+	} else if pct > 75.0 {
+		yellow('[WARN]')
+	} else {
+		green('[OK]')
+	}
 	return '${label}: [${cyan(bar)}${empty}] ${current:.1f}/${max:.1f} ${unit} (${pct:.1f}%) ${status}'
 }
 
@@ -558,7 +566,7 @@ pub mut:
 
 pub fn new_tree_node(label string) TreeNode {
 	return TreeNode{
-		label: label
+		label:    label
 		children: []TreeNode{}
 	}
 }
@@ -754,4 +762,50 @@ pub fn read_from_clipboard() string {
 		return ''
 	}
 	return cb.paste()
+}
+
+// ============================================================================
+// Terminal Spinner & Confirmation Prompt
+// ============================================================================
+
+// Spinner displays an animated terminal loading indicator.
+@[heap]
+pub struct Spinner {
+mut:
+	frames    []string = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
+	frame_idx int
+	message   string
+	active    bool
+}
+
+// new_spinner creates a new Spinner with a status message.
+pub fn new_spinner(message string) &Spinner {
+	return &Spinner{
+		message: message
+		active:  false
+	}
+}
+
+// step advances the spinner by one frame and returns the formatted frame string.
+pub fn (mut s Spinner) step() string {
+	frame := s.frames[s.frame_idx % s.frames.len]
+	s.frame_idx++
+	return cyan(frame) + ' ' + s.message
+}
+
+// update changes the spinner's message text.
+pub fn (mut s Spinner) update(message string) {
+	s.message = message
+}
+
+// confirm prompts the user for a Yes/No question and returns true for yes, false for no.
+pub fn confirm(prompt string, default_yes bool) bool {
+	options := if default_yes { '[Y/n]' } else { '[y/N]' }
+	print('${prompt} ${options}: ')
+	os.flush()
+	input := os.get_line().trim_space().to_lower()
+	if input.len == 0 {
+		return default_yes
+	}
+	return input == 'y' || input == 'yes'
 }

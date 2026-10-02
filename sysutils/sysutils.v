@@ -348,13 +348,13 @@ pub fn exec_timeout(cmd string, timeout_ms int) ExecTimeoutResult {
 	duration_ms := (time.now() - start).milliseconds()
 	if duration_ms > timeout_ms {
 		return ExecTimeoutResult{
-			output: res.output
+			output:    res.output
 			exit_code: res.exit_code
 			timed_out: true
 		}
 	}
 	return ExecTimeoutResult{
-		output: res.output
+		output:    res.output
 		exit_code: res.exit_code
 		timed_out: false
 	}
@@ -381,9 +381,9 @@ pub fn exec_retry(cmd string, retries int, delay_ms int) ExecRetryResult {
 		last_code = res.exit_code
 		if res.exit_code == 0 {
 			return ExecRetryResult{
-				output: res.output
+				output:    res.output
 				exit_code: 0
-				attempts: attempt
+				attempts:  attempt
 			}
 		}
 		if attempt < max_attempts && delay_ms > 0 {
@@ -391,9 +391,9 @@ pub fn exec_retry(cmd string, retries int, delay_ms int) ExecRetryResult {
 		}
 	}
 	return ExecRetryResult{
-		output: last_output
+		output:    last_output
 		exit_code: last_code
-		attempts: attempt
+		attempts:  attempt
 	}
 }
 
@@ -577,6 +577,9 @@ pub fn copy_to_clipboard(text string) ! {
 		p.stdin_write(text)
 		p.close()
 		p.wait()
+		if p.code != 0 {
+			return error('pbcopy failed with exit code ${p.code}')
+		}
 		return
 	}
 	$if linux {
@@ -588,6 +591,9 @@ pub fn copy_to_clipboard(text string) ! {
 			p.stdin_write(text)
 			p.close()
 			p.wait()
+			if p.code != 0 {
+				return error('xclip failed with exit code ${p.code}')
+			}
 			return
 		} else if has_command('wl-copy') {
 			mut p := os.new_process('wl-copy')
@@ -596,6 +602,9 @@ pub fn copy_to_clipboard(text string) ! {
 			p.stdin_write(text)
 			p.close()
 			p.wait()
+			if p.code != 0 {
+				return error('wl-copy failed with exit code ${p.code}')
+			}
 			return
 		}
 	}
@@ -683,13 +692,13 @@ pub fn runtime_system_info() RuntimeInfo {
 	arch := if runtime.is_64bit() { '64-bit' } else { '32-bit' }
 
 	return RuntimeInfo{
-		os_name: os.user_os()
-		arch: arch
-		num_cpus: runtime.nr_cpus()
-		is_64bit: runtime.is_64bit()
+		os_name:          os.user_os()
+		arch:             arch
+		num_cpus:         runtime.nr_cpus()
+		is_64bit:         runtime.is_64bit()
 		is_little_endian: runtime.is_little_endian()
-		total_memory_mb: u64(total_mem / (1024 * 1024))
-		free_memory_mb: u64(free_mem / (1024 * 1024))
+		total_memory_mb:  u64(total_mem / (1024 * 1024))
+		free_memory_mb:   u64(free_mem / (1024 * 1024))
 	}
 }
 

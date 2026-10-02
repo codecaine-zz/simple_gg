@@ -75,3 +75,30 @@ fn test_fuzzy_matching() {
 	sim2 := similarity('hello', 'hallo')
 	assert sim2 > 0.7
 }
+
+fn test_formatting_and_ansi() {
+	assert format_int_commas(0) == '0'
+	assert format_int_commas(123) == '123'
+	assert format_int_commas(1000) == '1,000'
+	assert format_int_commas(1234567) == '1,234,567'
+	assert format_int_commas(-9876543) == '-9,876,543'
+
+	assert format_number_commas(1234567.89, 2) == '1,234,567.89'
+	assert format_number_commas(1000.0, 0) == '1,000'
+
+	assert ordinal(1) == '1st'
+	assert ordinal(2) == '2nd'
+	assert ordinal(3) == '3rd'
+	assert ordinal(4) == '4th'
+	assert ordinal(11) == '11th'
+	assert ordinal(12) == '12th'
+	assert ordinal(13) == '13th'
+	assert ordinal(21) == '21st'
+	assert ordinal(102) == '102nd'
+
+	assert truncate_middle('0123456789abcdef', 10, '...') == '0123...def'
+	assert truncate_middle('short', 10, '...') == 'short'
+
+	colored := '\x1b[31;1mRed Alert\x1b[0m'
+	assert strip_ansi(colored) == 'Red Alert'
+}

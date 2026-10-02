@@ -139,7 +139,7 @@ pub fn new_ring_buffer[T](capacity int) SimpleRingBuffer[T] {
 	cap := if capacity > 0 { capacity } else { 1 }
 	return SimpleRingBuffer[T]{
 		capacity: cap
-		items: []T{cap: cap}
+		items:    []T{cap: cap}
 	}
 }
 

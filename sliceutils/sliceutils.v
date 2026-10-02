@@ -169,3 +169,73 @@ pub fn max_f64(arr []f64) ?f64 {
 	res := arrays.max(arr) or { return none }
 	return res
 }
+
+// Pair represents a 2-tuple of generic types.
+pub struct Pair[T, U] {
+pub:
+	first  T
+	second U
+}
+
+// zip combines elements of two slices into a slice of Pairs up to the shorter slice's length.
+pub fn zip[T, U](a []T, b []U) []Pair[T, U] {
+	min_len := if a.len < b.len { a.len } else { b.len }
+	mut res := []Pair[T, U]{cap: min_len}
+	for i in 0 .. min_len {
+		res << Pair[T, U]{
+			first:  a[i]
+			second: b[i]
+		}
+	}
+	return res
+}
+
+// frequency counts the number of occurrences of each distinct element in a slice.
+pub fn frequency[T](items []T) map[T]int {
+	mut counts := map[T]int{}
+	for item in items {
+		counts[item] = counts[item] + 1
+	}
+	return counts
+}
+
+// group_by partitions elements of a slice into a map grouped by keys returned by key_fn.
+pub fn group_by[T, K](items []T, key_fn fn (T) K) map[K][]T {
+	mut groups := map[K][]T{}
+	for item in items {
+		key := key_fn(item)
+		groups[key] << item
+	}
+	return groups
+}
+
+// window returns overlapping or non-overlapping sliding windows of size with the specified step.
+pub fn window[T](items []T, size int, step int) [][]T {
+	if size <= 0 || step <= 0 || items.len < size {
+		return [][]T{}
+	}
+	mut windows := [][]T{}
+	mut i := 0
+	for i + size <= items.len {
+		windows << items[i..i + size].clone()
+		i += step
+	}
+	return windows
+}
+
+// binary_search performs binary search on a sorted slice and returns the index of target, or -1 if not found.
+pub fn binary_search[T](sorted_items []T, target T) int {
+	mut low := 0
+	mut high := sorted_items.len - 1
+	for low <= high {
+		mid := low + (high - low) / 2
+		if sorted_items[mid] == target {
+			return mid
+		} else if sorted_items[mid] < target {
+			low = mid + 1
+		} else {
+			high = mid - 1
+		}
+	}
+	return -1
+}

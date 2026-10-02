@@ -87,7 +87,7 @@ pub fn parallel_filter[T](items []T, worker_count int, predicate fn (T) bool) []
 	return final_results
 }
 
-fn worker_each[T](chunk []T, action fn (T)) {
+pub fn worker_each[T](chunk []T, action fn (T)) {
 	for item in chunk {
 		action(item)
 	}
@@ -127,7 +127,7 @@ pub fn parallel_each[T](items []T, worker_count int, action fn (T)) {
 @[heap]
 pub struct WaitGroup {
 mut:
-	wg sync.WaitGroup
+	wg &sync.WaitGroup = unsafe { nil }
 }
 
 // new_waitgroup creates and initializes a new WaitGroup.
@@ -158,14 +158,20 @@ pub fn (mut wg WaitGroup) wait() {
 
 pub type TaskFn = fn ()
 
+@[heap]
+struct TaskItem {
+	f TaskFn = unsafe { nil }
+}
+
 // WorkerPool dispatches tasks across a fixed number of worker threads via a bounded channel.
+@[heap]
 pub struct WorkerPool {
 mut:
-	tasks       chan TaskFn
+	tasks       chan &TaskItem
 	workers     int
-	wg          sync.WaitGroup
+	wg          &sync.WaitGroup = unsafe { nil }
 	is_closed   bool
-	worker_done sync.WaitGroup
+	worker_done &sync.WaitGroup = unsafe { nil }
 }
 
 // new_worker_pool initializes a bounded worker pool with worker_count threads and a queue capacity.
@@ -175,28 +181,32 @@ pub fn new_worker_pool(worker_count int, queue_size int) !&WorkerPool {
 	}
 	q_size := if queue_size <= 0 { 64 } else { queue_size }
 	mut pool := &WorkerPool{
-		tasks: chan TaskFn{ cap: q_size }
-		workers: worker_count
-		wg: sync.new_waitgroup()
-		is_closed: false
+		tasks:       chan &TaskItem{cap: q_size}
+		workers:     worker_count
+		wg:          sync.new_waitgroup()
+		is_closed:   false
 		worker_done: sync.new_waitgroup()
 	}
 
 	pool.worker_done.add(worker_count)
 	for _ in 0 .. worker_count {
-		spawn pool.worker_loop()
+		spawn worker_loop(pool)
 	}
 
 	return pool
 }
 
-fn (mut pool WorkerPool) worker_loop() {
+fn worker_loop(pool &WorkerPool) {
 	for {
-		task := <-pool.tasks or { break }
-		task()
-		pool.wg.done()
+		item := <-pool.tasks or { break }
+		item.f()
+		unsafe {
+			pool.wg.done()
+		}
 	}
-	pool.worker_done.done()
+	unsafe {
+		pool.worker_done.done()
+	}
 }
 
 // submit queues a new task into the worker pool.
@@ -205,7 +215,9 @@ pub fn (mut pool WorkerPool) submit(task TaskFn) ! {
 		return error('Worker pool is closed')
 	}
 	pool.wg.add(1)
-	pool.tasks <- task
+	pool.tasks <- &TaskItem{
+		f: task
+	}
 }
 
 // wait_all blocks until all submitted tasks have completed execution.

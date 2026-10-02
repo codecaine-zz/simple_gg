@@ -5,9 +5,9 @@ import time
 
 fn test_logger_levels() {
 	mut l := new_logger(
-		level: .warn
-		output: .console
-		use_color: false
+		level:          .warn
+		output:         .console
+		use_color:      false
 		show_timestamp: false
 	)
 	assert l.level == .warn
@@ -31,10 +31,10 @@ fn test_logger_file_output() {
 	}
 
 	mut l := new_logger(
-		level: .info
-		output: .file
-		file_path: tmp_file
-		use_color: false
+		level:          .info
+		output:         .file
+		file_path:      tmp_file
+		use_color:      false
 		show_timestamp: false
 	)
 

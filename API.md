@@ -21,11 +21,11 @@ v install --git https://github.com/codecaine-zz/simple_gg
 
 - **V Module Import**: `import simplegui` (unified on macOS, Linux, and Windows)
 - **Headless CLI Import**: `import simplecli`
-- **30 Utility Modules**: `import <modulename>` (e.g., `import strutils`, `import cacheutils`, `import sqliteutils`). Complete manual: [UTILS_API.md](UTILS_API.md)
+- **37 Utility Modules**: `import <modulename>` (e.g., `import strutils`, `import cacheutils`, `import sqliteutils`). Complete manual: [UTILS_API.md](UTILS_API.md)
 
 ### V Compiler Compatibility & Maintenance (`v up`)
 
-`simplegui` is built and validated against **V 0.5.2** (commit `9e9f7f05` / V3 compiler backend). All 43 test suites, 30 GUI demos, 29 examples, and 47 desktop workstations pass on this build.
+`simplegui` is built and validated against **V 0.5.2** (commit `9e9f7f05` / V3 compiler backend). All 50 test suites, 30 GUI demos, 29 examples, and 47 desktop workstations pass on this build.
 
 > [!WARNING]
 > **Caution Regarding `v up`**:

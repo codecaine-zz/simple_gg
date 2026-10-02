@@ -156,12 +156,12 @@ pub fn new_app_state[T](app_name string, default_data T) AppStateStore[T] {
 pub fn new_app_state_with_file[T](app_name string, filename string, default_data T, loc StateLocation) AppStateStore[T] {
 	fname := if filename.trim_space().len > 0 { filename.trim_space() } else { 'state.json' }
 	mut store := AppStateStore[T]{
-		app_name: app_name
-		filename: fname
-		location: loc
+		app_name:     app_name
+		filename:     fname
+		location:     loc
 		default_data: default_data
-		data: default_data
-		auto_save: false
+		data:         default_data
+		auto_save:    false
 	}
 	// Try loading existing state automatically
 	store.load() or {}
@@ -271,11 +271,11 @@ pub fn new_kv_state(app_name string) KeyValueState {
 pub fn new_kv_state_with_file(app_name string, filename string, loc StateLocation) KeyValueState {
 	fname := if filename.trim_space().len > 0 { filename.trim_space() } else { 'settings.json' }
 	mut kv := KeyValueState{
-		app_name: app_name
-		filename: fname
-		location: loc
+		app_name:  app_name
+		filename:  fname
+		location:  loc
 		auto_save: false
-		values: map[string]string{}
+		values:    map[string]string{}
 	}
 	kv.load() or {}
 	return kv

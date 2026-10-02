@@ -53,8 +53,8 @@ fn test_uuid_v4() {
 }
 
 fn test_aes_encryption() {
-	key := [u8(1), 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23,
-		24, 25, 26, 27, 28, 29, 30, 31, 32]
+	key := [u8(1), 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22,
+		23, 24, 25, 26, 27, 28, 29, 30, 31, 32]
 	iv := [u8(10), 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130, 140, 150, 160]
 
 	plaintext := 'High level abstractions in V language'
@@ -91,4 +91,18 @@ fn test_fast_hashes_and_ed25519() {
 	sig := ed25519_sign(priv_k, msg) or { panic(err) }
 	assert ed25519_verify(pub_k, msg, sig) == true
 	assert ed25519_verify(pub_k, 'tampered'.bytes(), sig) == false
+}
+
+fn test_secure_compare_and_totp() {
+	assert secure_compare('secret_token', 'secret_token') == true
+	assert secure_compare('secret_token', 'secret_tokeX') == false
+	assert secure_compare('secret', 'secret_token') == false
+
+	u := generate_ulid()
+	assert u.len == 26
+
+	totp6 := generate_totp('12345678901234567890', 1, 6) or { panic(err) }
+	assert totp6.len == 6
+	totp8 := generate_totp('12345678901234567890', 1, 8) or { panic(err) }
+	assert totp8.len == 8
 }

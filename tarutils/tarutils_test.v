@@ -5,16 +5,16 @@ import os
 fn test_tar_in_memory_roundtrip() {
 	entries := [
 		TarEntry{
-			name: 'doc.txt'
-			size: 13
+			name:   'doc.txt'
+			size:   13
 			is_dir: false
-			data: 'Hello, World!'.bytes()
+			data:   'Hello, World!'.bytes()
 		},
 		TarEntry{
-			name: 'assets'
-			size: 0
+			name:   'assets'
+			size:   0
 			is_dir: true
-			data: []u8{}
+			data:   []u8{}
 		},
 	]
 

@@ -1,6 +1,18 @@
 module netutils
 
 import net
+import time
+
+fn wait_for_listening_port(port int, want_present bool) bool {
+	for _ in 0 .. 20 {
+		ports := get_listening_ports()
+		if (port in ports) == want_present {
+			return true
+		}
+		time.sleep(50 * time.millisecond)
+	}
+	return false
+}
 
 fn test_network_probes() {
 	local_ip := get_local_ip()
@@ -13,19 +25,25 @@ fn test_network_probes() {
 	gateway := get_default_gateway()
 	assert gateway.len > 0
 
-	ports := get_listening_ports()
-	// Should identify listening ports on the host
-	assert ports.len > 0
-
-	// Test TCP port check against one of the active listening ports
-	if ports.len > 0 {
-		is_open := ping_tcp_port('127.0.0.1', ports[0], 500)
-		assert is_open == true
+	mut listener := net.listen_tcp(.ip, '127.0.0.1:0') or { panic(err) }
+	port := (listener.addr() or { panic(err) }).port() or { panic(err) }
+	defer {
+		listener.close() or {}
 	}
 
-	// Test an unopened port
-	is_closed := ping_tcp_port('127.0.0.1', 65432, 200)
-	assert is_closed == false
+	assert wait_for_listening_port(port, true)
+
+	is_open := ping_tcp_port('127.0.0.1', port, 500)
+	assert is_open == true
+}
+
+fn test_listening_ports_excludes_closed_listener() {
+	mut listener := net.listen_tcp(.ip, '127.0.0.1:0') or { panic(err) }
+	port := (listener.addr() or { panic(err) }).port() or { panic(err) }
+
+	assert wait_for_listening_port(port, true)
+	listener.close() or {}
+	assert wait_for_listening_port(port, false)
 }
 
 fn test_tcp_framing() {

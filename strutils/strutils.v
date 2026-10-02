@@ -337,3 +337,99 @@ pub fn similarity(a string, b string) f64 {
 	distance := levenshtein_distance(a, b)
 	return 1.0 - (f64(distance) / f64(max_len))
 }
+
+// format_int_commas formats an integer with thousands separator commas (e.g. 1000000 -> "1,000,000").
+pub fn format_int_commas(n i64) string {
+	if n == 0 {
+		return '0'
+	}
+	is_neg := n < 0
+	val := if is_neg { -n } else { n }
+	raw := val.str()
+	mut res := []string{}
+	mut count := 0
+	for i := raw.len - 1; i >= 0; i-- {
+		if count > 0 && count % 3 == 0 {
+			res << ','
+		}
+		res << raw[i..i + 1]
+		count++
+	}
+	res.reverse_in_place()
+	prefix := if is_neg { '-' } else { '' }
+	return prefix + res.join('')
+}
+
+// format_number_commas formats a floating-point number with comma grouping and fixed decimal precision.
+pub fn format_number_commas(n f64, decimals int) string {
+	int_part := i64(n)
+	formatted_int := format_int_commas(int_part)
+	if decimals <= 0 {
+		return formatted_int
+	}
+	mut diff := n - f64(int_part)
+	if diff < 0.0 {
+		diff = -diff
+	}
+	mut factor := 1.0
+	for _ in 0 .. decimals {
+		factor *= 10.0
+	}
+	fraction_int := i64(diff * factor + 0.5)
+	frac_str := pad_left(fraction_int.str(), decimals, '0')
+	return '${formatted_int}.${frac_str}'
+}
+
+// ordinal returns the ordinal suffix for an integer (e.g. 1 -> "1st", 2 -> "2nd", 3 -> "3rd", 4 -> "4th", 11 -> "11th").
+pub fn ordinal(n int) string {
+	abs_n := if n < 0 { -n } else { n }
+	rem100 := abs_n % 100
+	if rem100 >= 11 && rem100 <= 13 {
+		return '${n}th'
+	}
+	suffix := match abs_n % 10 {
+		1 { 'st' }
+		2 { 'nd' }
+		3 { 'rd' }
+		else { 'th' }
+	}
+	return '${n}${suffix}'
+}
+
+// truncate_middle truncates a string in the middle if it exceeds max_len (e.g. "0x123456789abcdef", 10, "...") -> "0x12...cdef".
+pub fn truncate_middle(s string, max_len int, ellipsis string) string {
+	runes := s.runes()
+	if runes.len <= max_len || max_len <= ellipsis.len {
+		return s
+	}
+	avail := max_len - ellipsis.len
+	left_len := avail / 2 + avail % 2
+	right_len := avail / 2
+	mut sb := strings.new_builder(max_len)
+	for i in 0 .. left_len {
+		sb.write_rune(runes[i])
+	}
+	sb.write_string(ellipsis)
+	for i in (runes.len - right_len) .. runes.len {
+		sb.write_rune(runes[i])
+	}
+	return sb.str()
+}
+
+// strip_ansi removes ANSI color and style escape sequences from a string.
+pub fn strip_ansi(s string) string {
+	mut sb := strings.new_builder(s.len)
+	mut in_escape := false
+	for r in s.runes() {
+		if r == 0x1b {
+			in_escape = true
+		} else if in_escape {
+			if (r >= `a` && r <= `z`) || (r >= `A` && r <= `Z`) {
+				in_escape = false
+			}
+		} else {
+			sb.write_rune(r)
+		}
+	}
+	return sb.str()
+}

@@ -3,6 +3,7 @@ module fileutils
 import os
 import rand
 import json2
+import crypto.sha256
 
 // Saves a slice of structs to disk as JSON.
 pub fn save_struct_array_to_file[T](path string, data []T) ! {
@@ -357,4 +358,58 @@ pub fn temp_dir(prefix string) !string {
 	path := os.join_path(os.temp_dir(), name)
 	os.mkdir_all(path) or { return err }
 	return path
+}
+
+// write_file_atomic safely writes content to a temporary file before atomically renaming it,
+// preventing partial or corrupt file writes if interrupted.
+pub fn write_file_atomic(path string, content string) ! {
+	ensure_dir_exists(path) or { return err }
+	dir := os.dir(path)
+	tmp_name := '.tmp_${os.file_name(path)}_${os.getpid()}_${rand.ulid()}'
+	tmp_path := os.join_path(dir, tmp_name)
+	os.write_file(tmp_path, content) or { return err }
+	os.mv_by_cp(tmp_path, path) or {
+		os.rm(tmp_path) or {}
+		return err
+	}
+}
+
+// file_hash_sha256 calculates the hexadecimal SHA-256 checksum of a file.
+pub fn file_hash_sha256(path string) !string {
+	if !os.exists(path) {
+		return error('file does not exist: ${path}')
+	}
+	content := os.read_bytes(path) or { return err }
+	return sha256.hexhash(content.bytestr())
+}
+
+// mime_type returns the MIME content type based on the file extension and signature.
+pub fn mime_type(path string) string {
+	ext := file_extension(path).to_lower()
+	return match ext {
+		'html', 'htm' { 'text/html' }
+		'css' { 'text/css' }
+		'js', 'mjs' { 'application/javascript' }
+		'json' { 'application/json' }
+		'xml' { 'application/xml' }
+		'png' { 'image/png' }
+		'jpg', 'jpeg' { 'image/jpeg' }
+		'gif' { 'image/gif' }
+		'svg' { 'image/svg+xml' }
+		'webp' { 'image/webp' }
+		'ico' { 'image/x-icon' }
+		'pdf' { 'application/pdf' }
+		'zip' { 'application/zip' }
+		'tar' { 'application/x-tar' }
+		'gz' { 'application/gzip' }
+		'csv' { 'text/csv' }
+		'tsv' { 'text/tab-separated-values' }
+		'txt', 'log' { 'text/plain' }
+		'md' { 'text/markdown' }
+		'wasm' { 'application/wasm' }
+		'mp3' { 'audio/mpeg' }
+		'mp4' { 'video/mp4' }
+		'v' { 'text/x-v' }
+		else { 'application/octet-stream' }
+	}
 }

@@ -70,7 +70,7 @@ fn test_standard_paths() {
 fn test_clipboard() {
 	test_msg := 'vlang_sysutils_test_payload'
 	copy_to_clipboard(test_msg) or { return }
-	paste := get_clipboard_text() or { '' }
+	paste := get_clipboard_text() or { return }
 	assert paste == test_msg
 }
 

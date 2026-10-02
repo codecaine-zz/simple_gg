@@ -75,7 +75,7 @@
 - **OS & System Extensions (`sys.v`)**: Standardized user directory lookups for macOS (`~/Library`), Windows (`%APPDATA%`), and Linux (`$XDG_*`), path expansion with tilde (`~`) and environment variable resolution, native notifications, hardware metrics, process execution, clipboard, and file operations.
 - **Headless Console & RAD Toolkit (`simplecli`)**: Full-featured zero-window CLI framework with flag parsing, ANSI colors, tables, interactive prompts, multi-level logging, process control, hardware probing, and cryptography.
 - **V Standard Library Integrations (`stdlib.v`)**: Built-in fluent helpers for HTTP requests, RegEx matching, Cryptography (SHA256, MD5, AES, Bcrypt), Gzip/Zlib/Zstd compression, TOML parsing, SemVer checks, and WebSockets.
-- **30 Bundled Production Utility Modules (`vlang_utils`)**: Zero-boilerplate ergonomic toolkit ready to import anywhere (`fileutils`, `sqliteutils`, `strutils`, `sliceutils`, `envutils`, `cryptoutils`, `timeutils`, `httputils`, `cliutils`, `sysutils`, `netutils`, `validutils`, `structutils`, `statutils`, `stateutils`, `cacheutils`, `semverutils`, `flowutils`, `templateutils`, `colorutils`, `archiveutils`, `asyncutils`, `regexutils`, `mockutils`, `logutils`, `tomlutils`, `htmlutils`, `bitutils`, `compressutils`, `tarutils`). Full manual in [UTILS_API.md](UTILS_API.md).
+- **37 Bundled Production Utility Modules (`vlang_utils`)**: Zero-boilerplate ergonomic toolkit ready to import anywhere (`archiveutils`, `asyncutils`, `bitutils`, `cacheutils`, `cliutils`, `colorutils`, `compressutils`, `cronutils`, `cryptoutils`, `diffutils`, `envutils`, `eventutils`, `fileutils`, `flowutils`, `graphutils`, `htmlutils`, `httputils`, `jwtutils`, `logutils`, `mathutils`, `mockutils`, `netutils`, `regexutils`, `semverutils`, `sliceutils`, `sqliteutils`, `stateutils`, `statutils`, `structutils`, `strutils`, `sysutils`, `tarutils`, `templateutils`, `timeutils`, `tomlutils`, `urlutils`, `validutils`). Full manual in [UTILS_API.md](UTILS_API.md).
 - **Beginner Friendly**: Fluent chainable builder API with zero boilerplate.
 
 ---
@@ -145,7 +145,7 @@ sudo apt install -y libx11-dev libxcursor-dev libxi-dev libgl1-mesa-dev libasoun
 
 ### 5. V Compiler Version & `v up` Maintenance
 
-`simple_gg` is developed and validated against **V 0.5.2** (commit `9e9f7f05` / V3 compiler backend). All 43 test suites, 30 GUI demos, 29 examples, 47 desktop workstations, and 49 CLI tools are tested and verified on this build.
+`simple_gg` is developed and validated against **V 0.5.2** (commit `9e9f7f05` / V3 compiler backend). All 50 test suites, 30 GUI demos, 29 examples, 47 desktop workstations, and 49 CLI tools are tested and verified on this build.
 
 #### ⚠️ Caution with `v up`
 Running `v up` directly pulls rolling changes from the V master branch, which can occasionally introduce compiler bootstrap issues or codegen regressions:
@@ -352,7 +352,7 @@ See the [`cli_apps/README.md`](cli_apps/README.md) for the complete catalog of a
 
 - **Full API Guide (GUI)**: See [API.md](API.md) for complete details on window configuration, controls, layout engine, themes, event callbacks, reactive state management (`state.v`), system calls (`sys.v`), and standard library extensions (`stdlib.v`).
 - **SimpleCLI Reference (Headless & Console)**: See [CLI_API.md](CLI_API.md) for complete details on the zero-window console utility framework, flag parsing, ANSI UI, interactive prompts, process management, hardware metrics, and stdlib utilities.
-- **30 Utility Modules Reference (`vlang_utils`)**: See [UTILS_API.md](UTILS_API.md) for complete documentation, function signatures, and beginner-friendly examples for all 30 utility modules.
+- **37 Utility Modules Reference (`vlang_utils`)**: See [UTILS_API.md](UTILS_API.md) for complete documentation, function signatures, and beginner-friendly examples for all 37 utility modules.
 - **Workstations Catalog**: See [applications/README.md](applications/README.md) for the complete list & visual showcase of 47 desktop applications.
 - **Examples Guide**: See [examples/README.md](examples/README.md) for detailed descriptions of all example scripts.
 

@@ -245,3 +245,50 @@ pub fn ed25519_verify(pub_key_hex string, msg []u8, sig_hex string) bool {
 	sig_bytes := hex.decode(sig_hex) or { return false }
 	return ed25519.verify(pub_bytes, msg, sig_bytes) or { false }
 }
+
+// secure_compare performs constant-time string comparison to prevent timing attacks.
+pub fn secure_compare(a string, b string) bool {
+	if a.len != b.len {
+		return false
+	}
+	mut diff := 0
+	for i in 0 .. a.len {
+		diff |= int(a[i] ^ b[i])
+	}
+	return diff == 0
+}
+
+const ulid_encoding = '0123456789ABCDEFGHJKMNPQRSTVWXYZ'
+
+// generate_ulid generates a 26-character Universally Unique Lexicographically Sortable Identifier.
+pub fn generate_ulid() string {
+	return rand.ulid()
+}
+
+// generate_totp produces a Time-based One-Time Password (RFC 6238) from a secret and counter step.
+pub fn generate_totp(secret string, counter u64, digits int) !string {
+	if digits < 6 || digits > 10 {
+		return error('digits must be between 6 and 10')
+	}
+	mut msg := []u8{len: 8}
+	for i := 7; i >= 0; i-- {
+		msg[i] = u8((counter >> (8 * (7 - i))) & 0xff)
+	}
+	digest := hmac.new(secret.bytes(), msg, vsha256.sum, vsha256.block_size)
+	offset := int(digest[digest.len - 1] & 0x0f)
+	bin_code := ((u32(digest[offset]) & 0x7f) << 24) |
+		((u32(digest[offset + 1]) & 0xff) << 16) |
+		((u32(digest[offset + 2]) & 0xff) << 8) |
+		(u32(digest[offset + 3]) & 0xff)
+
+	mut mod := 1
+	for _ in 0 .. digits {
+		mod *= 10
+	}
+	otp := int(bin_code % u32(mod))
+	mut raw_str := otp.str()
+	for raw_str.len < digits {
+		raw_str = '0' + raw_str
+	}
+	return raw_str
+}

@@ -1,5 +1,36 @@
 module cliutils
 
+import os
+
+struct EnvState {
+	value  string
+	exists bool
+}
+
+fn should_skip_clipboard_test() bool {
+	$if linux {
+		return os.getenv('CI').len > 0 && os.getenv('DISPLAY').len == 0
+			&& os.getenv('WAYLAND_DISPLAY').len == 0
+	}
+	return false
+}
+
+fn capture_env(key string) EnvState {
+	env := os.environ()
+	return EnvState{
+		value:  env[key] or { '' }
+		exists: key in env
+	}
+}
+
+fn restore_env(key string, state EnvState) {
+	if !state.exists {
+		os.unsetenv(key)
+	} else {
+		os.setenv(key, state.value, true)
+	}
+}
+
 fn test_ansi_styling() {
 	b := bold('Hello')
 	assert b.contains('Hello')
@@ -135,6 +166,9 @@ fn test_rad_visualizations() {
 }
 
 fn test_clipboard() {
+	if should_skip_clipboard_test() {
+		return
+	}
 	if is_clipboard_available() {
 		original := read_from_clipboard()
 		test_msg := 'antigravity_vlang_utils_test'
@@ -144,4 +178,34 @@ fn test_clipboard() {
 			copy_to_clipboard(original)
 		}
 	}
+}
+
+fn test_clipboard_ci_skip_gate() {
+	$if linux {
+		old_ci := capture_env('CI')
+		old_display := capture_env('DISPLAY')
+		old_wayland := capture_env('WAYLAND_DISPLAY')
+		defer {
+			restore_env('CI', old_ci)
+			restore_env('DISPLAY', old_display)
+			restore_env('WAYLAND_DISPLAY', old_wayland)
+		}
+		os.setenv('CI', '1', true)
+		os.unsetenv('DISPLAY')
+		os.unsetenv('WAYLAND_DISPLAY')
+		assert should_skip_clipboard_test() == true
+		os.setenv('DISPLAY', ':99', true)
+		assert should_skip_clipboard_test() == false
+	}
+}
+
+fn test_spinner() {
+	mut s := new_spinner('Processing data...')
+	assert s.message == 'Processing data...'
+	frame1 := s.step()
+	assert frame1.contains('Processing data...')
+	s.update('Done!')
+	assert s.message == 'Done!'
+	frame2 := s.step()
+	assert frame2.contains('Done!')
 }

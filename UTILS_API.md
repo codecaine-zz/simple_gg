@@ -1,11 +1,11 @@
 # V Developer Utility Suite (`vlang_utils`) - Complete API Reference
 
-Welcome to the comprehensive API reference manual for the **30 production-grade developer utility modules** in `vlang_utils`.
+Welcome to the comprehensive API reference manual for the **37 production-grade developer utility modules** in `vlang_utils`.
 
 Every module is zero-dependency, self-contained, and designed for Rapid Application Development (RAD). You can import any module directly across GUI apps, CLI tools, services, and background workers (e.g. `import strutils`, `import sqliteutils`, `import cacheutils`).
 
 > [!NOTE]
-> **V Compiler Compatibility**: All 30 modules in `vlang_utils` are verified and tested against **V 0.5.2** (`9e9f7f05`). This includes full support for `json2` streaming serialization, generics, and native SQLite bindings. For compiler maintenance, `v up` troubleshooting, and `VFLAGS` setup, refer to [`README.md`](README.md#5-v-compiler-version--v-up-maintenance).
+> **V Compiler Compatibility**: All 37 modules in `vlang_utils` are verified and tested against **V 0.5.2** (`9e9f7f05`). This includes full support for `json2` streaming serialization, generics, and native SQLite bindings. For compiler maintenance, `v up` troubleshooting, and `VFLAGS` setup, refer to [`README.md`](README.md#5-v-compiler-version--v-up-maintenance).
 
 ---
 
@@ -26,9 +26,9 @@ Examples that contact a website, read a file, use the clipboard, or ask a questi
 
 ### 🚀 Ready-to-Run Demos
 
-All 30 utility modules have standalone, fully functional demo scripts located in the [`demos/`](demos/) directory.
+All 37 utility modules have standalone, fully functional demo scripts located in the [`demos/`](demos/) directory.
 
-- **Run all 30 demos sequentially with execution timing:**
+- **Run all 37 demos sequentially with execution timing:**
   ```bash
   v run demos/run_all_demos.v
   ```
@@ -42,13 +42,19 @@ All 30 utility modules have standalone, fully functional demo scripts located in
 | [`cliutils`](#cliutils-api) | [`demo_cliutils.v`](demos/demo_cliutils.v) | `v run demos/demo_cliutils.v` |
 | [`colorutils`](#colorutils-api) | [`demo_colorutils.v`](demos/demo_colorutils.v) | `v run demos/demo_colorutils.v` |
 | [`compressutils`](#compressutils-api) | [`demo_compressutils.v`](demos/demo_compressutils.v) | `v run demos/demo_compressutils.v` |
+| [`cronutils`](#cronutils-api) | [`demo_cronutils.v`](demos/demo_cronutils.v) | `v run demos/demo_cronutils.v` |
 | [`cryptoutils`](#cryptoutils-api) | [`demo_cryptoutils.v`](demos/demo_cryptoutils.v) | `v run demos/demo_cryptoutils.v` |
+| [`diffutils`](#diffutils-api) | [`demo_diffutils.v`](demos/demo_diffutils.v) | `v run demos/demo_diffutils.v` |
 | [`envutils`](#envutils-api) | [`demo_envutils.v`](demos/demo_envutils.v) | `v run demos/demo_envutils.v` |
+| [`eventutils`](#eventutils-api) | [`demo_eventutils.v`](demos/demo_eventutils.v) | `v run demos/demo_eventutils.v` |
 | [`fileutils`](#fileutils-api) | [`demo_fileutils.v`](demos/demo_fileutils.v) | `v run demos/demo_fileutils.v` |
 | [`flowutils`](#flowutils-api) | [`demo_flowutils.v`](demos/demo_flowutils.v) | `v run demos/demo_flowutils.v` |
+| [`graphutils`](#graphutils-api) | [`demo_graphutils.v`](demos/demo_graphutils.v) | `v run demos/demo_graphutils.v` |
 | [`htmlutils`](#htmlutils-api) | [`demo_htmlutils.v`](demos/demo_htmlutils.v) | `v run demos/demo_htmlutils.v` |
 | [`httputils`](#httputils-api) | [`demo_httputils.v`](demos/demo_httputils.v) | `v run demos/demo_httputils.v` |
+| [`jwtutils`](#jwtutils-api) | [`demo_jwtutils.v`](demos/demo_jwtutils.v) | `v run demos/demo_jwtutils.v` |
 | [`logutils`](#logutils-api) | [`demo_logutils.v`](demos/demo_logutils.v) | `v run demos/demo_logutils.v` |
+| [`mathutils`](#mathutils-api) | [`demo_mathutils.v`](demos/demo_mathutils.v) | `v run demos/demo_mathutils.v` |
 | [`mockutils`](#mockutils-api) | [`demo_mockutils.v`](demos/demo_mockutils.v) | `v run demos/demo_mockutils.v` |
 | [`netutils`](#netutils-api) | [`demo_netutils.v`](demos/demo_netutils.v) | `v run demos/demo_netutils.v` |
 | [`regexutils`](#regexutils-api) | [`demo_regexutils.v`](demos/demo_regexutils.v) | `v run demos/demo_regexutils.v` |
@@ -64,6 +70,7 @@ All 30 utility modules have standalone, fully functional demo scripts located in
 | [`templateutils`](#templateutils-api) | [`demo_templateutils.v`](demos/demo_templateutils.v) | `v run demos/demo_templateutils.v` |
 | [`timeutils`](#timeutils-api) | [`demo_timeutils.v`](demos/demo_timeutils.v) | `v run demos/demo_timeutils.v` |
 | [`tomlutils`](#tomlutils-api) | [`demo_tomlutils.v`](demos/demo_tomlutils.v) | `v run demos/demo_tomlutils.v` |
+| [`urlutils`](#urlutils-api) | [`demo_urlutils.v`](demos/demo_urlutils.v) | `v run demos/demo_urlutils.v` |
 | [`validutils`](#validutils-api) | [`demo_validutils.v`](demos/demo_validutils.v) | `v run demos/demo_validutils.v` |
 
 ---
@@ -74,7 +81,7 @@ All 30 utility modules have standalone, fully functional demo scripts located in
 
 ### ⚡ Quick Jump Index
 
-[`archiveutils`](#archiveutils-api) • [`asyncutils`](#asyncutils-api) • [`bitutils`](#bitutils-api) • [`cacheutils`](#cacheutils-api) • [`cliutils`](#cliutils-api) • [`colorutils`](#colorutils-api) • [`compressutils`](#compressutils-api) • [`cryptoutils`](#cryptoutils-api) • [`envutils`](#envutils-api) • [`fileutils`](#fileutils-api) • [`flowutils`](#flowutils-api) • [`htmlutils`](#htmlutils-api) • [`httputils`](#httputils-api) • [`logutils`](#logutils-api) • [`mockutils`](#mockutils-api) • [`netutils`](#netutils-api) • [`regexutils`](#regexutils-api) • [`semverutils`](#semverutils-api) • [`sliceutils`](#sliceutils-api) • [`sqliteutils`](#sqliteutils-api) • [`stateutils`](#stateutils-api) • [`statutils`](#statutils-api) • [`structutils`](#structutils-api) • [`strutils`](#strutils-api) • [`sysutils`](#sysutils-api) • [`tarutils`](#tarutils-api) • [`templateutils`](#templateutils-api) • [`timeutils`](#timeutils-api) • [`tomlutils`](#tomlutils-api) • [`validutils`](#validutils-api) • [Advanced Additions & Enhancements](#advanced-additions--enhancements)
+[`archiveutils`](#archiveutils-api) • [`asyncutils`](#asyncutils-api) • [`bitutils`](#bitutils-api) • [`cacheutils`](#cacheutils-api) • [`cliutils`](#cliutils-api) • [`colorutils`](#colorutils-api) • [`compressutils`](#compressutils-api) • [`cronutils`](#cronutils-api) • [`cryptoutils`](#cryptoutils-api) • [`diffutils`](#diffutils-api) • [`envutils`](#envutils-api) • [`eventutils`](#eventutils-api) • [`fileutils`](#fileutils-api) • [`flowutils`](#flowutils-api) • [`graphutils`](#graphutils-api) • [`htmlutils`](#htmlutils-api) • [`httputils`](#httputils-api) • [`jwtutils`](#jwtutils-api) • [`logutils`](#logutils-api) • [`mathutils`](#mathutils-api) • [`mockutils`](#mockutils-api) • [`netutils`](#netutils-api) • [`regexutils`](#regexutils-api) • [`semverutils`](#semverutils-api) • [`sliceutils`](#sliceutils-api) • [`sqliteutils`](#sqliteutils-api) • [`stateutils`](#stateutils-api) • [`statutils`](#statutils-api) • [`structutils`](#structutils-api) • [`strutils`](#strutils-api) • [`sysutils`](#sysutils-api) • [`tarutils`](#tarutils-api) • [`templateutils`](#templateutils-api) • [`timeutils`](#timeutils-api) • [`tomlutils`](#tomlutils-api) • [`urlutils`](#urlutils-api) • [`validutils`](#validutils-api) • [Advanced Additions & Enhancements](#advanced-additions--enhancements)
 
 ---
 
@@ -5730,5 +5737,255 @@ println('Ops/Sec: ${res.ops_per_sec}')
 var_bm := timeutils.BenchmarkResult{ name: 'demo', iterations: 10 }
 println('Benchmark result: ${var_bm.name}')
 ```
+
+---
+
+<a id="mathutils-api"></a>
+## `mathutils` API Reference
+
+2D mathematics, spatial geometry, interpolation, clamping, and number theory.
+
+```v
+import mathutils
+
+// 1. Interpolation & Mapping
+val := mathutils.remap(50.0, 0.0, 100.0, 0.0, 1.0) // 0.5
+snapped := mathutils.round_to_step(4.78, 0.25)      // 4.75
+clamped := mathutils.clamp(120.0, 0.0, 100.0)       // 100.0
+
+// 2. Geometry
+p1 := mathutils.Point2D[f64]{ x: 0.0, y: 0.0 }
+p2 := mathutils.Point2D[f64]{ x: 3.0, y: 4.0 }
+dist := mathutils.distance(p1, p2)                  // 5.0
+rect := mathutils.Rect[f64]{ x: 0.0, y: 0.0, width: 10.0, height: 10.0 }
+inside := mathutils.rect_contains_point(rect, Point2D[f64]{ x: 5.0, y: 5.0 }) // true
+
+// 3. Number Theory
+gcd_val := mathutils.gcd(84, 18)                    // 6
+lcm_val := mathutils.lcm(12, 18)                    // 36
+is_pow2 := mathutils.is_power_of_two(64)            // true
+next_pow2 := mathutils.next_power_of_two(33)        // 64
+```
+
+---
+
+<a id="cronutils-api"></a>
+## `cronutils` API Reference
+
+Standard 5-field cron parsing, future execution calculation, and human-readable summarization.
+
+```v
+import cronutils
+import time
+
+// Parse standard 5-field cron expression
+sched := cronutils.parse_cron('*/15 9-17 * * 1-5')!
+
+// Check if a timestamp matches
+now := time.now()
+is_due := sched.matches(now)
+
+// Calculate next run timestamp
+next := sched.next_after(now)!
+println('Next occurrence: ${next}')
+
+// Convert expression to English summary
+desc := cronutils.cron_to_human('0 0 * * *')
+println(desc) // "Every day at midnight"
+```
+
+---
+
+<a id="urlutils-api"></a>
+## `urlutils` API Reference
+
+RFC 3986 URL parsing, path segmentation, query manipulation, and credential redaction.
+
+```v
+import urlutils
+
+// Parse URL
+u := urlutils.parse_url('https://admin:secret123@api.example.com:8443/v1/users?page=1#top')!
+println('Host: ${u.host_with_port()}') // "api.example.com:8443"
+println('Path: ${u.path_segments()}')  // ["v1", "users"]
+
+// Clean path joining
+joined := urlutils.join_path('https://example.com/api', 'v1', 'profile')
+println(joined) // "https://example.com/api/v1/profile"
+
+// Redact credentials for safe logging
+redacted := urlutils.redact_credentials('postgres://user:mypassword@db:5432/main')
+println(redacted) // "postgres://user:***@db:5432/main"
+```
+
+---
+
+<a id="jwtutils-api"></a>
+## `jwtutils` API Reference
+
+Zero-dependency HS256 JSON Web Token signing, claims parsing, and verification.
+
+```v
+import jwtutils
+import time
+
+// Sign JWT with registered and custom claims
+claims := jwtutils.JWTClaims{
+    sub: 'user_42'
+    iss: 'auth_service'
+    exp: time.now().unix() + 3600
+    custom: { 'role': 'admin' }
+}
+token := jwtutils.sign_jwt(claims, 'secret_signing_key')!
+
+// Verify signature and expiration
+verified := jwtutils.verify_jwt(token, 'secret_signing_key')!
+println('Subject: ${verified.sub}, Role: ${verified.custom['role']}')
+
+// Sign simple token
+simple_token := jwtutils.sign_simple_token('worker_1', 'secret_key', 300)!
+```
+
+---
+
+<a id="eventutils-api"></a>
+## `eventutils` API Reference
+
+In-memory publish-subscribe event dispatching and notification.
+
+```v
+import eventutils
+
+mut em := eventutils.new_emitter()
+
+// Register recurring listener
+em.on('user_login', fn (user string) {
+    println('Logged in: ${user}')
+})
+
+// Register one-time listener
+em.once('app_init', fn (status string) {
+    println('Initialized: ${status}')
+})
+
+// Dispatch events
+em.emit('app_init', 'v1.0')
+em.emit('user_login', 'Alice')
+em.emit('user_login', 'Bob')
+
+// Check active listener count
+count := em.listener_count('user_login') // 1
+em.clear()
+```
+
+---
+
+<a id="diffutils-api"></a>
+## `diffutils` API Reference
+
+Line-level programmatic diffing, operation trees, and standard unified diff formatting.
+
+```v
+import diffutils
+
+v1 := "server_host = 127.0.0.1\nserver_port = 8080"
+v2 := "server_host = 0.0.0.0\nserver_port = 8080"
+
+// Line operations
+ops := diffutils.diff_lines(v1, v2)
+for op in ops {
+    match op.op {
+        .equal  { println('  ${op.text}') }
+        .insert { println('+ ${op.text}') }
+        .delete { println('- ${op.text}') }
+    }
+}
+
+// Unified diff string
+patch := diffutils.unified_diff(v1, v2, 'config.ini')
+print(patch)
+```
+
+---
+
+<a id="graphutils-api"></a>
+## `graphutils` API Reference
+
+Directed Acyclic Graphs (DAG), dependency ordering via topological sorting, cycle detection, BFS and DFS.
+
+```v
+import graphutils
+
+mut dag := graphutils.new_graph[string]()
+
+// Add dependency edges (from -> to)
+dag.add_edge('fetch_deps', 'compile')
+dag.add_edge('compile', 'test')
+dag.add_edge('test', 'deploy')
+
+// Cycle detection
+has_cycle := dag.has_cycle() // false
+
+// Kahn's algorithm topological sorting
+order := dag.topological_sort()!
+println('Build order: ${order}') // ["fetch_deps", "compile", "test", "deploy"]
+
+// Traversals
+bfs_nodes := dag.bfs('fetch_deps')
+dfs_nodes := dag.dfs('fetch_deps')
+```
+
+---
+
+<a id="recent-enhancements-api"></a>
+## Extended Enhancements to Existing Modules
+
+### `fileutils`
+- `write_file_atomic(path string, content string) !`: Crash-safe atomic writing via temporary file + atomic OS rename.
+- `mime_type(path string) string`: Automatic MIME detection from file extension and type signature.
+- `file_hash_sha256(path string) !string`: Hexadecimal SHA-256 checksum calculation for any file.
+
+### `strutils`
+- `format_int_commas(n i64) string`: Format integers with comma separators (e.g. `1,234,567`).
+- `format_number_commas(n f64, decimals int) string`: Format floating point numbers with comma grouping.
+- `ordinal(n int) string`: Ordinal suffixes (`1st`, `2nd`, `3rd`, `4th`, `11th`, `21st`).
+- `truncate_middle(s string, max_len int, ellipsis string) string`: Truncate strings in the middle (`0123...def`).
+- `strip_ansi(s string) string`: Remove ANSI terminal styling codes.
+
+### `sliceutils`
+- `zip[T, U](a []T, b []U) []Pair[T, U]`: Combine two slices into pairs.
+- `frequency[T](items []T) map[T]int`: Count occurrences of distinct elements.
+- `group_by[T, K](items []T, key_fn fn (T) K) map[K][]T`: Group slice items by key.
+- `window[T](items []T, size int, step int) [][]T`: Sliding window partitioner.
+- `binary_search[T](sorted_items []T, target T) int`: Fast $O(\log n)$ search on sorted slices.
+
+### `cryptoutils`
+- `secure_compare(a string, b string) bool`: Constant-time string comparison to prevent timing attacks.
+- `generate_ulid() string`: 26-character sortable unique identifier.
+- `generate_totp(secret string, counter u64, digits int) !string`: RFC 6238 Time-based One-Time Passwords.
+
+### `httputils`
+- `bearer_auth_header(token string) map[string]string`: Generate Bearer authorization map.
+- `basic_auth_header(user string, pass string) map[string]string`: Generate Basic authentication map.
+- `merge_headers(maps ...map[string]string) map[string]string`: Combine multiple HTTP header sets.
+- `is_success_status`, `is_redirect_status`, `is_client_error`, `is_server_error`: Fast status code inspection.
+
+### `cliutils`
+- `Spinner`: Terminal loading spinner with `new_spinner(msg)`, `step()`, `update(msg)`.
+- `confirm(prompt string, default_yes bool) bool`: Interactive Yes/No prompt.
+
+### `sqliteutils`
+- `transaction(mut db sqlite.DB, action fn (mut db sqlite.DB) !) !`: Safe transaction runner with auto-rollback.
+- `insert_many(mut db sqlite.DB, table string, rows []map[string]string) !int`: High-throughput atomic batch insert.
+
+### `timeutils`
+- `parse_duration(s string) !time.Duration`: Parse human duration strings (`"1h 30m"`, `"500ms"`, `"45s"`).
+- `add_business_days(start time.Time, days int) time.Time`: Skip weekend days.
+- `TimeRange`: Struct with `contains`, `overlaps`, and `duration()`.
+
+### `flowutils`
+- `SlidingWindowRateLimiter`: Enforce request limits across moving time windows.
+
+---
 
 [▲ Back to Table of Contents](#table-of-contents)

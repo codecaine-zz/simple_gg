@@ -17,10 +17,10 @@ fn main() {
 
 	app_name := 'vlang_utils_demo_window'
 	default_cfg := WindowConfig{
-		title: 'My Application'
-		width: 1024
+		title:  'My Application'
+		width:  1024
 		height: 768
-		dark: false
+		dark:   false
 	}
 
 	mut store := stateutils.new_app_state[WindowConfig](app_name, default_cfg)

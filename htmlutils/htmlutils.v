@@ -42,11 +42,11 @@ fn convert_tag(t &html.Tag) HtmlNode {
 	class_attr := t.attributes['class']
 	classes := if class_attr != '' { class_attr.split(' ') } else { []string{} }
 	return HtmlNode{
-		tag: t.name
-		id: t.attributes['id']
-		classes: classes
+		tag:        t.name
+		id:         t.attributes['id']
+		classes:    classes
 		attributes: t.attributes.clone()
-		text: t.text().trim_space()
+		text:       t.text().trim_space()
 	}
 }
 

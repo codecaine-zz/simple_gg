@@ -740,3 +740,26 @@ pub fn select_rows(mut db sqlite.DB, table_name string, columns []string, where_
 	query := 'SELECT ${col_clause} FROM "${tbl}" ${clause};'
 	return query_maps_params(mut db, query, where_params)
 }
+
+// transaction wraps an arbitrary closure inside BEGIN TRANSACTION and COMMIT, rolling back if action returns an error.
+pub fn transaction(mut db sqlite.DB, action fn (mut db sqlite.DB) !) ! {
+	db.exec('BEGIN TRANSACTION;') or { return err }
+	action(mut db) or {
+		db.exec('ROLLBACK;') or {}
+		return err
+	}
+	db.exec('COMMIT;') or { return err }
+}
+
+// insert_many inserts multiple rows into table_name in a single atomic transaction.
+pub fn insert_many(mut db sqlite.DB, table_name string, rows []map[string]string) !int {
+	if rows.len == 0 {
+		return 0
+	}
+	transaction(mut db, fn [table_name, rows] (mut tx_db sqlite.DB) ! {
+		for row in rows {
+			insert_row(mut tx_db, table_name, row) or { return err }
+		}
+	}) or { return err }
+	return rows.len
+}

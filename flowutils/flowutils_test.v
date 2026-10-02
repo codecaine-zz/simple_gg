@@ -65,3 +65,13 @@ fn test_debouncer() {
 	time.sleep(time.millisecond * 50)
 	assert d.can_trigger() == true
 }
+
+fn test_sliding_window_rate_limiter() {
+	mut sw := new_sliding_window_rate_limiter(2, time.millisecond * 50) or { panic(err) }
+	assert sw.allow() == true
+	assert sw.allow() == true
+	assert sw.allow() == false // 3rd request in 50ms rejected
+
+	time.sleep(time.millisecond * 60)
+	assert sw.allow() == true // Allowed again after window moves
+}

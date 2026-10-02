@@ -33,7 +33,7 @@ fn main() {
 	cfg := ServerConfig{
 		host: '127.0.0.1'
 		port: 8080
-		ssl: true
+		ssl:  true
 	}
 	fileutils.save_struct_to_file(cfg_path, cfg)!
 	loaded_cfg := fileutils.load_struct_from_file[ServerConfig](cfg_path)!

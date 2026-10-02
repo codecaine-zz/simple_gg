@@ -126,10 +126,10 @@ pub fn unpack_bytes(data []u8) ![]TarEntry {
 		}
 
 		entries << TarEntry{
-			name: name
-			size: int(size)
+			name:   name
+			size:   int(size)
 			is_dir: is_dir
-			data: entry_data
+			data:   entry_data
 		}
 	}
 	return entries
@@ -145,10 +145,10 @@ pub fn create_tar(tar_path string, file_paths []string) !bool {
 		data := os.read_bytes(path)!
 		base_name := os.file_name(path)
 		entries << TarEntry{
-			name: base_name
-			size: data.len
+			name:   base_name
+			size:   data.len
 			is_dir: false
-			data: data
+			data:   data
 		}
 	}
 	raw := pack_bytes(entries)

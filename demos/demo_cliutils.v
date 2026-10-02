@@ -34,12 +34,12 @@ fn main() {
 	// 4. Tree View
 	println(cliutils.bold('Tree Hierarchy:'))
 	tree := cliutils.TreeNode{
-		label: 'vlang_utils'
+		label:    'vlang_utils'
 		children: [
 			cliutils.TreeNode{ label: 'fileutils' },
 			cliutils.TreeNode{ label: 'sqliteutils' },
 			cliutils.TreeNode{
-				label: 'cli'
+				label:    'cli'
 				children: [
 					cliutils.TreeNode{ label: 'cliutils' },
 					cliutils.TreeNode{ label: 'colorutils' },
