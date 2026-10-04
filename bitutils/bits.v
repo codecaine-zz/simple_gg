@@ -83,7 +83,7 @@ pub fn lowest_set_bit(n u64) u64 {
 
 // clear_lowest_set_bit clears the lowest set bit.
 pub fn clear_lowest_set_bit(n u64) u64 {
-	return if n == 0 { 0 } else { n & (n - 1) }
+	return if n == 0 { u64(0) } else { n & (n - 1) }
 }
 
 // extract_bits returns `len` bits of n starting at bit `start` (LSB = 0).
@@ -199,7 +199,9 @@ pub fn (mut b BitSet) clear_all() {
 
 // set_range turns on bits [start, end) (clamped to the set's size).
 pub fn (mut b BitSet) set_range(start int, end int) {
-	for i in (if start < 0 { 0 } else { start }) .. (if end > b.size() { b.size() } else { end }) {
+	s := if start < 0 { 0 } else { start }
+	e := if end > b.size() { b.size() } else { end }
+	for i in s .. e {
 		b.bf.set_bit(i)
 	}
 }

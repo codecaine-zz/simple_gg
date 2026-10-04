@@ -663,13 +663,17 @@ fn (mut r Renderer) eval(e Expr) !json2.Any {
 		.unary {
 			v := r.eval(e.args[0])!
 			if e.name == '!' {
-				return json2.Any(!truthy(v))
+				res := !truthy(v)
+				return json2.Any(res)
 			}
 			if is_intlike(v) {
-				return json2.Any(-(as_i64(v) or { 0 }))
+				iv := as_i64(v) or { 0 }
+				neg_iv := -iv
+				return json2.Any(neg_iv)
 			}
 			n := as_num(v) or { return error('cannot negate ${type_label(v)}') }
-			return json2.Any(-n)
+			neg_n := -n
+			return json2.Any(neg_n)
 		}
 		.binary {
 			match e.name {
@@ -689,16 +693,42 @@ fn (mut r Renderer) eval(e Expr) !json2.Any {
 			}
 			a := r.eval(e.args[0])!
 			b := r.eval(e.args[1])!
-			return match e.name {
-				'==' { json2.Any(values_equal(a, b)) }
-				'!=' { json2.Any(!values_equal(a, b)) }
-				'<' { json2.Any(compare_values(a, b)! < 0) }
-				'<=' { json2.Any(compare_values(a, b)! <= 0) }
-				'>' { json2.Any(compare_values(a, b)! > 0) }
-				'>=' { json2.Any(compare_values(a, b)! >= 0) }
-				'in' { json2.Any(contains_value(b, a)) }
-				'not in' { json2.Any(!contains_value(b, a)) }
-				else { arith(e.name, a, b)! }
+			match e.name {
+				'==' {
+					eq := values_equal(a, b)
+					return json2.Any(eq)
+				}
+				'!=' {
+					neq := !values_equal(a, b)
+					return json2.Any(neq)
+				}
+				'<' {
+					lt := compare_values(a, b)! < 0
+					return json2.Any(lt)
+				}
+				'<=' {
+					lte := compare_values(a, b)! <= 0
+					return json2.Any(lte)
+				}
+				'>' {
+					gt := compare_values(a, b)! > 0
+					return json2.Any(gt)
+				}
+				'>=' {
+					gte := compare_values(a, b)! >= 0
+					return json2.Any(gte)
+				}
+				'in' {
+					has := contains_value(b, a)
+					return json2.Any(has)
+				}
+				'not in' {
+					not_has := !contains_value(b, a)
+					return json2.Any(not_has)
+				}
+				else {
+					return arith(e.name, a, b)!
+				}
 			}
 		}
 		.ternary {

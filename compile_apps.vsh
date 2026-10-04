@@ -265,6 +265,10 @@ fn compile_app(t Task, cached_icns_path string) TaskResult {
 		if t.target_arch.len > 0 {
 			cmd += '-arch ${t.target_arch} '
 		}
+		is_linux_target := t.target_os == 'linux' || (t.target_os == '' && os.user_os() == 'linux')
+		if is_linux_target && os.getenv('WAYLAND_DISPLAY') != '' && os.getenv('DISPLAY') == '' && !cmd.contains('-d sokol_wayland') {
+			cmd += '-d sokol_wayland '
+		}
 		if t.extra_flags.len > 0 {
 			cmd += '${t.extra_flags} '
 		}
@@ -315,6 +319,16 @@ fn compile_app(t Task, cached_icns_path string) TaskResult {
 		}
 		if t.target_arch.len > 0 {
 			cmd += '-arch ${t.target_arch} '
+		}
+		is_linux_target := t.target_os == 'linux' || (t.target_os == '' && os.user_os() == 'linux')
+		if is_linux_target {
+			if os.getenv('WAYLAND_DISPLAY') != '' && os.getenv('DISPLAY') == '' && !cmd.contains('-d sokol_wayland') {
+				cmd += '-d sokol_wayland '
+			}
+			local_lib := os.join_path(os.home_dir(), '.local', 'lib')
+			if os.exists(local_lib) && !cmd.contains(local_lib) {
+				cmd += '-cflags "-L${local_lib}" '
+			}
 		}
 		if t.extra_flags.len > 0 {
 			cmd += '${t.extra_flags} '

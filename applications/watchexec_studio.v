@@ -607,7 +607,7 @@ fn main() {
 			mut p := os.new_process(bin_path)
 			p.set_args(args)
 			p.set_work_folder(watch_dir)
-			p.set_redirect_stdio_merged()
+			p.set_redirect_stdio()
 			p.run()
 
 			state.process_pid = p.pid
