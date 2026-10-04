@@ -545,6 +545,13 @@ pub fn (mut win SimpleWindow) render_ui() {
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, track_y, fill_w, track_h,
 					5.0, accent)
 			}
+			'spinner' {
+				sp_col := if ctrl.font_color.len > 0 { parse_hex_color(ctrl.font_color) } else { accent }
+				cx := ctrl.x + ctrl.h / 2.0
+				cy := ctrl.y + ctrl.h / 2.0
+				rad := (ctrl.h / 2.0) - 2.0
+				draw_vector_spinner(win.gg_ctx, cx, cy, rad, ctrl.bool_value, sp_col)
+			}
 			'password_strength' {
 				target_name := ctrl.props['target']
 				mut pwd_val := ''
@@ -3836,7 +3843,7 @@ fn draw_vector_clock_icon(gg_ctx &gg.Context, cx f32, cy f32, radius f32, color 
 	gg_ctx.draw_line(cx, cy, cx + radius * 0.45, cy, color)
 }
 
-fn draw_vector_spinner(gg_ctx &gg.Context, cx f32, cy f32, radius f32, active bool, color gg.Color) {
+pub fn draw_vector_spinner(gg_ctx &gg.Context, cx f32, cy f32, radius f32, active bool, color gg.Color) {
 	num_dots := 8
 	ticks := time.ticks()
 	step := if active { int(ticks / 100) % num_dots } else { 0 }
