@@ -1,7 +1,7 @@
 module main
 
 import webutils
-import x.json2
+import json2
 import net.http
 
 struct Todo {

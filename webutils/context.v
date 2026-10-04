@@ -8,7 +8,7 @@ import crypto.hmac
 import crypto.sha256
 import crypto.rand
 import encoding.base64
-import x.json2
+import json2
 
 // Context carries one request and its response (like Express `req` + `res`).
 pub struct Context {

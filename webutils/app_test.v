@@ -3,7 +3,7 @@ module webutils
 import os
 import net.http
 import compress.gzip
-import x.json2
+import json2
 
 fn hdr(r http.Response, name string) string {
 	return r.header.get_custom(name) or { '' }

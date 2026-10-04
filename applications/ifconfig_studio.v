@@ -2,7 +2,7 @@ module main
 
 import simplegui
 import os
-import x.json2
+import json2
 import time
 
 // -------------------------------------------------------------

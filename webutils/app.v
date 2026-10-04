@@ -3,7 +3,7 @@ module webutils
 import net.http
 import net.urllib
 import crypto.rand
-import x.json2
+import json2
 
 // ============================================================================
 // Express-style web framework with batteries included.

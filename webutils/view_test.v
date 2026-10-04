@@ -1,7 +1,7 @@
 module webutils
 
 import os
-import x.json2
+import json2
 
 fn test_escape_by_default() {
 	out := render_string('<p><%= name %></p>', {

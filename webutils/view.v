@@ -3,7 +3,7 @@ module webutils
 import os
 import strings
 import sync
-import x.json2
+import json2
 
 // ============================================================================
 // EJS-style templates — familiar syntax, secure by default.

@@ -3,7 +3,7 @@ module webutils
 import math
 import strings
 import time
-import x.json2
+import json2
 
 // Self-contained JSON encode/parse for `json2.Any`. Instantiating json2's
 // generic encoder/decoder on the recursive `json2.Any` sum type makes the V

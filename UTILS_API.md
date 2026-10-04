@@ -5975,7 +5975,7 @@ dfs_nodes := dag.dfs('fetch_deps')
 
 An Express-style web framework with a secure, EJS-compatible template engine. Everything people usually pull in from third-party packages is built in and depends only on vlib.
 
-**Import statement:** `import webutils` (plus `import x.json2` when you pass template data).
+**Import statement:** `import webutils` (plus `import json2` when you pass template data).
 
 ### Application and routing
 - `new_app(cfg AppConfig) &App`: create an app. Options include `views_dir`, `view_ext`, `view_cache`, `secret`, `max_body_bytes` (1 MB), `security_headers` (on), `security`, `trust_proxy`, `debug`, `strict_routing` and `https`.
@@ -6030,7 +6030,7 @@ An Express-style web framework with a secure, EJS-compatible template engine. Ev
 
 ```v
 import webutils
-import x.json2
+import json2
 
 mut app := webutils.new_app(secret: 'change-me')
 app.views.add('hello', '<h1>Hello <%= name | title %></h1>')!
