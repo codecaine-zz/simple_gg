@@ -76,15 +76,32 @@ pub fn get_state_path(app_name string, filename string, loc StateLocation) strin
 
 // atomic_write writes content to target_path safely by writing to a temporary file first
 // and atomically renaming it. This ensures zero corruption if interrupted.
+// The data is flushed to stable storage (fsync) before the rename, so a crash or power
+// loss can never leave a zero-length/partial file behind; the temp file is removed on failure.
 fn atomic_write(target_path string, content string) ! {
 	parent := os.dir(target_path)
 	if !os.exists(parent) {
 		os.mkdir_all(parent)!
 	}
 	tmp_path := '${target_path}.tmp.${os.getpid()}.${time.now().unix_nano()}'
-	os.write_file(tmp_path, content)!
-	os.mv(tmp_path, target_path)!
+	mut f := os.create(tmp_path)!
+	f.write_string(content) or {
+		f.close()
+		os.rm(tmp_path) or {}
+		return err
+	}
+	f.flush()
+	$if !windows {
+		C.fsync(f.fd)
+	}
+	f.close()
+	os.mv(tmp_path, target_path) or {
+		os.rm(tmp_path) or {}
+		return err
+	}
 }
+
+fn C.fsync(fd int) int
 
 // ============================================================================
 // Direct Generic App State Helpers

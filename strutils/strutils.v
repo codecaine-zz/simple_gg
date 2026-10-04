@@ -1,10 +1,20 @@
 module strutils
 
+import math
 import rand
 import strings
 
+// is_whitespace reports whether r is a Unicode whitespace code point (White_Space property).
 fn is_whitespace(r rune) bool {
-	return u8(r).is_space() || r == `\t` || r == `\n` || r == `\r`
+	return match r {
+		` `, `\t`, `\n`, `\r`, 0x0b, 0x0c, 0x85, 0xa0, 0x1680, 0x2028, 0x2029, 0x202f, 0x205f,
+		0x3000 {
+			true
+		}
+		else {
+			r >= 0x2000 && r <= 0x200a
+		}
+	}
 }
 
 // to_snake_case converts a string (camelCase, PascalCase, kebab-case, or spaced) into snake_case.
@@ -102,7 +112,7 @@ pub fn slugify(s string) string {
 	}
 	mut sb := strings.new_builder(trimmed.len)
 	mut last_was_dash := false
-	for r in trimmed.runes() {
+	for r in remove_accents(trimmed).runes() {
 		if (r >= `a` && r <= `z`) || (r >= `0` && r <= `9`) {
 			sb.write_rune(r)
 			last_was_dash = false
@@ -135,15 +145,12 @@ pub fn truncate(s string, max_len int, suffix string) string {
 
 // truncate_words shortens a string to a given number of words.
 pub fn truncate_words(s string, max_words int, suffix string) string {
-	words := s.fields()
-	if words.len <= max_words {
+	word_list := s.fields()
+	if word_list.len <= max_words {
 		return s
 	}
-	mut chosen := []string{cap: max_words}
-	for i in 0 .. max_words {
-		chosen << words[i]
-	}
-	return chosen.join(' ') + suffix
+	n := if max_words < 0 { 0 } else { max_words }
+	return word_list[..n].join(' ') + suffix
 }
 
 // pad_left pads the left of s with fill until total width is reached.
@@ -196,9 +203,16 @@ pub fn mask(s string, unmasked_start int, unmasked_end int, mask_char string) st
 	if total == 0 {
 		return ''
 	}
-	if unmasked_start + unmasked_end >= total {
+	unmasked_start_ := if unmasked_start < 0 { 0 } else { unmasked_start }
+	unmasked_end_ := if unmasked_end < 0 { 0 } else { unmasked_end }
+	if unmasked_start_ + unmasked_end_ >= total {
 		return s
 	}
+	return mask_runes(runes, unmasked_start_, unmasked_end_, mask_char)
+}
+
+fn mask_runes(runes []rune, unmasked_start int, unmasked_end int, mask_char string) string {
+	total := runes.len
 	m := if mask_char.len > 0 { mask_char } else { '*' }
 	mut sb := strings.new_builder(total)
 	for i in 0 .. unmasked_start {
@@ -214,11 +228,14 @@ pub fn mask(s string, unmasked_start int, unmasked_end int, mask_char string) st
 
 // mask_email masks an email address for privacy (e.g. john.doe@example.com -> j***e@example.com).
 pub fn mask_email(email string) string {
-	at_idx := email.index('@') or { return mask(email, 1, 1, '*') }
+	at_idx := email.last_index('@') or { return mask(email, 1, 1, '*') }
 	name := email[..at_idx]
 	domain := email[at_idx..]
-	if name.len <= 2 {
-		return name[..1] + '*' + domain
+	if name.len == 0 {
+		return email
+	}
+	if name.runes().len <= 2 {
+		return name.runes()[0].str() + '*' + domain
 	}
 	masked_name := mask(name, 1, 1, '*')
 	return masked_name + domain
@@ -287,13 +304,13 @@ pub fn word_wrap(s string, width int) string {
 	if width <= 0 || s.len <= width {
 		return s
 	}
-	words := s.fields()
-	if words.len == 0 {
+	word_list := s.fields()
+	if word_list.len == 0 {
 		return ''
 	}
 	mut lines := []string{}
 	mut current_line := ''
-	for word in words {
+	for word in word_list {
 		if current_line.len == 0 {
 			current_line = word
 		} else if current_line.runes().len + 1 + word.runes().len <= width {
@@ -344,8 +361,8 @@ pub fn format_int_commas(n i64) string {
 		return '0'
 	}
 	is_neg := n < 0
-	val := if is_neg { -n } else { n }
-	raw := val.str()
+	// Work on the decimal string so that i64 min (which has no positive counterpart) is safe.
+	raw := if is_neg { n.str()[1..] } else { n.str() }
 	mut res := []string{}
 	mut count := 0
 	for i := raw.len - 1; i >= 0; i-- {
@@ -362,21 +379,42 @@ pub fn format_int_commas(n i64) string {
 
 // format_number_commas formats a floating-point number with comma grouping and fixed decimal precision.
 pub fn format_number_commas(n f64, decimals int) string {
-	int_part := i64(n)
-	formatted_int := format_int_commas(int_part)
-	if decimals <= 0 {
-		return formatted_int
+	if math.is_nan(n) {
+		return 'NaN'
 	}
-	mut diff := n - f64(int_part)
-	if diff < 0.0 {
-		diff = -diff
+	if math.is_inf(n, 0) {
+		return if n > 0 { '+Inf' } else { '-Inf' }
 	}
+	d := if decimals < 0 {
+		0
+	} else if decimals > 15 {
+		15
+	} else {
+		decimals
+	}
+	is_neg := n < 0
+	abs_n := math.abs(n)
 	mut factor := 1.0
-	for _ in 0 .. decimals {
+	for _ in 0 .. d {
 		factor *= 10.0
 	}
-	fraction_int := i64(diff * factor + 0.5)
-	frac_str := pad_left(fraction_int.str(), decimals, '0')
+	// Round the whole value once so that carries propagate (0.999 @2 -> 1.00).
+	scaled := math.round(abs_n * factor)
+	if scaled >= 9.0e18 {
+		// Beyond i64 precision: fall back to the integral part only.
+		int_str := format_int_commas(i64(math.min(abs_n, 9.2e18)))
+		return if is_neg { '-' + int_str } else { int_str }
+	}
+	scaled_i := u64(scaled)
+	factor_i := u64(factor)
+	int_part := i64(scaled_i / factor_i)
+	frac_part := scaled_i % factor_i
+	sign := if is_neg && scaled_i != 0 { '-' } else { '' }
+	formatted_int := sign + format_int_commas(int_part)
+	if d == 0 {
+		return formatted_int
+	}
+	frac_str := pad_left(frac_part.str(), d, '0')
 	return '${formatted_int}.${frac_str}'
 }
 
@@ -416,19 +454,52 @@ pub fn truncate_middle(s string, max_len int, ellipsis string) string {
 	return sb.str()
 }
 
-// strip_ansi removes ANSI color and style escape sequences from a string.
+// strip_ansi removes ANSI/VT100 escape sequences (CSI, OSC hyperlinks/titles, and 2-byte escapes).
 pub fn strip_ansi(s string) string {
+	if !s.contains_u8(0x1b) {
+		return s
+	}
 	mut sb := strings.new_builder(s.len)
-	mut in_escape := false
-	for r in s.runes() {
-		if r == 0x1b {
-			in_escape = true
-		} else if in_escape {
-			if (r >= `a` && r <= `z`) || (r >= `A` && r <= `Z`) {
-				in_escape = false
+	mut i := 0
+	for i < s.len {
+		c := s[i]
+		if c != 0x1b {
+			sb.write_u8(c)
+			i++
+			continue
+		}
+		i++
+		if i >= s.len {
+			break
+		}
+		match s[i] {
+			`[` {
+				// CSI: parameters/intermediates, terminated by a final byte in 0x40..0x7e.
+				i++
+				for i < s.len && !(s[i] >= 0x40 && s[i] <= 0x7e) {
+					i++
+				}
+				i++
 			}
-		} else {
-			sb.write_rune(r)
+			`]`, `P`, `X`, `^`, `_` {
+				// OSC/DCS/SOS/PM/APC: terminated by BEL or ST (ESC \).
+				i++
+				for i < s.len {
+					if s[i] == 0x07 {
+						i++
+						break
+					}
+					if s[i] == 0x1b && i + 1 < s.len && s[i + 1] == `\\` {
+						i += 2
+						break
+					}
+					i++
+				}
+			}
+			else {
+				// Two-byte escape (e.g. ESC c, ESC 7).
+				i++
+			}
 		}
 	}
 	return sb.str()

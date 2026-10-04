@@ -8,12 +8,14 @@ import time
 // ============================================================================
 
 // RateLimiter enforces request rate limits using the Token Bucket algorithm.
+// Timing uses the monotonic clock, so wall-clock adjustments cannot freeze or flood the bucket.
+// Not thread-safe: wrap in a mutex or `shared` when used across threads.
 pub struct RateLimiter {
 mut:
 	capacity            f64
 	tokens              f64
 	refill_rate_per_sec f64
-	last_refill         time.Time
+	last_refill_ns      u64
 }
 
 // new_rate_limiter initializes a Token Bucket rate limiter with a bucket capacity and refill rate per second.
@@ -29,7 +31,7 @@ pub fn new_rate_limiter(capacity int, refill_rate_per_sec f64) !RateLimiter {
 		capacity:            f64(capacity)
 		tokens:              f64(capacity)
 		refill_rate_per_sec: refill_rate_per_sec
-		last_refill:         time.now()
+		last_refill_ns:      time.sys_mono_now()
 	}
 }
 
@@ -51,18 +53,32 @@ pub fn (mut rl RateLimiter) allow_n(tokens int) bool {
 	return false
 }
 
-// wait blocks the current thread until 1 token is available.
+// time_until_available returns how long until n tokens will be available (0 if available now).
+// Requests larger than the bucket capacity can never succeed and return max duration.
+pub fn (mut rl RateLimiter) time_until_available(n int) time.Duration {
+	if f64(n) > rl.capacity {
+		return time.Duration(max_i64)
+	}
+	rl.refill()
+	deficit := f64(n) - rl.tokens
+	if deficit <= 0 {
+		return time.Duration(0)
+	}
+	return time.Duration(i64(math.ceil(deficit / rl.refill_rate_per_sec * 1e9)))
+}
+
+// wait blocks the current thread until 1 token is available, sleeping exactly as long as needed.
 pub fn (mut rl RateLimiter) wait() ! {
 	for !rl.allow() {
-		sleep_ms := int(math.max(10.0, 1000.0 / rl.refill_rate_per_sec))
-		time.sleep(time.millisecond * sleep_ms)
+		d := rl.time_until_available(1)
+		time.sleep(if d > time.millisecond { d } else { time.millisecond })
 	}
 }
 
 // reset restores the bucket to maximum capacity.
 pub fn (mut rl RateLimiter) reset() {
 	rl.tokens = rl.capacity
-	rl.last_refill = time.now()
+	rl.last_refill_ns = time.sys_mono_now()
 }
 
 // available_tokens returns the current number of available tokens in the bucket.
@@ -72,12 +88,11 @@ pub fn (mut rl RateLimiter) available_tokens() f64 {
 }
 
 fn (mut rl RateLimiter) refill() {
-	now := time.now()
-	elapsed_sec := f64(now.unix_nano() - rl.last_refill.unix_nano()) / 1_000_000_000.0
-	if elapsed_sec > 0.0 {
-		new_tokens := elapsed_sec * rl.refill_rate_per_sec
-		rl.tokens = math.min(rl.capacity, rl.tokens + new_tokens)
-		rl.last_refill = now
+	now := time.sys_mono_now()
+	if now > rl.last_refill_ns {
+		elapsed_sec := f64(now - rl.last_refill_ns) / 1_000_000_000.0
+		rl.tokens = math.min(rl.capacity, rl.tokens + elapsed_sec * rl.refill_rate_per_sec)
+		rl.last_refill_ns = now
 	}
 }
 
@@ -286,22 +301,46 @@ pub fn new_sliding_window_rate_limiter(max_requests int, window time.Duration) !
 }
 
 // allow returns true and records the request if the limit within the moving window is not exceeded.
+// Uses the monotonic clock, so wall-clock adjustments cannot reset or freeze the window.
 pub fn (mut sw SlidingWindowRateLimiter) allow() bool {
-	now_ns := time.now().unix_nano()
-	cutoff_ns := now_ns - sw.window.nanoseconds()
-
-	// Retain only timestamps within the current window
-	mut kept := []i64{}
-	for ts in sw.timestamps {
-		if ts > cutoff_ns {
-			kept << ts
-		}
-	}
-	sw.timestamps = kept
-
+	now_ns := sw.prune()
 	if sw.timestamps.len < sw.max_requests {
 		sw.timestamps << now_ns
 		return true
 	}
 	return false
+}
+
+// remaining returns how many more requests are allowed in the current window.
+pub fn (mut sw SlidingWindowRateLimiter) remaining() int {
+	sw.prune()
+	r := sw.max_requests - sw.timestamps.len
+	return if r < 0 { 0 } else { r }
+}
+
+// retry_after returns how long until the next request would be allowed (0 if allowed now).
+pub fn (mut sw SlidingWindowRateLimiter) retry_after() time.Duration {
+	now_ns := sw.prune()
+	if sw.timestamps.len < sw.max_requests {
+		return 0
+	}
+	// Oldest request that must expire to free a slot.
+	idx := sw.timestamps.len - sw.max_requests
+	wait := sw.timestamps[idx] + sw.window.nanoseconds() - now_ns
+	return if wait <= 0 { time.Duration(0) } else { time.Duration(wait) }
+}
+
+// prune drops expired timestamps (timestamps are sorted, so only a prefix is removed)
+// and returns the current monotonic time in nanoseconds.
+fn (mut sw SlidingWindowRateLimiter) prune() i64 {
+	now_ns := i64(time.sys_mono_now())
+	cutoff_ns := now_ns - sw.window.nanoseconds()
+	mut n := 0
+	for n < sw.timestamps.len && sw.timestamps[n] <= cutoff_ns {
+		n++
+	}
+	if n > 0 {
+		sw.timestamps = sw.timestamps[n..].clone()
+	}
+	return now_ns
 }

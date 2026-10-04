@@ -257,17 +257,6 @@ fn test_csv_operations() {
 	remove_file(csv_path) or {}
 }
 
-fn test_parse_csv_handles_quotes_newlines_and_comments() {
-	content := '# ignored\r\nid,name,notes\r\n1,Alice,"Hello, ""world"""\r\n2,Bob,"two\nlines"'
-	rows := parse_csv(content, `,`)
-
-	assert rows == [
-		['id', 'name', 'notes'],
-		['1', 'Alice', 'Hello, "world"'],
-		['2', 'Bob', 'two\nlines'],
-	]
-}
-
 fn test_temp_helpers() {
 	tf := temp_file('prefix', '.tmp') or { '' }
 	assert tf.len > 0
@@ -301,4 +290,17 @@ fn test_mime_type() {
 	assert mime_type('image.png') == 'image/png'
 	assert mime_type('archive.zip') == 'application/zip'
 	assert mime_type('unknown.xyz123') == 'application/octet-stream'
+}
+
+fn test_parse_csv_handles_quotes_newlines_and_comments() {
+	content := '# ignored\r\nid,name,notes\r\n1,Alice,"Hello, ""world"""\r\n2,Bob,"two\nlines"'
+	rows := parse_csv(content, `,`)
+
+	assert rows == [
+		['id', 'name', 'notes'],
+		['1', 'Alice', 'Hello, "world"'],
+		['2', 'Bob', 'two\nlines'],
+	]
+	assert parse_csv_with('#a,b\n', comment: 0) == [['#a', 'b']]
+	assert parse_csv_with(' a , b \n', trim: true) == [['a', 'b']]
 }

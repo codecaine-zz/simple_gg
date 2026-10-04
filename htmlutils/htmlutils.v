@@ -104,9 +104,88 @@ pub fn escape_html(s string) string {
 	return sb.str()
 }
 
-// unescape_html replaces common HTML entities with their character equivalents.
+// unescape_html replaces HTML entities with their character equivalents in a single
+// pass (so "&amp;lt;" correctly becomes "&lt;", not "<"). Supports common named
+// entities plus decimal (&#39;) and hex (&#x1F600;) numeric references.
 pub fn unescape_html(s string) string {
-	return s.replace('&amp;', '&').replace('&lt;', '<').replace('&gt;', '>').replace('&quot;', '"').replace('&#39;', "'").replace('&apos;', "'")
+	if !s.contains('&') {
+		return s
+	}
+	mut sb := strings.new_builder(s.len)
+	mut i := 0
+	for i < s.len {
+		if s[i] == `&` {
+			if semi := s.index_after(';', i + 1) {
+				if semi - i <= 12 {
+					ent := s[i + 1..semi]
+					if decoded := decode_entity(ent) {
+						sb.write_string(decoded)
+						i = semi + 1
+						continue
+					}
+				}
+			}
+		}
+		sb.write_u8(s[i])
+		i++
+	}
+	return sb.str()
+}
+
+const named_entities = {
+	'amp':    '&'
+	'lt':     '<'
+	'gt':     '>'
+	'quot':   '"'
+	'apos':   "'"
+	'nbsp':   '\u00a0'
+	'copy':   '©'
+	'reg':    '®'
+	'trade':  '™'
+	'hellip': '…'
+	'mdash':  '—'
+	'ndash':  '–'
+	'lsquo':  '‘'
+	'rsquo':  '’'
+	'ldquo':  '“'
+	'rdquo':  '”'
+	'euro':   '€'
+	'pound':  '£'
+	'yen':    '¥'
+	'cent':   '¢'
+	'deg':    '°'
+	'times':  '×'
+	'divide': '÷'
+	'laquo':  '«'
+	'raquo':  '»'
+	'middot': '·'
+	'bull':   '•'
+	'sect':   '§'
+	'para':   '¶'
+}
+
+fn decode_entity(ent string) ?string {
+	if ent.len > 1 && ent[0] == `#` {
+		mut code := u32(0)
+		if ent[1] == `x` || ent[1] == `X` {
+			hex := ent[2..]
+			if hex.len == 0 || hex.len > 6 || !hex.bytes().all(it.is_hex_digit()) {
+				return none
+			}
+			code = u32(('0x' + hex).u64())
+		} else {
+			dec := ent[1..]
+			if dec.len > 7 || !dec.bytes().all(it.is_digit()) {
+				return none
+			}
+			code = u32(dec.u64())
+		}
+		if code == 0 || code > 0x10FFFF || (code >= 0xD800 && code <= 0xDFFF) {
+			return '\ufffd'
+		}
+		return rune(code).str()
+	}
+	return named_entities[ent] or { return none }
 }
 
 // strip_tags removes all HTML/XML tags from the input string.

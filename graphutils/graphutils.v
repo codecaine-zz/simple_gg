@@ -19,7 +19,8 @@ pub fn new_graph[T]() Graph[T] {
 
 // add_node adds a node to the graph if it is not already present.
 pub fn (mut g Graph[T]) add_node(node T) {
-	if node !in g.nodes {
+	// O(1) membership via the adjacency map (was a linear scan of `nodes`).
+	if node !in g.adjacency {
 		g.nodes << node
 		g.adjacency[node] = []T{}
 		g.in_degree[node] = 0
@@ -49,9 +50,10 @@ pub fn (g Graph[T]) topological_sort() ![]T {
 	}
 
 	mut order := []T{}
-	for queue.len > 0 {
-		curr := queue[0]
-		queue.delete(0)
+	mut head := 0 // index-based queue: O(V+E) instead of O(V^2) front deletions
+	for head < queue.len {
+		curr := queue[head]
+		head++
 		order << curr
 
 		for neighbor in g.adjacency[curr] {
@@ -77,7 +79,7 @@ pub fn (g Graph[T]) has_cycle() bool {
 
 // bfs performs Breadth-First Search starting from start node, returning visited nodes in order.
 pub fn (g Graph[T]) bfs(start T) []T {
-	if start !in g.nodes {
+	if start !in g.adjacency {
 		return []T{}
 	}
 	mut visited := map[T]bool{}
@@ -85,9 +87,10 @@ pub fn (g Graph[T]) bfs(start T) []T {
 	mut queue := [start]
 	visited[start] = true
 
-	for queue.len > 0 {
-		curr := queue[0]
-		queue.delete(0)
+	mut head := 0
+	for head < queue.len {
+		curr := queue[head]
+		head++
 		order << curr
 
 		for neighbor in g.adjacency[curr] {
@@ -102,21 +105,27 @@ pub fn (g Graph[T]) bfs(start T) []T {
 
 // dfs performs Depth-First Search starting from start node, returning visited nodes in order.
 pub fn (g Graph[T]) dfs(start T) []T {
-	if start !in g.nodes {
+	if start !in g.adjacency {
 		return []T{}
 	}
+	// Iterative pre-order DFS (same visiting order as the recursive version, but cannot
+	// overflow the call stack on deep graphs).
 	mut visited := map[T]bool{}
 	mut order := []T{}
-	g.dfs_internal(start, mut visited, mut order)
-	return order
-}
-
-fn (g Graph[T]) dfs_internal(curr T, mut visited map[T]bool, mut order []T) {
-	visited[curr] = true
-	order << curr
-	for neighbor in g.adjacency[curr] {
-		if !visited[neighbor] {
-			g.dfs_internal(neighbor, mut visited, mut order)
+	mut stack := [start]
+	for stack.len > 0 {
+		curr := stack.pop()
+		if visited[curr] {
+			continue
+		}
+		visited[curr] = true
+		order << curr
+		adj := g.adjacency[curr]
+		for i := adj.len - 1; i >= 0; i-- {
+			if !visited[adj[i]] {
+				stack << adj[i]
+			}
 		}
 	}
+	return order
 }

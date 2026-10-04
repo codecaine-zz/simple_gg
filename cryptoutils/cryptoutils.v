@@ -9,6 +9,7 @@ import crypto.md5 as vmd5
 import crypto.rand as crand
 import crypto.sha256 as vsha256
 import crypto.sha512 as vsha512
+import crypto.subtle
 import encoding.base64
 import encoding.hex
 import hash.crc32
@@ -86,15 +87,18 @@ pub fn secure_token(byte_count int) string {
 	if byte_count <= 0 {
 		return ''
 	}
-	mut b := []u8{len: byte_count}
-	rand.read(mut b)
-	return hex.encode(b)
+	return hex.encode(csprng_bytes(byte_count))
+}
+
+// csprng_bytes reads from the operating system CSPRNG. Failure of the OS entropy source is
+// unrecoverable for security-sensitive code, so it panics rather than silently degrading.
+fn csprng_bytes(n int) []u8 {
+	return crand.bytes(n) or { panic('cryptoutils: OS CSPRNG unavailable: ${err}') }
 }
 
 // uuid_v4 generates a cryptographically random RFC 4122 version 4 UUID.
 pub fn uuid_v4() string {
-	mut b := []u8{len: 16}
-	rand.read(mut b)
+	mut b := csprng_bytes(16)
 	// Set version to 4 (0100) in the most significant 4 bits of the 7th byte
 	b[6] = (b[6] & 0x0f) | 0x40
 	// Set variant to RFC 4122 (10) in the most significant 2 bits of the 9th byte
@@ -247,15 +251,12 @@ pub fn ed25519_verify(pub_key_hex string, msg []u8, sig_hex string) bool {
 }
 
 // secure_compare performs constant-time string comparison to prevent timing attacks.
+// (Only the length is observable, which is unavoidable and harmless for fixed-size digests/tokens.)
 pub fn secure_compare(a string, b string) bool {
 	if a.len != b.len {
 		return false
 	}
-	mut diff := 0
-	for i in 0 .. a.len {
-		diff |= int(a[i] ^ b[i])
-	}
-	return diff == 0
+	return subtle.constant_time_compare(a.bytes(), b.bytes()) == 1
 }
 
 const ulid_encoding = '0123456789ABCDEFGHJKMNPQRSTVWXYZ'
@@ -281,14 +282,14 @@ pub fn generate_totp(secret string, counter u64, digits int) !string {
 		((u32(digest[offset + 2]) & 0xff) << 8) |
 		(u32(digest[offset + 3]) & 0xff)
 
-	mut mod := 1
+	mut mod := u64(1)
 	for _ in 0 .. digits {
 		mod *= 10
 	}
-	otp := int(bin_code % u32(mod))
-	mut raw_str := otp.str()
-	for raw_str.len < digits {
-		raw_str = '0' + raw_str
-	}
-	return raw_str
+	otp := u64(bin_code) % mod
+	return zero_pad(otp.str(), digits)
+}
+
+fn zero_pad(s string, width int) string {
+	return if s.len >= width { s } else { '0'.repeat(width - s.len) + s }
 }

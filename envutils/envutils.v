@@ -101,37 +101,83 @@ pub fn get_required(key string) !string {
 
 // parse_dotenv_content parses a dotenv string into a key-value map.
 // Supports comments (#), quoted strings ('...', "..."), and inline whitespace.
+// Also supports: `export KEY=value`, escape sequences in double quotes
+// (\n \r \t \" \\ \$), multi-line quoted values, and backtick-quoted values.
 pub fn parse_dotenv_content(content string) map[string]string {
 	mut res := map[string]string{}
-	lines := content.split_into_lines()
-	for line in lines {
+	src := content.replace('\r\n', '\n')
+	mut i := 0
+	for i < src.len {
+		// Read one logical line start.
+		mut line_end := src.index_after('\n', i) or { src.len }
+		line := src[i..line_end]
 		trimmed := line.trim_space()
 		if trimmed.len == 0 || trimmed.starts_with('#') {
+			i = line_end + 1
 			continue
 		}
-		eq_pos := trimmed.index('=') or { continue }
-		key := trimmed[..eq_pos].trim_space()
+		eq_rel := line.index('=') or {
+			i = line_end + 1
+			continue
+		}
+		mut key := line[..eq_rel].trim_space()
+		if key.starts_with('export ') {
+			key = key[7..].trim_space()
+		}
 		if key.len == 0 {
+			i = line_end + 1
 			continue
 		}
-		mut val := trimmed[eq_pos + 1..].trim_space()
-		if val.starts_with('"') {
-			end_quote := val[1..].index('"') or { -1 }
-			if end_quote != -1 {
-				val = val[1..end_quote + 1]
+		// Position right after '=' (skip leading blanks).
+		mut p := i + eq_rel + 1
+		for p < line_end && (src[p] == ` ` || src[p] == `\t`) {
+			p++
+		}
+		if p < src.len && (src[p] == `"` || src[p] == `'` || src[p] == `\``) {
+			q := src[p]
+			mut sb := strings.new_builder(32)
+			mut j := p + 1
+			mut closed := false
+			for j < src.len {
+				c := src[j]
+				if c == q {
+					closed = true
+					break
+				}
+				if q == `"` && c == `\\` && j + 1 < src.len {
+					n := src[j + 1]
+					match n {
+						`n` { sb.write_u8(`\n`) }
+						`r` { sb.write_u8(`\r`) }
+						`t` { sb.write_u8(`\t`) }
+						`"`, `\\`, `$` { sb.write_u8(n) }
+						else {
+							sb.write_u8(c)
+							sb.write_u8(n)
+						}
+					}
+					j += 2
+					continue
+				}
+				sb.write_u8(c)
+				j++
 			}
-		} else if val.starts_with("'") {
-			end_quote := val[1..].index("'") or { -1 }
-			if end_quote != -1 {
-				val = val[1..end_quote + 1]
+			if closed {
+				res[key] = sb.str()
+				// Skip the rest of the line after the closing quote (e.g. a trailing comment).
+				line_end = src.index_after('\n', j) or { src.len }
+				i = line_end + 1
+				continue
 			}
-		} else {
-			hash_pos := val.index('#') or { -1 }
-			if hash_pos >= 0 {
-				val = val[..hash_pos].trim_space()
-			}
+			// Unterminated quote: fall back to the raw single-line value.
+		}
+		mut val := src[p..line_end].trim_space()
+		hash_pos := val.index(' #') or { if val.starts_with('#') { 0 } else { -1 } }
+		if hash_pos >= 0 {
+			val = val[..hash_pos].trim_space()
 		}
 		res[key] = val
+		i = line_end + 1
 	}
 	return res
 }
@@ -207,8 +253,11 @@ pub fn save_dotenv(path string, vars map[string]string) ! {
 	keys.sort()
 	for key in keys {
 		val := vars[key]
-		if val.contains('\n') || val.contains('"') || val.contains(' ') || val.contains('#') {
-			escaped := val.replace('\\', '\\\\').replace('"', '\\"')
+		if val.contains('\n') || val.contains('"') || val.contains(' ') || val.contains('#')
+			|| val.contains("'") || val.contains('\\') || val.contains('\r') || val.contains('\t')
+			|| val.contains('`') || val.contains('$') {
+			escaped := val.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n').replace('\r',
+				'\\r').replace('\t', '\\t').replace('$', '\\$')
 			sb.writeln('${key}="${escaped}"')
 		} else {
 			sb.writeln('${key}=${val}')
@@ -258,8 +307,7 @@ pub fn expand_env(input string) string {
 					}
 				}
 				if closing != -1 {
-					var_name := runes[i + 2..closing].string()
-					sb.write_string(os.getenv(var_name))
+					sb.write_string(lookup_braced(runes[i + 2..closing].string(), env_lookup))
 					i = closing + 1
 					continue
 				}

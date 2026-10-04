@@ -3,23 +3,39 @@ module netutils
 import net
 import net.http
 import os
+import time
 
 // is_online checks whether the system has active Internet connectivity by dialing a public DNS server.
+// Each probe is bounded to 1.5 s so the call never hangs on a black-holed network.
 pub fn is_online() bool {
-	// Try Cloudflare DNS port 53 (TCP)
-	mut conn := net.dial_tcp('1.1.1.1:53') or {
-		// Fallback to Google DNS
-		mut conn2 := net.dial_tcp('8.8.8.8:53') or { return false }
-		conn2.close() or {}
-		return true
-	}
-	conn.close() or {}
-	return true
+	// Try Cloudflare DNS port 53 (TCP), then fall back to Google DNS
+	return ping_tcp_port('1.1.1.1', 53, 1500) || ping_tcp_port('8.8.8.8', 53, 1500)
 }
 
 // ping_tcp_port tests whether a specific TCP host and port is open and listening.
+// The connection attempt is abandoned after timeout_ms (<= 0 means no extra limit
+// beyond the OS default). IPv6 literals are bracketed automatically.
 pub fn ping_tcp_port(host string, port int, timeout_ms int) bool {
-	target := '${host}:${port}'
+	target := join_host_port(host, port)
+	if timeout_ms <= 0 {
+		return dial_ok(target)
+	}
+	ch := chan bool{cap: 1}
+	spawn fn (target string, ch chan bool) {
+		ch <- dial_ok(target)
+	}(target, ch)
+	select {
+		ok := <-ch {
+			return ok
+		}
+		timeout_ms * time.millisecond {
+			return false
+		}
+	}
+	return false
+}
+
+fn dial_ok(target string) bool {
 	mut conn := net.dial_tcp(target) or { return false }
 	conn.close() or {}
 	return true
@@ -194,10 +210,8 @@ fn read_exact(mut conn net.TcpConn, size int) ![]u8 {
 	mut data := []u8{len: size}
 	mut read_bytes := 0
 	for read_bytes < size {
-		remaining := size - read_bytes
-		chunk := if remaining > 512 { 512 } else { remaining }
-		n := conn.read(mut data[read_bytes..read_bytes + chunk])!
-		if n == 0 {
+		n := conn.read(mut data[read_bytes..])!
+		if n <= 0 {
 			return error('unexpected end of stream')
 		}
 		read_bytes += n
@@ -211,14 +225,15 @@ pub fn read_framed_msg(mut conn net.TcpConn, max_size int) ![]u8 {
 	if hdr[0] != `M` || hdr[1] != `S` || hdr[2] != `G` || hdr[3] != `0` {
 		return error('invalid protocol magic header')
 	}
-	len := int((u32(hdr[4]) << 24) | (u32(hdr[5]) << 16) | (u32(hdr[6]) << 8) | u32(hdr[7]))
-	if len > max_size {
+	// Compare as i64: a u32 length >= 2^31 must not wrap negative and slip past max_size.
+	len := i64((u32(hdr[4]) << 24) | (u32(hdr[5]) << 16) | (u32(hdr[6]) << 8) | u32(hdr[7]))
+	if len > i64(max_size) {
 		return error('message length ${len} exceeds max size ${max_size}')
 	}
 	if len == 0 {
 		return []u8{}
 	}
-	return read_exact(mut conn, len)
+	return read_exact(mut conn, int(len))
 }
 
 // send_udp transmits a UDP packet to the given host and port.

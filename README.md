@@ -75,7 +75,7 @@
 - **OS & System Extensions (`sys.v`)**: Standardized user directory lookups for macOS (`~/Library`), Windows (`%APPDATA%`), and Linux (`$XDG_*`), path expansion with tilde (`~`) and environment variable resolution, native notifications, hardware metrics, process execution, clipboard, and file operations.
 - **Headless Console & RAD Toolkit (`simplecli`)**: Full-featured zero-window CLI framework with flag parsing, ANSI colors, tables, interactive prompts, multi-level logging, process control, hardware probing, and cryptography.
 - **V Standard Library Integrations (`stdlib.v`)**: Built-in fluent helpers for HTTP requests, RegEx matching, Cryptography (SHA256, MD5, AES, Bcrypt), Gzip/Zlib/Zstd compression, TOML parsing, SemVer checks, and WebSockets.
-- **37 Bundled Production Utility Modules (`vlang_utils`)**: Zero-boilerplate ergonomic toolkit ready to import anywhere (`archiveutils`, `asyncutils`, `bitutils`, `cacheutils`, `cliutils`, `colorutils`, `compressutils`, `cronutils`, `cryptoutils`, `diffutils`, `envutils`, `eventutils`, `fileutils`, `flowutils`, `graphutils`, `htmlutils`, `httputils`, `jwtutils`, `logutils`, `mathutils`, `mockutils`, `netutils`, `regexutils`, `semverutils`, `sliceutils`, `sqliteutils`, `stateutils`, `statutils`, `structutils`, `strutils`, `sysutils`, `tarutils`, `templateutils`, `timeutils`, `tomlutils`, `urlutils`, `validutils`). Full manual in [UTILS_API.md](UTILS_API.md).
+- **40 Bundled Production Utility Modules (`vlang_utils`)**: Zero-boilerplate ergonomic toolkit ready to import anywhere (`archiveutils`, `asyncutils`, `bitutils`, `cacheutils`, `cliutils`, `colorutils`, `compressutils`, `cronutils`, `cryptoutils`, `diffutils`, `envutils`, `eventutils`, `fileutils`, `flowutils`, `graphutils`, `htmlutils`, `httputils`, `jsonutils`, `jwtutils`, `logutils`, `markdownutils`, `mathutils`, `mockutils`, `netutils`, `regexutils`, `semverutils`, `sliceutils`, `sqliteutils`, `stateutils`, `statutils`, `structutils`, `strutils`, `sysutils`, `tarutils`, `templateutils`, `timeutils`, `tomlutils`, `urlutils`, `validutils`, `webutils`). Full manual in [UTILS_API.md](UTILS_API.md).
 - **Beginner Friendly**: Fluent chainable builder API with zero boilerplate.
 
 ---
@@ -352,7 +352,7 @@ See the [`cli_apps/README.md`](cli_apps/README.md) for the complete catalog of a
 
 - **Full API Guide (GUI)**: See [API.md](API.md) for complete details on window configuration, controls, layout engine, themes, event callbacks, reactive state management (`state.v`), system calls (`sys.v`), and standard library extensions (`stdlib.v`).
 - **SimpleCLI Reference (Headless & Console)**: See [CLI_API.md](CLI_API.md) for complete details on the zero-window console utility framework, flag parsing, ANSI UI, interactive prompts, process management, hardware metrics, and stdlib utilities.
-- **37 Utility Modules Reference (`vlang_utils`)**: See [UTILS_API.md](UTILS_API.md) for complete documentation, function signatures, and beginner-friendly examples for all 37 utility modules.
+- **40 Utility Modules Reference (`vlang_utils`)**: See [UTILS_API.md](UTILS_API.md) for complete documentation, function signatures, and beginner-friendly examples for all 40 utility modules.
 - **Workstations Catalog**: See [applications/README.md](applications/README.md) for the complete list & visual showcase of 47 desktop applications.
 - **Examples Guide**: See [examples/README.md](examples/README.md) for detailed descriptions of all example scripts.
 

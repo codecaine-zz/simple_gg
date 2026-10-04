@@ -22,6 +22,9 @@ pub fn validate_email(email string) bool {
 	if user.len == 0 || domain.len < 3 {
 		return false
 	}
+	if !validate_email_local_part(user) {
+		return false
+	}
 	if !domain.contains('.') {
 		return false
 	}
@@ -32,6 +35,29 @@ pub fn validate_email(email string) bool {
 	}
 	for r in domain.runes() {
 		if !is_domain_char(r) {
+			return false
+		}
+	}
+	if !validate_hostname(domain) {
+		return false
+	}
+	for c in tld {
+		if !c.is_letter() {
+			return false
+		}
+	}
+	return true
+}
+
+const email_atext_specials = "!#$%&'*+/=?^_`{|}~-"
+
+// validate_email_local_part checks the part before '@' (unquoted dot-atom form, max 64 chars).
+fn validate_email_local_part(user string) bool {
+	if user.len > 64 || user.starts_with('.') || user.ends_with('.') || user.contains('..') {
+		return false
+	}
+	for c in user {
+		if !(c.is_letter() || c.is_digit() || c == `.` || email_atext_specials.contains_u8(c)) {
 			return false
 		}
 	}
@@ -47,18 +73,57 @@ fn is_alnum_char(r rune) bool {
 	return (r >= `a` && r <= `z`) || (r >= `A` && r <= `Z`) || (r >= `0` && r <= `9`)
 }
 
-// validate_url verifies whether a string is a valid HTTP or HTTPS URL.
+// validate_url verifies whether a string is a valid HTTP or HTTPS URL with a well-formed host
+// (hostname, IPv4 or [IPv6]) and optional port; whitespace and control characters are rejected.
 pub fn validate_url(url string) bool {
 	trimmed := url.trim_space()
 	if !trimmed.starts_with('http://') && !trimmed.starts_with('https://') {
 		return false
 	}
+	for c in trimmed {
+		if c <= 32 || c == 127 {
+			return false
+		}
+	}
 	after_proto := if trimmed.starts_with('https://') { trimmed[8..] } else { trimmed[7..] }
 	if after_proto.len == 0 {
 		return false
 	}
-	host_part := after_proto.split('/')[0].split('?')[0].split('#')[0]
-	return host_part.len > 0
+	mut authority := after_proto.split('/')[0].split('?')[0].split('#')[0]
+	if authority.contains('@') {
+		authority = authority.all_after_last('@')
+	}
+	if authority.len == 0 {
+		return false
+	}
+	mut host := authority
+	mut port := ''
+	if authority.starts_with('[') {
+		end := authority.index(']') or { return false }
+		host = authority[1..end]
+		rest := authority[end + 1..]
+		if rest.len > 0 {
+			if !rest.starts_with(':') {
+				return false
+			}
+			port = rest[1..]
+		}
+		if !validate_ipv6(host) {
+			return false
+		}
+	} else {
+		if authority.contains(':') {
+			host = authority.all_before_last(':')
+			port = authority.all_after_last(':')
+		}
+		if !(validate_ip(host) || validate_hostname(host)) {
+			return false
+		}
+	}
+	if port.len > 0 || authority.ends_with(':') {
+		return validate_port(port)
+	}
+	return true
 }
 
 // validate_ip verifies whether a string is a valid IPv4 address (e.g. 192.168.1.1).

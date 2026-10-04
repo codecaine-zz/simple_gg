@@ -69,7 +69,8 @@ pub fn parse_url(raw_url string) !URL {
 
 	mut username := ''
 	mut password := ''
-	at_idx := authority.index('@') or { -1 }
+	// The LAST '@' separates userinfo from host (passwords may contain '@').
+	at_idx := authority.last_index('@') or { -1 }
 	if at_idx != -1 {
 		userinfo := authority[..at_idx]
 		authority = authority[at_idx + 1..]
@@ -80,15 +81,36 @@ pub fn parse_url(raw_url string) !URL {
 		} else {
 			username = userinfo
 		}
+		username = urllib.path_unescape(username) or { username }
+		password = urllib.path_unescape(password) or { password }
 	}
 
 	mut host := authority
 	mut port := 0
-	colon_port := host.last_index(':') or { -1 }
-	if colon_port != -1 && !host.contains(']') {
-		port_str := host[colon_port + 1..]
+	mut port_str := ''
+	if host.starts_with('[') {
+		// IPv6 literal: [addr] or [addr]:port
+		close := host.index(']') or { return error('unterminated IPv6 literal in "${raw_url}"') }
+		rest := host[close + 1..]
+		if rest.len > 0 {
+			if !rest.starts_with(':') {
+				return error('invalid characters after IPv6 literal in "${raw_url}"')
+			}
+			port_str = rest[1..]
+		}
+		host = host[..close + 1]
+	} else {
+		colon_port := host.last_index(':') or { -1 }
+		if colon_port != -1 {
+			port_str = host[colon_port + 1..]
+			host = host[..colon_port]
+		}
+	}
+	if port_str.len > 0 {
+		if !port_str.bytes().all(it.is_digit()) || port_str.len > 5 || port_str.int() > 65535 {
+			return error('invalid port "${port_str}" in "${raw_url}"')
+		}
 		port = port_str.int()
-		host = host[..colon_port]
 	}
 
 	return URL{
@@ -140,9 +162,9 @@ pub fn (u URL) str() string {
 		sb.write_string('${u.scheme}://')
 	}
 	if u.username.len > 0 {
-		sb.write_string(u.username)
+		sb.write_string(escape_userinfo(u.username))
 		if u.password.len > 0 {
-			sb.write_string(':${u.password}')
+			sb.write_string(':${escape_userinfo(u.password)}')
 		}
 		sb.write_string('@')
 	}
@@ -189,4 +211,17 @@ pub fn redact_credentials(raw_url string) string {
 		parsed.password = '***'
 	}
 	return parsed.str()
+}
+
+// escape_userinfo percent-encodes only the characters that would break URL structure.
+fn escape_userinfo(s string) string {
+	mut sb := strings.new_builder(s.len)
+	for c in s {
+		if c <= 0x20 || c >= 0x7f || c in [`%`, `@`, `:`, `/`, `?`, `#`, `[`, `]`] {
+			sb.write_string('%' + '${c:02X}')
+		} else {
+			sb.write_u8(c)
+		}
+	}
+	return sb.str()
 }

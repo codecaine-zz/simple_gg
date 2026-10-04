@@ -69,6 +69,8 @@ pub fn verify_jwt(token string, secret string) !JWTClaims {
 	}
 
 	header_b64, claims_b64, sig_b64 := parts[0], parts[1], parts[2]
+	// Reject algorithm confusion (`alg: none`, RS256 keys used as HMAC secrets, ...).
+	check_header_alg(header_b64, 'HS256')!
 	unsigned_token := '${header_b64}.${claims_b64}'
 
 	expected_sig := hmac.new(secret.bytes(), unsigned_token.bytes(), sha256.sum, sha256.block_size)

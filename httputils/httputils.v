@@ -6,6 +6,7 @@ import os
 import time
 import json2
 import encoding.base64
+import rand
 
 // build_query_string converts a map of parameters into an encoded query string (e.g. "key=val&a=b").
 pub fn build_query_string(params map[string]string) string {
@@ -51,9 +52,14 @@ pub fn get_text(url string, headers map[string]string) !string {
 	}
 	res := req.do() or { return err }
 	if res.status_code >= 400 {
-		return error('HTTP GET ${url} returned status ${res.status_code}: ${res.body}')
+		return error('HTTP GET ${url} returned status ${res.status_code}: ${truncate_body(res.body)}')
 	}
 	return res.body
+}
+
+// truncate_body keeps error messages readable when servers return large error pages.
+fn truncate_body(body string) string {
+	return if body.len > 512 { body[..512] + '... (${body.len} bytes)' } else { body }
 }
 
 // post_text sends an HTTP POST request with a text body and returns the response body.
@@ -64,7 +70,7 @@ pub fn post_text(url string, body string, headers map[string]string) !string {
 	}
 	res := req.do() or { return err }
 	if res.status_code >= 400 {
-		return error('HTTP POST ${url} returned status ${res.status_code}: ${res.body}')
+		return error('HTTP POST ${url} returned status ${res.status_code}: ${truncate_body(res.body)}')
 	}
 	return res.body
 }
@@ -108,25 +114,57 @@ pub:
 	max_retries      int = 3
 	initial_delay_ms int = 200
 	backoff_factor   f64 = 2.0
+	max_delay_ms     int = 30_000 // upper bound for any single wait
+	jitter           bool // "full jitter" (AWS architecture blog): sleep a random 0..delay to avoid thundering herds
+	retry_on_429     bool = true // retry "Too Many Requests", honoring Retry-After
 }
 
-// fetch_with_retry attempts an HTTP request with exponential backoff on network failures or 5xx errors.
+// backoff_delay returns the wait before retry number `attempt` (1-based), capped at max_delay_ms.
+pub fn backoff_delay(attempt int, config RetryConfig) time.Duration {
+	mut delay := f64(config.initial_delay_ms)
+	for _ in 1 .. attempt {
+		delay *= config.backoff_factor
+		if delay >= f64(config.max_delay_ms) {
+			break
+		}
+	}
+	if config.max_delay_ms > 0 && delay > f64(config.max_delay_ms) {
+		delay = f64(config.max_delay_ms)
+	}
+	mut ms := i64(delay)
+	if config.jitter && ms > 0 {
+		ms = rand.i64n(ms + 1) or { ms }
+	}
+	return time.Duration(ms * time.millisecond)
+}
+
+// is_retryable_status reports whether a response status is worth retrying (5xx, and 429 when enabled).
+pub fn is_retryable_status(status_code int, config RetryConfig) bool {
+	return status_code >= 500 || (config.retry_on_429 && status_code == 429)
+}
+
+// fetch_with_retry attempts an HTTP request with exponential backoff on network failures, 5xx and 429 errors.
+// A server-provided Retry-After header takes precedence over the computed backoff (still capped by max_delay_ms).
 pub fn fetch_with_retry(mut req http.Request, config RetryConfig) !http.Response {
 	mut attempts := 0
-	mut delay := config.initial_delay_ms
 	for {
 		attempts++
 		res := req.do() or {
 			if attempts >= config.max_retries {
 				return err
 			}
-			time.sleep(time.Duration(delay * int(time.millisecond)))
-			delay = int(f64(delay) * config.backoff_factor)
+			time.sleep(backoff_delay(attempts, config))
 			continue
 		}
-		if res.status_code >= 500 && attempts < config.max_retries {
-			time.sleep(time.Duration(delay * int(time.millisecond)))
-			delay = int(f64(delay) * config.backoff_factor)
+		if is_retryable_status(res.status_code, config) && attempts < config.max_retries {
+			mut wait := backoff_delay(attempts, config)
+			if ra := res.header.get_custom('Retry-After') {
+				if d := parse_retry_after(ra) {
+					cap := time.Duration(i64(config.max_delay_ms) * time.millisecond)
+					wait = if config.max_delay_ms > 0 && d > cap { cap } else { d }
+				}
+			}
+			time.sleep(wait)
 			continue
 		}
 		return res

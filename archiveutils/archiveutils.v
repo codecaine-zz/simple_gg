@@ -73,10 +73,14 @@ pub fn zip_dir(source_dir string, dest_zip string) ! {
 }
 
 // unzip_to_dir extracts all files from zip_file into dest_dir.
+// Entry names are validated first: archives containing absolute paths or `..`
+// components (zip-slip) are rejected before anything is written. For untrusted
+// archives prefer extract_safe, which also bounds sizes and entry counts.
 pub fn unzip_to_dir(zip_file string, dest_dir string) ! {
 	if !os.exists(zip_file) {
 		return error('Zip archive does not exist: "${zip_file}"')
 	}
+	ensure_safe_entries(zip_file)!
 	if !os.exists(dest_dir) {
 		os.mkdir_all(dest_dir)!
 	}

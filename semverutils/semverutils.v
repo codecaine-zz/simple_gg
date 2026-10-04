@@ -38,6 +38,9 @@ pub fn parse(raw string) !SemVer {
 		before, after := s.split_once('+') or { s, '' }
 		s = before
 		build = after
+		if after == '' {
+			return error('Empty build in version "${raw}"')
+		}
 	}
 
 	// Extract prerelease (-...)
@@ -46,6 +49,9 @@ pub fn parse(raw string) !SemVer {
 		before, after := s.split_once('-') or { s, '' }
 		s = before
 		prerelease = after
+		if after == '' {
+			return error('Empty prerelease in version "${raw}"')
+		}
 	}
 
 	// Parse major.minor.patch
@@ -64,6 +70,8 @@ pub fn parse(raw string) !SemVer {
 	if major < 0 || minor < 0 || patch < 0 {
 		return error('Semantic version numbers cannot be negative')
 	}
+	validate_identifiers(prerelease, true, raw)!
+	validate_identifiers(build, false, raw)!
 
 	return SemVer{
 		major:      major
@@ -183,68 +191,32 @@ pub fn bump_prerelease(s SemVer, tag string) SemVer {
 
 // satisfies tests whether a version satisfies a semver range condition (e.g. ">=1.2.0", "^1.0.0", "~2.1.0").
 pub fn satisfies(ver SemVer, requirement string) !bool {
-	req := requirement.trim_space()
-	if req == '*' || req == '' {
-		return true
-	}
+	// Delegates to the full npm-compatible range engine (see ranges.v), which also
+	// supports `||`, hyphen ranges, x-ranges and partial versions.
+	return satisfies_range(ver, requirement)
+}
 
-	// Handle compound requirements like ">=1.0.0 <2.0.0"
-	if req.contains(' ') {
-		parts := req.split(' ')
-		for part in parts {
-			if part.len > 0 && !satisfies(ver, part)! {
-				return false
+// validate_identifiers enforces SemVer 2.0.0 rules for dot-separated identifiers:
+// non-empty, [0-9A-Za-z-] only, and (for prerelease) no leading zeros in numerics.
+fn validate_identifiers(ids string, is_prerelease bool, raw string) ! {
+	if ids == '' {
+		return
+	}
+	for id in ids.split('.') {
+		if id == '' {
+			return error('Empty identifier in version "${raw}"')
+		}
+		mut numeric := true
+		for c in id {
+			if !(c.is_alnum() || c == `-`) {
+				return error('Invalid character in version identifier "${id}"')
+			}
+			if !c.is_digit() {
+				numeric = false
 			}
 		}
-		return true
-	}
-
-	// Caret range ^X.Y.Z (compatible without breaking major)
-	if req.starts_with('^') {
-		base := parse(req[1..])!
-		if compare(ver, base) < 0 {
-			return false
+		if is_prerelease && numeric && id.len > 1 && id[0] == `0` {
+			return error('Numeric prerelease identifier "${id}" has a leading zero')
 		}
-		if base.major > 0 {
-			return ver.major == base.major
-		}
-		if base.minor > 0 {
-			return ver.major == 0 && ver.minor == base.minor
-		}
-		return ver.major == 0 && ver.minor == 0 && ver.patch == base.patch
 	}
-
-	// Tilde range ~X.Y.Z (patch updates allowed)
-	if req.starts_with('~') {
-		base := parse(req[1..])!
-		if compare(ver, base) < 0 {
-			return false
-		}
-		return ver.major == base.major && ver.minor == base.minor
-	}
-
-	if req.starts_with('>=') {
-		target := parse(req[2..])!
-		return compare(ver, target) >= 0
-	}
-	if req.starts_with('<=') {
-		target := parse(req[2..])!
-		return compare(ver, target) <= 0
-	}
-	if req.starts_with('>') {
-		target := parse(req[1..])!
-		return compare(ver, target) > 0
-	}
-	if req.starts_with('<') {
-		target := parse(req[1..])!
-		return compare(ver, target) < 0
-	}
-	if req.starts_with('=') {
-		target := parse(req[1..])!
-		return compare(ver, target) == 0
-	}
-
-	// Exact match fallback
-	target := parse(req)!
-	return compare(ver, target) == 0
 }

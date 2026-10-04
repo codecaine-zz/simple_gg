@@ -120,12 +120,15 @@ pub fn rgb_to_hsl(c RGB) HSL {
 
 // hsl_to_rgb converts Hue, Saturation, Lightness into an RGB color.
 pub fn hsl_to_rgb(hsl HSL) RGB {
-	h := math.fmod(hsl.h, 360.0)
+	mut h := math.fmod(hsl.h, 360.0)
+	if h < 0 {
+		h += 360.0 // negative hues wrap (previously produced garbage channels)
+	}
 	s := math.max(0.0, math.min(1.0, hsl.s))
 	l := math.max(0.0, math.min(1.0, hsl.l))
 
 	if s == 0.0 {
-		val := u8(l * 255.0)
+		val := u8(math.round(l * 255.0))
 		return RGB{
 			r: val
 			g: val
@@ -142,9 +145,9 @@ pub fn hsl_to_rgb(hsl HSL) RGB {
 	tb := hk - 1.0 / 3.0
 
 	return RGB{
-		r: u8(hue_to_rgb(p, q, tr) * 255.0)
-		g: u8(hue_to_rgb(p, q, tg) * 255.0)
-		b: u8(hue_to_rgb(p, q, tb) * 255.0)
+		r: u8(math.round(hue_to_rgb(p, q, tr) * 255.0))
+		g: u8(math.round(hue_to_rgb(p, q, tg) * 255.0))
+		b: u8(math.round(hue_to_rgb(p, q, tb) * 255.0))
 	}
 }
 

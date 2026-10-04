@@ -4,8 +4,15 @@ import time
 
 // time_ago returns a human-friendly relative time string describing how long ago t was.
 pub fn time_ago(t time.Time) string {
-	now := time.now()
+	return time_ago_at(t, time.now())
+}
+
+// time_ago_at is time_ago relative to an explicit `now` (deterministic; ideal for tests and servers).
+pub fn time_ago_at(t time.Time, now time.Time) string {
 	diff := now.unix() - t.unix()
+	if diff <= -5 {
+		return time_until_at(t, now)
+	}
 	if diff < 5 {
 		return 'just now'
 	}
@@ -33,8 +40,8 @@ pub fn time_ago(t time.Time) string {
 	if days < 30 {
 		return '${days} days ago'
 	}
-	months := days / 30
-	if months < 12 {
+	if days < 365 {
+		months := days / 30
 		return if months == 1 { '1 month ago' } else { '${months} months ago' }
 	}
 	years := days / 365
@@ -43,8 +50,15 @@ pub fn time_ago(t time.Time) string {
 
 // time_until returns a human-friendly relative time string describing how far in the future t is.
 pub fn time_until(t time.Time) string {
-	now := time.now()
+	return time_until_at(t, time.now())
+}
+
+// time_until_at is time_until relative to an explicit `now`.
+pub fn time_until_at(t time.Time, now time.Time) string {
 	diff := t.unix() - now.unix()
+	if diff <= -5 {
+		return time_ago_at(t, now)
+	}
 	if diff < 5 {
 		return 'just now'
 	}
@@ -72,8 +86,8 @@ pub fn time_until(t time.Time) string {
 	if days < 30 {
 		return 'in ${days} days'
 	}
-	months := days / 30
-	if months < 12 {
+	if days < 365 {
+		months := days / 30
 		return if months == 1 { 'in 1 month' } else { 'in ${months} months' }
 	}
 	years := days / 365
@@ -263,11 +277,18 @@ pub fn benchmark_fn(name string, iterations int, f fn ()) BenchmarkResult {
 	}
 }
 
-// parse_duration parses a human duration string (e.g. "1h 30m", "500ms", "10s", "2d") into time.Duration.
+// parse_duration parses a human duration string (e.g. "1h 30m", "500ms", "10s", "2d", "1w", "-5m") into time.Duration.
 pub fn parse_duration(s string) !time.Duration {
-	clean := s.trim_space().to_lower()
+	mut clean := s.trim_space().to_lower().replace('µs', 'us')
 	if clean.len == 0 {
 		return error('empty duration string')
+	}
+	mut sign := i64(1)
+	if clean.starts_with('-') || clean.starts_with('+') {
+		if clean[0] == `-` {
+			sign = -1
+		}
+		clean = clean[1..].trim_space()
 	}
 	mut total_ns := i64(0)
 	mut num_buf := ''
@@ -277,7 +298,7 @@ pub fn parse_duration(s string) !time.Duration {
 		if (ch >= `0` && ch <= `9`) || ch == `.` {
 			num_buf += ch.ascii_str()
 			i++
-		} else if ch == ` ` || ch == `\t` {
+		} else if ch == ` ` || ch == `\t` || ch == `,` {
 			i++
 		} else {
 			// Extract unit
@@ -285,6 +306,9 @@ pub fn parse_duration(s string) !time.Duration {
 			for i < clean.len && clean[i] >= `a` && clean[i] <= `z` {
 				unit_buf += clean[i].ascii_str()
 				i++
+			}
+			if unit_buf.len == 0 {
+				return error('unexpected character in duration: ${clean[i..i + 1]}')
 			}
 			if num_buf.len == 0 {
 				return error('missing numeric value before unit: ${unit_buf}')
@@ -295,23 +319,26 @@ pub fn parse_duration(s string) !time.Duration {
 				'ns' {
 					total_ns += i64(val)
 				}
-				'us', 'µs' {
+				'us' {
 					total_ns += i64(val * 1_000.0)
 				}
 				'ms' {
 					total_ns += i64(val * 1_000_000.0)
 				}
-				's', 'sec', 'seconds' {
+				's', 'sec', 'secs', 'second', 'seconds' {
 					total_ns += i64(val * 1_000_000_000.0)
 				}
-				'm', 'min', 'minutes' {
+				'm', 'min', 'mins', 'minute', 'minutes' {
 					total_ns += i64(val * 60_000_000_000.0)
 				}
-				'h', 'hr', 'hours' {
+				'h', 'hr', 'hrs', 'hour', 'hours' {
 					total_ns += i64(val * 3_600_000_000_000.0)
 				}
 				'd', 'day', 'days' {
 					total_ns += i64(val * 86_400_000_000_000.0)
+				}
+				'w', 'wk', 'week', 'weeks' {
+					total_ns += i64(val * 604_800_000_000_000.0)
 				}
 				else {
 					return error('unknown duration unit: ${unit_buf}')
@@ -319,7 +346,10 @@ pub fn parse_duration(s string) !time.Duration {
 			}
 		}
 	}
-	return time.Duration(total_ns)
+	if num_buf.len > 0 {
+		return error('missing unit after "${num_buf}" (e.g. "${num_buf}s")')
+	}
+	return time.Duration(sign * total_ns)
 }
 
 // add_business_days adds or subtracts N business days to t, skipping Saturdays and Sundays.

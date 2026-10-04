@@ -1,11 +1,11 @@
 # V Developer Utility Suite (`vlang_utils`) - Complete API Reference
 
-Welcome to the comprehensive API reference manual for the **37 production-grade developer utility modules** in `vlang_utils`.
+Welcome to the comprehensive API reference manual for the **40 production-grade developer utility modules** in `vlang_utils`.
 
 Every module is zero-dependency, self-contained, and designed for Rapid Application Development (RAD). You can import any module directly across GUI apps, CLI tools, services, and background workers (e.g. `import strutils`, `import sqliteutils`, `import cacheutils`).
 
 > [!NOTE]
-> **V Compiler Compatibility**: All 37 modules in `vlang_utils` are verified and tested against **V 0.5.2** (`9e9f7f05`). This includes full support for `json2` streaming serialization, generics, and native SQLite bindings. For compiler maintenance, `v up` troubleshooting, and `VFLAGS` setup, refer to [`README.md`](README.md#5-v-compiler-version--v-up-maintenance).
+> **V Compiler Compatibility**: All 40 modules in `vlang_utils` are verified and tested against **V 0.5.2** (`9e9f7f05`). This includes full support for `json2` streaming serialization, generics, and native SQLite bindings. For compiler maintenance, `v up` troubleshooting, and `VFLAGS` setup, refer to [`README.md`](README.md#5-v-compiler-version--v-up-maintenance).
 
 ---
 
@@ -26,9 +26,9 @@ Examples that contact a website, read a file, use the clipboard, or ask a questi
 
 ### 🚀 Ready-to-Run Demos
 
-All 37 utility modules have standalone, fully functional demo scripts located in the [`demos/`](demos/) directory.
+All 40 utility modules have standalone, fully functional demo scripts located in the [`demos/`](demos/) directory.
 
-- **Run all 37 demos sequentially with execution timing:**
+- **Run all 40 demos sequentially with execution timing:**
   ```bash
   v run demos/run_all_demos.v
   ```
@@ -72,6 +72,7 @@ All 37 utility modules have standalone, fully functional demo scripts located in
 | [`tomlutils`](#tomlutils-api) | [`demo_tomlutils.v`](demos/demo_tomlutils.v) | `v run demos/demo_tomlutils.v` |
 | [`urlutils`](#urlutils-api) | [`demo_urlutils.v`](demos/demo_urlutils.v) | `v run demos/demo_urlutils.v` |
 | [`validutils`](#validutils-api) | [`demo_validutils.v`](demos/demo_validutils.v) | `v run demos/demo_validutils.v` |
+| [`webutils`](#webutils-api) | [`demo_webutils.v`](demos/demo_webutils.v) | `v run demos/demo_webutils.v` |
 
 ---
 
@@ -611,6 +612,38 @@ table := [
     ['2', 'Bob', 'inactive'],
 ]
 fileutils.write_csv('report.csv', table, `,`)!
+```
+
+---
+
+### `parse_csv(content string, delimiter rune) [][]string`
+
+Parses in-memory CSV or TSV content into a 2D slice of strings according to RFC 4180. Delimiter defaults to `,` if `0` is passed. Skips comment lines starting with `#`.
+
+```v
+csv_text := 'id,name,role\n1,Alice,admin\n2,Bob,user'
+rows := fileutils.parse_csv(csv_text, `,`)
+assert rows.len == 3
+assert rows[1][1] == 'Alice'
+```
+
+---
+
+### `parse_csv_with(content string, opts CsvOptions) [][]string`
+
+Parses CSV or TSV content with configurable options (`delimiter`, `comment` rune, `trim` boolean). Supports complex RFC 4180 multi-line quoted fields, escaped quotes (`""`), and comment line skipping.
+
+```v
+content := '# Exported user directory\nid, name ,notes\n1, Alice ,"Hello, ""world"""\n# Inactive accounts\n2, Bob ,"two\nlines"'
+rows := fileutils.parse_csv_with(content,
+	delimiter: `,`
+	comment: `#`
+	trim: true
+)
+assert rows.len == 3
+assert rows[1][1] == 'Alice'
+assert rows[1][2] == 'Hello, "world"'
+assert rows[2][2] == 'two\nlines'
 ```
 
 ---
@@ -5934,6 +5967,86 @@ println('Build order: ${order}') // ["fetch_deps", "compile", "test", "deploy"]
 bfs_nodes := dag.bfs('fetch_deps')
 dfs_nodes := dag.dfs('fetch_deps')
 ```
+
+---
+
+<a id="webutils-api"></a>
+## `webutils` API Reference
+
+An Express-style web framework with a secure, EJS-compatible template engine. Everything people usually pull in from third-party packages is built in and depends only on vlib.
+
+**Import statement:** `import webutils` (plus `import x.json2` when you pass template data).
+
+### Application and routing
+- `new_app(cfg AppConfig) &App`: create an app. Options include `views_dir`, `view_ext`, `view_cache`, `secret`, `max_body_bytes` (1 MB), `security_headers` (on), `security`, `trust_proxy`, `debug`, `strict_routing` and `https`.
+- `app.get/post/put/patch/delete/options/head/all(pattern, ...handlers)`: register routes.
+  - Patterns support `:id`, optional `:slug?` and wildcard `*path`.
+  - HEAD, OPTIONS and `405 Allow` are handled automatically.
+- `app.use(...)`, `app.use_at(prefix, ...)`, `app.group(prefix, ...mws)`: middleware and nestable route groups.
+- `app.static(prefix, root)`, `app.on_error(fn)`, `app.on_not_found(fn)`, `app.locals`: static files, custom error and 404 handlers, and template globals.
+- `app.listen(port)`, `app.listen_addr(addr)`, `app.server(addr)`: serve over HTTP.
+- `app.request(TestRequest)`: in-process testing without a socket, like supertest.
+- Errors: `return http_error(404, 'not found')` from a handler sends that status. Plain `error(...)` becomes a generic 500, and its message is only shown when `debug: true`.
+
+### Context (`fn (mut c Context) !`)
+- Request:
+  - Parameters and query: `param`, `query`, `query_or`, `query_int`, `query_values`.
+  - Headers and body: `header`, `body`, `bind_json[T]`, `json_body`.
+  - Forms and uploads: `form_value`, `form_values`, `file`, `files`.
+  - Cookies: `cookie`, `signed_cookie`.
+  - Client: `ip`, `secure`, `hostname`, `xhr`, `accepts`.
+- Response:
+  - Status and headers: `status`, `set_header`, `vary`.
+  - Bodies: `text`, `html`, `send`, `json[T]`, `json_any`, `render(view, data)`, `render_struct`, `no_content`.
+  - Redirects: `redirect`, `safe_redirect`.
+  - Cookies: `set_cookie`, `set_signed_cookie`, `clear_cookie`.
+  - Files: `send_file`, `download`, `attachment`.
+- Sessions: `session_get`, `session_set`, `session_delete`, `session_destroy`, `session_regenerate`, `flash`, `take_flash`.
+
+### Built-in middleware
+| Middleware | Replaces |
+| :--- | :--- |
+| `security_headers(SecurityConfig)` (on by default, CSP nonce) | helmet |
+| `cors(CorsConfig)` | cors |
+| `rate_limit(RateLimitConfig)` | express-rate-limit |
+| `csrf(CsrfConfig)`, `c.csrf_token()` | csurf |
+| `sessions(SessionConfig)`, `sessions_with_store(store, cfg)` | express-session, connect-flash |
+| `logger(LoggerConfig)`, `request_id()` | morgan |
+| `compress(CompressConfig)` | compression |
+| `static_files(root, StaticConfig)` | serve-static |
+| `basic_auth(users, realm)`, `bearer_auth(verify)` | passport-http style auth |
+| `body_limit(n)`, `no_cache()` | body-parser limits, nocache |
+
+### Templates
+- `render_string(src, data)`, `compile(src, opts)`, `Template.render(data)`, `to_any[T](value)`.
+- `new_views(ViewConfig)` / `app.views`: `add(name, src)`, `load(name)`, `render(name, data)`, `clear_cache()`.
+- Syntax:
+  - Output: `<%= escaped %>`, `<%- raw %>`, `<%# comment %>`.
+  - Control flow: `if/elif/else/end`, `for i, x in xs` with `loop.index`, `first` and `last`, and `else` for empty lists.
+  - Variables, partials and layouts: `set`, `include`, `layout` + `<%- body %>`.
+  - Filters: `| upper | truncate(10) | date("YYYY-MM-DD")`.
+  - Trim markers: `-%>`, `<%_` and `_%>`.
+- Security: templates cannot execute code (sandboxed expressions), output is escaped by default, and includes cannot escape the views root. Include depth and output size are bounded.
+
+```v
+import webutils
+import x.json2
+
+mut app := webutils.new_app(secret: 'change-me')
+app.views.add('hello', '<h1>Hello <%= name | title %></h1>')!
+app.use(webutils.sessions(), webutils.csrf())
+app.get('/hello/:name', fn (mut c webutils.Context) ! {
+	c.render('hello', {
+		'name': json2.Any(c.param('name'))
+	})!
+})
+res := app.request(path: '/hello/ann')
+assert res.body == '<h1>Hello Ann</h1>'
+// app.listen(3000)
+```
+
+> [!TIP]
+> On V 0.5.2, return errors from handler closures with `return webutils.http_error(...)` or `return error(...)`. Returning a custom `IError` value from a closure makes the compiler run out of memory.
 
 ---
 

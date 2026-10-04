@@ -1,6 +1,7 @@
 module bitutils
 
 import bitfield
+import math.bits
 import strconv
 import strings
 
@@ -94,13 +95,7 @@ pub fn (b BitSet) not_op() BitSet {
 
 // popcount returns the number of 1 bits in an integer (Hamming weight).
 pub fn popcount(n u64) int {
-	mut val := n
-	mut count := 0
-	for val > 0 {
-		count += int(val & 1)
-		val >>= 1
-	}
-	return count
+	return bits.ones_count_64(n)
 }
 
 // to_binary returns the binary string representation of an unsigned integer with minimum bit padding.

@@ -215,8 +215,13 @@ pub fn (mut pool WorkerPool) submit(task TaskFn) ! {
 		return error('Worker pool is closed')
 	}
 	pool.wg.add(1)
+	// The pool may be stopped concurrently between the check above and the push;
+	// a push into a closed channel fails, so undo the counter instead of panicking.
 	pool.tasks <- &TaskItem{
 		f: task
+	} or {
+		pool.wg.done()
+		return error('Worker pool is closed')
 	}
 }
 

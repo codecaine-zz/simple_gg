@@ -32,17 +32,19 @@ pub fn load_struct_from_file[T](path string) !T {
 }
 
 // Appends a single line to a text file, creating the file if needed.
+// Lines are newline-separated without a trailing newline. Uses O_APPEND, so cost is O(1) per call.
 pub fn append_line_to_file(path string, line string) ! {
 	ensure_dir_exists(path) or { return err }
-	mut content := ''
-	if os.exists(path) {
-		content = os.read_file(path) or { return err }
+	needs_sep := os.exists(path) && os.file_size(path) > 0
+	mut f := os.open_append(path) or { return err }
+	defer {
+		f.close()
 	}
-	if content.len > 0 {
-		content += '\n'
+	if needs_sep {
+		f.write_string('\n' + line) or { return err }
+	} else {
+		f.write_string(line) or { return err }
 	}
-	content += line
-	os.write_file(path, content) or { return err }
 }
 
 // Writes a text file, creating parent directories automatically.
@@ -185,12 +187,21 @@ pub fn list_files(dir string, recursive bool) ![]string {
 		return files
 	}
 
-	os.walk(dir, fn [mut files] (file string) {
-		if !os.is_dir(file) {
-			files << file
-		}
-	})
+	walk_files(dir, mut files)
 	return files
+}
+
+// walk_files collects regular files under dir recursively without following directory symlinks.
+fn walk_files(dir string, mut out []string) {
+	entries := os.ls(dir) or { return }
+	for entry in entries {
+		full_path := os.join_path(dir, entry)
+		if os.is_dir(full_path) && !os.is_link(full_path) {
+			walk_files(full_path, mut out)
+		} else if !os.is_dir(full_path) {
+			out << full_path
+		}
+	}
 }
 
 // list_files_with_ext returns files in dir matching the specified file extension (e.g. "json" or ".json").
@@ -253,73 +264,97 @@ pub fn file_stem(path string) string {
 	return name
 }
 
-// parse_csv parses CSV or TSV content into rows. Delimiter defaults to ',' if it is 0.
-pub fn parse_csv(content string, delimiter u8) [][]string {
-	delim := if delimiter == 0 { `,` } else { delimiter }
+// read_csv reads a CSV or TSV file into a 2D slice of strings. Delimiter defaults to ',' if rune is 0.
+// Follows RFC 4180: quoted fields may contain delimiters, newlines and "" escaped quotes.
+// Fields are whitespace-trimmed and blank lines are skipped.
+pub fn read_csv(path string, delimiter rune) ![][]string {
+	content := os.read_file(path) or { return err }
+	return parse_csv(content, delimiter)
+}
+
+// parse_csv parses CSV/TSV text (RFC 4180) into rows. Delimiter defaults to ',' if rune is 0.
+// Skips lines beginning with '#' comments.
+pub fn parse_csv(content string, delimiter rune) [][]string {
+	return parse_csv_with(content, delimiter: delimiter, comment: `#`, trim: false)
+}
+
+// CsvOptions configures parse_csv_with.
+@[params]
+pub struct CsvOptions {
+pub:
+	delimiter rune = `,` // field separator (0 = ',')
+	comment   rune = `#` // when non-zero, lines starting with this rune (e.g. `#`) are skipped
+	trim      bool // trim surrounding whitespace from unquoted fields
+}
+
+// parse_csv_with parses CSV/TSV text (RFC 4180) with options, e.g.
+// `parse_csv_with(text, delimiter: `\t`, comment: `#`, trim: true)`.
+// Quoted fields may contain delimiters, newlines, comment runes and "" escaped quotes.
+pub fn parse_csv_with(content string, opts CsvOptions) [][]string {
+	delim := if opts.delimiter == 0 { `,` } else { opts.delimiter }
 	mut rows := [][]string{}
 	mut row := []string{}
-	mut field := []u8{}
+	mut field := []rune{}
 	mut in_quotes := false
-	mut at_line_start := true
-	mut is_comment := false
-	mut index := 0
-	for index < content.len {
-		ch := content[index]
-		if is_comment {
-			if ch == `\n` || ch == `\r` {
-				is_comment = false
-				at_line_start = true
-				if ch == `\r` && index + 1 < content.len && content[index + 1] == `\n` {
-					index++
+	mut row_has_data := false
+	runes := content.runes()
+	mut i := 0
+	for i < runes.len {
+		r := runes[i]
+		if in_quotes {
+			if r == `"` {
+				if i + 1 < runes.len && runes[i + 1] == `"` {
+					field << `"`
+					i++
+				} else {
+					in_quotes = false
 				}
-			}
-			index++
-			continue
-		}
-		if at_line_start && row.len == 0 && field.len == 0 && ch == `#` {
-			is_comment = true
-			index++
-			continue
-		}
-		at_line_start = false
-		if ch == `"` {
-			if in_quotes && index + 1 < content.len && content[index + 1] == `"` {
-				field << `"`
-				index++
 			} else {
-				in_quotes = !in_quotes
+				field << r
 			}
-		} else if ch == delim && !in_quotes {
-			row << field.bytestr()
+		} else if opts.comment != 0 && r == opts.comment && !row_has_data && field.len == 0 {
+			// comment line: skip to the end of the line
+			for i < runes.len && runes[i] != `\n` && runes[i] != `\r` {
+				i++
+			}
+			if i < runes.len && runes[i] == `\r` && i + 1 < runes.len && runes[i + 1] == `\n` {
+				i++
+			}
+		} else if r == `"` {
+			in_quotes = true
+			row_has_data = true
+		} else if r == delim {
+			row << csv_field(field, opts.trim)
 			field.clear()
-		} else if (ch == `\n` || ch == `\r`) && !in_quotes {
-			if row.len > 0 || field.len > 0 {
-				row << field.bytestr()
+			row_has_data = true
+		} else if r == `\n` || r == `\r` {
+			if r == `\r` && i + 1 < runes.len && runes[i + 1] == `\n` {
+				i++
+			}
+			f := csv_field(field, opts.trim)
+			if row_has_data || f.len > 0 {
+				row << f
 				rows << row
-				row = []string{}
-				field.clear()
 			}
-			at_line_start = true
-			if ch == `\r` && index + 1 < content.len && content[index + 1] == `\n` {
-				index++
-			}
+			row = []string{}
+			field.clear()
+			row_has_data = false
 		} else {
-			field << ch
+			field << r
 		}
-		index++
+		i++
 	}
-	if row.len > 0 || field.len > 0 {
-		row << field.bytestr()
+	f := csv_field(field, opts.trim)
+	if row_has_data || f.len > 0 {
+		row << f
 		rows << row
 	}
 	return rows
 }
 
-// read_csv reads a CSV or TSV file into a 2D slice of strings. Delimiter defaults to ',' if rune is 0.
-pub fn read_csv(path string, delimiter rune) ![][]string {
-	content := os.read_file(path) or { return err }
-	delim := if delimiter == 0 { `,` } else { u8(delimiter) }
-	return parse_csv(content, delim)
+fn csv_field(field []rune, trim bool) string {
+	s := field.string()
+	return if trim { s.trim_space() } else { s }
 }
 
 // write_csv writes a 2D slice of strings to disk as a CSV or TSV file. Delimiter defaults to ',' if rune is 0.
@@ -368,19 +403,34 @@ pub fn write_file_atomic(path string, content string) ! {
 	tmp_name := '.tmp_${os.file_name(path)}_${os.getpid()}_${rand.ulid()}'
 	tmp_path := os.join_path(dir, tmp_name)
 	os.write_file(tmp_path, content) or { return err }
-	os.mv_by_cp(tmp_path, path) or {
-		os.rm(tmp_path) or {}
-		return err
+	// rename(2) is atomic on POSIX within one filesystem; readers see either the old or new file.
+	os.rename(tmp_path, path) or {
+		os.mv_by_cp(tmp_path, path) or {
+			os.rm(tmp_path) or {}
+			return err
+		}
 	}
 }
 
-// file_hash_sha256 calculates the hexadecimal SHA-256 checksum of a file.
+// file_hash_sha256 calculates the hexadecimal SHA-256 checksum of a file, streaming in 64 KiB chunks.
 pub fn file_hash_sha256(path string) !string {
 	if !os.exists(path) {
 		return error('file does not exist: ${path}')
 	}
-	content := os.read_bytes(path) or { return err }
-	return sha256.hexhash(content.bytestr())
+	mut f := os.open(path) or { return err }
+	defer {
+		f.close()
+	}
+	mut d := sha256.new()
+	mut buf := []u8{len: 64 * 1024}
+	for {
+		n := f.read(mut buf) or { break }
+		if n <= 0 {
+			break
+		}
+		d.write(buf[..n]) or { return err }
+	}
+	return d.sum([]u8{}).hex()
 }
 
 // mime_type returns the MIME content type based on the file extension and signature.

@@ -54,23 +54,41 @@ pub fn gray(s string) string {
 }
 
 // strip_ansi removes all ANSI escape codes from a string.
+// Handles CSI sequences (colors, cursor movement, erase: ESC [ ... final byte 0x40-0x7E),
+// OSC sequences such as hyperlinks (ESC ] ... BEL or ESC \) and two-byte escapes.
 pub fn strip_ansi(s string) string {
 	mut sb := strings.new_builder(s.len)
-	runes := s.runes()
 	mut i := 0
-	for i < runes.len {
-		if runes[i] == `\x1b` && i + 1 < runes.len && runes[i + 1] == `[` {
+	for i < s.len {
+		if s[i] != 0x1b || i + 1 >= s.len {
+			sb.write_u8(s[i])
+			i++
+			continue
+		}
+		next := s[i + 1]
+		if next == `[` {
 			mut j := i + 2
-			for j < runes.len && runes[j] != `m` {
+			for j < s.len && !(s[j] >= 0x40 && s[j] <= 0x7e) {
 				j++
 			}
-			if j < runes.len && runes[j] == `m` {
-				i = j + 1
-				continue
+			i = j + 1
+		} else if next == `]` {
+			mut j := i + 2
+			for j < s.len {
+				if s[j] == 0x07 {
+					j++
+					break
+				}
+				if s[j] == 0x1b && j + 1 < s.len && s[j + 1] == `\\` {
+					j += 2
+					break
+				}
+				j++
 			}
+			i = j
+		} else {
+			i += 2 // two-byte escape such as ESC 7 / ESC 8
 		}
-		sb.write_rune(runes[i])
-		i++
 	}
 	return sb.str()
 }
@@ -142,7 +160,13 @@ pub fn new_progress_bar(total int, width int) ProgressBar {
 
 // update advances or sets the current progress value.
 pub fn (mut pb ProgressBar) update(current int) {
-	pb.current = if current > pb.total { pb.total } else { current }
+	pb.current = if current > pb.total {
+		pb.total
+	} else if current < 0 {
+		0
+	} else {
+		current
+	}
 }
 
 // render generates the string representation of the progress bar.
@@ -248,7 +272,46 @@ pub fn (mut fp FlagParser) add_flag_float(name string, short string, default_val
 	fp.parsed[name] = '${default_val}'
 }
 
+fn (fp FlagParser) find_long(name string) ?FlagDef {
+	for flag in fp.flags {
+		if flag.name == name {
+			return flag
+		}
+	}
+	return none
+}
+
+fn (fp FlagParser) find_short(short string) ?FlagDef {
+	for flag in fp.flags {
+		if flag.short != '' && flag.short == short {
+			return flag
+		}
+	}
+	return none
+}
+
+fn check_flag_value(flag FlagDef, val string) ! {
+	ok := match flag.kind {
+		'int' {
+			val.len > 0 && val.trim_left('+-').len > 0 && val.trim_left('+-').bytes().all(it.is_digit())
+		}
+		'float' { val.len > 0 && (val.f64() != 0.0 || val.trim_left('+-').trim('0.') == '') }
+		'bool' { val.to_lower() in ['true', 'false', '1', '0', 'yes', 'no', 'on', 'off'] }
+		else { true }
+	}
+	if !ok {
+		return error('invalid value for --${flag.name}: "${val}" (expected ${flag.kind})')
+	}
+}
+
+fn is_negative_number(arg string) bool {
+	return arg.len > 1 && arg[0] == `-` && (arg[1].is_digit() || arg[1] == `.`)
+}
+
 // parse parses an argument array, updating parsed flag values and collecting positional args.
+// Supports `--name value`, `--name=value`, `-n value`, `-nvalue`, `-n=value`, combined
+// boolean shorts (`-abc`), negative numbers as positionals, and `--` to end option parsing.
+// Values are validated against the flag's type; a missing value is an error.
 pub fn (mut fp FlagParser) parse(args []string) ! {
 	mut i := 0
 	for i < args.len {
@@ -257,48 +320,68 @@ pub fn (mut fp FlagParser) parse(args []string) ! {
 			fp.print_help()
 			return
 		}
+		if arg == '--' {
+			fp.positional << args[i + 1..]
+			return
+		}
 		if arg.starts_with('--') {
 			raw := arg[2..]
 			eq_idx := raw.index('=') or { -1 }
 			name := if eq_idx >= 0 { raw[..eq_idx] } else { raw }
-			mut matched := false
-			for flag in fp.flags {
-				if flag.name == name {
-					matched = true
-					if flag.kind == 'bool' {
-						val := if eq_idx >= 0 { raw[eq_idx + 1..] } else { 'true' }
-						fp.parsed[name] = val
-					} else {
-						if eq_idx >= 0 {
-							fp.parsed[name] = raw[eq_idx + 1..]
-						} else if i + 1 < args.len {
-							i++
-							fp.parsed[name] = args[i]
-						}
-					}
-					break
-				}
+			flag := fp.find_long(name) or { return error('unknown flag: --${name}') }
+			mut val := ''
+			if eq_idx >= 0 {
+				val = raw[eq_idx + 1..]
+			} else if flag.kind == 'bool' {
+				val = 'true'
+			} else if i + 1 < args.len {
+				i++
+				val = args[i]
+			} else {
+				return error('flag --${name} requires a value')
 			}
-			if !matched {
-				return error('unknown flag: --${name}')
-			}
+			check_flag_value(flag, val)!
+			fp.parsed[name] = val
 		} else if arg.starts_with('-') && arg.len >= 2 {
 			short := arg[1..2]
-			mut matched := false
-			for flag in fp.flags {
-				if flag.short == short {
-					matched = true
-					if flag.kind == 'bool' {
-						fp.parsed[flag.name] = 'true'
-					} else if i + 1 < args.len {
-						i++
-						fp.parsed[flag.name] = args[i]
-					}
-					break
+			flag := fp.find_short(short) or {
+				if is_negative_number(arg) {
+					fp.positional << arg
+					i++
+					continue
 				}
-			}
-			if !matched {
 				return error('unknown flag: -${short}')
+			}
+			rest := arg[2..]
+			if flag.kind == 'bool' {
+				if rest.starts_with('=') {
+					check_flag_value(flag, rest[1..])!
+					fp.parsed[flag.name] = rest[1..]
+				} else {
+					fp.parsed[flag.name] = 'true'
+					// combined boolean shorts: -abc == -a -b -c
+					for k in 0 .. rest.len {
+						f2 := fp.find_short(rest[k..k + 1]) or {
+							return error('unknown flag: -${rest[k..k + 1]} (in ${arg})')
+						}
+						if f2.kind != 'bool' {
+							return error('flag -${f2.short} needs a value and cannot be combined in ${arg}')
+						}
+						fp.parsed[f2.name] = 'true'
+					}
+				}
+			} else {
+				mut val := ''
+				if rest.len > 0 {
+					val = rest.trim_string_left('=')
+				} else if i + 1 < args.len {
+					i++
+					val = args[i]
+				} else {
+					return error('flag -${short} requires a value')
+				}
+				check_flag_value(flag, val)!
+				fp.parsed[flag.name] = val
 			}
 		} else {
 			fp.positional << arg

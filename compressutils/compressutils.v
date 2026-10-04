@@ -82,7 +82,13 @@ pub fn zstd_compress(data []u8) ![]u8 {
 }
 
 // zstd_decompress decompresses Zstandard-compressed bytes.
+// A valid empty frame yields empty output (vlib's zstd.decompress rejects it).
 pub fn zstd_decompress(data []u8) ![]u8 {
+	if size := zstd_frame_content_size(data) {
+		if size == 0 {
+			return []u8{}
+		}
+	}
 	return zstd.decompress(data)!
 }
 
@@ -93,7 +99,7 @@ pub fn zstd_compress_string(text string) ![]u8 {
 
 // zstd_decompress_string decompresses Zstandard bytes to a string.
 pub fn zstd_decompress_string(data []u8) !string {
-	decompressed := zstd.decompress(data)!
+	decompressed := zstd_decompress(data)!
 	return decompressed.bytestr()
 }
 

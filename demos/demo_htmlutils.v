@@ -16,7 +16,7 @@ fn main() {
 	'
 
 	// 1. Parsing & DOM Querying
-	doc := htmlutils.parse(html_content)
+	mut doc := htmlutils.parse(html_content)
 	h1_nodes := doc.get_elements_by_tag('h1')
 	println('Found ${h1_nodes.len} <h1> tag(s):')
 	for node in h1_nodes {

@@ -317,8 +317,21 @@ pub fn sanitize_filename(name string) string {
 			sb.write_u8(`_`)
 		}
 	}
-	res := sb.str().trim_space()
-	return if res.len > 0 { res } else { 'unnamed' }
+	mut res := sb.str().trim_space().trim_right('. ')
+	// '.', '..' and other all-dot names are directory references, never files.
+	if res.trim('.') == '' {
+		return 'unnamed'
+	}
+	// Windows reserved device names (CON, NUL, COM1, ...) are unusable even with an extension.
+	stem := (res.all_before('.')).to_upper()
+	if stem in ['CON', 'PRN', 'AUX', 'NUL'] || (stem.len == 4 && (stem.starts_with('COM')
+		|| stem.starts_with('LPT')) && stem[3] >= `1` && stem[3] <= `9`) {
+		res = '_' + res
+	}
+	if res.len > 255 {
+		res = res[..255]
+	}
+	return res
 }
 
 // exec_safe executes a binary with arguments passed through quote_arg, preventing command injection.
@@ -340,23 +353,68 @@ pub:
 	timed_out bool
 }
 
-// exec_timeout executes a command with a timeout in milliseconds.
+// exec_timeout executes a shell command with a timeout in milliseconds. When the
+// deadline passes, the command and every process it spawned (its process group)
+// are killed; the result then has timed_out = true, exit_code 124 (the GNU
+// `timeout` convention) and whatever output was produced so far.
+// timeout_ms <= 0 runs without a limit.
 pub fn exec_timeout(cmd string, timeout_ms int) ExecTimeoutResult {
-	start := time.now()
-	// Run command
-	res := os.execute(cmd)
-	duration_ms := (time.now() - start).milliseconds()
-	if duration_ms > timeout_ms {
+	if timeout_ms <= 0 {
+		res := os.execute(cmd)
 		return ExecTimeoutResult{
 			output:    res.output
 			exit_code: res.exit_code
-			timed_out: true
 		}
 	}
+	mut p := shell_process(cmd)
+	p.set_redirect_stdio_merged()
+	p.use_pgroup = true
+	p.run()
+	deadline := time.now().add(timeout_ms * time.millisecond)
+	mut out := strings.new_builder(256)
+	mut timed_out := false
+	for p.is_alive() {
+		if p.is_pending(.stdout) {
+			out.write_string(p.stdout_read())
+		} else {
+			time.sleep(2 * time.millisecond)
+		}
+		if time.now() > deadline {
+			timed_out = true
+			p.signal_pgkill()
+			break
+		}
+	}
+	if timed_out {
+		for p.is_pending(.stdout) {
+			chunk := p.stdout_read()
+			if chunk.len == 0 {
+				break
+			}
+			out.write_string(chunk)
+		}
+	} else {
+		out.write_string(p.stdout_slurp())
+	}
+	p.wait()
+	code := if timed_out { 124 } else { p.code }
+	p.close()
 	return ExecTimeoutResult{
-		output:    res.output
-		exit_code: res.exit_code
-		timed_out: false
+		output:    out.str()
+		exit_code: code
+		timed_out: timed_out
+	}
+}
+
+fn shell_process(cmd string) &os.Process {
+	$if windows {
+		mut p := os.new_process('cmd.exe')
+		p.set_args(['/c', cmd])
+		return p
+	} $else {
+		mut p := os.new_process('/bin/sh')
+		p.set_args(['-c', cmd])
+		return p
 	}
 }
 

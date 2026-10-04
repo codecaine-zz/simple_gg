@@ -9,11 +9,22 @@ pub fn contains[T](arr []T, target T) bool {
 }
 
 // unique returns a new slice containing only distinct elements, preserving order of first appearance.
+// Runs in O(n) for hashable element types (integers, strings, runes) and O(n²) otherwise.
 pub fn unique[T](arr []T) []T {
 	mut res := []T{cap: arr.len}
-	for item in arr {
-		if item !in res {
-			res << item
+	$if T is $int || T is string || T is rune {
+		mut seen := map[T]bool{}
+		for item in arr {
+			if item !in seen {
+				seen[item] = true
+				res << item
+			}
+		}
+	} $else {
+		for item in arr {
+			if item !in res {
+				res << item
+			}
 		}
 	}
 	return res
@@ -22,9 +33,23 @@ pub fn unique[T](arr []T) []T {
 // intersection returns elements present in both a and b, with duplicates removed.
 pub fn intersection[T](a []T, b []T) []T {
 	mut res := []T{}
-	for item in a {
-		if item in b && item !in res {
-			res << item
+	$if T is $int || T is string || T is rune {
+		mut in_b := map[T]bool{}
+		for item in b {
+			in_b[item] = true
+		}
+		mut seen := map[T]bool{}
+		for item in a {
+			if item in in_b && item !in seen {
+				seen[item] = true
+				res << item
+			}
+		}
+	} $else {
+		for item in a {
+			if item in b && item !in res {
+				res << item
+			}
 		}
 	}
 	return res
@@ -33,9 +58,22 @@ pub fn intersection[T](a []T, b []T) []T {
 // difference returns elements present in a that are not in b.
 pub fn difference[T](a []T, b []T) []T {
 	mut res := []T{}
-	for item in a {
-		if item !in b && item !in res {
-			res << item
+	$if T is $int || T is string || T is rune {
+		mut excluded := map[T]bool{}
+		for item in b {
+			excluded[item] = true
+		}
+		for item in a {
+			if item !in excluded {
+				excluded[item] = true
+				res << item
+			}
+		}
+	} $else {
+		for item in a {
+			if item !in b && item !in res {
+				res << item
+			}
 		}
 	}
 	return res
@@ -43,22 +81,18 @@ pub fn difference[T](a []T, b []T) []T {
 
 // union_slices returns all unique elements from both slices combined.
 pub fn union_slices[T](a []T, b []T) []T {
-	mut res := []T{cap: a.len + b.len}
-	for item in a {
-		if item !in res {
-			res << item
-		}
-	}
-	for item in b {
-		if item !in res {
-			res << item
-		}
-	}
-	return res
+	mut combined := []T{cap: a.len + b.len}
+	combined << a
+	combined << b
+	return unique(combined)
 }
 
 // chunk splits a slice into smaller slices of specified size using V's built-in arrays.chunk.
+// Returns an empty result when size <= 0.
 pub fn chunk[T](arr []T, size int) [][]T {
+	if size <= 0 || arr.len == 0 {
+		return [][]T{}
+	}
 	return arrays.chunk(arr, size)
 }
 

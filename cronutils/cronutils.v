@@ -24,54 +24,87 @@ pub:
 	day        CronField
 	month      CronField
 	weekday    CronField // 0 = Sunday, 1 = Monday ... 6 = Saturday (or 7 = Sunday)
+	// POSIX rule: when BOTH day-of-month and day-of-week are restricted (not `*`),
+	// a day matches if EITHER field matches. Set by parse_cron.
+	dom_restricted bool
+	dow_restricted bool
+}
+
+const month_names = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV',
+	'DEC']
+const day_names = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT']
+
+// parse_atom parses a single number or a JAN..DEC / SUN..SAT name, strictly.
+fn parse_atom(s string, min_val int, max_val int) !int {
+	up := s.to_upper()
+	if min_val == 1 && max_val == 12 {
+		idx := month_names.index(up)
+		if idx >= 0 {
+			return idx + 1
+		}
+	}
+	if min_val == 0 && max_val == 7 {
+		idx := day_names.index(up)
+		if idx >= 0 {
+			return idx
+		}
+	}
+	if s.len == 0 || !s.bytes().all(it.is_digit()) {
+		return error('invalid cron value: "${s}"')
+	}
+	v := s.int()
+	if v < min_val || v > max_val {
+		return error('cron value out of bounds: ${s}')
+	}
+	return v
 }
 
 fn parse_field(field_str string, min_val int, max_val int) !CronField {
-	mut allowed := []int{}
-	parts := field_str.split(',')
-	for part in parts {
+	mut seen := []bool{len: max_val + 1}
+	for part in field_str.split(',') {
 		trimmed := part.trim_space()
 		if trimmed.len == 0 {
 			continue
 		}
-		if trimmed == '*' {
-			for v in min_val .. (max_val + 1) {
-				allowed << v
-			}
-		} else if trimmed.starts_with('*/') {
-			step := trimmed[2..].int()
-			if step <= 0 {
+		mut base := trimmed
+		mut step := 1
+		if trimmed.contains('/') {
+			b, st := trimmed.split_once('/') or { trimmed, '' }
+			if st.len == 0 || !st.bytes().all(it.is_digit()) || st.int() <= 0 {
 				return error('invalid cron step: ${trimmed}')
 			}
-			for v := min_val; v <= max_val; v += step {
-				allowed << v
-			}
-		} else if trimmed.contains('-') {
-			range_parts := trimmed.split('-')
-			if range_parts.len != 2 {
-				return error('invalid cron range: ${trimmed}')
-			}
-			start := range_parts[0].int()
-			end := range_parts[1].int()
-			if start < min_val || end > max_val || start > end {
+			base = b
+			step = st.int()
+		}
+		mut start := min_val
+		mut end := max_val
+		if base == '*' || base == '?' {
+			// full range
+		} else if base.contains('-') {
+			lo, hi := base.split_once('-') or { base, '' }
+			start = parse_atom(lo, min_val, max_val)!
+			end = parse_atom(hi, min_val, max_val)!
+			if start > end {
 				return error('invalid cron range bounds: ${trimmed}')
 			}
-			for v in start .. (end + 1) {
-				allowed << v
-			}
 		} else {
-			val := trimmed.int()
-			if val < min_val || val > max_val {
-				return error('cron value out of bounds: ${trimmed}')
-			}
-			allowed << val
+			start = parse_atom(base, min_val, max_val)!
+			// `N/step` means N..max stepping; a bare `N` is a single value.
+			end = if trimmed.contains('/') { max_val } else { start }
+		}
+		for v := start; v <= end; v += step {
+			seen[v] = true
 		}
 	}
-
+	mut allowed := []int{}
+	for v in min_val .. max_val + 1 {
+		if seen[v] {
+			allowed << v
+		}
+	}
 	if allowed.len == 0 {
 		return error('no valid values parsed for field: ${field_str}')
 	}
-
 	return CronField{
 		min_val: min_val
 		max_val: max_val
@@ -79,9 +112,26 @@ fn parse_field(field_str string, min_val int, max_val int) !CronField {
 	}
 }
 
+// expand_macro maps @yearly/@annually/@monthly/@weekly/@daily/@midnight/@hourly to 5 fields.
+fn expand_macro(expr string) string {
+	return match expr.trim_space().to_lower() {
+		'@yearly', '@annually' { '0 0 1 1 *' }
+		'@monthly' { '0 0 1 * *' }
+		'@weekly' { '0 0 * * 0' }
+		'@daily', '@midnight' { '0 0 * * *' }
+		'@hourly' { '0 * * * *' }
+		else { expr }
+	}
+}
+
+fn is_unrestricted(f string) bool {
+	return f == '*' || f == '?'
+}
+
 // parse_cron parses a standard 5-part cron expression (minute hour day_of_month month day_of_week).
+// Supports lists, ranges, steps on ranges (`1-30/5`), names (`MON-FRI`, `JAN`) and macros (`@daily`).
 pub fn parse_cron(expr string) !CronSchedule {
-	parts := expr.fields()
+	parts := expand_macro(expr).fields()
 	if parts.len != 5 {
 		return error('cron expression must have 5 fields, got ${parts.len}')
 	}
@@ -93,64 +143,96 @@ pub fn parse_cron(expr string) !CronSchedule {
 	dow_field := parse_field(parts[4], 0, 7)!
 
 	return CronSchedule{
-		expression: expr
-		minute:     min_field
-		hour:       hr_field
-		day:        dom_field
-		month:      mon_field
-		weekday:    dow_field
+		expression:     expr
+		minute:         min_field
+		hour:           hr_field
+		day:            dom_field
+		month:          mon_field
+		weekday:        dow_field
+		dom_restricted: !is_unrestricted(parts[2])
+		dow_restricted: !is_unrestricted(parts[4])
 	}
+}
+
+// is_valid_cron reports whether expr parses as a cron expression.
+pub fn is_valid_cron(expr string) bool {
+	parse_cron(expr) or { return false }
+	return true
+}
+
+fn (s CronSchedule) day_matches(t time.Time) bool {
+	// V's day_of_week() returns 1 (Mon) .. 7 (Sun); cron treats 0 and 7 as Sunday.
+	dow := t.day_of_week() % 7
+	dow_ok := s.weekday.matches(dow) || (dow == 0 && s.weekday.matches(7))
+	dom_ok := s.day.matches(t.day)
+	if s.dom_restricted && s.dow_restricted {
+		return dom_ok || dow_ok
+	}
+	return dom_ok && dow_ok
 }
 
 // matches checks if time t satisfies the cron schedule.
 pub fn (s CronSchedule) matches(t time.Time) bool {
-	if !s.minute.matches(t.minute) {
-		return false
-	}
-	if !s.hour.matches(t.hour) {
-		return false
-	}
-	if !s.day.matches(t.day) {
-		return false
-	}
-	if !s.month.matches(t.month) {
-		return false
-	}
-	// V's day_of_week() returns 1 (Mon) .. 7 (Sun)
-	// Cron usually treats 0 and 7 as Sunday
-	dow := t.day_of_week() % 7
-	if !s.weekday.matches(dow) && !(dow == 0 && s.weekday.matches(7)) {
-		return false
-	}
-	return true
+	return s.minute.matches(t.minute) && s.hour.matches(t.hour) && s.month.matches(t.month)
+		&& s.day_matches(t)
 }
 
-// next_after calculates the next timestamp matching the schedule after t (searches up to 366 days).
-pub fn (s CronSchedule) next_after(t time.Time) !time.Time {
-	// Advance to next full minute
-	mut curr := time.new(time.Time{
-		year:       t.year
-		month:      t.month
-		day:        t.day
-		hour:       t.hour
-		minute:     t.minute
-		second:     0
-		nanosecond: 0
-	}).add_seconds(60)
+fn mk_time(year int, month int, day int, hour int, minute int) time.Time {
+	return time.new(time.Time{
+		year:   year
+		month:  month
+		day:    day
+		hour:   hour
+		minute: minute
+	})
+}
 
-	max_iterations := 366 * 24 * 60
-	for _ in 0 .. max_iterations {
-		if s.matches(curr) {
-			return curr
+// next_after calculates the next timestamp matching the schedule strictly after t.
+// Uses field skipping (month -> day -> hour -> minute), so even rare schedules such as
+// `0 0 29 2 *` (leap days) resolve instantly; searches up to 10 years ahead.
+pub fn (s CronSchedule) next_after(t time.Time) !time.Time {
+	mut c := mk_time(t.year, t.month, t.day, t.hour, t.minute).add_seconds(60)
+	limit := t.year + 10
+	for c.year <= limit {
+		if !s.month.matches(c.month) {
+			c = if c.month == 12 {
+				mk_time(c.year + 1, 1, 1, 0, 0)
+			} else {
+				mk_time(c.year, c.month + 1, 1, 0, 0)
+			}
+			continue
 		}
-		curr = curr.add_seconds(60)
+		if !s.day_matches(c) {
+			c = mk_time(c.year, c.month, c.day, 0, 0).add_days(1)
+			continue
+		}
+		if !s.hour.matches(c.hour) {
+			c = mk_time(c.year, c.month, c.day, c.hour, 0).add_seconds(3600)
+			continue
+		}
+		if !s.minute.matches(c.minute) {
+			c = c.add_seconds(60)
+			continue
+		}
+		return c
 	}
-	return error('no matching cron time found within 1 year')
+	return error('no matching cron time found within 10 years')
+}
+
+// next_n returns the next `n` matching times strictly after t.
+pub fn (s CronSchedule) next_n(t time.Time, n int) ![]time.Time {
+	mut out := []time.Time{cap: if n > 0 { n } else { 0 }}
+	mut cur := t
+	for _ in 0 .. n {
+		cur = s.next_after(cur)!
+		out << cur
+	}
+	return out
 }
 
 // cron_to_human converts a standard cron expression into a human-readable English summary.
 pub fn cron_to_human(expr string) string {
-	parts := expr.fields()
+	parts := expand_macro(expr).fields()
 	if parts.len != 5 {
 		return expr
 	}

@@ -9,6 +9,10 @@ pub struct EventEmitter {
 mut:
 	listeners      map[string][]EventHandler
 	once_listeners map[string][]EventHandler
+	// Handle-based subscriptions (see subscriptions.v).
+	subs    map[string][]Subscription
+	any     []Subscription
+	next_id int = 1
 }
 
 // new_emitter creates and initializes a new EventEmitter instance.
@@ -33,6 +37,7 @@ pub fn (mut e EventEmitter) once(event string, handler EventHandler) {
 pub fn (mut e EventEmitter) off(event string) {
 	e.listeners.delete(event)
 	e.once_listeners.delete(event)
+	e.subs.delete(event)
 }
 
 // emit dispatches an event to all registered listeners with the provided payload string.
@@ -50,6 +55,7 @@ pub fn (mut e EventEmitter) emit(event string, payload string) {
 			handler(payload)
 		}
 	}
+	e.dispatch_subscriptions(event, payload)
 }
 
 // listener_count returns the total number of active listeners for the given event name.
@@ -61,6 +67,9 @@ pub fn (e EventEmitter) listener_count(event string) int {
 	if event in e.once_listeners {
 		count += e.once_listeners[event].len
 	}
+	if event in e.subs {
+		count += e.subs[event].len
+	}
 	return count
 }
 
@@ -68,4 +77,6 @@ pub fn (e EventEmitter) listener_count(event string) int {
 pub fn (mut e EventEmitter) clear() {
 	e.listeners.clear()
 	e.once_listeners.clear()
+	e.subs.clear()
+	e.any.clear()
 }
