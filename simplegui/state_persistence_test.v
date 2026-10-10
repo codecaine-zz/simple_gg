@@ -90,6 +90,7 @@ fn test_app_state_persistence_lifecycle() {
 	win.set_state_int('login_count', 42)
 	win.set_state_bool('logged_in', true)
 	win.set_state_f64('ratio', 3.14)
+	win.set_state_strings('recent_tabs', ['home', 'editor', 'settings'])
 
 	win.save_app_state(app_name) or {
 		assert false

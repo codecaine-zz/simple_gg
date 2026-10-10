@@ -366,3 +366,46 @@ fn test_sqlite_custom_config_and_shared_db() {
 	assert theme_kv_reload.get_str('current_theme', '') == 'cyberpunk'
 	assert theme_kv_reload.has('username') == false
 }
+
+fn test_array_state_handling() {
+	app := 'vlang_utils_test_array_app'
+	defer {
+		os.rmdir_all(get_app_dir(app, .data)) or {}
+	}
+
+	// 1. Root-level array state (AppStateStore[[]string])
+	mut history_store := new_app_state[[]string](app, ['initial_entry'])
+	history_store.auto_save = true
+	assert history_store.get() == ['initial_entry']
+
+	history_store.update(fn (mut list []string) {
+		list << 'second_entry'
+		list << 'third_entry'
+	}) or { panic(err) }
+
+	assert history_store.get().len == 3
+	assert history_store.get()[1] == 'second_entry'
+
+	// Reload from disk
+	loaded_history := load_app_state[[]string](app, 'state.json') or { panic(err) }
+	assert loaded_history.len == 3
+	assert loaded_history[2] == 'third_entry'
+
+	// 2. KeyValueState array helper (JSON)
+	mut kv := new_kv_state(app)
+	kv.set_strings('recent_files', ['/a/b.txt', '/c/d.txt']) or { panic(err) }
+	files := kv.get_strings('recent_files', [])
+	assert files.len == 2
+	assert files[0] == '/a/b.txt'
+	assert files[1] == '/c/d.txt'
+	assert kv.get_strings('non_existent', ['fallback']) == ['fallback']
+
+	// 3. KeyValueState array helper (SQLite)
+	mut sqlite_kv := new_sqlite_kv_state(app)
+	sqlite_kv.auto_save = true
+	sqlite_kv.set_strings('bookmarks', ['https://vlang.io', 'https://github.com']) or { panic(err) }
+	bookmarks := sqlite_kv.get_strings('bookmarks', [])
+	assert bookmarks.len == 2
+	assert bookmarks[0] == 'https://vlang.io'
+}
+

@@ -5997,12 +5997,14 @@ sqlite_kv.set_str('current_profile', 'guest')!
 sqlite_kv.set_int('volume', 85)!
 sqlite_kv.set_bool('notifications', true)!
 sqlite_kv.set_f64('scale', 1.5)!
+sqlite_kv.set_strings('tags', ['alpha', 'beta', 'release'])!
 
 profile := sqlite_kv.get_str('current_profile', 'default')
 volume  := sqlite_kv.get_int('volume', 100)
 notify  := sqlite_kv.get_bool('notifications', false)
 scale   := sqlite_kv.get_f64('scale', 1.0)
-println('${profile}, vol=${volume}, notify=${notify}, scale=${scale}')
+tags    := sqlite_kv.get_strings('tags', [])
+println('${profile}, vol=${volume}, notify=${notify}, scale=${scale}, tags=${tags}')
 
 // Management
 println('Has volume: ${sqlite_kv.has("volume")}')

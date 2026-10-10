@@ -735,6 +735,17 @@ pub fn (kv KeyValueState) get_f64(key string, default_val f64) f64 {
 	return val_str.f64()
 }
 
+// set_strings assigns an array of string values serialized as JSON.
+pub fn (mut kv KeyValueState) set_strings(key string, val []string) ! {
+	kv.set_str(key, json2.encode(val))!
+}
+
+// get_strings retrieves an array of string values or default_val if missing or malformed.
+pub fn (kv KeyValueState) get_strings(key string, default_val []string) []string {
+	val_str := kv.values[key] or { return default_val }
+	return json2.decode[[]string](val_str) or { default_val }
+}
+
 // has checks whether a key exists.
 pub fn (kv KeyValueState) has(key string) bool {
 	return key in kv.values

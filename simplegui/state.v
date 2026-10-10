@@ -223,6 +223,30 @@ pub fn (win &SimpleWindow) get_state_f64_or(key string, fallback f64) f64 {
 	return fallback
 }
 
+// set_state_strings serializes a string array to JSON and stores it under `key`.
+pub fn (mut win SimpleWindow) set_state_strings(key string, val []string) &SimpleWindow {
+	return win.set_state(key, json2.encode(val))
+}
+
+// get_state_strings retrieves the value of `key` parsed as a string array.
+// Optional `default_val`: Allows specifying a custom fallback string array if `key` is missing or unparseable.
+pub fn (win &SimpleWindow) get_state_strings(key string, default_val ...[]string) []string {
+	fallback := if default_val.len > 0 { default_val[0] } else { []string{} }
+	return win.get_state_strings_or(key, fallback)
+}
+
+// get_state_strings_or retrieves string array state for `key`, returning `fallback` if missing or unparseable.
+pub fn (win &SimpleWindow) get_state_strings_or(key string, fallback []string) []string {
+	if key in win.state_store {
+		str_val := win.state_store[key].trim_space()
+		if str_val.len > 0 {
+			res := json2.decode[[]string](str_val) or { return fallback }
+			return res
+		}
+	}
+	return fallback
+}
+
 // toggle_state_bool flips the boolean state of `key` (true -> false, false -> true) and returns the new boolean value.
 pub fn (mut win SimpleWindow) toggle_state_bool(key string) bool {
 	curr := win.get_state_bool(key)
