@@ -9,6 +9,7 @@ import crypto.sha256
 import crypto.rand
 import encoding.base64
 import json2
+import strings
 
 // Context carries one request and its response (like Express `req` + `res`).
 pub struct Context {
@@ -42,7 +43,7 @@ mut:
 	files_map     map[string][]http.FileData
 }
 
-fn new_context(app &App, req http.Request) Context {
+fn new_context(mut app App, req http.Request) Context {
 	raw := req.url
 	q := raw.index('?') or { -1 }
 	path := if q >= 0 { raw[..q] } else { raw }
@@ -50,7 +51,7 @@ fn new_context(app &App, req http.Request) Context {
 		req:         req
 		method:      req.method.str().to_upper()
 		path:        if path == '' { '/' } else { path }
-		app:         app
+		app:         unsafe { &app }
 		res_headers: http.new_header()
 		started:     time.now()
 	}
@@ -283,14 +284,17 @@ pub fn (c &Context) ip() string {
 			return real.trim_space()
 		}
 	}
-	addr := c.req.remote_addr
-	if addr.starts_with('[') {
-		return addr.all_before(']')[1..]
+	addr := c.header('X-Remote-Addr')
+	if addr != '' {
+		if addr.starts_with('[') {
+			return addr.all_before(']')[1..]
+		}
+		if addr.count(':') == 1 {
+			return addr.all_before(':')
+		}
+		return addr
 	}
-	if addr.count(':') == 1 {
-		return addr.all_before(':')
-	}
-	return addr
+	return '127.0.0.1'
 }
 
 // protocol returns 'https' or 'http' (X-Forwarded-Proto honoured with trust_proxy).
@@ -516,6 +520,23 @@ pub fn (mut c Context) send_status(code int) {
 // no_content sends 204 No Content.
 pub fn (mut c Context) no_content() {
 	c.send_status(204)
+}
+
+// sse formats and sends a Server-Sent Event (text/event-stream) message.
+pub fn (mut c Context) sse(event string, data string) {
+	c.set_header('Content-Type', 'text/event-stream')
+	c.set_header('Cache-Control', 'no-cache')
+	c.set_header('Connection', 'keep-alive')
+	mut sb := strings.new_builder(data.len + 32)
+	if event.len > 0 {
+		safe_event := event.replace('\r', '').replace('\n', '')
+		sb.write_string('event: ${safe_event}\n')
+	}
+	for line in data.split_into_lines() {
+		sb.write_string('data: ${line}\n')
+	}
+	sb.write_string('\n')
+	c.send(sb.str())
 }
 
 // render renders a view with `data`, merged over app.locals and c.locals

@@ -764,3 +764,83 @@ pub fn insert_many(mut db sqlite.DB, table_name string, rows []map[string]string
 	}) or { return err }
 	return rows.len
 }
+
+// PagedResult encapsulates paginated rows and navigation metadata for rapid UI development.
+pub struct PagedResult {
+pub:
+	items       []map[string]string
+	page        int
+	per_page    int
+	total_items int
+	total_pages int
+	has_prev    bool
+	has_next    bool
+}
+
+// sanitize_order_by validates that an ORDER BY string consists solely of comma-separated
+// sanitized column identifiers followed by optional ASC or DESC keywords.
+pub fn sanitize_order_by(order_by string) !string {
+	trimmed := order_by.trim_space()
+	if trimmed.len == 0 {
+		return ''
+	}
+	parts := trimmed.split(',')
+	mut safe_parts := []string{}
+	for p in parts {
+		tokens := p.trim_space().split(' ').filter(it.len > 0)
+		if tokens.len == 0 || tokens.len > 2 {
+			return error('invalid ORDER BY clause: "${p}"')
+		}
+		col := sanitize_identifier(tokens[0])!
+		if tokens.len == 2 {
+			dir := tokens[1].to_upper()
+			if dir !in ['ASC', 'DESC'] {
+				return error('invalid ORDER BY direction "${tokens[1]}", expected ASC or DESC')
+			}
+			safe_parts << '"${col}" ${dir}'
+		} else {
+			safe_parts << '"${col}"'
+		}
+	}
+	return safe_parts.join(', ')
+}
+
+// select_rows_paged queries a table with automated pagination metadata calculation
+pub fn select_rows_paged(mut db sqlite.DB, table_name string, columns []string, where_clause string, where_params []string, page int, per_page int, order_by string) !PagedResult {
+	tbl := sanitize_identifier(table_name)!
+	p := if page < 1 { 1 } else { page }
+	limit := if per_page < 1 { 10 } else { per_page }
+	offset := (p - 1) * limit
+
+	where_str := if where_clause.len > 0 { 'WHERE ${where_clause}' } else { '' }
+
+	// Count total items
+	count_query := 'SELECT COUNT(*) as total FROM "${tbl}" ${where_str};'
+	count_res := query_maps_params(mut db, count_query, where_params)!
+	total_items := if count_res.len > 0 { (count_res[0]['total'] or { '0' }).int() } else { 0 }
+
+	total_pages := if total_items == 0 { 1 } else { (total_items + limit - 1) / limit }
+
+	mut col_clause := '*'
+	if columns.len > 0 && !(columns.len == 1 && columns[0] == '*') {
+		mut safe_cols := []string{cap: columns.len}
+		for c in columns {
+			safe_cols << '"' + sanitize_identifier(c)! + '"'
+		}
+		col_clause = safe_cols.join(', ')
+	}
+
+	order_str := if order_by.len > 0 { 'ORDER BY ' + sanitize_order_by(order_by)! } else { '' }
+	paged_query := 'SELECT ${col_clause} FROM "${tbl}" ${where_str} ${order_str} LIMIT ${limit} OFFSET ${offset};'
+	items := query_maps_params(mut db, paged_query, where_params)!
+
+	return PagedResult{
+		items:       items
+		page:        p
+		per_page:    limit
+		total_items: total_items
+		total_pages: total_pages
+		has_prev:    p > 1
+		has_next:    p < total_pages
+	}
+}

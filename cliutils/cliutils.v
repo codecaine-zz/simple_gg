@@ -135,6 +135,54 @@ pub fn prompt_select(message string, options []string) ?int {
 	return none
 }
 
+// prompt_multiselect displays checkbox options, allowing comma- or space-separated selection (e.g. "1,3"), returning selected strings.
+pub fn prompt_multiselect(message string, options []string, defaults []int) []string {
+	if options.len == 0 {
+		return []string{}
+	}
+	println(message)
+	for i, opt in options {
+		marker := if i in defaults { '[x]' } else { '[ ]' }
+		println('  ${marker} ${i + 1}. ${opt}')
+	}
+	hint := if defaults.len > 0 {
+		' [default: ${defaults.map((it + 1).str()).join(',')}]'
+	} else {
+		''
+	}
+	print('Select numbers separated by comma or space (e.g. 1,3)${hint}: ')
+	os.flush()
+	input := os.get_line().trim_space()
+	if input.len == 0 {
+		mut res := []string{}
+		for d in defaults {
+			if d >= 0 && d < options.len {
+				res << options[d]
+			}
+		}
+		return res
+	}
+
+	mut selected_indices := []int{}
+	clean := input.replace(',', ' ')
+	for part in clean.split(' ') {
+		p := part.trim_space()
+		if p.len == 0 {
+			continue
+		}
+		idx := p.int() - 1
+		if idx >= 0 && idx < options.len && idx !in selected_indices {
+			selected_indices << idx
+		}
+	}
+
+	mut selected_options := []string{}
+	for idx in selected_indices {
+		selected_options << options[idx]
+	}
+	return selected_options
+}
+
 // ============================================================================
 // Progress Bar
 // ============================================================================

@@ -263,7 +263,9 @@ fn set_in(node json2.Any, toks []string, val json2.Any) !json2.Any {
 		[]json2.Any {
 			idx := array_index(tok, node.len, true)!
 			mut arr := []json2.Any{cap: node.len + 1}
-			arr << node
+			for elem in node {
+				arr << elem
+			}
 			if idx == arr.len {
 				if toks.len > 1 {
 					return error('cannot descend past array end')
@@ -420,4 +422,47 @@ fn map_keys(m map[string]json2.Any) []string {
 		out << k
 	}
 	return out
+}
+
+// -----------------------------------------------------------------------
+// NDJSON (Newline Delimited JSON) Streaming Helpers
+// -----------------------------------------------------------------------
+
+// encode_ndjson serializes a slice of items into a newline-delimited JSON string
+pub fn encode_ndjson[T](items []T) !string {
+	mut sb := strings.new_builder(items.len * 64)
+	for item in items {
+		line := json2.encode(item)
+		sb.write_string(line)
+		sb.write_u8(`\n`)
+	}
+	return sb.str()
+}
+
+// decode_ndjson deserializes a newline-delimited JSON string into a slice of typed items
+pub fn decode_ndjson[T](data string) ![]T {
+	mut res := []T{}
+	for line in data.split_into_lines() {
+		trimmed := line.trim_space()
+		if trimmed.len == 0 {
+			continue
+		}
+		item := json2.decode[T](trimmed)!
+		res << item
+	}
+	return res
+}
+
+// each_ndjson_line streams and iterates through NDJSON content line-by-line via callback
+pub fn each_ndjson_line(data string, cb fn (line_json string) !bool) ! {
+	for line in data.split_into_lines() {
+		trimmed := line.trim_space()
+		if trimmed.len == 0 {
+			continue
+		}
+		cont := cb(trimmed)!
+		if !cont {
+			break
+		}
+	}
 }

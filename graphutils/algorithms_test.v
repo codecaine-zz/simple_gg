@@ -44,7 +44,9 @@ fn test_scc_and_cycle() {
 	g.add_edge(4, 5)
 	g.add_edge(5, 4)
 	mut comps := g.strongly_connected_components().map(it.sorted())
-	comps.sort(a[0] < b[0])
+	unsafe {
+		comps.sort(a[0] < b[0])
+	}
 	assert comps == [[1, 2, 3], [4, 5]]
 	cyc := g.find_cycle()?
 	assert cyc.first() == cyc.last()

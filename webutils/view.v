@@ -668,10 +668,12 @@ fn (mut r Renderer) eval(e Expr) !json2.Any {
 				return json2.Any(!truthy(v))
 			}
 			if is_intlike(v) {
-				return json2.Any(-(as_i64(v) or { 0 }))
+				iv := -(as_i64(v) or { 0 })
+				return json2.Any(iv)
 			}
 			n := as_num(v) or { return error('cannot negate ${type_label(v)}') }
-			return json2.Any(-n)
+			neg := -n
+			return json2.Any(neg)
 		}
 		.binary {
 			match e.name {

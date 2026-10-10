@@ -7,6 +7,7 @@ import time
 import json2
 import encoding.base64
 import rand
+import strings
 
 // build_query_string converts a map of parameters into an encoded query string (e.g. "key=val&a=b").
 pub fn build_query_string(params map[string]string) string {
@@ -216,4 +217,97 @@ pub fn is_client_error(status_code int) bool {
 // is_server_error returns true if status_code is in the 5xx range.
 pub fn is_server_error(status_code int) bool {
 	return status_code >= 500 && status_code < 600
+}
+
+// -----------------------------------------------------------------------
+// Multipart & Streaming Helpers
+// -----------------------------------------------------------------------
+
+// post_multipart uploads form fields and file attachments using multipart/form-data.
+// `files` maps field name -> file path on disk.
+pub fn post_multipart(url string, fields map[string]string, files map[string]string, headers map[string]string) !http.Response {
+	boundary := '----VlangUtilsFormBoundary' + rand.u64().hex()
+	mut body := strings.new_builder(2048)
+
+	// Add text fields
+	for k, v in fields {
+		safe_k := k.replace('"', '').replace('\r', '').replace('\n', '')
+		body.write_string('--${boundary}\r\n')
+		body.write_string('Content-Disposition: form-data; name="${safe_k}"\r\n\r\n')
+		body.write_string(v)
+		body.write_string('\r\n')
+	}
+
+	// Add files
+	for field_name, file_path in files {
+		if !os.exists(file_path) {
+			return error('file not found for upload: ${file_path}')
+		}
+		filename := os.file_name(file_path)
+		safe_field := field_name.replace('"', '').replace('\r', '').replace('\n', '')
+		safe_filename := filename.replace('"', '').replace('\r', '').replace('\n', '')
+		content := os.read_file(file_path)!
+		body.write_string('--${boundary}\r\n')
+		body.write_string('Content-Disposition: form-data; name="${safe_field}"; filename="${safe_filename}"\r\n')
+		body.write_string('Content-Type: application/octet-stream\r\n\r\n')
+		body.write_string(content)
+		body.write_string('\r\n')
+	}
+
+	body.write_string('--${boundary}--\r\n')
+
+	mut req := http.new_request(.post, url, body.str())
+	req.add_custom_header('Content-Type', 'multipart/form-data; boundary=${boundary}') or {
+		return err
+	}
+	for k, v in headers {
+		req.add_custom_header(k, v) or { return err }
+	}
+	return req.do()
+}
+
+// stream_lines fetches an endpoint and iterates over lines in the response, calling on_line.
+// Return false from on_line to stop iteration.
+pub fn stream_lines(url string, headers map[string]string, on_line fn (line string) bool) ! {
+	body := get_text(url, headers)!
+	for line in body.split_into_lines() {
+		if !on_line(line) {
+			break
+		}
+	}
+}
+
+// stream_sse fetches a Server-Sent Events stream and parses event / data pairs.
+// Return false from on_event to stop listening.
+pub fn stream_sse(url string, headers map[string]string, on_event fn (event string, data string) bool) ! {
+	mut sse_headers := headers.clone()
+	sse_headers['Accept'] = 'text/event-stream'
+	body := get_text(url, sse_headers)!
+
+	mut cur_event := 'message'
+	mut data_lines := []string{}
+
+	for line in body.split_into_lines() {
+		trimmed := line.trim_space()
+		if trimmed.len == 0 {
+			if data_lines.len > 0 {
+				payload := data_lines.join('\n')
+				cont := on_event(cur_event, payload)
+				cur_event = 'message'
+				data_lines.clear()
+				if !cont {
+					break
+				}
+			}
+			continue
+		}
+		if trimmed.starts_with('event:') {
+			cur_event = trimmed[6..].trim_space()
+		} else if trimmed.starts_with('data:') {
+			data_lines << trimmed[5..].trim_space()
+		}
+	}
+	if data_lines.len > 0 {
+		on_event(cur_event, data_lines.join('\n'))
+	}
 }

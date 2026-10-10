@@ -460,3 +460,61 @@ fn test_struct_schema_evolution() {
 	assert reloaded.tags == ['api', 'v2']
 	assert reloaded.custom_meta['region'] == 'us-east-1'
 }
+
+fn test_state_history() {
+	mut h := new_history[string]('v1', 5)
+	assert h.get() == 'v1'
+	assert !h.can_undo()
+	assert !h.can_redo()
+
+	h.push('v2')
+	h.push('v3')
+	assert h.get() == 'v3'
+	assert h.can_undo()
+	assert !h.can_redo()
+
+	undone := h.undo() or { panic(err) }
+	assert undone == 'v2'
+	assert h.get() == 'v2'
+	assert h.can_redo()
+
+	undone2 := h.undo() or { panic(err) }
+	assert undone2 == 'v1'
+	assert !h.can_undo()
+
+	redone := h.redo() or { panic(err) }
+	assert redone == 'v2'
+	assert h.get() == 'v2'
+
+	// Pushing a new branch clears redo future
+	h.push('v4')
+	assert !h.can_redo()
+	assert h.get() == 'v4'
+}
+
+fn test_security_sanitization() {
+	// Path traversal attempts must be sanitized to safe file basenames
+	assert sanitize_app_name('../../etc/passwd') == 'passwd'
+	assert sanitize_app_name('..') == 'app'
+	assert sanitize_app_name('/') == 'app'
+	assert sanitize_app_name('   ') == 'app'
+	assert sanitize_app_name('my_app') == 'my_app'
+
+	assert sanitize_state_filename('../../../secrets.json', 'default.json') == 'secrets.json'
+	assert sanitize_state_filename('..', 'default.json') == 'default.json'
+	assert sanitize_state_filename('', 'default.json') == 'default.json'
+
+	// Path generation must stay inside app directory
+	safe_path := get_state_path('../../bad_app', '../../bad_file.json', .data)
+	assert !safe_path.contains('..')
+	assert safe_path.ends_with(os.join_path('bad_app', 'bad_file.json'))
+
+	// Table name injection validation
+	if _ := sanitize_table_name('users; DROP TABLE app_state; --') {
+		panic('expected error on table name SQL injection')
+	}
+	if _ := sanitize_table_name('123_invalid_start') {
+		panic('expected error on invalid table starting digit')
+	}
+	assert sanitize_table_name('valid_table_123') or { '' } == 'valid_table_123'
+}

@@ -60,10 +60,27 @@ pub fn sanitize_table_name(name string) !string {
 	return clean
 }
 
+// sanitize_app_name strips directory traversal elements, slashes, and null bytes from an application name.
+pub fn sanitize_app_name(name string) string {
+	clean := os.file_name(name.trim_space()).replace('\x00', '')
+	if clean == '..' || clean == '.' || clean.len == 0 {
+		return 'app'
+	}
+	return clean
+}
+
+// sanitize_state_filename strips directory traversal elements and null bytes from a state filename.
+pub fn sanitize_state_filename(name string, default_fname string) string {
+	clean := os.file_name(name.trim_space()).replace('\x00', '')
+	if clean == '..' || clean == '.' || clean.len == 0 {
+		return default_fname
+	}
+	return clean
+}
+
 // get_app_dir returns the OS recommended directory for the given application.
 pub fn get_app_dir(app_name string, loc StateLocation) string {
-	clean_name := app_name.trim_space()
-	name := if clean_name.len > 0 { clean_name } else { 'app' }
+	name := sanitize_app_name(app_name)
 
 	$if macos {
 		base := os.join_path(os.home_dir(), 'Library', 'Application Support', name)
@@ -74,6 +91,9 @@ pub fn get_app_dir(app_name string, loc StateLocation) string {
 
 		if !os.exists(target) {
 			os.mkdir_all(target) or {}
+			$if !windows {
+				os.chmod(target, 0o700) or {}
+			}
 		}
 		return target
 	}
@@ -112,6 +132,9 @@ pub fn get_app_dir(app_name string, loc StateLocation) string {
 
 	if !os.exists(target) {
 		os.mkdir_all(target) or {}
+		$if !windows {
+			os.chmod(target, 0o700) or {}
+		}
 	}
 	return target
 }
@@ -119,7 +142,7 @@ pub fn get_app_dir(app_name string, loc StateLocation) string {
 // get_state_path resolves the complete absolute filepath for an application state file.
 pub fn get_state_path(app_name string, filename string, loc StateLocation) string {
 	dir := get_app_dir(app_name, loc)
-	fname := if filename.trim_space().len > 0 { filename.trim_space() } else { default_state_file }
+	fname := sanitize_state_filename(filename, default_state_file)
 	return os.join_path(dir, fname)
 }
 
@@ -131,6 +154,9 @@ fn atomic_write(target_path string, content string) ! {
 	parent := os.dir(target_path)
 	if !os.exists(parent) {
 		os.mkdir_all(parent)!
+		$if !windows {
+			os.chmod(parent, 0o700) or {}
+		}
 	}
 	tmp_path := '${target_path}.tmp.${os.getpid()}.${time.now().unix_nano()}'
 	mut f := os.create(tmp_path)!
@@ -141,6 +167,7 @@ fn atomic_write(target_path string, content string) ! {
 	}
 	f.flush()
 	$if !windows {
+		os.chmod(tmp_path, 0o600) or {}
 		C.fsync(f.fd)
 	}
 	f.close()
@@ -846,4 +873,81 @@ pub fn (mut kv KeyValueState) rollback() ! {
 	content := os.read_file(bak_path)!
 	kv.values = json2.decode[map[string]string](content)!
 	atomic_write(kv.path(), content)!
+}
+
+// ============================================================================
+// StateHistory: Undo / Redo History Stack for RAD App State
+// ============================================================================
+
+// StateHistory manages bounded undo and redo snapshots for any application state type T.
+pub struct StateHistory[T] {
+pub:
+	max_depth int = 50
+pub mut:
+	past    []T
+	current T
+	future  []T
+}
+
+// new_history creates a StateHistory initialized with an initial state and max history depth.
+pub fn new_history[T](initial T, max_depth int) StateHistory[T] {
+	depth := if max_depth <= 0 { 50 } else { max_depth }
+	return StateHistory[T]{
+		max_depth: depth
+		past:      []T{}
+		current:   initial
+		future:    []T{}
+	}
+}
+
+// get returns the current active state
+pub fn (h StateHistory[T]) get() T {
+	return h.current
+}
+
+// push commits a new state snapshot, archiving the current state to the undo history
+// and discarding any previous redo branch.
+pub fn (mut h StateHistory[T]) push(new_state T) {
+	h.past << h.current
+	if h.past.len > h.max_depth {
+		h.past.delete(0)
+	}
+	h.current = new_state
+	h.future.clear()
+}
+
+// can_undo returns whether an undo step is available
+pub fn (h StateHistory[T]) can_undo() bool {
+	return h.past.len > 0
+}
+
+// can_redo returns whether a redo step is available
+pub fn (h StateHistory[T]) can_redo() bool {
+	return h.future.len > 0
+}
+
+// undo reverts to the previous snapshot, moving the current state to future (redo)
+pub fn (mut h StateHistory[T]) undo() !T {
+	if h.past.len == 0 {
+		return error('no state to undo')
+	}
+	h.future << h.current
+	h.current = h.past.pop()
+	return h.current
+}
+
+// redo restores the undone state, moving the current state back to past (undo)
+pub fn (mut h StateHistory[T]) redo() !T {
+	if h.future.len == 0 {
+		return error('no state to redo')
+	}
+	h.past << h.current
+	h.current = h.future.pop()
+	return h.current
+}
+
+// clear resets undo/redo history, keeping only the current state
+pub fn (mut h StateHistory[T]) clear() {
+	h.past.clear()
+	h.future.clear()
 }

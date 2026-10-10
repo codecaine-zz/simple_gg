@@ -286,7 +286,7 @@ pub fn aes_ctr_xor(key []u8, iv []u8, data []u8) ![]u8 {
 	if iv.len != aes.block_size {
 		return error('IV must be ${aes.block_size} bytes')
 	}
-	block := aes.new_cipher(key)!
+	block := aes.new_cipher(key)
 	mut stream := cipher.new_ctr(block, iv)
 	mut out := []u8{len: data.len}
 	stream.xor_key_stream(mut out, data)

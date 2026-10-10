@@ -368,7 +368,7 @@ pub fn exec_timeout(cmd string, timeout_ms int) ExecTimeoutResult {
 		}
 	}
 	mut p := shell_process(cmd)
-	p.set_redirect_stdio_merged()
+	p.set_redirect_stdio()
 	p.use_pgroup = true
 	p.run()
 	deadline := time.now().add(timeout_ms * time.millisecond)

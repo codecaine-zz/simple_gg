@@ -301,13 +301,11 @@ fn call_builtin(name string, args []json2.Any) !json2.Any {
 		'abs' {
 			if is_intlike(a) {
 				v := as_i64(a) or { 0 }
-				return json2.Any(if v < 0 {
-					-v
-				} else {
-					v
-				})
+				val := if v < 0 { -v } else { v }
+				return json2.Any(val)
 			}
-			return json2.Any(math.abs(as_num(a) or { 0.0 }))
+			fval := math.abs(as_num(a) or { 0.0 })
+			return json2.Any(fval)
 		}
 		'int' {
 			return json2.Any(as_i64(a) or { i64(0) })

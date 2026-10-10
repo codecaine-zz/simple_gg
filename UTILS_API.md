@@ -1,11 +1,11 @@
 # V Developer Utility Suite (`vlang_utils`) - Complete API Reference
 
-Welcome to the comprehensive API reference manual for the **40 production-grade developer utility modules** in `vlang_utils`.
+Welcome to the comprehensive API reference manual for the **45 production-grade developer utility modules** in `vlang_utils`.
 
 Every module is zero-dependency, self-contained, and designed for Rapid Application Development (RAD). You can import any module directly across GUI apps, CLI tools, services, and background workers (e.g. `import strutils`, `import sqliteutils`, `import cacheutils`).
 
 > [!NOTE]
-> **V Compiler Compatibility**: All 40 modules in `vlang_utils` are verified and tested against **V 0.5.2** (`9e9f7f05`). This includes full support for `json2` streaming serialization, generics, and native SQLite bindings. For compiler maintenance, `v up` troubleshooting, and `VFLAGS` setup, refer to [`README.md`](README.md#5-v-compiler-version--v-up-maintenance).
+> **V Compiler Compatibility**: All 45 modules in `vlang_utils` are verified and tested against **V 0.5.2** (`9e9f7f05`). This includes full support for `json2` streaming serialization, generics, and native SQLite bindings. For compiler maintenance, `v up` troubleshooting, and `VFLAGS` setup, refer to [`README.md`](README.md#5-v-compiler-version--v-up-maintenance).
 
 ---
 
@@ -26,9 +26,9 @@ Examples that contact a website, read a file, use the clipboard, or ask a questi
 
 ### 🚀 Ready-to-Run Demos
 
-All 40 utility modules have standalone, fully functional demo scripts located in the [`demos/`](demos/) directory.
+All 45 utility modules have standalone, fully functional demo scripts located in the [`demos/`](demos/) directory.
 
-- **Run all 40 demos sequentially with execution timing:**
+- **Run all 45 demos sequentially with execution timing:**
   ```bash
   v run demos/run_all_demos.v
   ```
@@ -42,6 +42,7 @@ All 40 utility modules have standalone, fully functional demo scripts located in
 | [`cliutils`](#cliutils-api) | [`demo_cliutils.v`](demos/demo_cliutils.v) | `v run demos/demo_cliutils.v` |
 | [`colorutils`](#colorutils-api) | [`demo_colorutils.v`](demos/demo_colorutils.v) | `v run demos/demo_colorutils.v` |
 | [`compressutils`](#compressutils-api) | [`demo_compressutils.v`](demos/demo_compressutils.v) | `v run demos/demo_compressutils.v` |
+| [`configutils`](#configutils-api) | [`demo_configutils.v`](demos/demo_configutils.v) | `v run demos/demo_configutils.v` |
 | [`cronutils`](#cronutils-api) | [`demo_cronutils.v`](demos/demo_cronutils.v) | `v run demos/demo_cronutils.v` |
 | [`cryptoutils`](#cryptoutils-api) | [`demo_cryptoutils.v`](demos/demo_cryptoutils.v) | `v run demos/demo_cryptoutils.v` |
 | [`diffutils`](#diffutils-api) | [`demo_diffutils.v`](demos/demo_diffutils.v) | `v run demos/demo_diffutils.v` |
@@ -52,6 +53,7 @@ All 40 utility modules have standalone, fully functional demo scripts located in
 | [`graphutils`](#graphutils-api) | [`demo_graphutils.v`](demos/demo_graphutils.v) | `v run demos/demo_graphutils.v` |
 | [`htmlutils`](#htmlutils-api) | [`demo_htmlutils.v`](demos/demo_htmlutils.v) | `v run demos/demo_htmlutils.v` |
 | [`httputils`](#httputils-api) | [`demo_httputils.v`](demos/demo_httputils.v) | `v run demos/demo_httputils.v` |
+| [`idutils`](#idutils-api) | [`demo_idutils.v`](demos/demo_idutils.v) | `v run demos/demo_idutils.v` |
 | [`jsonutils`](#jsonutils-api) | [`demo_jsonutils.v`](demos/demo_jsonutils.v) | `v run demos/demo_jsonutils.v` |
 | [`jwtutils`](#jwtutils-api) | [`demo_jwtutils.v`](demos/demo_jwtutils.v) | `v run demos/demo_jwtutils.v` |
 | [`logutils`](#logutils-api) | [`demo_logutils.v`](demos/demo_logutils.v) | `v run demos/demo_logutils.v` |
@@ -59,9 +61,11 @@ All 40 utility modules have standalone, fully functional demo scripts located in
 | [`mathutils`](#mathutils-api) | [`demo_mathutils.v`](demos/demo_mathutils.v) | `v run demos/demo_mathutils.v` |
 | [`mockutils`](#mockutils-api) | [`demo_mockutils.v`](demos/demo_mockutils.v) | `v run demos/demo_mockutils.v` |
 | [`netutils`](#netutils-api) | [`demo_netutils.v`](demos/demo_netutils.v) | `v run demos/demo_netutils.v` |
+| [`procutils`](#procutils-api) | [`demo_procutils.v`](demos/demo_procutils.v) | `v run demos/demo_procutils.v` |
 | [`regexutils`](#regexutils-api) | [`demo_regexutils.v`](demos/demo_regexutils.v) | `v run demos/demo_regexutils.v` |
 | [`semverutils`](#semverutils-api) | [`demo_semverutils.v`](demos/demo_semverutils.v) | `v run demos/demo_semverutils.v` |
 | [`sliceutils`](#sliceutils-api) | [`demo_sliceutils.v`](demos/demo_sliceutils.v) | `v run demos/demo_sliceutils.v` |
+| [`sqlbuilder`](#sqlbuilder-api) | [`demo_sqlbuilder.v`](demos/demo_sqlbuilder.v) | `v run demos/demo_sqlbuilder.v` |
 | [`sqliteutils`](#sqliteutils-api) | [`demo_sqliteutils.v`](demos/demo_sqliteutils.v) | `v run demos/demo_sqliteutils.v` |
 | [`stateutils`](#stateutils-api) | [`demo_stateutils.v`](demos/demo_stateutils.v) | `v run demos/demo_stateutils.v` |
 | [`statutils`](#statutils-api) | [`demo_statutils.v`](demos/demo_statutils.v) | `v run demos/demo_statutils.v` |
@@ -70,6 +74,7 @@ All 40 utility modules have standalone, fully functional demo scripts located in
 | [`sysutils`](#sysutils-api) | [`demo_sysutils.v`](demos/demo_sysutils.v) | `v run demos/demo_sysutils.v` |
 | [`tarutils`](#tarutils-api) | [`demo_tarutils.v`](demos/demo_tarutils.v) | `v run demos/demo_tarutils.v` |
 | [`templateutils`](#templateutils-api) | [`demo_templateutils.v`](demos/demo_templateutils.v) | `v run demos/demo_templateutils.v` |
+| [`testutils`](#testutils-api) | [`demo_testutils.v`](demos/demo_testutils.v) | `v run demos/demo_testutils.v` |
 | [`timeutils`](#timeutils-api) | [`demo_timeutils.v`](demos/demo_timeutils.v) | `v run demos/demo_timeutils.v` |
 | [`tomlutils`](#tomlutils-api) | [`demo_tomlutils.v`](demos/demo_tomlutils.v) | `v run demos/demo_tomlutils.v` |
 | [`urlutils`](#urlutils-api) | [`demo_urlutils.v`](demos/demo_urlutils.v) | `v run demos/demo_urlutils.v` |
@@ -84,7 +89,7 @@ All 40 utility modules have standalone, fully functional demo scripts located in
 
 ### ⚡ Quick Jump Index
 
-[`archiveutils`](#archiveutils-api) • [`asyncutils`](#asyncutils-api) • [`bitutils`](#bitutils-api) • [`cacheutils`](#cacheutils-api) • [`cliutils`](#cliutils-api) • [`colorutils`](#colorutils-api) • [`compressutils`](#compressutils-api) • [`cronutils`](#cronutils-api) • [`cryptoutils`](#cryptoutils-api) • [`diffutils`](#diffutils-api) • [`envutils`](#envutils-api) • [`eventutils`](#eventutils-api) • [`fileutils`](#fileutils-api) • [`flowutils`](#flowutils-api) • [`graphutils`](#graphutils-api) • [`htmlutils`](#htmlutils-api) • [`httputils`](#httputils-api) • [`jsonutils`](#jsonutils-api) • [`jwtutils`](#jwtutils-api) • [`logutils`](#logutils-api) • [`markdownutils`](#markdownutils-api) • [`mathutils`](#mathutils-api) • [`mockutils`](#mockutils-api) • [`netutils`](#netutils-api) • [`regexutils`](#regexutils-api) • [`semverutils`](#semverutils-api) • [`sliceutils`](#sliceutils-api) • [`sqliteutils`](#sqliteutils-api) • [`stateutils`](#stateutils-api) • [`statutils`](#statutils-api) • [`structutils`](#structutils-api) • [`strutils`](#strutils-api) • [`sysutils`](#sysutils-api) • [`tarutils`](#tarutils-api) • [`templateutils`](#templateutils-api) • [`timeutils`](#timeutils-api) • [`tomlutils`](#tomlutils-api) • [`urlutils`](#urlutils-api) • [`validutils`](#validutils-api) • [`webutils`](#webutils-api) • [Advanced Additions & Enhancements](#advanced-additions--enhancements)
+[`archiveutils`](#archiveutils-api) • [`asyncutils`](#asyncutils-api) • [`bitutils`](#bitutils-api) • [`cacheutils`](#cacheutils-api) • [`cliutils`](#cliutils-api) • [`colorutils`](#colorutils-api) • [`compressutils`](#compressutils-api) • [`configutils`](#configutils-api) • [`cronutils`](#cronutils-api) • [`cryptoutils`](#cryptoutils-api) • [`diffutils`](#diffutils-api) • [`envutils`](#envutils-api) • [`eventutils`](#eventutils-api) • [`fileutils`](#fileutils-api) • [`flowutils`](#flowutils-api) • [`graphutils`](#graphutils-api) • [`htmlutils`](#htmlutils-api) • [`httputils`](#httputils-api) • [`idutils`](#idutils-api) • [`jsonutils`](#jsonutils-api) • [`jwtutils`](#jwtutils-api) • [`logutils`](#logutils-api) • [`markdownutils`](#markdownutils-api) • [`mathutils`](#mathutils-api) • [`mockutils`](#mockutils-api) • [`netutils`](#netutils-api) • [`procutils`](#procutils-api) • [`regexutils`](#regexutils-api) • [`semverutils`](#semverutils-api) • [`sliceutils`](#sliceutils-api) • [`sqlbuilder`](#sqlbuilder-api) • [`sqliteutils`](#sqliteutils-api) • [`stateutils`](#stateutils-api) • [`statutils`](#statutils-api) • [`structutils`](#structutils-api) • [`strutils`](#strutils-api) • [`sysutils`](#sysutils-api) • [`tarutils`](#tarutils-api) • [`templateutils`](#templateutils-api) • [`testutils`](#testutils-api) • [`timeutils`](#timeutils-api) • [`tomlutils`](#tomlutils-api) • [`urlutils`](#urlutils-api) • [`validutils`](#validutils-api) • [`webutils`](#webutils-api) • [Advanced Additions & Enhancements](#advanced-additions--enhancements)
 
 ---
 
@@ -95,6 +100,7 @@ All 40 utility modules have standalone, fully functional demo scripts located in
 - **[`cacheutils`](#cacheutils-api)** — In-memory LRU and TTL caching engines
   - [LRU (Least-Recently-Used) Cache](#1-lru-least-recently-used-cache)
   - [TTL (Time-To-Live) Cache](#2-ttl-time-to-live-cache)
+- **[`configutils`](#configutils-api)** — Hierarchical layered configuration manager (defaults -> TOML/JSON -> ENV -> CLI)
 - **[`fileutils`](#fileutils-api)** — High-level file, JSON, CSV, and directory operations
   - [Struct Helpers](#struct-helpers)
   - [Text File Helpers](#text-file-helpers)
@@ -103,6 +109,7 @@ All 40 utility modules have standalone, fully functional demo scripts located in
   - [JSON Helpers](#json-helpers)
   - [File Operations & CSV Helpers](#file-operations--csv-helpers)
 - **[`jsonutils`](#jsonutils-api)** — RFC 6901 JSON Pointer, RFC 7386 Merge Patch, canonical encoding, diff & flatten
+- **[`sqlbuilder`](#sqlbuilder-api)** — Fluent, composable SQL query builder for SELECT, INSERT, UPDATE, DELETE
 - **[`sqliteutils`](#sqliteutils-api)** — SQLite persistence, KV store, JSON document store, CRUD & migrations
   - [Connection & Database Management](#connection--database-management)
   - [Key-Value Store Helpers](#key-value-store-helpers)
@@ -113,11 +120,12 @@ All 40 utility modules have standalone, fully functional demo scripts located in
   - [Extended JSON Document Store Helpers](#extended-json-document-store-helpers)
   - [Query Helpers](#query-helpers)
   - [Column Management Helpers](#column-management-helpers)
-- **[`stateutils`](#stateutils-api)** — Atomic crash-proof AppStateStore & KeyValueState with auto-save & rollback
+- **[`stateutils`](#stateutils-api)** — Atomic crash-proof AppStateStore, KeyValueState & StateHistory with auto-save & rollback
 
 #### 2. Strings, Collections & Math
 
 - **[`bitutils`](#bitutils-api)** — Dynamic BitSet, popcount, bitwise operations, binary string conversions
+- **[`idutils`](#idutils-api)** — Modern unique IDs: ULID, Snowflake (64-bit distributed), and Sqids integer obfuscation
 - **[`mathutils`](#mathutils-api)** — 2D mathematics, spatial geometry, interpolation, clamping, and number theory
 - **[`sliceutils`](#sliceutils-api)** — Generic slice operations (unique, chunk, flatten, partition, sample, shuffle)
 - **[`statutils`](#statutils-api)** — Statistical analysis, linear regression, variance, quartiles, outlier detection
@@ -134,6 +142,7 @@ All 40 utility modules have standalone, fully functional demo scripts located in
   - [Dotenv (.env) Persistence](#envutils-dotenv)
   - [String Interpolation](#envutils-expansion)
 - **[`logutils`](#logutils-api)** — Leveled structured logging (.debug, .info, .warn, .error, .fatal)
+- **[`procutils`](#procutils-api)** — Subprocess management with real-time stdout/stderr line streaming, timeouts, pipelines
 - **[`sysutils`](#sysutils-api)** — CPU/RAM/disk telemetry, system uptime, safe command execution, clipboard
 
 #### 4. Network, HTTP & Web
@@ -193,6 +202,7 @@ All 40 utility modules have standalone, fully functional demo scripts located in
   - [Mock Data Structures](#mockutils-data-structures)
   - [Mock Functions](#mockutils-functions)
 - **[`tarutils`](#tarutils-api)** — In-memory and on-disk TAR archive creation, unpacking, directory archiving
+- **[`testutils`](#testutils-api)** — Testing harness: isolated temp directories, scoped ENV overrides, assertions
 
 #### 8. Advanced Extensions
 
@@ -8040,8 +8050,342 @@ println('Benchmark result: ${var_bm.name}')
 
 ---
 
+<a id="configutils"></a><a id="configutils-api"></a>
+
+# configutils API
+
+**Plain-language purpose:** Use `configutils` for 12-factor application configuration. It merges defaults, configuration files (TOML/JSON), environment variables, and CLI flags into a single unified manager with type-safe accessors and complete provenance tracking (knowing whether a value came from a default, file, ENV, or CLI).
+
+Import statement:
+
+```v
+import configutils
+```
+
+### Quick Start Example
+
+```v
+import configutils
+
+// Initialize with environment variable prefix (e.g. APP_PORT)
+mut cfg := configutils.new_manager('APP')
+
+// 1. Establish defaults
+cfg.set_default('port', '8080')
+cfg.set_default('host', '127.0.0.1')
+cfg.set_default('debug', 'false')
+
+// 2. Load configuration file (TOML or JSON) if present
+cfg.load_file('app.toml') or {}
+
+// 3. Merge environment variables (APP_PORT, APP_HOST, etc.)
+cfg.load_env()
+
+// 4. Override with CLI arguments (--port 9000 --debug)
+cfg.load_cli_args(['--port', '9000', '--debug'])!
+
+// Type-safe access
+port := cfg.get_int('port')! // 9000
+host := cfg.get('host') or { '127.0.0.1' }
+debug := cfg.get_bool('debug')! // true
+source := cfg.source_of('port') // "cli"
+```
+
+### Reference: Methods & Functions
+
+- `new_manager(env_prefix string) &ConfigManager`: Creates a new layered configuration manager with an optional environment variable prefix.
+- `(mut cm ConfigManager) set_default(key string, val string)`: Sets a base default value for a key.
+- `(mut cm ConfigManager) load_file(path string) !`: Loads and parses a `.toml` or `.json` configuration file, overriding defaults.
+- `(mut cm ConfigManager) load_env()`: Inspects environment variables matching `PREFIX_KEY` (case-insensitive) and overrides existing keys.
+- `(mut cm ConfigManager) load_cli_args(args []string) !`: Parses `--key value` or `--flag` command-line arguments and overrides existing keys.
+- `(cm &ConfigManager) get(key string) ?string`: Retrieves a configuration value by key.
+- `(cm &ConfigManager) get_or_default(key string, default_val string) string`: Retrieves a value or falls back to a provided default.
+- `(cm &ConfigManager) get_int(key string) !int`: Retrieves and parses a value as `int`.
+- `(cm &ConfigManager) get_i64(key string) !i64`: Retrieves and parses a value as `i64`.
+- `(cm &ConfigManager) get_f64(key string) !f64`: Retrieves and parses a value as `f64`.
+- `(cm &ConfigManager) get_bool(key string) !bool`: Retrieves and parses a boolean value (`true`/`false`, `1`/`0`, `yes`/`no`).
+- `(cm &ConfigManager) get_strings(key string) ![]string`: Retrieves and splits a comma-delimited string into a slice.
+- `(cm &ConfigManager) source_of(key string) string`: Returns the provenance source of a key (`"default"`, `"file"`, `"env"`, `"cli"`, or `"unknown"`).
+- `(cm &ConfigManager) all() map[string]string`: Returns a complete copy of all resolved configuration key-value pairs.
+- `(cm &ConfigManager) has(key string) bool`: Checks if a configuration key exists.
+
+---
+
+<a id="idutils"></a><a id="idutils-api"></a>
+
+# idutils API
+
+**Plain-language purpose:** Use `idutils` to generate and parse collision-resistant, sortable, distributed, and URL-friendly unique identifiers without external services.
+
+Import statement:
+
+```v
+import idutils
+```
+
+### Quick Start Example
+
+```v
+import idutils
+
+// 1. ULID: 128-bit lexically sortable, Crockford Base32 ID
+id := idutils.ulid()
+println('ULID: ${id}') // e.g. "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+ts := idutils.ulid_timestamp(id)
+println('Timestamp (ms): ${ts}')
+
+// Monotonic ULID generator (guarantees order within the same millisecond)
+mut gen := idutils.new_monotonic_ulid_generator()
+id1 := gen.generate()
+id2 := gen.generate()
+
+// 2. Twitter Snowflake: 64-bit distributed integer ID
+mut sf := idutils.new_snowflake(1, 1)!
+snow_id := sf.next_id()!
+println('Snowflake ID: ${snow_id}')
+parts := idutils.parse_snowflake(snow_id)
+println('Worker: ${parts.worker_id}, Time: ${parts.timestamp_ms}')
+
+// 3. Sqids: YouTube-style URL obfuscation for integers
+sq := idutils.new_sqids(min_length: 8)!
+encoded := sq.encode([42, 1337])!
+println('Sqid: ${encoded}') // e.g. "b7xK9nQ2"
+decoded := sq.decode(encoded) // [42, 1337]
+```
+
+### Reference: Methods & Functions
+
+- `ulid() string`: Generates a standard 26-character ULID using the current UTC timestamp and CSPRNG randomness.
+- `ulid_at(timestamp_ms u64) string`: Generates a ULID for a specific Unix epoch timestamp in milliseconds.
+- `ulid_timestamp(id string) u64`: Extracts the 48-bit millisecond timestamp from an existing ULID string.
+- `is_valid_ulid(id string) bool`: Validates if a string adheres to canonical ULID format and Crockford Base32 alphabet.
+- `new_monotonic_ulid_generator() &MonotonicULIDGenerator`: Creates a stateful generator that guarantees strict ascending order for IDs generated within the same millisecond.
+- `(mut g MonotonicULIDGenerator) generate() string`: Generates a monotonically increasing ULID.
+- `new_snowflake(worker_id u64, datacenter_id u64) !&Snowflake`: Initializes a 64-bit distributed Snowflake generator (supports up to 32 datacenters and 32 workers).
+- `(mut s Snowflake) next_id() !u64`: Returns the next 64-bit Snowflake identifier.
+- `(mut s Snowflake) next_id_string() !string`: Returns the next Snowflake ID formatted as a string.
+- `parse_snowflake(id u64) SnowflakeParts`: Deconstructs a 64-bit Snowflake into `timestamp_ms`, `datacenter_id`, `worker_id`, and `sequence`.
+- `new_sqids(config SqidsConfig) !&Sqids`: Initializes an obfuscator with custom alphabet, minimum length, and blocklist.
+- `(s &Sqids) encode(numbers []u64) !string`: Encodes an array of unsigned integers into a URL-friendly Sqid.
+- `(s &Sqids) decode(id string) []u64`: Decodes a Sqid string back into its original array of integers.
+
+---
+
+<a id="procutils"></a><a id="procutils-api"></a>
+
+# procutils API
+
+**Plain-language purpose:** Use `procutils` for advanced subprocess management. Stream stdout and stderr in real-time line-by-line, enforce strict process timeouts with auto-kill, and execute piped shell workflows safely.
+
+Import statement:
+
+```v
+import procutils
+```
+
+### Quick Start Example
+
+```v
+import procutils
+
+// 1. Real-time stdout & stderr streaming
+procutils.stream_lines('git status', fn (line string, is_stderr bool) {
+    if is_stderr {
+        eprintln('[STDERR] ${line}')
+    } else {
+        println('[STDOUT] ${line}')
+    }
+})!
+
+// 2. Timeout-bounded process execution
+res := procutils.exec_timeout('sleep 5', timeout_ms: 1000)
+if res.timed_out {
+    println('Process exceeded 1s deadline and was terminated.')
+}
+
+// 3. Multi-stage piped commands
+output := procutils.pipeline(['cat /etc/hosts', 'grep localhost', 'wc -l'])!
+println('Matching lines: ${output.trim_space()}')
+```
+
+### Reference: Methods & Functions
+
+- `stream_lines(cmd string, on_line fn (line string, is_stderr bool)) !`: Executes a shell command and delivers each stdout and stderr line to the callback in real time.
+- `exec_timeout(cmd string, config ExecTimeoutConfig) ProcessResult`: Runs a subprocess with a timeout deadline in milliseconds. Automatically sends `SIGKILL` to the process group if execution exceeds the deadline.
+- `pipeline(cmds []string) !string`: Chains multiple commands together in a pipeline, feeding the stdout of each stage as the stdin of the next.
+- `ProcessResult`: Struct containing `output string`, `exit_code int`, `timed_out bool`, `duration_ms i64`.
+
+---
+
+<a id="sqlbuilder"></a><a id="sqlbuilder-api"></a>
+
+# sqlbuilder API
+
+**Plain-language purpose:** Use `sqlbuilder` to construct SQL queries programmatically with a fluent, chainable API that automatically handles parameterized placeholders (`?`) and prevents SQL injection.
+
+Import statement:
+
+```v
+import sqlbuilder
+```
+
+### Quick Start Example
+
+```v
+import sqlbuilder
+
+// 1. Fluent SELECT Query with Filtering & Pagination
+query, params := sqlbuilder.select_from('users')
+    .columns(['id', 'username', 'email', 'status'])
+    .where_eq('status', 'active')
+    .where_gte('age', 18)
+    .where_like('email', '%@company.com')
+    .order_by('created_at', .desc)
+    .paginate(page: 1, page_size: 25)
+    .to_sql()
+
+println('SQL: ${query}')
+// SELECT id, username, email, status FROM users WHERE status = ? AND age >= ? AND email LIKE ? ORDER BY created_at DESC LIMIT 25 OFFSET 0
+println('Params: ${params}')
+// ['active', '18', '%@company.com']
+
+// 2. INSERT Query
+ins_query, ins_params := sqlbuilder.insert_into('audit_logs')
+    .row({
+        'user_id': '42'
+        'action':  'password_reset'
+    })
+    .to_sql()
+
+// 3. UPDATE Query
+upd_query, upd_params := sqlbuilder.update_table('users')
+    .set('status', 'suspended')
+    .where_eq('id', '42')
+    .to_sql()
+
+// 4. DELETE Query
+del_query, del_params := sqlbuilder.delete_from('sessions')
+    .where_eq('expired', '1')
+    .to_sql()
+```
+
+### Reference: Methods & Functions
+
+- `select_from(table string) &SelectQuery`: Begins building a `SELECT` statement.
+- `(q &SelectQuery) columns(cols []string) &SelectQuery`: Specifies the column list (defaults to `*`).
+- `(q &SelectQuery) where_eq(col string, val string) &SelectQuery`: Adds an `AND col = ?` clause.
+- `(q &SelectQuery) where_ne(col string, val string) &SelectQuery`: Adds an `AND col != ?` clause.
+- `(q &SelectQuery) where_gt(col string, val string) &SelectQuery`: Adds an `AND col > ?` clause.
+- `(q &SelectQuery) where_gte(col string, val string) &SelectQuery`: Adds an `AND col >= ?` clause.
+- `(q &SelectQuery) where_lt(col string, val string) &SelectQuery`: Adds an `AND col < ?` clause.
+- `(q &SelectQuery) where_lte(col string, val string) &SelectQuery`: Adds an `AND col <= ?` clause.
+- `(q &SelectQuery) where_like(col string, pattern string) &SelectQuery`: Adds an `AND col LIKE ?` clause.
+- `(q &SelectQuery) where_in(col string, values []string) &SelectQuery`: Adds an `AND col IN (?, ?, ...)` clause.
+- `(q &SelectQuery) order_by(col string, dir OrderDir) &SelectQuery`: Adds an `ORDER BY col ASC/DESC` clause.
+- `(q &SelectQuery) limit(n int) &SelectQuery`: Sets a row limit.
+- `(q &SelectQuery) offset(n int) &SelectQuery`: Sets a row offset.
+- `(q &SelectQuery) paginate(page int, page_size int) &SelectQuery`: Convenience method that calculates `limit` and `offset` for 1-based page numbers.
+- `(q &SelectQuery) to_sql() (string, []string)`: Compiles the builder into a parameterized SQL statement and an array of argument strings.
+- `insert_into(table string) &InsertQuery`: Begins building an `INSERT INTO` statement.
+- `(q &InsertQuery) row(data map[string]string) &InsertQuery`: Sets column-value pairs for insertion.
+- `update_table(table string) &UpdateQuery`: Begins building an `UPDATE` statement.
+- `(q &UpdateQuery) set(col string, val string) &UpdateQuery`: Sets a column to a new value.
+- `delete_from(table string) &DeleteQuery`: Begins building a `DELETE FROM` statement.
+
+---
+
+<a id="testutils"></a><a id="testutils-api"></a>
+
+# testutils API
+
+**Plain-language purpose:** Use `testutils` to write clean, reliable, and isolated integration tests. Automatically manages temporary directories and files with guaranteed cleanup, scopes environment variable overrides, and provides high-precision assertions.
+
+Import statement:
+
+```v
+import testutils
+import os
+```
+
+### Quick Start Example
+
+```v
+import testutils
+import os
+
+// 1. Isolated temporary directory with automatic recursive cleanup
+testutils.with_temp_dir(fn (dir string) ! {
+    testutils.write_temp_file(dir, 'config.json', '{"port": 8080}')!
+    data := testutils.read_temp_file(dir, 'config.json')!
+    testutils.assert_contains(data, '8080', 'port found in config')
+})!
+
+// 2. Scoped environment variable overrides (restores previous state upon return)
+testutils.with_env({'APP_ENV': 'testing', 'DEBUG': '1'}, fn () ! {
+    env := os.getenv('APP_ENV')
+    testutils.assert_eq(env, 'testing', 'env variable correctly scoped')
+})!
+
+// 3. Floating-point comparison with epsilon delta
+testutils.assert_in_delta(3.14159, 3.14, 0.01, 'approximate value')
+```
+
+### Reference: Methods & Functions
+
+- `with_temp_dir(cb fn (dir string) !) !`: Creates a uniquely named temporary sandbox directory, passes its path to `cb`, and removes it recursively when `cb` finishes or errors.
+- `with_temp_file(prefix string, suffix string, cb fn (path string) !) !`: Creates an isolated temporary file, invokes `cb`, and removes the file upon completion.
+- `write_temp_file(dir string, filename string, content string) !string`: Helper to safely create a file inside a test directory.
+- `read_temp_file(dir string, filename string) !string`: Helper to read file contents from a test directory.
+- `with_env(vars map[string]string, cb fn () !) !`: Temporarily sets environment variables for the duration of `cb`, then restores the previous environment state.
+- `assert_eq[T](actual T, expected T, msg string)`: Asserts equality between two generic values with descriptive failure messages.
+- `assert_ne[T](actual T, expected T, msg string)`: Asserts inequality between two generic values.
+- `assert_contains(haystack string, needle string, msg string)`: Asserts that a substring exists within a string.
+- `assert_in_delta(actual f64, expected f64, delta f64, msg string)`: Asserts that two floating-point numbers differ by no more than `delta`.
+
+---
+
 <a id="recent-enhancements-api"></a>
 ## Extended Enhancements to Existing Modules
+
+### `sqliteutils`
+- `select_rows_paged(db sqlite.DB, base_query string, page int, page_size int) !PagedResult`: Executes a paginated query, automatically calculating total count, total pages, current page, offset, has_next, has_prev, and returning the requested slice of rows.
+- `PagedResult`: Struct containing `rows []map[string]string`, `total_count int`, `page int`, `page_size int`, `total_pages int`, `has_next bool`, `has_prev bool`.
+- `transaction(mut db sqlite.DB, action fn (mut db sqlite.DB) !) !`: Safe transaction runner with auto-rollback.
+- `insert_many(mut db sqlite.DB, table string, rows []map[string]string) !int`: High-throughput atomic batch insert.
+
+### `stateutils`
+- `StateHistory[T]`: Generic undo/redo history stack with configurable capacity.
+- `new_state_history[T](initial T, max_history int) StateHistory[T]`: Initializes an undo/redo stack.
+- `(mut h StateHistory[T]) push(state T)`: Pushes a new state snapshot, clearing any subsequent redo history.
+- `(mut h StateHistory[T]) undo() ?T`: Reverts to the previous snapshot.
+- `(mut h StateHistory[T]) redo() ?T`: Re-applies a previously undone snapshot.
+- `(h StateHistory[T]) can_undo() bool`: Checks if undo steps are available.
+- `(h StateHistory[T]) can_redo() bool`: Checks if redo steps are available.
+- `(h StateHistory[T]) current() T`: Returns the active state.
+- `(mut h StateHistory[T]) clear(current T)`: Resets history to a single base state.
+
+### `cliutils`
+- `prompt_multiselect(prompt string, options []string) ![]string`: Interactive multi-choice prompt in the terminal, returns array of selected options.
+- `Spinner`: Terminal loading spinner with `new_spinner(msg)`, `step()`, `update(msg)`.
+- `confirm(prompt string, default_yes bool) bool`: Interactive Yes/No prompt.
+
+### `jsonutils`
+- `encode_ndjson[T](items []T) !string`: Serializes an array of structs into newline-delimited JSON (NDJSON).
+- `decode_ndjson[T](ndjson_str string) ![]T`: Parses newline-delimited JSON (NDJSON) string into an array of typed structs.
+- `each_ndjson_line[T](ndjson_str string, handler fn (item T) !) !`: Memory-efficient line-by-line streaming of NDJSON without loading all objects into memory at once.
+
+### `webutils`
+- `c.sse(event string, data string) !`: Streams a Server-Sent Event (SSE) frame (`event: ...\ndata: ...\n\n`) with `text/event-stream` headers.
+- `app.use_healthz(path string)`: Mounts standard RFC-ready `/healthz` or custom liveness probes returning JSON `{"status": "ok", "uptime_sec": ...}`.
+
+### `httputils`
+- `post_multipart(url string, form_fields map[string]string, file_field string, file_path string) !http.Response`: Direct multipart form upload with boundary generation.
+- `stream_lines(url string, on_line fn (line string) !) !`: Streams response body line-by-line as data arrives over HTTP socket.
+- `stream_sse(url string, on_event fn (event string, data string) !) !`: Consumes Server-Sent Events from an HTTP endpoint in real time.
+- `bearer_auth_header(token string) map[string]string`: Generate Bearer authorization map.
+- `basic_auth_header(user string, pass string) map[string]string`: Generate Basic authentication map.
+- `merge_headers(maps ...map[string]string) map[string]string`: Combine multiple HTTP header sets.
+- `is_success_status`, `is_redirect_status`, `is_client_error`, `is_server_error`: Fast status code inspection.
 
 ### `fileutils`
 - `write_file_atomic(path string, content string) !`: Crash-safe atomic writing via temporary file + atomic OS rename.
@@ -8066,20 +8410,6 @@ println('Benchmark result: ${var_bm.name}')
 - `secure_compare(a string, b string) bool`: Constant-time string comparison to prevent timing attacks.
 - `generate_ulid() string`: 26-character sortable unique identifier.
 - `generate_totp(secret string, counter u64, digits int) !string`: RFC 6238 Time-based One-Time Passwords.
-
-### `httputils`
-- `bearer_auth_header(token string) map[string]string`: Generate Bearer authorization map.
-- `basic_auth_header(user string, pass string) map[string]string`: Generate Basic authentication map.
-- `merge_headers(maps ...map[string]string) map[string]string`: Combine multiple HTTP header sets.
-- `is_success_status`, `is_redirect_status`, `is_client_error`, `is_server_error`: Fast status code inspection.
-
-### `cliutils`
-- `Spinner`: Terminal loading spinner with `new_spinner(msg)`, `step()`, `update(msg)`.
-- `confirm(prompt string, default_yes bool) bool`: Interactive Yes/No prompt.
-
-### `sqliteutils`
-- `transaction(mut db sqlite.DB, action fn (mut db sqlite.DB) !) !`: Safe transaction runner with auto-rollback.
-- `insert_many(mut db sqlite.DB, table string, rows []map[string]string) !int`: High-throughput atomic batch insert.
 
 ### `timeutils`
 - `parse_duration(s string) !time.Duration`: Parse human duration strings (`"1h 30m"`, `"500ms"`, `"45s"`).

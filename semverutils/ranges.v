@@ -111,13 +111,19 @@ fn expand(op string, p Partial) []Constraint {
 	if op == '^' && p.n == 2 && p.major > 0 {
 		hi = sv(p.major + 1, 0, 0, '0')
 	}
-	return match op {
-		'>' { [Constraint{'>=', sv(hi.major, hi.minor, hi.patch, '')}] }
-		'>=' { [Constraint{'>=', lo}] }
-		'<' { [Constraint{'<', sv(lo.major, lo.minor, 0, '0')}] }
-		'<=' { [Constraint{'<', hi}] }
-		else { [Constraint{'>=', lo}, Constraint{'<', hi}] }
+	mut res := []Constraint{}
+	if op == '>' {
+		res = [Constraint{'>=', sv(hi.major, hi.minor, hi.patch, '')}]
+	} else if op == '>=' {
+		res = [Constraint{'>=', lo}]
+	} else if op == '<' {
+		res = [Constraint{'<', sv(lo.major, lo.minor, 0, '0')}]
+	} else if op == '<=' {
+		res = [Constraint{'<', hi}]
+	} else {
+		res = [Constraint{'>=', lo}, Constraint{'<', hi}]
 	}
+	return res
 }
 
 fn split_op(tok string) (string, string) {

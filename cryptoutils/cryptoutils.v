@@ -162,7 +162,7 @@ pub fn aes_encrypt_cbc(key []u8, iv []u8, plaintext []u8) ![]u8 {
 		return error('IV must be ${aes.block_size} bytes')
 	}
 	padded := pkcs7_pad(plaintext, aes.block_size)
-	block := aes.new_cipher(key)!
+	block := aes.new_cipher(key)
 	mut enc := cipher.new_cbc(block, iv)
 	mut ciphertext := []u8{len: padded.len}
 	enc.encrypt_blocks(mut ciphertext, padded)
@@ -180,7 +180,7 @@ pub fn aes_decrypt_cbc(key []u8, iv []u8, ciphertext []u8) ![]u8 {
 	if ciphertext.len % aes.block_size != 0 || ciphertext.len == 0 {
 		return error('ciphertext length must be a non-zero multiple of ${aes.block_size}')
 	}
-	block := aes.new_cipher(key)!
+	block := aes.new_cipher(key)
 	mut dec := cipher.new_cbc(block, iv)
 	mut decrypted_padded := []u8{len: ciphertext.len}
 	dec.decrypt_blocks(mut decrypted_padded, ciphertext)

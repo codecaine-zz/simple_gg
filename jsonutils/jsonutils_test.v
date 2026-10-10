@@ -23,8 +23,8 @@ fn test_rfc6901_examples() {
 	assert jc(pointer_get(d, '/c%d')!) == '2'
 	assert jc(pointer_get(d, '/e^f')!) == '3'
 	assert jc(pointer_get(d, '/g|h')!) == '4'
-	assert jc(pointer_get(d, '/i\\j')!) == '5'
-	assert jc(pointer_get(d, '/k"l')!) == '6'
+	assert jc(pointer_get(d, '/i\\\\j')!) == '5'
+	assert jc(pointer_get(d, '/k\\"l')!) == '6'
 	assert jc(pointer_get(d, '/ ')!) == '7'
 	assert jc(pointer_get(d, '/m~0n')!) == '8'
 	if _ := pointer_get(d, '/foo/2') {
@@ -89,4 +89,30 @@ fn test_diff_and_flatten() {
 	assert f['a.b.1.c'] == 'x'
 	assert f['e'] == '{}'
 	assert f['n'] == 'null'
+}
+
+struct LogEntry {
+	level string
+	msg   string
+}
+
+fn test_ndjson() {
+	entries := [
+		LogEntry{
+			level: 'info'
+			msg:   'start'
+		},
+		LogEntry{
+			level: 'warn'
+			msg:   'slow'
+		},
+	]
+	encoded := encode_ndjson[LogEntry](entries) or { panic(err) }
+	assert encoded.contains('{"level":"info","msg":"start"}\n')
+	assert encoded.contains('{"level":"warn","msg":"slow"}\n')
+
+	decoded := decode_ndjson[LogEntry](encoded) or { panic(err) }
+	assert decoded.len == 2
+	assert decoded[0].level == 'info'
+	assert decoded[1].msg == 'slow'
 }

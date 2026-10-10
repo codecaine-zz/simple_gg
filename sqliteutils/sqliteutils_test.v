@@ -1,6 +1,7 @@
 module sqliteutils
 
 import os
+import db.sqlite
 
 // ─── Shared test struct ───────────────────────────────────────────────────────
 
@@ -817,4 +818,41 @@ fn test_transaction_and_insert_many() {
 	]) or { panic(err) }
 	assert inserted == 3
 	assert count_rows(mut db, 'items') or { panic(err) } == 5
+}
+
+fn test_select_rows_paged() {
+	mut db := open_db(':memory:') or { panic(err) }
+	exec_sql(mut db, 'CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT);') or { panic(err) }
+
+	for i in 1 .. 26 {
+		insert_row(mut db, 'users', {
+			'name': 'User ${i}'
+		}) or { panic(err) }
+	}
+
+	paged := select_rows_paged(mut db, 'users', ['*'], '', [], 1, 10, 'id ASC') or { panic(err) }
+	assert paged.total_items == 25
+	assert paged.total_pages == 3
+	assert paged.page == 1
+	assert paged.per_page == 10
+	assert paged.has_prev == false
+	assert paged.has_next == true
+	assert paged.items.len == 10
+	assert paged.items[0]['name'] == 'User 1'
+
+	paged_last := select_rows_paged(mut db, 'users', ['*'], '', [], 3, 10, 'id ASC') or {
+		panic(err)
+	}
+	assert paged_last.page == 3
+	assert paged_last.has_prev == true
+	assert paged_last.has_next == false
+	assert paged_last.items.len == 5
+
+	// Security: SQL injection via order_by must be rejected
+	if _ := select_rows_paged(mut db, 'users', ['*'], '', [], 1, 10, 'id; DROP TABLE users; --') {
+		panic('expected error on malicious order_by injection')
+	}
+	if _ := select_rows_paged(mut db, 'users', ['*'], '', [], 1, 10, 'id INVALID_DIR') {
+		panic('expected error on invalid order_by direction')
+	}
 }
