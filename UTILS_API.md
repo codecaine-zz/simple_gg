@@ -4797,6 +4797,100 @@ import sqliteutils
 
 ---
 
+### 📘 SQLite Primer for Beginners: Core Concepts & Querying
+
+If you are new to SQLite or databases in general, these core concepts will make working with `sqliteutils` intuitive and safe:
+
+#### 1. Idempotent Table Creation (`IF NOT EXISTS`)
+When you initialize your database tables:
+```v
+sqliteutils.create_kv_table(mut db, 'settings')!
+sqliteutils.create_doc_table(mut db, 'users')!
+```
+**What if the table already exists?**
+`sqliteutils` internally generates SQL with `CREATE TABLE IF NOT EXISTS "${tbl}" (...)`.
+- **First application run:** SQLite creates the new table and any associated indexes.
+- **Subsequent application runs:** SQLite checks the master catalog, sees that the table already exists, and **silently ignores** the creation request. It preserves all existing rows and returns successfully with zero errors.
+- **Best Practice:** Always call `create_kv_table` or table initialization helpers unconditionally during app startup (e.g. inside `main()` or an `init_db()` function). You do not need to check if the table exists first.
+
+#### 2. Automatic Upsert (`INSERT ... ON CONFLICT DO UPDATE`)
+When saving settings or records:
+```v
+sqliteutils.set_kv(mut db, 'settings', 'theme', 'dark')!
+```
+`set_kv` uses SQLite's native upsert syntax (`ON CONFLICT(key) DO UPDATE SET val=?`).
+- If the key `'theme'` does not exist yet &rarr; it **inserts** a new row.
+- If the key `'theme'` already exists &rarr; it **updates** the existing row's value.
+- You never need to write manual `SELECT` checks to decide between `INSERT` and `UPDATE`.
+
+#### 3. Complete Guide to Comparison Operators in SQLite (Beyond `=`)
+When querying records using `select_rows`, `select_rows_paged`, `delete_rows`, or `update_rows`, you pass a `where_clause` string and a `where_params` array. SQLite supports rich comparisons far beyond basic equality (`=`):
+
+| Comparison Operator | Meaning | Example `where_clause` | Example `where_params` | Real-World Use Case |
+| :--- | :--- | :--- | :--- | :--- |
+| `=` or `==` | Exact equality | `'status = ?'` | `['active']` | Match specific user status or ID |
+| `!=` or `<>` | Inequality (not equal) | `'role != ?'` | `['banned']` | Exclude banned or archived records |
+| `>` | Strictly greater than | `'score > ?'` | `['100']` | High score leaderboards |
+| `>=` | Greater than or equal | `'age >= ?'` | `['18']` | Age verification or minimum pricing |
+| `<` | Strictly less than | `'stock < ?'` | `['5']` | Low stock inventory alerts |
+| `<=` | Less than or equal | `'price <= ?'` | `['49.99']` | Filtering products under a budget |
+| `BETWEEN .. AND` | Inclusive range | `'price BETWEEN ? AND ?'` | `['10.0', '50.0']` | Price ranges or date spans (`col >= a AND col <= b`) |
+| `LIKE` | Case-insensitive pattern | `'email LIKE ?'` | `['%@company.com']` | Wildcard search (`%` = any chars, `_` = single char) |
+| `NOT LIKE` | Pattern exclusion | `'username NOT LIKE ?'` | `['bot_%']` | Filter out test or bot accounts |
+| `GLOB` | Unix file glob pattern | `'filename GLOB ?'` | `['*.png']` | Case-sensitive pattern matching (`*`, `?`, `[0-9]`) |
+| `IN (...)` | Set membership | `'category IN (?, ?, ?)'` | `['books', 'tech', 'music']` | Match records in any of several categories |
+| `NOT IN (...)` | Set exclusion | `'status NOT IN (?, ?)'` | `['deleted', 'archived']` | Exclude multiple inactive states |
+| `IS NULL` | Matches NULL (empty) | `'deleted_at IS NULL'` | `[]` | Active records in soft-delete patterns |
+| `IS NOT NULL` | Matches non-NULL | `'verified_at IS NOT NULL'` | `[]` | Verified accounts |
+| `COLLATE NOCASE` | Case-insensitive match | `'username = ? COLLATE NOCASE'` | `['alice']` | Matches `'Alice'`, `'ALICE'`, and `'alice'` |
+
+> [!WARNING]
+> **Common Beginner Trap with `NULL`:**
+> In SQL, `NULL` means "unknown value". Because an unknown value cannot be compared, writing `'deleted_at = NULL'` will **NEVER** match any rows (not even rows where `deleted_at` is NULL!). Always use `'deleted_at IS NULL'` or `'deleted_at IS NOT NULL'`.
+
+#### 4. Date & Time Comparisons in SQLite
+SQLite does not have a separate storage class for dates. Instead, dates and timestamps are stored in one of three formats:
+1. **ISO-8601 Strings** (`'YYYY-MM-DD HH:MM:SS'` or `'YYYY-MM-DD'`): **(Recommended)**
+2. **Unix Timestamps** (integer seconds or milliseconds since 1970-01-01)
+3. **Julian Day Numbers** (floating-point numbers)
+
+Because ISO-8601 strings are ordered from largest unit (Year) to smallest (Seconds), standard string comparisons (`>`, `<`, `BETWEEN`) sort them in exact chronological order:
+
+```v
+// 1. Range query for records created within a specific year
+new_users := sqliteutils.select_rows(
+    mut db,
+    'users',
+    ['id', 'name', 'created_at'],
+    'created_at >= ? AND created_at < ?',
+    ['2026-01-01 00:00:00', '2027-01-01 00:00:00']
+)!
+
+// 2. Relative time filtering using SQLite's built-in datetime() function
+// Finds all log entries from the last 24 hours
+recent_logs := sqliteutils.select_rows(
+    mut db,
+    'logs',
+    ['level', 'message', 'created_at'],
+    "created_at >= datetime('now', '-1 day')",
+    []
+)!
+
+// 3. Ordering by newest first
+latest := sqliteutils.select_rows_paged(
+    mut db,
+    'posts',
+    ['id', 'title', 'published_at'],
+    'published_at IS NOT NULL',
+    [],
+    1,
+    10,
+    'published_at DESC'
+)!
+```
+
+---
+
 <a id="connection--database-management"></a><a id="connection-database-management"></a>
 
 ## Connection & Database Management
@@ -4944,16 +5038,56 @@ println('Created user id: ${new_id}')
 
 #### `select_rows(mut db sqlite.DB, table_name string, columns []string, where_clause string, where_params []string) ![]map[string]string`
 
-Safely queries rows with bound filter parameters.
+Safely queries rows with bound filter parameters. Supports any standard SQL comparison operator (`=`, `!=`, `<`, `>`, `<=`, `>=`, `LIKE`, `IN`, `BETWEEN`, `IS NULL`) in `where_clause`.
 
 ```v
 mut db := sqliteutils.open_db(':memory:')!
-sqliteutils.exec_sql(mut db, 'CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, email TEXT);')!
-sqliteutils.exec_sql(mut db, "INSERT INTO users (name, email) VALUES ('Alice', 'alice@example.com');")!
+sqliteutils.exec_sql(mut db, 'CREATE TABLE users (id INTEGER PRIMARY KEY, name TEXT, email TEXT, age INTEGER, status TEXT);')!
+sqliteutils.exec_sql(mut db, "INSERT INTO users (name, email, age, status) VALUES ('Alice', 'alice@example.com', 25, 'active');")!
+sqliteutils.exec_sql(mut db, "INSERT INTO users (name, email, age, status) VALUES ('Bob', 'bob@test.org', 17, 'pending');")!
+sqliteutils.exec_sql(mut db, "INSERT INTO users (name, email, age, status) VALUES ('Charlie', 'charlie@example.com', 32, 'active');")!
 
-users := sqliteutils.select_rows(mut db, 'users', ['id', 'name', 'email'], 'name = ?', ['Alice'])!
-for u in users {
-    println('Found: ${u["name"]} (${u["email"]})')
+// 1. Exact match (=)
+alice := sqliteutils.select_rows(mut db, 'users', ['id', 'name'], 'name = ?', ['Alice'])!
+
+// 2. Numeric comparison (>=)
+adults := sqliteutils.select_rows(mut db, 'users', ['name', 'age'], 'age >= ?', ['18'])!
+
+// 3. Pattern match with wildcard (LIKE)
+domain_users := sqliteutils.select_rows(mut db, 'users', ['name', 'email'], 'email LIKE ?', ['%@example.com'])!
+
+// 4. Set membership (IN)
+active_or_pending := sqliteutils.select_rows(mut db, 'users', ['name', 'status'], 'status IN (?, ?)', ['active', 'pending'])!
+
+// 5. Compound conditions (AND / OR)
+qualified := sqliteutils.select_rows(mut db, 'users', ['name'], 'status = ? AND age >= ?', ['active', '21'])!
+```
+
+#### `select_rows_paged(mut db sqlite.DB, table_name string, columns []string, where_clause string, where_params []string, page int, per_page int, order_by string) !PagedResult`
+
+Queries a table with automatic pagination calculation, row offset computation, total page counting, and navigation metadata (`has_prev`, `has_next`).
+
+```v
+mut db := sqliteutils.open_db(':memory:')!
+sqliteutils.exec_sql(mut db, 'CREATE TABLE products (id INTEGER PRIMARY KEY, title TEXT, price REAL, in_stock INTEGER);')!
+
+// Fetch Page 2 (25 items per page), sorted by price ascending, filtered by price and stock
+paged := sqliteutils.select_rows_paged(
+    mut db,
+    'products',
+    ['id', 'title', 'price'],
+    'in_stock = ? AND price <= ?',
+    ['1', '100.0'],
+    2,
+    25,
+    'price ASC'
+)!
+
+println('Page: ${paged.page} of ${paged.total_pages}')
+println('Total matching items: ${paged.total_items}')
+println('Has Next: ${paged.has_next}, Has Prev: ${paged.has_prev}')
+for item in paged.items {
+    println('  Product: ${item["title"]} ($${item["price"]})')
 }
 ```
 
@@ -5041,10 +5175,14 @@ println('Total rows in users table: ${count}') // Output: 2
 
 Creates a Key-Value table with schema `(key TEXT PRIMARY KEY, val TEXT)`.
 
+> [!TIP]
+> **What if the table already exists?**
+> `create_kv_table` executes `CREATE TABLE IF NOT EXISTS "${tbl}"`. If the table already exists from an earlier run, SQLite **silently ignores the creation** and keeps all existing data intact without raising an error. It is completely safe to call this on every application startup.
+
 ```v
 mut db := sqliteutils.open_db(':memory:')!
 
-// Create a key-value table called 'settings'
+// Create a key-value table called 'settings' (safe to run unconditionally on startup)
 sqliteutils.create_kv_table(mut db, 'settings')!
 ```
 
@@ -5052,15 +5190,18 @@ sqliteutils.create_kv_table(mut db, 'settings')!
 
 ### `set_kv(mut db sqlite.DB, table_name string, key string, val string) !`
 
-Inserts or updates a key-value pair in a Key-Value table.
+Inserts a new key-value pair, or updates the existing value if the key already exists (atomic upsert using SQLite's native `ON CONFLICT(key) DO UPDATE SET val=?`).
 
 ```v
 mut db := sqliteutils.open_db(':memory:')!
 sqliteutils.create_kv_table(mut db, 'settings')!
 
-// Save key-value settings
+// 1. Initial insert: key does not exist yet -> creates new row
 sqliteutils.set_kv(mut db, 'settings', 'theme', 'dark')!
 sqliteutils.set_kv(mut db, 'settings', 'fontSize', '16')!
+
+// 2. Subsequent update: key already exists -> updates value in-place without duplicate rows
+sqliteutils.set_kv(mut db, 'settings', 'theme', 'solarized-light')!
 ```
 
 ---
