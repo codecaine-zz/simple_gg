@@ -5767,6 +5767,9 @@ for col in schema {
 
 **Plain-language purpose:** Use these tools to remember an app's choices between runs, such as a theme, volume, or window size. The examples show both a named data record and flexible key-value settings, saved safely to the standard app-data location.
 
+> [!TIP]
+> **Best Practice Tip:** Always define variables or constants for your application identifier (`app_name`), state filenames, and configuration keys rather than repeating hardcoded string literals across multiple calls. This prevents typos, simplifies refactoring, and ensures consistent state handling throughout your application.
+
 Import statement:
 
 ```v
@@ -5787,8 +5790,9 @@ Returns the OS-recommended directory for an application:
 ```v
 import stateutils
 
-data_dir := stateutils.get_app_dir('my_app', .data)
-config_dir := stateutils.get_app_dir('my_app', .config)
+app_name := 'my_app'
+data_dir := stateutils.get_app_dir(app_name, .data)
+config_dir := stateutils.get_app_dir(app_name, .config)
 println('App data dir: ${data_dir}, config dir: ${config_dir}')
 ```
 
@@ -5799,7 +5803,9 @@ Resolves the complete absolute path for a state file in the recommended director
 ```v
 import stateutils
 
-path := stateutils.get_state_path('my_app', 'state.json', .data)
+app_name := 'my_app'
+state_file := stateutils.default_state_file
+path := stateutils.get_state_path(app_name, state_file, .data)
 println('State file path: ${path}')
 ```
 
@@ -5819,7 +5825,9 @@ struct UserPrefs {
     sound bool
 }
 
-stateutils.save_app_state('my_app', 'prefs.json', UserPrefs{ theme: 'dark', sound: true })!
+app_name := 'my_app'
+prefs_file := 'prefs.json'
+stateutils.save_app_state(app_name, prefs_file, UserPrefs{ theme: 'dark', sound: true })!
 ```
 
 #### `load_app_state[T](app_name string, filename string) !T`
@@ -5834,7 +5842,9 @@ struct UserPrefs {
     sound bool
 }
 
-prefs := stateutils.load_app_state[UserPrefs]('my_app', 'prefs.json')!
+app_name := 'my_app'
+prefs_file := 'prefs.json'
+prefs := stateutils.load_app_state[UserPrefs](app_name, prefs_file)!
 println('Loaded theme: ${prefs.theme}')
 ```
 
@@ -5850,7 +5860,9 @@ struct UserPrefs {
     sound bool
 }
 
-prefs := stateutils.load_app_state_or('my_app', 'prefs.json', UserPrefs{ theme: 'system', sound: false })
+app_name := 'my_app'
+prefs_file := 'prefs.json'
+prefs := stateutils.load_app_state_or(app_name, prefs_file, UserPrefs{ theme: 'system', sound: false })
 println('Loaded theme: ${prefs.theme}')
 ```
 
@@ -5861,8 +5873,10 @@ Checks for the presence of a state file or removes it.
 ```v
 import stateutils
 
-if stateutils.app_state_exists('my_app', 'prefs.json') {
-    stateutils.delete_app_state('my_app', 'prefs.json')!
+app_name := 'my_app'
+prefs_file := 'prefs.json'
+if stateutils.app_state_exists(app_name, prefs_file) {
+    stateutils.delete_app_state(app_name, prefs_file)!
 }
 ```
 
@@ -5887,15 +5901,18 @@ struct UserPrefs {
     sound bool
 }
 
-// Persist struct to SQLite database (state.db)
-stateutils.save_app_state_sqlite('my_app', 'prefs.db', UserPrefs{ theme: 'dark', sound: true })!
+app_name := 'my_app'
+db_file := 'prefs.db'
+
+// Persist struct to SQLite database (prefs.db)
+stateutils.save_app_state_sqlite(app_name, db_file, UserPrefs{ theme: 'dark', sound: true })!
 
 // Load struct from SQLite database
-prefs := stateutils.load_app_state_sqlite[UserPrefs]('my_app', 'prefs.db')!
+prefs := stateutils.load_app_state_sqlite[UserPrefs](app_name, db_file)!
 println('Loaded SQLite theme: ${prefs.theme}')
 
 // Unified backend switching
-stateutils.save_app_state_with_backend('my_app', 'prefs.db', prefs, .sqlite)!
+stateutils.save_app_state_with_backend(app_name, db_file, prefs, .sqlite)!
 ```
 
 ---
@@ -5923,15 +5940,19 @@ pub mut:
     recent_files []string
 }
 
+app_name := 'my_app'
+custom_db := 'workspace.db'
+table_name := 'window_settings'
+
 // Default state store (state.json in OS data dir)
-mut store := stateutils.new_app_state[Settings]('my_app', Settings{
+mut store := stateutils.new_app_state[Settings](app_name, Settings{
     window_w: 1280
     window_h: 720
     theme:    'dark'
 })
 
 // SQLite-backed state store (state.db in OS data dir)
-mut sqlite_store := stateutils.new_sqlite_app_state[Settings]('my_app', Settings{
+mut sqlite_store := stateutils.new_sqlite_app_state[Settings](app_name, Settings{
     window_w: 1920
     window_h: 1080
     theme:    'nord'
@@ -5940,7 +5961,7 @@ sqlite_store.save()!
 
 // Custom SQLite filename and table:
 mut custom_sqlite := stateutils.new_sqlite_app_state_with_table[Settings](
-    'my_app', 'workspace.db', 'window_settings', Settings{}, .data
+    app_name, custom_db, table_name, Settings{}, .data
 )
 
 // Access current state
@@ -5987,7 +6008,8 @@ pub mut:
     extra        map[string]string = map[string]string{}
 }
 
-mut v2_store := stateutils.new_app_state[AppConfigV2]('my_app', AppConfigV2{})
+app_name := 'my_app'
+mut v2_store := stateutils.new_app_state[AppConfigV2](app_name, AppConfigV2{})
 v2_store.update(fn (mut s AppConfigV2) {
     s.recent_files << '/path/to/project'
     s.extra['custom_key'] = 'custom_value'
@@ -6012,31 +6034,39 @@ For apps that need schema-free configuration and preferences. Supports both **JS
 ```v
 import stateutils
 
+app_name := 'my_app'
+
 // JSON-backed key-value store
-mut kv := stateutils.new_kv_state('my_app')
+mut kv := stateutils.new_kv_state(app_name)
 kv.auto_save = true
 
 // SQLite-backed key-value store
-mut sqlite_kv := stateutils.new_sqlite_kv_state('my_app')
+mut sqlite_kv := stateutils.new_sqlite_kv_state(app_name)
 sqlite_kv.auto_save = true
 
-// Typed setters & getters with fallbacks (works identically on JSON and SQLite)
-sqlite_kv.set_str('current_profile', 'guest')!
-sqlite_kv.set_int('volume', 85)!
-sqlite_kv.set_bool('notifications', true)!
-sqlite_kv.set_f64('scale', 1.5)!
-sqlite_kv.set_strings('tags', ['alpha', 'beta', 'release'])!
+// Typed setters & getters with fallbacks (using variables for keys to prevent typos)
+key_profile := 'current_profile'
+key_volume  := 'volume'
+key_notify  := 'notifications'
+key_scale   := 'scale'
+key_tags    := 'tags'
 
-profile := sqlite_kv.get_str('current_profile', 'default')
-volume  := sqlite_kv.get_int('volume', 100)
-notify  := sqlite_kv.get_bool('notifications', false)
-scale   := sqlite_kv.get_f64('scale', 1.0)
-tags    := sqlite_kv.get_strings('tags', [])
+sqlite_kv.set_str(key_profile, 'guest')!
+sqlite_kv.set_int(key_volume, 85)!
+sqlite_kv.set_bool(key_notify, true)!
+sqlite_kv.set_f64(key_scale, 1.5)!
+sqlite_kv.set_strings(key_tags, ['alpha', 'beta', 'release'])!
+
+profile := sqlite_kv.get_str(key_profile, 'default')
+volume  := sqlite_kv.get_int(key_volume, 100)
+notify  := sqlite_kv.get_bool(key_notify, false)
+scale   := sqlite_kv.get_f64(key_scale, 1.0)
+tags    := sqlite_kv.get_strings(key_tags, [])
 println('${profile}, vol=${volume}, notify=${notify}, scale=${scale}, tags=${tags}')
 
 // Management
-println('Has volume: ${sqlite_kv.has("volume")}')
-sqlite_kv.delete('scale')!
+println('Has volume: ${sqlite_kv.has(key_volume)}')
+sqlite_kv.delete(key_scale)!
 keys := sqlite_kv.keys()
 all_data := sqlite_kv.all()
 println('All data: ${all_data}')
@@ -6927,8 +6957,10 @@ Provides standard OS paths:
 ```v
 import sysutils
 
-data_dir := sysutils.get_app_data_dir('my_app')
-cfg_file := sysutils.get_app_config_path('my_app', 'settings.json')
+app_name := 'my_app'
+cfg_name := 'settings.json'
+data_dir := sysutils.get_app_data_dir(app_name)
+cfg_file := sysutils.get_app_config_path(app_name, cfg_name)
 println('Data dir: ${data_dir}, Config file path: ${cfg_file}')
 ```
 

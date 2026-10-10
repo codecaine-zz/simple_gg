@@ -39,7 +39,12 @@ fn main() {
 	println('               demo_stateutils                    ')
 	println('==================================================')
 
+	// Best practice: Use variables for application identifiers, filenames,
+	// and state keys rather than duplicating hardcoded string literals.
 	app_name := 'vlang_utils_demo_window'
+	state_file := stateutils.default_state_file
+	sqlite_file := stateutils.default_sqlite_state_file
+
 	default_cfg := WindowConfig{
 		title:        'My Application'
 		width:        1024
@@ -51,7 +56,7 @@ fn main() {
 
 	mut store := stateutils.new_app_state[WindowConfig](app_name, default_cfg)
 	defer {
-		stateutils.delete_app_state(app_name, 'state.json') or {}
+		stateutils.delete_app_state(app_name, state_file) or {}
 	}
 	println('State path: ${store.path()}')
 
@@ -67,7 +72,7 @@ fn main() {
 	assert store.exists() == true
 
 	// Reload state and inspect array elements
-	loaded := stateutils.load_app_state[WindowConfig](app_name, 'state.json')!
+	loaded := stateutils.load_app_state[WindowConfig](app_name, state_file)!
 	println('Reloaded state: title="${loaded.title}", recent_files=${loaded.recent_files}, tags=${loaded.tags}')
 	assert loaded.title == 'Updated Title'
 	assert loaded.dark == true
@@ -77,16 +82,17 @@ fn main() {
 	// 2. Direct Root-Level Array State (e.g. list of recent searches or history)
 	println('\n--- Root-Level Array State ---')
 	history_app := 'vlang_utils_demo_history'
+	history_file := stateutils.default_state_file
 	mut history_store := stateutils.new_app_state[[]string](history_app, ['v run .'])
 	defer {
-		stateutils.delete_app_state(history_app, 'state.json') or {}
+		stateutils.delete_app_state(history_app, history_file) or {}
 	}
 	history_store.auto_save = true
 	history_store.data << 'v test .'
 	history_store.data << 'git status'
 	history_store.save()!
 
-	loaded_history := stateutils.load_app_state[[]string](history_app, 'state.json')!
+	loaded_history := stateutils.load_app_state[[]string](history_app, history_file)!
 	println('Loaded root array history (${loaded_history.len} items): ${loaded_history}')
 	assert loaded_history.len == 3
 	assert loaded_history[1] == 'v test .'
@@ -97,14 +103,18 @@ fn main() {
 	defer {
 		kv.reset() or {}
 	}
-	kv.set_str('user_name', 'dev_user')!
-	kv.set_int('login_count', 42)!
-	kv.set_strings('favorite_colors', ['#ff007f', '#00ffc8', '#7b2cbf'])!
+	key_user := 'user_name'
+	key_logins := 'login_count'
+	key_colors := 'favorite_colors'
 
-	name := kv.get_str('user_name', '')
-	logins := kv.get_int('login_count', 0)
-	colors := kv.get_strings('favorite_colors', [])
-	println('Dynamic KV: user_name=${name}, logins=${logins}, colors=${colors}')
+	kv.set_str(key_user, 'dev_user')!
+	kv.set_int(key_logins, 42)!
+	kv.set_strings(key_colors, ['#ff007f', '#00ffc8', '#7b2cbf'])!
+
+	name := kv.get_str(key_user, '')
+	logins := kv.get_int(key_logins, 0)
+	colors := kv.get_strings(key_colors, [])
+	println('Dynamic KV: ${key_user}=${name}, ${key_logins}=${logins}, ${key_colors}=${colors}')
 	assert name == 'dev_user'
 	assert logins == 42
 	assert colors.len == 3
@@ -123,7 +133,7 @@ fn main() {
 	sqlite_store.save()!
 	assert sqlite_store.exists() == true
 
-	loaded_sqlite := stateutils.load_app_state_sqlite[WindowConfig](app_name, 'state.db')!
+	loaded_sqlite := stateutils.load_app_state_sqlite[WindowConfig](app_name, sqlite_file)!
 	println('Reloaded SQLite state: title="${loaded_sqlite.title}", recent_files=${loaded_sqlite.recent_files}')
 	assert loaded_sqlite.title == 'SQLite Powered Window'
 	assert loaded_sqlite.recent_files.len == 3
@@ -133,14 +143,18 @@ fn main() {
 		sqlite_kv.reset() or {}
 	}
 	sqlite_kv.auto_save = true
-	sqlite_kv.set_str('database_engine', 'sqlite3')!
-	sqlite_kv.set_int('wal_checkpoint', 100)!
-	sqlite_kv.set_strings('active_plugins', ['syntax_hl', 'git_blame', 'linter'])!
+	key_engine := 'database_engine'
+	key_chk := 'wal_checkpoint'
+	key_plugins := 'active_plugins'
 
-	engine := sqlite_kv.get_str('database_engine', '')
-	chk := sqlite_kv.get_int('wal_checkpoint', 0)
-	plugins := sqlite_kv.get_strings('active_plugins', [])
-	println('Dynamic KV (SQLite): engine=${engine}, checkpoint=${chk}, plugins=${plugins}')
+	sqlite_kv.set_str(key_engine, 'sqlite3')!
+	sqlite_kv.set_int(key_chk, 100)!
+	sqlite_kv.set_strings(key_plugins, ['syntax_hl', 'git_blame', 'linter'])!
+
+	engine := sqlite_kv.get_str(key_engine, '')
+	chk := sqlite_kv.get_int(key_chk, 0)
+	plugins := sqlite_kv.get_strings(key_plugins, [])
+	println('Dynamic KV (SQLite): ${key_engine}=${engine}, ${key_chk}=${chk}, ${key_plugins}=${plugins}')
 	assert engine == 'sqlite3'
 	assert chk == 100
 	assert plugins.len == 3
@@ -149,8 +163,9 @@ fn main() {
 	// 5. Schema Evolution: Adding fields when an application expands beyond original design
 	println('\n--- Struct Evolution: Adding Fields to State ---')
 	evolution_app := 'vlang_utils_demo_evolution'
+	evolution_file := 'config.json'
 	defer {
-		stateutils.delete_app_state(evolution_app, 'config.json') or {}
+		stateutils.delete_app_state(evolution_app, evolution_file) or {}
 	}
 
 	// Step 1: Older version of the app persisted state using AppConfigV1 (only title and width)
@@ -158,12 +173,12 @@ fn main() {
 		title: 'Legacy Editor Window'
 		width: 1200
 	}
-	stateutils.save_app_state(evolution_app, 'config.json', v1_initial)!
+	stateutils.save_app_state(evolution_app, evolution_file, v1_initial)!
 	println('Step 1: Saved original V1 state (fields: title="${v1_initial.title}", width=${v1_initial.width})')
 
 	// Step 2: Newer version of the app loads existing state into expanded AppConfigV2
 	// Existing fields retain their persisted values; newly added fields get struct default values.
-	mut v2_store := stateutils.new_app_state_with_file[AppConfigV2](evolution_app, 'config.json', AppConfigV2{}, .data)
+	mut v2_store := stateutils.new_app_state_with_file[AppConfigV2](evolution_app, evolution_file, AppConfigV2{}, .data)
 	println('Step 2: Loaded into expanded AppConfigV2:')
 	println('  title="${v2_store.data.title}" (preserved from v1)')
 	println('  width=${v2_store.data.width} (preserved from v1)')
@@ -185,7 +200,7 @@ fn main() {
 	v2_store.save()!
 
 	// Step 4: Verify full persistence of expanded state
-	v2_reloaded := stateutils.load_app_state[AppConfigV2](evolution_app, 'config.json')!
+	v2_reloaded := stateutils.load_app_state[AppConfigV2](evolution_app, evolution_file)!
 	println('Step 4: Reloaded fully migrated V2 state:')
 	println('  recent_files=${v2_reloaded.recent_files}')
 	println('  extra=${v2_reloaded.extra}')

@@ -5,6 +5,13 @@ import math
 import os
 import simplegui
 
+// Best practice: Use constants or variables for state keys rather than hardcoding string literals.
+const key_font_path = 'active_font_path'
+const key_font_name = 'active_font_name'
+const key_font_size = 'font_size'
+const key_font_bold = 'font_bold'
+const key_font_color = 'font_color'
+
 // get_platform_font_candidates returns categorized system font candidates on macOS, Linux, or Windows.
 fn get_platform_font_candidates() []string {
 	mut candidates := []string{}
@@ -39,11 +46,11 @@ fn apply_typography_to_form(mut win simplegui.SimpleWindow, font_path string, fo
 	font_weight := if is_bold { 'Bold' } else { 'Regular' }
 
 	win.set_font_path(font_path)
-	win.set_state('active_font_path', font_path)
-	win.set_state('active_font_name', font_filename)
-	win.set_state_int('font_size', font_size)
-	win.set_state_bool('font_bold', is_bold)
-	win.set_state('font_color', hex_color)
+	win.set_state(key_font_path, font_path)
+	win.set_state(key_font_name, font_filename)
+	win.set_state_int(key_font_size, font_size)
+	win.set_state_bool(key_font_bold, is_bold)
+	win.set_state(key_font_color, hex_color)
 
 	// 1. Form Header & Description
 	win.set_control_font_size('lbl_form_header', font_size + 4)
@@ -134,18 +141,18 @@ fn main() {
 	}
 
 	// Initialize state store
-	win.set_state_int('font_size', 15)
-	win.set_state_bool('font_bold', false)
-	win.set_state('font_color', '#0a84ff')
-	win.set_state('active_font_name', initial_font_name)
-	win.set_state('active_font_path', if initial_font_path.len > 0 { initial_font_path } else { 'Default Sokol TTF' })
+	win.set_state_int(key_font_size, 15)
+	win.set_state_bool(key_font_bold, false)
+	win.set_state(key_font_color, '#0a84ff')
+	win.set_state(key_font_name, initial_font_name)
+	win.set_state(key_font_path, if initial_font_path.len > 0 { initial_font_path } else { 'Default Sokol TTF' })
 
 	win.add_heading('Custom Font Loading & Live Form Typography')
 	win.add_label('lbl_subhead_guide', 'Dynamic Typography & Real-time Form Engine — Click any font, mode, size, or preset to update the form live.')
 	win.control('lbl_subhead_guide').set_font_size(13).set_font_color('#98989d')
 
 	// 1. Font Family & System Discovery
-	active_path := win.get_state('active_font_path')
+	active_path := win.get_state(key_font_path)
 	win.group('grp_font_info', 'Font Family & Render Mode Selection', fn [active_path] (mut win simplegui.SimpleWindow) {
 		win.add_label('lbl_active_font', 'Active System Font: ' + active_path)
 

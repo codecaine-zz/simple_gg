@@ -21,6 +21,15 @@ pub enum StateBackend {
 	sqlite
 }
 
+// Standard default filenames and table names for state persistence
+pub const default_state_file = 'state.json'
+pub const default_sqlite_state_file = 'state.db'
+pub const default_kv_file = 'settings.json'
+pub const default_sqlite_kv_file = 'settings.db'
+pub const default_app_state_table = 'app_state'
+pub const default_kv_state_table = 'kv_state'
+
+
 // StateStoreConfig configures an AppStateStore or KeyValueState instance.
 @[params]
 pub struct StateStoreConfig {
@@ -111,7 +120,7 @@ pub fn get_app_dir(app_name string, loc StateLocation) string {
 // get_state_path resolves the complete absolute filepath for an application state file.
 pub fn get_state_path(app_name string, filename string, loc StateLocation) string {
 	dir := get_app_dir(app_name, loc)
-	fname := if filename.trim_space().len > 0 { filename.trim_space() } else { 'state.json' }
+	fname := if filename.trim_space().len > 0 { filename.trim_space() } else { default_state_file }
 	return os.join_path(dir, fname)
 }
 
@@ -247,7 +256,7 @@ pub fn app_state_sqlite_exists(app_name string, filename string) bool {
 
 // delete_app_state_sqlite removes the saved SQLite state database and associated journals.
 pub fn delete_app_state_sqlite(app_name string, filename string) ! {
-	fname := if filename.trim_space().len > 0 { filename.trim_space() } else { 'state.db' }
+	fname := if filename.trim_space().len > 0 { filename.trim_space() } else { default_sqlite_state_file }
 	full_path := get_state_path(app_name, fname, .data)
 	remove_state_file(full_path)!
 }
@@ -256,7 +265,7 @@ pub fn delete_app_state_sqlite(app_name string, filename string) ! {
 pub fn save_app_state_with_backend[T](app_name string, filename string, state T, backend StateBackend) ! {
 	match backend {
 		.json {
-			fname := if filename.trim_space().len > 0 { filename.trim_space() } else { 'state.json' }
+			fname := if filename.trim_space().len > 0 { filename.trim_space() } else { default_state_file }
 			save_app_state[T](app_name, fname, state)!
 		}
 		.sqlite {
@@ -269,7 +278,7 @@ pub fn save_app_state_with_backend[T](app_name string, filename string, state T,
 pub fn load_app_state_with_backend[T](app_name string, filename string, backend StateBackend) !T {
 	return match backend {
 		.json {
-			fname := if filename.trim_space().len > 0 { filename.trim_space() } else { 'state.json' }
+			fname := if filename.trim_space().len > 0 { filename.trim_space() } else { default_state_file }
 			load_app_state[T](app_name, fname)!
 		}
 		.sqlite {
@@ -306,12 +315,12 @@ pub mut:
 // new_app_state initializes an AppStateStore with automatic loading from disk (JSON format).
 // If an existing state file is found, it is loaded into memory; otherwise default_data is used.
 pub fn new_app_state[T](app_name string, default_data T) AppStateStore[T] {
-	return new_app_state_with_file[T](app_name, 'state.json', default_data, .data)
+	return new_app_state_with_file[T](app_name, default_state_file, default_data, .data)
 }
 
 // new_app_state_with_file initializes an AppStateStore with a custom filename and location (JSON format).
 pub fn new_app_state_with_file[T](app_name string, filename string, default_data T, loc StateLocation) AppStateStore[T] {
-	fname := if filename.trim_space().len > 0 { filename.trim_space() } else { 'state.json' }
+	fname := if filename.trim_space().len > 0 { filename.trim_space() } else { default_state_file }
 	return new_app_state_with_config[T](app_name, default_data,
 		filename: fname
 		location: loc
@@ -327,8 +336,8 @@ pub fn new_app_state_with_backend[T](app_name string, default_data T, backend St
 // new_app_state_with_config initializes an AppStateStore with full configuration options.
 pub fn new_app_state_with_config[T](app_name string, default_data T, cfg StateStoreConfig) AppStateStore[T] {
 	default_fname := match cfg.backend {
-		.json { 'state.json' }
-		.sqlite { 'state.db' }
+		.json { default_state_file }
+		.sqlite { default_sqlite_state_file }
 	}
 
 	fname := if cfg.filename.trim_space().len > 0 {
@@ -339,7 +348,7 @@ pub fn new_app_state_with_config[T](app_name string, default_data T, cfg StateSt
 	tbl := if cfg.table_name.trim_space().len > 0 {
 		cfg.table_name.trim_space()
 	} else {
-		'app_state'
+		default_app_state_table
 	}
 	mut store := AppStateStore[T]{
 		app_name:     app_name
@@ -542,8 +551,8 @@ pub fn new_kv_state_with_backend(app_name string, backend StateBackend) KeyValue
 // new_kv_state_with_config creates or loads a key-value store with full configuration options.
 pub fn new_kv_state_with_config(app_name string, cfg StateStoreConfig) KeyValueState {
 	default_fname := match cfg.backend {
-		.json { 'settings.json' }
-		.sqlite { 'settings.db' }
+		.json { default_kv_file }
+		.sqlite { default_sqlite_kv_file }
 	}
 
 	fname := if cfg.filename.trim_space().len > 0 {
@@ -551,7 +560,7 @@ pub fn new_kv_state_with_config(app_name string, cfg StateStoreConfig) KeyValueS
 	} else {
 		default_fname
 	}
-	tbl := if cfg.table_name.trim_space().len > 0 { cfg.table_name.trim_space() } else { 'kv_state' }
+	tbl := if cfg.table_name.trim_space().len > 0 { cfg.table_name.trim_space() } else { default_kv_state_table }
 	mut kv := KeyValueState{
 		app_name:   app_name
 		filename:   fname
