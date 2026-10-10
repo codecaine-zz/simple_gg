@@ -89,7 +89,7 @@ All 45 utility modules have standalone, fully functional demo scripts located in
 
 ### ⚡ Quick Jump Index
 
-[`archiveutils`](#archiveutils-api) • [`asyncutils`](#asyncutils-api) • [`bitutils`](#bitutils-api) • [`cacheutils`](#cacheutils-api) • [`cliutils`](#cliutils-api) • [`colorutils`](#colorutils-api) • [`compressutils`](#compressutils-api) • [`configutils`](#configutils-api) • [`cronutils`](#cronutils-api) • [`cryptoutils`](#cryptoutils-api) • [`diffutils`](#diffutils-api) • [`envutils`](#envutils-api) • [`eventutils`](#eventutils-api) • [`fileutils`](#fileutils-api) • [`flowutils`](#flowutils-api) • [`graphutils`](#graphutils-api) • [`htmlutils`](#htmlutils-api) • [`httputils`](#httputils-api) • [`idutils`](#idutils-api) • [`jsonutils`](#jsonutils-api) • [`jwtutils`](#jwtutils-api) • [`logutils`](#logutils-api) • [`markdownutils`](#markdownutils-api) • [`mathutils`](#mathutils-api) • [`mockutils`](#mockutils-api) • [`netutils`](#netutils-api) • [`procutils`](#procutils-api) • [`regexutils`](#regexutils-api) • [`semverutils`](#semverutils-api) • [`sliceutils`](#sliceutils-api) • [`sqlbuilder`](#sqlbuilder-api) • [`sqliteutils`](#sqliteutils-api) • [`stateutils`](#stateutils-api) • [`statutils`](#statutils-api) • [`structutils`](#structutils-api) • [`strutils`](#strutils-api) • [`sysutils`](#sysutils-api) • [`tarutils`](#tarutils-api) • [`templateutils`](#templateutils-api) • [`testutils`](#testutils-api) • [`timeutils`](#timeutils-api) • [`tomlutils`](#tomlutils-api) • [`urlutils`](#urlutils-api) • [`validutils`](#validutils-api) • [`webutils`](#webutils-api) • [Advanced Additions & Enhancements](#advanced-additions--enhancements)
+[`archiveutils`](#archiveutils-api) • [`asyncutils`](#asyncutils-api) • [`bitutils`](#bitutils-api) • [`cacheutils`](#cacheutils-api) • [`cliutils`](#cliutils-api) • [`colorutils`](#colorutils-api) • [`compressutils`](#compressutils-api) • [`configutils`](#configutils-api) • [`cronutils`](#cronutils-api) • [`cryptoutils`](#cryptoutils-api) • [`diffutils`](#diffutils-api) • [`envutils`](#envutils-api) • [`eventutils`](#eventutils-api) • [`fileutils`](#fileutils-api) • [`flowutils`](#flowutils-api) • [`graphutils`](#graphutils-api) • [`htmlutils`](#htmlutils-api) • [`httputils`](#httputils-api) • [`idutils`](#idutils-api) • [`jsonutils`](#jsonutils-api) • [`jwtutils`](#jwtutils-api) • [`logutils`](#logutils-api) • [`markdownutils`](#markdownutils-api) • [`mathutils`](#mathutils-api) • [`mockutils`](#mockutils-api) • [`netutils`](#netutils-api) • [`procutils`](#procutils-api) • [`regexutils`](#regexutils-api) • [`semverutils`](#semverutils-api) • [`sliceutils`](#sliceutils-api) • [`sqlbuilder`](#sqlbuilder-api) • [`sqliteutils`](#sqliteutils-api) • [`stateutils`](#stateutils-api) • [`statutils`](#statutils-api) • [`structutils`](#structutils-api) • [`strutils`](#strutils-api) • [`sysutils`](#sysutils-api) • [`tarutils`](#tarutils-api) • [`templateutils`](#templateutils-api) • [`testutils`](#testutils-api) • [`timeutils`](#timeutils-api) • [`tomlutils`](#tomlutils-api) • [`urlutils`](#urlutils-api) • [`validutils`](#validutils-api) • [`webutils`](#webutils-api)
 
 ---
 
@@ -204,9 +204,6 @@ All 45 utility modules have standalone, fully functional demo scripts located in
 - **[`tarutils`](#tarutils-api)** — In-memory and on-disk TAR archive creation, unpacking, directory archiving
 - **[`testutils`](#testutils-api)** — Testing harness: isolated temp directories, scoped ENV overrides, assertions
 
-#### 8. Advanced Extensions
-
-- **[Advanced Additions & Enhancements](#advanced-additions--enhancements)** — System clipboard, symmetric AES-CBC, Bcrypt hashing, secure entropy, fast non-cryptographic hashes
 
 ---
 
@@ -221,6 +218,43 @@ Import statement:
 ```v
 import archiveutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Archive & Zip Primer for Beginners: Core Concepts, Lifecycle & Operations
+
+If you are new to working with zip archives in applications, these fundamental concepts will help you manipulate archives safely and avoid data loss or security vulnerabilities:
+
+#### 1. Lifecycle & Idempotency: Overwrite vs Append vs Missing Files
+- **What if the destination zip file already exists?**
+  Functions like `archiveutils.zip_file(src, dst)!` and `archiveutils.zip_dir(src, dst)!` completely **overwrite** the destination zip file if it already exists. They do **not** append entries into an existing zip file. If you need to keep previous backups, generate a unique filename with a timestamp or version identifier before archiving.
+- **What if the destination directory does not exist?**
+  When calling `archiveutils.unzip_to_dir(zip_file, dest_dir)!`, the function automatically calls `os.mkdir_all(dest_dir)` under the hood. You do not need to create target folders beforehand.
+- **What if extracted files already exist on disk?**
+  When extracting, existing files at the destination path are silently overwritten with the contents from the archive.
+
+#### 2. Security Defense: Preventing "Zip Slip" Directory Traversal
+A notorious security risk when unpacking untrusted zip files is the **Zip Slip** vulnerability. A malicious zip archive can contain file entries with paths like `../../../../etc/passwd` or `../../.ssh/authorized_keys`.
+`archiveutils.unzip_to_dir` validates each extracted entry's canonical path against `dest_dir`. If an entry attempts to escape the root extraction folder, it is rejected, protecting your host filesystem.
+
+#### 3. Core Archive Operations Reference Table
+
+| Operation | Function | What Happens If Target Exists? | In-Memory vs Disk | Real-World Use Case |
+| :--- | :--- | :--- | :--- | :--- |
+| **Verify Archive** | `is_valid_zip(path)` | Returns `false` if missing/corrupt | Disk check (Magic bytes `PK\x03\x04`) | Validating user upload before unpacking |
+| **Compress Single File** | `zip_file(src, dst)!` | Overwrites `dst` | Reads `src`, writes `dst` | Single report or database export backup |
+| **Compress File List** | `zip_files(srcs, dst)!` | Overwrites `dst` | Reads files, writes `dst` | Bundling selected configuration files |
+| **Compress Folder Tree** | `zip_dir(dir, dst)!` | Overwrites `dst` | Recursive scan, writes `dst` | Bundling static assets or source repos |
+| **Extract All** | `unzip_to_dir(zip, dst)!` | Overwrites matching files | Auto-creates `dst`, writes files | Installing plugin packages, unpacking data |
+| **Inspect Contents** | `list_entries(zip)!` | N/A (read-only) | Memory scan of zip central directory | Previewing archive without extracting to disk |
+| **Read Single Entry** | `read_entry(zip, name)!` | Returns error if missing | Extracts entry directly into `[]u8` | Extracting a single JSON config in memory |
+
+> [!TIP]
+> **Performance Tip:** Use `list_entries(zip)!` to inspect file sizes and filenames without writing anything to disk. This is instant even for archives containing gigabytes of compressed data.
+
+---
 
 Ergonomic Zip archive creation, extraction, recursive directory bundling, and in-memory file inspection built directly on V's native `compress.szip` engine.
 
@@ -330,6 +364,9 @@ println('Readme preview:\n${text[..100]}...')
 
 [▲ Back to Table of Contents](#table-of-contents)
 
+
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
 
 <a id="asyncutils"></a><a id="asyncutils-api"></a>
@@ -342,8 +379,43 @@ Import statement:
 
 ```v
 import asyncutils
-import time
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Async & Concurrency Primer for Beginners: Threads, Queues & Synchronization
+
+Writing concurrent code allows your applications to perform background tasks, download files, or process data without freezing the user interface or bottlenecking CPU cores.
+
+#### 1. Concurrency vs Parallelism: Understanding the Primitives
+- **Parallel Collections (`parallel_map`, `parallel_filter`):** Distribute an array of work across worker threads. **Key Guarantee:** The output array strictly preserves the exact same ordering as the original input array, regardless of which worker thread finished first.
+- **`WaitGroup`:** A synchronization barrier. You increment a counter (`wg.add(count)`), launch concurrent worker threads, and block with `wg.wait()` until all workers signal completion with `wg.done()`.
+- **`WorkerPool`:** A bounded worker system. Spawning 10,000 threads simultaneously will crash your operating system with socket or stack exhaustion. A `WorkerPool` of size 8 will queue 10,000 tasks and process them using only 8 persistent worker threads.
+
+#### 2. Lifecycle & Thread Safety Invariants
+- **What if a worker crashes or errors?**
+  In `parallel_map`, each item's worker function is executed within a guarded context. If an error occurs, the pipeline captures it cleanly.
+- **What if `wg.done()` is called too many times?**
+  Calling `wg.done()` decrements the atomic counter. Ensure you only call `wg.done()` once per task; calling it when the counter is already zero will result in an underflow warning.
+- **Shared State Danger:**
+  Never modify a standard array or map from multiple threads simultaneously. Collect results via `parallel_map` or use thread-safe channels/mutexes.
+
+#### 3. Concurrency Tool Selection Matrix
+
+| Tool | Concurrency Style | Order Preserved? | Thread Limit | Best For |
+| :--- | :--- | :--- | :--- | :--- |
+| `parallel_map[T, R]` | CPU/IO Parallelism | **Yes (Guaranteed)** | CPU Cores | Batch image processing, bulk API requests |
+| `parallel_filter[T]` | CPU/IO Parallelism | **Yes (Guaranteed)** | CPU Cores | Bulk data validation across multi-core CPUs |
+| `parallel_each[T]` | Side-effects | No | CPU Cores | Firing independent asynchronous webhooks |
+| `WaitGroup` | Synchronization Barrier | N/A | Manual | Waiting for multiple distinct subsystems to start |
+| `WorkerPool` | Bounded Task Queue | Configurable | Fixed `concurrency` | High-volume backend job queues, web crawlers |
+
+> [!WARNING]
+> **Race Condition Warning:** If multiple parallel workers mutate the same external variable without a lock, the final result will be corrupted. Prefer returning values from `parallel_map` rather than mutating shared outer variables.
+
+---
 
 High-throughput, deterministic concurrency abstractions: order-preserving parallel collections (`parallel_map`, `parallel_filter`, `parallel_each`), `WaitGroup` synchronization, and bounded `WorkerPool`.
 
@@ -475,6 +547,9 @@ pool.wait_all()
 
 [▲ Back to Table of Contents](#table-of-contents)
 
+
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
 
 <a id="bitutils"></a><a id="bitutils-api"></a>
@@ -488,6 +563,42 @@ Import statement:
 ```v
 import bitutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Bit Manipulation Primer for Beginners: Dynamic BitSets & Binary Flags
+
+Bits are the most compact data representation in computer science: a single byte stores 8 independent boolean flags, and 1 kilobyte stores 8,192 flags.
+
+#### 1. Dynamic Auto-Expanding BitSet
+Unlike fixed-size integers (`u32` gives 32 bits, `u64` gives 64 bits), `bitutils.BitSet` is dynamically sized:
+- **What if you set a bit index beyond current capacity?**
+  Calling `bs.set(1000)` on a BitSet initialized with 64 bits **automatically expands** its internal 64-bit word storage to accommodate index 1000. It will **never** throw an index-out-of-bounds error or panic.
+- **What if you read an uninitialized bit?**
+  Calling `bs.get(5000)` on an unexpanded BitSet safely returns `false`.
+
+#### 2. Real-World Use Cases
+- **User Permissions:** Read (`1`), Write (`2`), Execute (`4`), Admin (`8`). A single integer or bitset represents the full permission matrix.
+- **Bloom Filters & Bloom Indexes:** Testing whether a record might exist in a large dataset using microsecond bitwise operations.
+- **Tracking Visited IDs:** Efficiently tracking seen IDs up to millions of records with near-zero memory footprint.
+
+#### 3. BitSet Operations Reference Table
+
+| Operation | Method / Function | Description | Example |
+| :--- | :--- | :--- | :--- |
+| **Set Bit (1)** | `bs.set(index)` | Turns the bit at `index` to 1 (`true`) | `bs.set(42)` |
+| **Clear Bit (0)** | `bs.clear(index)` | Clears the bit at `index` to 0 (`false`) | `bs.clear(42)` |
+| **Check Bit** | `bs.get(index) bool` | Returns `true` if bit is 1, `false` otherwise | `if bs.get(42) { ... }` |
+| **Toggle Bit** | `bs.toggle(index)` | Inverts bit: 1 becomes 0, 0 becomes 1 | `bs.toggle(10)` |
+| **Popcount (Count 1s)**| `bs.count() int` | Counts total number of set bits (Hamming weight) | `active_users := bs.count()` |
+| **Bitwise AND** | `bs.and_with(other)` | Retains only bits set in **both** sets (Intersection) | Permission verification |
+| **Bitwise OR** | `bs.or_with(other)` | Retains bits set in **either** set (Union) | Combining role flags |
+| **Bitwise XOR** | `bs.xor_with(other)` | Retains bits set in one set but **not** both (Difference) | Finding state changes |
+| **Binary String** | `bs.to_bin_str() string` | Outputs readable binary string | e.g. `"10010110"` |
+
+---
 
 ### Core Concepts
 
@@ -674,6 +785,9 @@ println('Hamming distance: ${dist}') // 2
 
 [▲ Back to Table of Contents](#table-of-contents)
 
+
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
 
 <a id="cacheutils"></a><a id="cacheutils-api"></a>
@@ -686,8 +800,46 @@ Import statement:
 
 ```v
 import cacheutils
-import time
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Caching Primer for Beginners: LRU vs TTL In-Memory Caching
+
+Caching prevents expensive duplicate operations (such as re-running slow database queries or re-calculating cryptographic hashes) by storing recent results in fast RAM.
+
+#### 1. LRU (Least-Recently-Used) vs TTL (Time-To-Live)
+- **LRU Cache (`LRUCache[K, V]`):** Bound by **capacity**.
+  - **What happens when capacity is exceeded?** If you set `max_size: 100` and add a 101st key, the item that was least recently accessed (read or written) is **automatically evicted** in $O(1)$ constant time.
+- **TTL Cache (`TTLCache[K, V]`):** Bound by **time**.
+  - **What happens when TTL expires?** Each item has an expiration duration (e.g. 5 minutes). On `get()`, if the current time exceeds the creation timestamp + TTL, the item is dropped and `none` is returned.
+
+#### 2. Handling Missing Keys Gracefully
+Both cache engines return V's standard option type (`?V`):
+```v
+val := cache.get('user_42') or {
+    // Cache miss! Fetch from database and populate cache
+    db_val := fetch_user_from_db(42)
+    cache.set('user_42', db_val)
+    db_val
+}
+```
+
+#### 3. Caching Strategy Comparison Table
+
+| Feature | `LRUCache[K, V]` | `TTLCache[K, V]` | Standard Map |
+| :--- | :--- | :--- | :--- |
+| **Eviction Trigger** | Capacity limit exceeded | Clock duration elapsed | Never (grows infinitely) |
+| **Memory Risk** | **Zero** (bounded by fixed size) | Low (cleaned on access) | **High** (leaks RAM if unbounded) |
+| **Best For** | Static assets, parsed templates, SQL query cache | Session tokens, temporary auth codes, API rate limits | Small, fixed lookup tables |
+| **Time Complexity** | $O(1)$ get and set | $O(1)$ get and set | $O(1)$ get and set |
+
+> [!WARNING]
+> **Thundering Herd / Cache Stampede:** If a popular cached item expires simultaneously under high traffic, dozens of threads may attempt to recompute it at the same moment. Ensure expensive recomputation handles fallback or lock acquisition.
+
+---
 
 High-performance, in-memory caching data structures featuring O(1) Least-Recently-Used (LRU) evictions and entry-level Time-To-Live (TTL) expiration policies.
 
@@ -823,6 +975,9 @@ println('Rates: ${data}')
 
 [▲ Back to Table of Contents](#table-of-contents)
 
+
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
 
 <a id="cliutils"></a><a id="cliutils-api"></a>
@@ -836,6 +991,42 @@ Import statement:
 ```v
 import cliutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 CLI & Terminal Primer for Beginners: Prompts, Colors & Arguments
+
+Building an ergonomic command-line tool requires clear user feedback, graceful fallback handling for non-interactive scripts, and safe handling of sensitive inputs like passwords.
+
+#### 1. User Prompts & Fallback Behaviors
+- **What happens if the user just presses Enter?**
+  `cliutils.prompt(label, default_value)` detects an empty input line and automatically returns `default_value`. This allows interactive tools to be accepted with sensible defaults.
+- **Masked Passwords:**
+  `cliutils.prompt_password(label)` suppresses terminal character echoing so onlookers cannot read credentials as they are typed.
+- **Interactive Multiselect:**
+  `cliutils.prompt_multiselect(label, options)` displays an interactive checkbox menu:
+  - `↑` / `↓` Arrow keys navigate the list
+  - `Space` toggles a checkbox
+  - `Enter` confirms and returns the array of chosen options
+
+#### 2. ANSI Colors & Styling
+Terminal colors improve readability. `cliutils` supports 16-color ANSI, 256-color palettes, and Truecolor (24-bit RGB), with automatic stripping if stdout is piped to a file.
+
+#### 3. CLI Helper Reference Table
+
+| Tool | Function / Struct | Behavior on Empty Input | Safe for Piping? | Real-World Use Case |
+| :--- | :--- | :--- | :--- | :--- |
+| **Text Prompt** | `prompt(msg, default)` | Returns `default` | Yes | Project setup wizard ("Project name: [my-app]") |
+| **Yes/No Confirm** | `prompt_confirm(msg, default)` | Returns `default` bool | Yes | Destructive confirmation ("Delete all files? [y/N]") |
+| **Password Prompt** | `prompt_password(msg)` | Re-prompts or returns empty | No (terminal only) | Sudo, database, or API key entry |
+| **Single Choice** | `prompt_select(msg, opts)` | Prompts until valid choice | Terminal only | Choosing environment ("dev", "staging", "prod") |
+| **Multi-Select** | `prompt_multiselect(msg, opts)`| Returns empty array | Terminal only | Feature selection ("Auth", "Database", "Docker") |
+| **Spinner** | `new_spinner(msg)` | Animated loading indicator | Auto-disables | Long-running operations like downloads |
+| **Flag Parser** | `FlagParser` | Inspects `--flags` and options | Yes | CLI option handling (`--port 8080 --verbose`) |
+
+---
 
 ### ANSI Colors & Text Styles
 
@@ -1175,6 +1366,33 @@ log.error('Failed to send webhook notification')
 
 ---
 
+### Advanced Capabilities (`cliutils`)
+
+Clipboard Functions
+
+```v
+import cliutils
+
+if cliutils.is_clipboard_available() {
+    cliutils.copy_to_clipboard('Copied to system clipboard')
+    text := cliutils.read_from_clipboard()
+    println(text)
+}
+```
+
+---
+
+### Extended Methods & Enhancements
+
+- `prompt_multiselect(prompt string, options []string) ![]string`: Interactive multi-choice prompt in the terminal, returns array of selected options.
+- `Spinner`: Terminal loading spinner with `new_spinner(msg)`, `step()`, `update(msg)`.
+- `confirm(prompt string, default_yes bool) bool`: Interactive Yes/No prompt.
+
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
 <a id="colorutils"></a><a id="colorutils-api"></a>
 
 # colorutils API
@@ -1186,6 +1404,39 @@ Import statement:
 ```v
 import colorutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Color Theory & Accessibility Primer: Spaces, Harmonies & WCAG Audits
+
+`colorutils` provides mathematical color conversions, palette generation, terminal formatting, and WCAG 2.1 accessibility auditing for user interfaces and design systems.
+
+#### 1. Color Representations
+- **HEX:** Hexadecimal string (e.g. `'#3498db'` or `'#3498dbff'` with alpha). Supports 3, 6, and 8 hex digits.
+- **RGB:** Additive color model with Red, Green, Blue channels from `0` to `255`.
+- **HSL:** Human-perceptual model: Hue (`0.0 - 360.0°`), Saturation (`0.0 - 100.0%`), and Lightness (`0.0 - 100.0%`). Ideal for creating harmonious color shades.
+
+#### 2. WCAG 2.1 Accessibility & Contrast Compliance
+The Web Content Accessibility Guidelines (WCAG 2.1) require sufficient contrast between text and background colors:
+- **AA Level (Normal Text):** Contrast ratio of at least **4.5:1**.
+- **AA Level (Large Text / Bold 18pt+):** Contrast ratio of at least **3.0:1**.
+- **AAA Level (Enhanced Contrast):** Contrast ratio of at least **7.0:1**.
+
+Use `colorutils.contrast_ratio(fg, bg)` to test color combinations before deploying UI designs.
+
+#### 3. Color Harmonies Reference Table
+
+| Harmony | Angular Shift on Color Wheel | Visual Mood | Example Application |
+| :--- | :--- | :--- | :--- |
+| **Complementary** | +180° | High contrast, vibrant energy | Primary button vs Call-to-action badge |
+| **Analogous** | -30° and +30° | Calm, unified, serene | Background gradients and card surfaces |
+| **Triadic** | +120° and +240° | Balanced, colorful, playful | Chart palettes, multi-category dashboards |
+| **Tetradic** | +90°, +180°, +270° | Rich, diverse color scheme | Complex data visualizations |
+| **Monochromatic** | Varied lightness / saturation | Professional, clean, minimal | Dark/light theme variations |
+
+---
 
 Comprehensive color conversions (HEX, RGB, HSL), color theory transformations (lighten, darken, invert, blend, grayscale), WCAG 2.1 accessibility auditing (relative luminance, contrast ratio, AA/AAA compliance), and 24-bit truecolor ANSI terminal styling.
 
@@ -1436,6 +1687,9 @@ println('Boosted Headroom: ${boosted.headroom:.2f}x')
 
 [▲ Back to Table of Contents](#table-of-contents)
 
+
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
 
 <a id="compressutils"></a><a id="compressutils-api"></a>
@@ -1449,6 +1703,34 @@ Import statement:
 ```v
 import compressutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Compression Primer for Beginners: Gzip, Zlib, Deflate & Zstandard
+
+Data compression reduces network payload sizes and storage footprints by eliminating repetitive byte sequences.
+
+#### 1. Compression Formats & Invariants
+- **What if input data is empty?**
+  Compressing an empty byte slice returns valid format headers with zero payload bytes. Decompressing it safely returns an empty slice.
+- **What if the payload is corrupted?**
+  All decompression functions return a V Result (`![]u8`). If the checksum fails (CRC32 for Gzip, Adler32 for Zlib) or the header magic bytes are invalid, an error is returned cleanly instead of terminating the process.
+
+#### 2. Algorithm Comparison Table
+
+| Algorithm | Magic Header Bytes | Checksum Algorithm | Overhead | Best For |
+| :--- | :--- | :--- | :--- | :--- |
+| **Gzip** | `0x1F 0x8B` | CRC-32 | 18 bytes + footer | Web HTTP `Content-Encoding: gzip`, file archives (.gz) |
+| **Zlib** | `0x78 0x9C` / `0x78 0x01` | Adler-32 | 6 bytes (lighter) | In-memory protocol streams, PDF streams, PNG chunks |
+| **Deflate** | None (Raw bitstream) | None | 0 bytes | Low-level embedded packet payloads |
+| **Zstandard (zstd)**| `0x28 0xB5 0x2F 0xFD` | XXH64 | Flexible | Modern ultra-fast real-time compression |
+
+> [!TIP]
+> **Compression Levels:** Level 1 is optimized for speed with lower ratio (ideal for live network streaming); Level 9 maximizes compression ratio at the expense of CPU time (ideal for static asset pre-compression). Default level 6 provides the optimal balance.
+
+---
 
 ### Supported Compression Formats
 
@@ -1575,6 +1857,112 @@ os.rm('app_restored.log') or {}
 
 [▲ Back to Table of Contents](#table-of-contents)
 
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+<a id="configutils"></a><a id="configutils-api"></a>
+
+# configutils API
+
+**Plain-language purpose:** Use `configutils` for 12-factor application configuration. It merges defaults, configuration files (TOML/JSON), environment variables, and CLI flags into a single unified manager with type-safe accessors and complete provenance tracking (knowing whether a value came from a default, file, ENV, or CLI).
+
+Import statement:
+
+```v
+import configutils
+```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Layered Configuration Primer: 12-Factor App Settings & Provenance
+
+Modern cloud-native and 12-factor applications require configurations that can be configured by developers locally, overridden by `.env` files in staging, and injected via container environment variables or CLI flags in production.
+
+#### 1. Configuration Precedence Hierarchy
+When a configuration key is requested, `configutils` resolves values using strict precedence (highest to lowest):
+1. **CLI Arguments** (e.g. `--port 9000`) &rarr; **[Highest Precedence]**
+2. **Environment Variables** (e.g. `APP_PORT=9000`)
+3. **Configuration File** (`app.toml` or `app.json`)
+4. **Programmatic Defaults** (`cfg.set_default('port', '8080')`) &rarr; **[Lowest Precedence]**
+
+#### 2. Provenance Tracking & Missing Keys
+- **What if a key does not exist?**
+  - `cfg.get('missing')` returns `none` (`?string`).
+  - `cfg.get_or_default('missing', 'fallback')` returns `'fallback'`.
+  - `cfg.get_int('missing')!` returns an error indicating the key was not found.
+- **Where did this setting come from?**
+  `cfg.source_of('port')` returns `"cli"`, `"env"`, `"file"`, `"default"`, or `"unknown"`. This makes debugging configuration issues trivial when diagnosing production discrepancies.
+- **What if an environment variable has a prefix?**
+  Initializing with `configutils.new_manager('APP')` will automatically strip the prefix, mapping `APP_DATABASE_URL` to `database_url`.
+
+#### 3. Typed Accessors Reference Table
+
+| Accessor | Supported Formats | Return on Failure | Real-World Use Case |
+| :--- | :--- | :--- | :--- |
+| `get(key)` | String | `none` (`?string`) | Optional API tokens |
+| `get_or_default(key, def)` | String | `def` | Default hostnames |
+| `get_int(key)` | Integer strings (`"8080"`) | Returns `error` | Port numbers, retry counts |
+| `get_i64(key)` | 64-bit integer strings | Returns `error` | Large byte limits, timestamps |
+| `get_f64(key)` | Floating point (`"3.14"`) | Returns `error` | Thresholds, rates |
+| `get_bool(key)` | `"true"`, `"false"`, `"1"`, `"0"`, `"yes"`, `"no"` | Returns `error` | Feature flags (`DEBUG`, `SSL_ENABLED`) |
+| `get_strings(key)` | Comma-separated (`"a,b,c"`) | Returns `error` | Allowed CORS origins, whitelist IPs |
+
+---
+
+### Quick Start Example
+
+```v
+import configutils
+
+// Initialize with environment variable prefix (e.g. APP_PORT)
+mut cfg := configutils.new_manager('APP')
+
+// 1. Establish defaults
+cfg.set_default('port', '8080')
+cfg.set_default('host', '127.0.0.1')
+cfg.set_default('debug', 'false')
+
+// 2. Load configuration file (TOML or JSON) if present
+cfg.load_file('app.toml') or {}
+
+// 3. Merge environment variables (APP_PORT, APP_HOST, etc.)
+cfg.load_env()
+
+// 4. Override with CLI arguments (--port 9000 --debug)
+cfg.load_cli_args(['--port', '9000', '--debug'])!
+
+// Type-safe access
+port := cfg.get_int('port')! // 9000
+host := cfg.get('host') or { '127.0.0.1' }
+debug := cfg.get_bool('debug')! // true
+source := cfg.source_of('port') // "cli"
+```
+
+### Reference: Methods & Functions
+
+- `new_manager(env_prefix string) &ConfigManager`: Creates a new layered configuration manager with an optional environment variable prefix.
+- `(mut cm ConfigManager) set_default(key string, val string)`: Sets a base default value for a key.
+- `(mut cm ConfigManager) load_file(path string) !`: Loads and parses a `.toml` or `.json` configuration file, overriding defaults.
+- `(mut cm ConfigManager) load_env()`: Inspects environment variables matching `PREFIX_KEY` (case-insensitive) and overrides existing keys.
+- `(mut cm ConfigManager) load_cli_args(args []string) !`: Parses `--key value` or `--flag` command-line arguments and overrides existing keys.
+- `(cm &ConfigManager) get(key string) ?string`: Retrieves a configuration value by key.
+- `(cm &ConfigManager) get_or_default(key string, default_val string) string`: Retrieves a value or falls back to a provided default.
+- `(cm &ConfigManager) get_int(key string) !int`: Retrieves and parses a value as `int`.
+- `(cm &ConfigManager) get_i64(key string) !i64`: Retrieves and parses a value as `i64`.
+- `(cm &ConfigManager) get_f64(key string) !f64`: Retrieves and parses a value as `f64`.
+- `(cm &ConfigManager) get_bool(key string) !bool`: Retrieves and parses a boolean value (`true`/`false`, `1`/`0`, `yes`/`no`).
+- `(cm &ConfigManager) get_strings(key string) ![]string`: Retrieves and splits a comma-delimited string into a slice.
+- `(cm &ConfigManager) source_of(key string) string`: Returns the provenance source of a key (`"default"`, `"file"`, `"env"`, `"cli"`, or `"unknown"`).
+- `(cm &ConfigManager) all() map[string]string`: Returns a complete copy of all resolved configuration key-value pairs.
+- `(cm &ConfigManager) has(key string) bool`: Checks if a configuration key exists.
+
+
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
 
 <a id="cronutils"></a><a id="cronutils-api"></a>
@@ -1587,8 +1975,49 @@ Import statement:
 
 ```v
 import cronutils
-import time
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Cron Primer for Beginners: POSIX Schedules & Execution Timers
+
+Cron expressions schedule recurring tasks such as database backups, email digests, and cache warming.
+
+#### 1. POSIX 5-Field Cron Anatomy
+A standard cron expression consists of 5 space-separated fields:
+```
+┌───────────── Minute (0 - 59)
+│ ┌───────────── Hour (0 - 23)
+│ │ ┌───────────── Day of Month (1 - 31)
+│ │ │ ┌───────────── Month (1 - 12 or JAN - DEC)
+│ │ │ │ ┌───────────── Day of Week (0 - 6, 0 = Sunday)
+│ │ │ │ │
+* * * * *
+```
+
+#### 2. Special Characters & Syntax
+- `*` ("every"): Matches all possible values for that field (`* * * * *` = every minute).
+- `,` (list): Matches any value in a list (`15,45 * * * *` = at minute 15 and 45).
+- `-` (range): Matches an inclusive range (`0 9-17 * * *` = at minute 0 of every hour from 9 AM to 5 PM).
+- `/` (step): Matches intervals (`*/15 * * * *` = every 15 minutes).
+
+#### 3. Common Cron Patterns Reference Table
+
+| Expression | Meaning | Next Execution Behavior | Real-World Use Case |
+| :--- | :--- | :--- | :--- |
+| `* * * * *` | Every single minute | Fires at the start of the next minute | Real-time queue health checks |
+| `*/5 * * * *` | Every 5 minutes | Fires at `:00`, `:05`, `:10`, etc. | Polling external webhook queues |
+| `0 * * * *` | Top of every hour | Fires at `:00` | Syncing metrics, clearing expired cache |
+| `0 0 * * *` | Every day at midnight | Fires at `00:00:00` | Nightly database backups, report generation |
+| `0 9 * * 1-5` | 9:00 AM on weekdays | Skips Saturday and Sunday | Sending morning business digests |
+| `0 0 1 * *` | First day of every month | Fires at midnight on day 1 | Monthly invoice billing |
+
+> [!NOTE]
+> **Calendar Handling:** `cronutils` correctly handles leap years, varying month lengths (28, 30, 31 days), and daylight savings rollovers when calculating `next_run(time)`.
+
+---
 
 ### Cron Syntax Format
 
@@ -1683,6 +2112,9 @@ println(cronutils.is_valid_cron('@daily'))       // true
 
 [▲ Back to Table of Contents](#table-of-contents)
 
+
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
 
 <a id="cryptoutils"></a><a id="cryptoutils-api"></a>
@@ -1696,6 +2128,38 @@ Import statement:
 ```v
 import cryptoutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Cryptography Primer for Beginners: Hashing, Ciphers & Passwords
+
+Cryptography provides data integrity, confidentiality, and authentication. Using the wrong algorithm for a task is a critical security vulnerability.
+
+#### 1. Core Rule: Hashing vs Encryption vs Password Storage
+- **Cryptographic Hashes (SHA-256, SHA-512):** One-way functions. Impossible to reverse. Used for **data integrity** (verifying a downloaded file has not been altered).
+- **Password Hashing (Bcrypt):** Intentionally **slow and salted**. Standard SHA-256 can compute billions of guesses per second on modern GPUs, making brute-force trivial. Bcrypt uses an adaptive work cost factor to prevent offline cracking.
+- **Symmetric Encryption (AES-256-CBC):** Two-way reversible. Encrypts plaintext into unreadable ciphertext using a secret key and a random Initialization Vector (IV).
+- **HMAC (Hash-based Message Authentication Code):** Prevents tampering and validates authenticity between systems sharing a secret key.
+
+#### 2. Timing Attacks & Constant-Time Comparison
+When verifying HMAC signatures or authentication tokens, standard string comparison (`a == b`) terminates early at the first non-matching byte. Attackers can measure response times in nanoseconds to deduce secrets character-by-character.
+Always use `cryptoutils.secure_compare(a, b)` for secret verification.
+
+#### 3. Cryptographic Operations Matrix
+
+| Task | Recommended Function | Security Guarantee | Do NOT Use |
+| :--- | :--- | :--- | :--- |
+| **Password Storage** | `bcrypt_hash(pwd)!` | Salted, GPU-resistant | `md5`, `sha256` (Too fast!) |
+| **Password Verification** | `bcrypt_verify(pwd, hash)` | Constant-time check | Manual string comparison |
+| **File / Data Checksum** | `sha256(data)` | Cryptographic collision resistance | `md5` (Broken collisions) |
+| **Data Encryption** | `aes_encrypt_string(k, iv, data)!` | AES-256-CBC with PKCS7 | ECB mode (Leaks patterns) |
+| **API Signature** | `hmac_sha256(key, message)` | Keyed message authentication | Plain hash concatenation |
+| **Token Comparison** | `secure_compare(a, b)` | Immune to timing attacks | Standard `==` operator |
+| **Secure Randomness** | `secure_random_bytes(len)!` | Cryptographic OS entropy | Standard `rand` PRNG |
+
+---
 
 ### `sha256(s string) string` & `sha256_hex(s string) string`
 
@@ -1802,6 +2266,57 @@ println(token) // 64 hex characters
 
 ---
 
+### Advanced Capabilities (`cryptoutils`)
+
+Advanced Cryptography
+
+```v
+import cryptoutils
+
+// Symmetric AES-CBC (with PKCS7 padding)
+key := cryptoutils.secure_random_bytes(32) or { panic(err) }
+iv := cryptoutils.secure_random_bytes(16) or { panic(err) }
+ciphertext := cryptoutils.aes_encrypt_string(key, iv, 'Secret Payload') or { panic(err) }
+raw_cipher := cryptoutils.aes_encrypt_cbc(key, iv, 'Secret Payload'.bytes()) or { panic(err) }
+raw_dec := cryptoutils.aes_decrypt_cbc(key, iv, raw_cipher) or { panic(err) }
+decrypted := cryptoutils.aes_decrypt_string(key, iv, ciphertext) or { panic(err) }
+
+println('Decrypted raw len: ${raw_dec.len}, decrypted text: ${decrypted}')
+
+// Password hashing with Bcrypt
+hash := cryptoutils.bcrypt_hash('user_password') or { panic(err) }
+ok := cryptoutils.bcrypt_verify('user_password', hash)
+println('Password ok: ${ok}')
+
+// Secure Entropy
+random_hex := cryptoutils.secure_random_hex(16) or { '' }
+println('Random hex: ${random_hex}')
+
+// Fast non-cryptographic hashes
+fnv32 := cryptoutils.fnv1a_32('string to hash')
+c32 := cryptoutils.crc32_hash('string to hash')
+println('FNV32: ${fnv32}, CRC32: ${c32}')
+
+// Asymmetric Ed25519 digital signatures
+pub_k, priv_k := cryptoutils.generate_ed25519_keypair() or { panic(err) }
+sig := cryptoutils.ed25519_sign(priv_k, 'message'.bytes()) or { panic(err) }
+valid := cryptoutils.ed25519_verify(pub_k, 'message'.bytes(), sig)
+println('Ed25519 signature valid: ${valid}')
+```
+
+---
+
+### Extended Methods & Enhancements
+
+- `secure_compare(a string, b string) bool`: Constant-time string comparison to prevent timing attacks.
+- `generate_ulid() string`: 26-character sortable unique identifier.
+- `generate_totp(secret string, counter u64, digits int) !string`: RFC 6238 Time-based One-Time Passwords.
+
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
 <a id="diffutils"></a><a id="diffutils-api"></a>
 
 # diffutils API
@@ -1813,6 +2328,43 @@ Import statement:
 ```v
 import diffutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Diff & Patch Primer for Beginners: Myers Algorithm & Unified Diffs
+
+A diff compares two versions of text and calculates the minimal sequence of insertions and deletions required to transform one into the other.
+
+#### 1. Anatomy of a Unified Diff
+Unified diffs (the standard format used by Git and patch utilities) represent changes with standardized markers:
+```diff
+--- a/config.json
++++ b/config.json
+@@ -1,4 +1,4 @@
+ {
+-  "debug": false,
++  "debug": true,
+   "port": 8080
+ }
+```
+- `--- a/...`: Original file
+- `+++ b/...`: Modified file
+- `@@ -start,count +start,count @@`: Chunk coordinates (line numbers and counts)
+- `-`: Deleted line
+- `+`: Added line
+- ` `: Unchanged context line
+
+#### 2. Operations & Use Cases
+
+| Operation | Function | Output Format | Real-World Use Case |
+| :--- | :--- | :--- | :--- |
+| **Programmatic Diff** | `diff_lines(old, new)` | `[]DiffOp` (`.equal`, `.insert`, `.delete`) | Building custom diff visualization UIs |
+| **Unified Diff** | `unified_diff(old, new, opts)` | Standard Git patch text | Generating patch files for review |
+| **Colorized Terminal Diff** | `colorized_diff(old, new)` | ANSI green/red formatted text | CLI code review, terminal changelogs |
+
+---
 
 ### Core Operations
 
@@ -1962,6 +2514,9 @@ println(ansi_output)
 
 [▲ Back to Table of Contents](#table-of-contents)
 
+
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
 
 <a id="envutils"></a><a id="envutils-api"></a>
@@ -1977,6 +2532,33 @@ import envutils
 ```
 
 [▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Environment Variables Primer: 12-Factor Loading & Expansion
+
+Environment variables decouple configuration secrets (API keys, database URLs, port numbers) from application source code.
+
+#### 1. Lifecycle & Invariants
+- **What happens if `.env` does not exist?**
+  Calling `envutils.load_dotenv()` will return without error if an optional `.env` file is missing. If loading is mandatory, check `os.exists('.env')` or handle error results.
+- **Does `.env` overwrite existing system variables?**
+  By default, `envutils.load_dotenv()` does **not** overwrite variables that were already defined in the shell or Docker environment. This respects containerized deployments. Use `envutils.load_dotenv_override()` to force `.env` values to overwrite system variables.
+- **Variable Expansion Syntax:**
+  `envutils.expand("http://${HOST:-localhost}:${PORT:-8080}")` replaces `${HOST}` with its environment value, or defaults to `localhost` if unset.
+
+#### 2. Typed Accessors & Gotchas
+
+| Function | Type Returned | Behavior on Missing Key | Real-World Example |
+| :--- | :--- | :--- | :--- |
+| `get(key)` | `?string` | Returns `none` | Optional `NEW_RELIC_LICENSE_KEY` |
+| `get_or_default(key, def)` | `string` | Returns `def` | `APP_NAME` defaulting to `"my_service"` |
+| `get_int(key, def)` | `int` | Returns `def` if unset or non-numeric | `PORT` defaulting to `8080` |
+| `get_bool(key, def)` | `bool` | Returns `def` (`"true"`, `"1"` &rarr; `true`) | `DEBUG` defaulting to `false` |
+| `get_strings(key, sep)` | `[]string` | Splits delimited string | `ALLOWED_HOSTS` split by `","` |
+
+> [!WARNING]
+> **Security Tip:** Never print the entire environment dictionary into logs or error messages. Redact sensitive keys containing `KEY`, `SECRET`, `PASSWORD`, or `TOKEN`.
 
 ---
 
@@ -2270,6 +2852,9 @@ println(path)
 
 [▲ Back to Table of Contents](#table-of-contents)
 
+
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
 
 <a id="eventutils"></a><a id="eventutils-api"></a>
@@ -2283,6 +2868,34 @@ Import statement:
 ```v
 import eventutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Event Bus Primer for Beginners: Pub/Sub & Decoupled Architecture
+
+The Publish-Subscribe (Pub/Sub) pattern decouples components: modules emit events when something happens without knowing or caring what other subsystems are listening.
+
+#### 1. Core Concepts & Subscription Types
+- **Standard Listener (`bus.on(event, handler)`):** Persists and executes every time the event is fired until explicitly removed.
+- **One-Time Listener (`bus.once(event, handler)`):** Executes the first time the event is emitted and then automatically unregisters itself.
+- **Wildcard Subscriptions:** Subscribing to `'user.*'` will catch `'user.registered'`, `'user.login'`, and `'user.deleted'`.
+
+#### 2. Synchronous Dispatch vs Error Handling
+When `bus.emit(event, data)` is called, handlers are invoked in the order they were registered. If an event handler requires long-running background execution, spawn a coroutine or push to an `asyncutils.WorkerPool`.
+
+#### 3. Event Bus Methods Reference Table
+
+| Method | Behavior | Listener Persistence | Best For |
+| :--- | :--- | :--- | :--- |
+| `bus.on(event, handler)` | Registers handler | Indefinite | Metrics collection, audit logging |
+| `bus.once(event, handler)` | Registers handler | Removed after first fire | Waiting for application boot / ready |
+| `bus.emit(event, data)` | Invokes all matching handlers | N/A | Firing state change notifications |
+| `bus.off(event, handler_id)` | Unregisters handler | Removed immediately | Component teardown, memory leak prevention |
+| `bus.listener_count(event)` | Returns number of subscribers | N/A | Diagnostics and health checks |
+
+---
 
 ### Core Concepts
 
@@ -2416,6 +3029,9 @@ order_bus.emit(OrderEvent{
 
 [▲ Back to Table of Contents](#table-of-contents)
 
+
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
 
 <a id="fileutils"></a><a id="fileutils-api"></a>
@@ -2429,6 +3045,40 @@ Import statement:
 ```v
 import fileutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 File Operations Primer: Crash-Safe Atomic Writes & CSV Processing
+
+File handling must account for power outages, abrupt process termination, directory structure creation, and path traversal security.
+
+#### 1. Why Standard File Writes Are Dangerous (And Why Atomic Writes Fix It)
+A standard file write truncates the target file before writing new bytes. If your server experiences a crash, power outage, or Out-Of-Memory (OOM) kill midway through, the file is left completely empty or partially corrupted!
+`fileutils.write_file_atomic(path, content)!` solves this:
+1. Writes the content to a unique hidden temporary file (`path + .tmp.random`).
+2. Flushes bytes to disk storage.
+3. Performs an **atomic filesystem rename** (`os.mv`) replacing the old file in a single filesystem transaction. The file is guaranteed to be 100% written or 100% unchanged.
+
+#### 2. Directory Creation & Traversal Defense
+- **What if parent directories do not exist?**
+  `fileutils.ensure_dir(path)` creates any missing parent directory hierarchy. If the directory already exists, it silently succeeds without error.
+- **Path Traversal Protection:**
+  Always validate that user-supplied filenames do not contain `../` or null bytes before passing them to file reading or writing functions.
+
+#### 3. File Operations Reference Table
+
+| Function | Operation | Crash-Safe? | Overwrites? | Use Case |
+| :--- | :--- | :--- | :--- | :--- |
+| `write_file_atomic(path, content)!` | Atomic text write | **Yes** (Temp + Rename) | Yes (Atomic) | Config files, critical state |
+| `read_text(path)!` | Read full text | N/A | N/A | Loading text/markdown/JSON |
+| `ensure_dir(dir)!` | Recursive mkdir | N/A | Safe if exists | Preparing output folders |
+| `file_hash_sha256(path)!` | SHA-256 Checksum | N/A | N/A | Verifying download integrity |
+| `mime_type(path)` | Detect MIME type | N/A | N/A | Setting HTTP `Content-Type` |
+| `read_csv(path)!` / `write_csv(path, rows)!` | RFC 4180 CSV | No | Yes | Data import/export spreadsheets |
+
+---
 
 <a id="struct-helpers"></a>
 
@@ -2902,6 +3552,17 @@ defer { fileutils.remove_dir(dir) or {} }
 
 ---
 
+### Extended Methods & Enhancements
+
+- `write_file_atomic(path string, content string) !`: Crash-safe atomic writing via temporary file + atomic OS rename.
+- `mime_type(path string) string`: Automatic MIME detection from file extension and type signature.
+- `file_hash_sha256(path string) !string`: Hexadecimal SHA-256 checksum calculation for any file.
+
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
 <a id="flowutils"></a><a id="flowutils-api"></a>
 
 # flowutils API
@@ -2912,8 +3573,35 @@ Import statement:
 
 ```v
 import flowutils
-import time
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Flow Control & Resilience Primer: Rate Limiters & Circuit Breakers
+
+Distributed applications must defend themselves against traffic spikes and downstream service outages.
+
+#### 1. The Four Resilience Patterns
+- **1. Token Bucket Rate Limiter (`RateLimiter`):** Allows short bursts up to `capacity` while maintaining a steady `refill_rate`. If the bucket is empty, requests are rejected immediately.
+- **2. Circuit Breaker (`CircuitBreaker`):** Prevents cascading failures when a downstream database or third-party API is failing.
+  - **`Closed`:** Healthy. Normal requests pass through. Failures are counted.
+  - **`Open`:** Failure threshold reached. All requests fail fast immediately without hitting the downstream server.
+  - **`Half-Open`:** Reset timeout elapsed. A test request probes the downstream service; if successful, resets to `Closed`.
+- **3. Exponential Backoff with Jitter:** Retries failed requests with doubling delays (`base * 2^attempt`). Adding randomized "jitter" prevents all retrying clients from hammering the server at the exact same millisecond (the "thundering herd" problem).
+- **4. Debouncer (`Debouncer`):** Delays execution until a period of silence has elapsed (ideal for search input keystrokes).
+
+#### 2. Pattern Selection Matrix
+
+| Pattern | Problem Solved | Key Parameters | Example Scenario |
+| :--- | :--- | :--- | :--- |
+| **Token Bucket** | API abuse / DDoS | `capacity`, `refill_per_sec` | Limiting users to 60 requests/minute |
+| **Circuit Breaker** | Cascading outages | `failure_threshold`, `reset_timeout_ms` | Protecting against payment gateway timeout |
+| **Backoff + Jitter** | Transient network hiccups | `max_retries`, `base_delay_ms` | Retrying failed webhook deliveries |
+| **Debounce** | UI event spamming | `delay_ms` | Executing search query after user stops typing |
+
+---
 
 Resilience and traffic control primitives: Token Bucket rate limiting, Circuit Breaker state machine, exponential backoff retries, and call debouncing.
 
@@ -3064,6 +3752,15 @@ debouncer.reset()
 
 ---
 
+### Extended Methods & Enhancements
+
+- `SlidingWindowRateLimiter`: Enforce request limits across moving time windows.
+
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
 <a id="graphutils"></a><a id="graphutils-api"></a>
 
 # graphutils API
@@ -3075,6 +3772,34 @@ Import statement:
 ```v
 import graphutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Graph & DAG Primer for Beginners: Topological Sort & Cycles
+
+A Directed Acyclic Graph (DAG) represents directional dependencies between tasks, packages, or database migrations.
+
+#### 1. Topological Sorting & Dependency Ordering
+A topological sort arranges vertices such that for every directed edge $u 	o v$, node $u$ appears before node $v$.
+- **What if there is a circular dependency ($A 	o B 	o C 	o A$)?**
+  A circular dependency means the graph is NOT acyclic. Calling `dag.topological_sort()!` detects the cycle and returns a clear descriptive error rather than looping infinitely.
+- **Real-World Applications:**
+  - Build systems: Compiling source files in dependency order.
+  - Database migrations: Applying foreign key tables before dependent child tables.
+  - Task execution pipelines: Running prerequisites before dependent jobs.
+
+#### 2. Graph Algorithms Reference Table
+
+| Algorithm / Method | Description | Error Condition | Output |
+| :--- | :--- | :--- | :--- |
+| `dag.topological_sort() ![]string` | Linear resolution order | Returns error if cycle exists | Ordered list of node IDs |
+| `dag.has_cycle() bool` | Tests for circular loops | Returns `true`/`false` | Cycle presence boolean |
+| `dag.bfs(start_node)` | Breadth-First Search | None | Level-by-level node traversal |
+| `dag.dfs(start_node)` | Depth-First Search | None | Branch-by-branch node traversal |
+
+---
 
 ### Core Data Structures
 
@@ -3202,6 +3927,9 @@ println('0 and 5 are connected: ${uf.connected(0, 5)}') // false
 
 [▲ Back to Table of Contents](#table-of-contents)
 
+
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
 
 <a id="htmlutils"></a><a id="htmlutils-api"></a>
@@ -3215,6 +3943,37 @@ Import statement:
 ```v
 import htmlutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 HTML & XSS Security Primer: Sanitization, Escaping & DOM Queries
+
+Rendering untrusted user input directly into HTML is the number one cause of Cross-Site Scripting (XSS) vulnerabilities.
+
+#### 1. The Critical Distinction: Escaping vs Tag Stripping
+- **HTML Escaping (`escape_html(str)`):** Converts dangerous characters into safe HTML entities:
+  - `<` &rarr; `&lt;`
+  - `>` &rarr; `&gt;`
+  - `&` &rarr; `&amp;`
+  - `"` &rarr; `&quot;`
+  - `'` &rarr; `&#39;`
+  The browser displays the text verbatim without executing it as JavaScript or markup.
+- **Tag Stripping (`strip_tags(html)`):** Completely removes all `<...>` tags, leaving only raw inner text. Ideal for generating plain-text search index summaries or preview snippets.
+
+#### 2. DOM Tree Search & CSS Selectors
+
+| Function | Operation | Returns | Use Case |
+| :--- | :--- | :--- | :--- |
+| `escape_html(str)` | Entity encoding | Safe string | Rendering user comments in HTML templates |
+| `unescape_html(str)` | Restores entities | Raw string | Decoding encoded titles from RSS feeds |
+| `strip_tags(html)` | Removes all tags | Plain text | Generating email notifications from HTML |
+| `parse_html(html)` | Builds DOM tree | `HTMLDocument` | Web scraping, extracting data from pages |
+| `doc.find_by_tag('a')` | Tag matching | `[]HTMLElement`| Extracting all hyperlinks from an article |
+| `doc.find_by_class('price')`| Class matching | `[]HTMLElement`| Scraping product prices from e-commerce |
+
+---
 
 ### Parsing & DOM Queries
 
@@ -3317,6 +4076,9 @@ ${plain}')
 
 [▲ Back to Table of Contents](#table-of-contents)
 
+
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
 
 <a id="httputils"></a><a id="httputils-api"></a>
@@ -3330,6 +4092,37 @@ Import statement:
 ```v
 import httputils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 HTTP Client Primer for Beginners: Requests, Uploads & Streaming
+
+`httputils` provides an ergonomic HTTP client with JSON serialization, timeout controls, multipart file uploads, and Server-Sent Events (SSE) streaming.
+
+#### 1. Request Lifecycle & Timeout Defense
+Never issue unbounded HTTP requests in production. If a remote server hangs or drops packets, threads will remain blocked indefinitely.
+Always configure timeouts or use `httputils` defaults.
+
+#### 2. File Uploads & Server-Sent Events
+- **Multipart Form Uploads (`post_multipart`):**
+  Constructs a standard `multipart/form-data` payload with random boundary headers, streaming binary files without loading entire multi-gigabyte files into RAM.
+- **Server-Sent Events (`stream_sse`):**
+  Maintains an open HTTP connection to listen for real-time `text/event-stream` pushes from servers (e.g. LLM streaming responses, live stock tickers).
+
+#### 3. HTTP Methods Reference Table
+
+| Function | Method | Body Payload | Response Format | Best For |
+| :--- | :--- | :--- | :--- | :--- |
+| `get(url, opts)!` | GET | None | `http.Response` | Fetching web pages or raw bytes |
+| `get_json[T](url)!` | GET | None | Deserialized struct `T` | Consuming REST APIs |
+| `post_json[T](url, payload)!`| POST | Serialized JSON | `http.Response` | Submitting API payloads |
+| `post_multipart(...)!` | POST | `multipart/form-data` | `http.Response` | Uploading images, PDFs, files |
+| `stream_lines(url, cb)!` | GET | None | Line-by-line callback | Reading streaming logs |
+| `stream_sse(url, cb)!` | GET | None | Event/Data callback | LLM token streaming, real-time feeds |
+
+---
 
 ### `build_query_string(params map[string]string) string`
 
@@ -3444,6 +4237,111 @@ println(res.body)
 
 ---
 
+### Extended Methods & Enhancements
+
+- `post_multipart(url string, form_fields map[string]string, file_field string, file_path string) !http.Response`: Direct multipart form upload with boundary generation.
+- `stream_lines(url string, on_line fn (line string) !) !`: Streams response body line-by-line as data arrives over HTTP socket.
+- `stream_sse(url string, on_event fn (event string, data string) !) !`: Consumes Server-Sent Events from an HTTP endpoint in real time.
+- `bearer_auth_header(token string) map[string]string`: Generate Bearer authorization map.
+- `basic_auth_header(user string, pass string) map[string]string`: Generate Basic authentication map.
+- `merge_headers(maps ...map[string]string) map[string]string`: Combine multiple HTTP header sets.
+- `is_success_status`, `is_redirect_status`, `is_client_error`, `is_server_error`: Fast status code inspection.
+
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+<a id="idutils"></a><a id="idutils-api"></a>
+
+# idutils API
+
+**Plain-language purpose:** Use `idutils` to generate and parse collision-resistant, sortable, distributed, and URL-friendly unique identifiers without external services.
+
+Import statement:
+
+```v
+import idutils
+```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Identifier Primer: UUID v4 vs ULID vs Snowflake vs Sqids
+
+Choosing the correct identifier architecture affects database index performance, distributed scaling, and URL ergonomics.
+
+#### 1. Identifier Comparison & Selection Matrix
+
+| Identifier | Bits / Length | Chronologically Sortable? | Millisecond Timestamp? | Monotonic? | Best Real-World Use Case |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **UUID v4** | 128-bit (36 chars) | No (Random) | No | No | Legacy API compatibility, general random tokens |
+| **ULID** | 128-bit (26 chars) | **Yes (Lexical)** | **Yes (48-bit ms)** | Yes (with generator) | Database primary keys, B-tree indexes, events |
+| **Snowflake** | 64-bit integer | **Yes (Numeric)** | **Yes (41-bit ms)** | Yes (per worker) | High-scale distributed databases (Twitter-scale) |
+| **Sqids** | Obfuscated string | N/A (Reversible) | N/A | N/A | Obfuscating auto-increment IDs in public URLs |
+
+#### 2. Why ULID is Superior to UUID for Database Primary Keys
+Standard UUID v4 IDs are completely random. When inserting millions of rows into a B-tree indexed database table (like SQLite or Postgres), random UUIDs cause constant index re-balancing ("page thrashing"), degrading write speeds.
+**ULID** solves this by prefixing the ID with a 48-bit millisecond timestamp encoded in Crockford Base32. New entries are always inserted at the end of the B-tree index, maintaining peak write speeds.
+
+#### 3. Clock Drift & Monotonic Guarantees
+- **Monotonic ULID Generator (`new_monotonic_ulid_generator()`):** Guarantees strict lexical ordering even when generating thousands of IDs within the exact same millisecond.
+- **Snowflake Clock Drift Protection:** Automatically detects if system time moves backwards (e.g. NTP synchronization) and pauses or errors rather than issuing duplicate IDs.
+
+---
+
+### Quick Start Example
+
+```v
+import idutils
+
+// 1. ULID: 128-bit lexically sortable, Crockford Base32 ID
+id := idutils.ulid()
+println('ULID: ${id}') // e.g. "01ARZ3NDEKTSV4RRFFQ69G5FAV"
+ts := idutils.ulid_timestamp(id)
+println('Timestamp (ms): ${ts}')
+
+// Monotonic ULID generator (guarantees order within the same millisecond)
+mut gen := idutils.new_monotonic_ulid_generator()
+id1 := gen.generate()
+id2 := gen.generate()
+
+// 2. Twitter Snowflake: 64-bit distributed integer ID
+mut sf := idutils.new_snowflake(1, 1)!
+snow_id := sf.next_id()!
+println('Snowflake ID: ${snow_id}')
+parts := idutils.parse_snowflake(snow_id)
+println('Worker: ${parts.worker_id}, Time: ${parts.timestamp_ms}')
+
+// 3. Sqids: YouTube-style URL obfuscation for integers
+sq := idutils.new_sqids(min_length: 8)!
+encoded := sq.encode([42, 1337])!
+println('Sqid: ${encoded}') // e.g. "b7xK9nQ2"
+decoded := sq.decode(encoded) // [42, 1337]
+```
+
+### Reference: Methods & Functions
+
+- `ulid() string`: Generates a standard 26-character ULID using the current UTC timestamp and CSPRNG randomness.
+- `ulid_at(timestamp_ms u64) string`: Generates a ULID for a specific Unix epoch timestamp in milliseconds.
+- `ulid_timestamp(id string) u64`: Extracts the 48-bit millisecond timestamp from an existing ULID string.
+- `is_valid_ulid(id string) bool`: Validates if a string adheres to canonical ULID format and Crockford Base32 alphabet.
+- `new_monotonic_ulid_generator() &MonotonicULIDGenerator`: Creates a stateful generator that guarantees strict ascending order for IDs generated within the same millisecond.
+- `(mut g MonotonicULIDGenerator) generate() string`: Generates a monotonically increasing ULID.
+- `new_snowflake(worker_id u64, datacenter_id u64) !&Snowflake`: Initializes a 64-bit distributed Snowflake generator (supports up to 32 datacenters and 32 workers).
+- `(mut s Snowflake) next_id() !u64`: Returns the next 64-bit Snowflake identifier.
+- `(mut s Snowflake) next_id_string() !string`: Returns the next Snowflake ID formatted as a string.
+- `parse_snowflake(id u64) SnowflakeParts`: Deconstructs a 64-bit Snowflake into `timestamp_ms`, `datacenter_id`, `worker_id`, and `sequence`.
+- `new_sqids(config SqidsConfig) !&Sqids`: Initializes an obfuscator with custom alphabet, minimum length, and blocklist.
+- `(s &Sqids) encode(numbers []u64) !string`: Encodes an array of unsigned integers into a URL-friendly Sqid.
+- `(s &Sqids) decode(id string) []u64`: Decodes a Sqid string back into its original array of integers.
+
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
 <a id="jsonutils"></a><a id="jsonutils-api"></a>
 
 # jsonutils API
@@ -3454,8 +4352,42 @@ Import statement:
 
 ```v
 import jsonutils
-import json2
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 JSON & Streaming NDJSON Primer: Pointers, Patches & Big Data
+
+JSON is the ubiquitous interchange format for web APIs, document databases, and application state.
+
+#### 1. Advanced JSON Capabilities
+- **RFC 6901 JSON Pointer (`get_pointer(json, '/user/profile/email')`):** Query deeply nested fields directly from a JSON string without having to declare rigid, nested struct types.
+- **RFC 7386 JSON Merge Patch:** Applies partial updates to an existing JSON document according to standard HTTP PATCH semantics.
+- **Canonical Formatting (`canonicalize(json)`):** Sorts all object keys deterministically and eliminates insignificant whitespace. Indispensable when computing cryptographic SHA-256 hashes of JSON payloads.
+
+#### 2. Streaming Big Data with NDJSON (Newline-Delimited JSON)
+Loading a 2-gigabyte JSON array into memory will cause an Out-Of-Memory (OOM) crash.
+**NDJSON** formats each JSON object on its own line:
+```json
+{"id": 1, "event": "login"}
+{"id": 2, "event": "purchase"}
+```
+With `each_ndjson_line[T](path, handler)!`, you stream and process gigabytes of data line-by-line with constant $O(1)$ memory usage!
+
+#### 3. JSON Methods Reference Table
+
+| Tool | Purpose | Standard / RFC | Memory Profile |
+| :--- | :--- | :--- | :--- |
+| `get_pointer(json, ptr)` | Direct nested querying | RFC 6901 | Low (targeted lookup) |
+| `merge_patch(target, patch)`| Partial document updates | RFC 7386 | Moderate |
+| `canonicalize(json)` | Deterministic key ordering | RFC 8785 | Moderate |
+| `encode_ndjson[T](items)` | Serializes slice to NDJSON | NDJSON spec | Standard |
+| `decode_ndjson[T](str)` | Parses NDJSON to slice | NDJSON spec | Proportional to slice size |
+| `each_ndjson_line[T](path, cb)`| Streaming line-by-line processing| NDJSON spec | **$O(1)$ Constant RAM** |
+
+---
 
 ### Core Standards
 
@@ -3600,6 +4532,17 @@ println(minified) // '{"a":1,"b":2}'
 
 ---
 
+### Extended Methods & Enhancements
+
+- `encode_ndjson[T](items []T) !string`: Serializes an array of structs into newline-delimited JSON (NDJSON).
+- `decode_ndjson[T](ndjson_str string) ![]T`: Parses newline-delimited JSON (NDJSON) string into an array of typed structs.
+- `each_ndjson_line[T](ndjson_str string, handler fn (item T) !) !`: Memory-efficient line-by-line streaming of NDJSON without loading all objects into memory at once.
+
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
 <a id="jwtutils"></a><a id="jwtutils-api"></a>
 
 # jwtutils API
@@ -3611,6 +4554,43 @@ Import statement:
 ```v
 import jwtutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 JWT Primer for Beginners: Claims, Signatures & Token Security
+
+JSON Web Tokens (JWT) securely transmit claims between parties as a compact, URL-safe token.
+
+#### 1. Structure of a JWT
+A JWT consists of three base64url-encoded parts separated by dots (`.`):
+```
+header.payload.signature
+```
+1. **Header:** Contains the algorithm (`"alg": "HS256"`) and token type (`"typ": "JWT"`).
+2. **Payload (Claims):** Contains assertions such as user ID, role, and expiration timestamp.
+3. **Signature:** Cryptographic HMAC hash of the header and payload using your secret key.
+
+#### 2. Security Invariants & Claim Verification
+- **Signature Verification:** Never trust claims from an unverified token. `jwtutils.verify(token, secret)!` recalculates the HMAC signature; if an attacker changed a single letter in the payload (e.g. `"role": "user"` &rarr; `"role": "admin"`), verification fails.
+- **Standard Claims Validated:**
+  - `exp` (Expiration Time): Automatically rejected if current time is past expiration.
+  - `nbf` (Not Before): Automatically rejected if token is used before its activation time.
+  - `iat` (Issued At): Timestamp of creation.
+
+#### 3. JWT Operations Reference Table
+
+| Function | Operation | Cryptographic Check? | Real-World Use Case |
+| :--- | :--- | :--- | :--- |
+| `sign(claims, secret, alg)!` | Generates signed token | Signs with HMAC | User login authentication |
+| `verify(token, secret)!` | Validates signature & claims | **Yes (Full validation)**| Authenticating incoming API requests |
+| `decode_unverified(token)` | Reads payload without key | **No (Unsafe for auth)** | Client-side UI inspect (e.g. reading username) |
+
+> [!WARNING]
+> **Secret Key Length:** Always use a high-entropy secret key of at least 32 cryptographically random bytes (`cryptoutils.secure_random_hex(32)`). Weak secrets can be cracked offline with GPU dictionary attacks.
+
+---
 
 ### Core Security Principles
 
@@ -3715,6 +4695,9 @@ println('Subject identifier: ${claims.sub}')
 
 [▲ Back to Table of Contents](#table-of-contents)
 
+
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
 
 <a id="logutils"></a><a id="logutils-api"></a>
@@ -3728,6 +4711,38 @@ Import statement:
 ```v
 import logutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Structured Logging Primer: Levels, Rotation & JSON Formatting
+
+Reliable application logging enables fast debugging, system telemetry, and automated security monitoring.
+
+#### 1. Logging Hierarchy
+Log levels control verbosity. Setting a threshold automatically filters out all lower-priority messages:
+```
+DEBUG (0) ──► INFO (1) ──► WARN (2) ──► ERROR (3) ──► FATAL (4)
+```
+- In **Development:** Set level to `DEBUG` to see granular diagnostic details.
+- In **Production:** Set level to `INFO` or `WARN` to reduce disk I/O and log noise.
+
+#### 2. Log File Rotation Lifecycle
+- **What happens when the log file exceeds `max_bytes`?**
+  Writing to an unbounded log file will eventually fill up the server's hard drive and crash the operating system.
+  `logutils` monitors file size: when `app.log` exceeds the threshold, it is renamed to `app.log.1`, previous backups are shifted (`.1` &rarr; `.2`), old archives exceeding `max_backups` are deleted, and a fresh `app.log` is opened immediately.
+
+#### 3. Structured Logging vs Plain Text
+
+| Feature | Human Console Format | Structured JSON Format |
+| :--- | :--- | :--- |
+| **Output Style** | ANSI color-highlighted text | Single-line JSON objects (`{"level":"info",...}`) |
+| **Target Audience**| Developer terminal | Logstash, Datadog, CloudWatch, Loki |
+| **Key-Value Fields**| Inline brackets (`[user_id=42]`) | First-class queryable JSON attributes |
+| **Production Ready**| No (hard to parse) | **Yes (Standard industry format)** |
+
+---
 
 ### Log Levels
 
@@ -3861,6 +4876,9 @@ if rotated {
 
 [▲ Back to Table of Contents](#table-of-contents)
 
+
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
 
 <a id="markdownutils"></a><a id="markdownutils-api"></a>
@@ -3874,6 +4892,32 @@ Import statement:
 ```v
 import markdownutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Markdown & Document Processing Primer: CommonMark, Tables & Frontmatter
+
+Markdown is the standard format for documentation, developer blogs, README files, and content management systems.
+
+#### 1. GitHub Flavored Markdown (GFM) Features
+In addition to standard CommonMark headings, bold, italic, and lists, `markdownutils` supports:
+- **GFM Tables:** `| Header 1 | Header 2 |` with column alignment (`:---`, `:---:`, `---:`).
+- **Task Lists:** Interactive checklist syntax (`- [ ] Todo` and `- [x] Done`).
+- **YAML Frontmatter:** Extracts metadata headers (such as `--- title: Post ---`) from documents.
+- **Plain Text Stripping:** Removes all markdown formatting syntax, leaving clean text for search indexing or TTS.
+
+#### 2. Markdown Functions Reference Table
+
+| Function | Input | Output | Real-World Use Case |
+| :--- | :--- | :--- | :--- |
+| `to_html(md)` | Markdown string | Semantic HTML5 | Rendering blog posts or wiki pages |
+| `to_plain_text(md)` | Markdown string | Unformatted text | Full-text search engine indexing |
+| `extract_frontmatter(md)` | Document string | `(map[string]string, body)` | Static site generators (Hugo/Jekyll style) |
+| `generate_toc(md)` | Markdown string | Table of Contents markdown | Generating navigation sidebars |
+
+---
 
 ### Features
 
@@ -3982,6 +5026,9 @@ println(preview)
 
 [▲ Back to Table of Contents](#table-of-contents)
 
+
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
 
 <a id="mathutils"></a><a id="mathutils-api"></a>
@@ -3995,6 +5042,38 @@ Import statement:
 ```v
 import mathutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Math & Spatial Geometry Primer: Clamping, Interpolation & Vectors
+
+Game development, UI animations, physics simulations, and graphics programming require spatial mathematics and numeric ranges.
+
+#### 1. Interpolation & Range Remapping
+- **Clamping (`clamp(val, min, max)`):** Guarantees a number stays within bounds (e.g. keeping player health between `0` and `100`).
+- **Linear Interpolation (`lerp(a, b, t)`):** Computes a smooth blend between start value `a` and end value `b` given normalized progress `t` (`0.0` to `1.0`). Ideal for UI transitions and camera smoothing.
+- **Remapping (`remap(val, in_min, in_max, out_min, out_max)`):** Maps a value from one range to another (e.g. mapping an analog joystick reading from `[-128, 127]` to `[0.0, 1.0]`).
+
+#### 2. 2D Vector Geometry
+`mathutils.Vector2D` provides essential vector mathematics:
+- Addition, subtraction, scalar multiplication.
+- Euclidean distance between points.
+- Dot product and angle calculation.
+- Normalization (converting to unit vector with length 1.0).
+
+#### 3. Math Functions Reference Table
+
+| Function | Operation | Example | Output |
+| :--- | :--- | :--- | :--- |
+| `clamp(val, min, max)` | Bounds restriction | `clamp(150, 0, 100)` | `100` |
+| `lerp(a, b, t)` | Linear interpolation | `lerp(10.0, 20.0, 0.5)` | `15.0` |
+| `remap(val, a1, a2, b1, b2)`| Range projection | `remap(5, 0, 10, 0, 100)`| `50.0` |
+| `gcd(a, b)` / `lcm(a, b)` | Number theory | `gcd(48, 18)` | `6` |
+| `is_prime(n)` | Primality test | `is_prime(17)` | `true` |
+
+---
 
 ### Clamping, Interpolation & Snapping
 
@@ -4145,6 +5224,9 @@ println('LCM of 12 and 15: ${mathutils.lcm(12, 15)}') // 60
 
 [▲ Back to Table of Contents](#table-of-contents)
 
+
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
 
 <a id="mockutils"></a><a id="mockutils-api"></a>
@@ -4158,6 +5240,33 @@ Import statement:
 ```v
 import mockutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Mock Data Primer for Beginners: Synthetic Test Generators & Seeds
+
+Unit and integration tests require realistic synthetic data (names, emails, phone numbers, addresses) without exposing sensitive production databases.
+
+#### 1. Deterministic Seeding vs Random Generation
+- **Random Mock Data:** Generates unpredictable data on every run. Great for fuzz testing and exploratory manual testing.
+- **Seeded Mock Data:** Initializing with a fixed seed guarantees the exact same mock data sequence is generated across every test run. This ensures assertions do not flake due to randomized variations.
+
+#### 2. Synthetic Data Generators Reference Table
+
+| Generator | Data Type Produced | Example Output |
+| :--- | :--- | :--- |
+| `first_name()` / `last_name()` | Human names | `"Alice"`, `"Smith"` |
+| `full_name()` | Combined name | `"Bob Jones"` |
+| `email()` | Realistic email address | `"alice.smith@example.com"` |
+| `phone()` | Formatted phone number | `"+1-555-0199"` |
+| `ipv4()` / `ipv6()` | Valid IP addresses | `"192.168.1.100"` |
+| `uuid()` | Standard UUID string | `"9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d"` |
+| `lorem_words(count)` | Latin placeholder text | `"lorem ipsum dolor sit amet"` |
+| `paragraph()` | Full placeholder paragraph | Multi-sentence dummy text |
+
+---
 
 Rapid prototyping, testing, and mock data generation wrapping V's native `strings.lorem` and pseudo-random generators.
 
@@ -4242,6 +5351,9 @@ for u in test_users {
 
 [▲ Back to Table of Contents](#table-of-contents)
 
+
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
 
 <a id="netutils"></a><a id="netutils-api"></a>
@@ -4255,6 +5367,35 @@ Import statement:
 ```v
 import netutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Network Introspection Primer: CIDR, Subnets & Diagnostics
+
+`netutils` provides network address classification, CIDR subnet matching, and diagnostic connectivity probes.
+
+#### 1. CIDR Subnet Containment
+In backend APIs and security firewalls, you often need to verify if an incoming client IP belongs to a trusted subnet (e.g. private VPC, corporate VPN, Cloudflare proxy):
+```v
+if netutils.is_ip_in_cidr('10.0.1.45', '10.0.0.0/16') {
+    println('Internal corporate network confirmed.')
+}
+```
+
+#### 2. Network Operations Reference Table
+
+| Function | Operation | Returns | Use Case |
+| :--- | :--- | :--- | :--- |
+| `is_ipv4(str)` | IPv4 syntax check | `bool` | Validating user-submitted IP |
+| `is_ipv6(str)` | IPv6 syntax check | `bool` | Modern dual-stack networking |
+| `is_ip_in_cidr(ip, cidr)`| Subnet membership test | `bool` | Firewall rules, VPN access control |
+| `is_port_open(host, port, timeout_ms)`| Socket probe | `bool` | Checking if DB or Redis is ready on boot |
+| `tcp_ping(host, port)` | Latency measurement | `int` (ms) | Server health telemetry |
+| `local_ip()` | Outbound IP discovery | `string` | Node clustering and discovery |
+
+---
 
 ### `is_online() bool`
 
@@ -4334,6 +5475,106 @@ println('Active listening ports: ${ports}')
 
 ---
 
+### Advanced Capabilities (`netutils`)
+
+Framed TCP & UDP
+
+```v
+import netutils
+import net
+
+// Framed TCP messages (4-byte length prefix to prevent fragmentation)
+mut conn := net.dial_tcp('127.0.0.1:9000') or { panic(err) }
+netutils.send_framed_msg(mut conn, 'Framed Payload'.bytes()) or { panic(err) }
+reply := netutils.read_framed_msg(mut conn, 8192) or { panic(err) }
+println('Received reply len: ${reply.len}')
+
+// UDP datagram transmission
+netutils.send_udp('127.0.0.1', 9001, 'UDP Packet'.bytes()) or { panic(err) }
+```
+
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+<a id="procutils"></a><a id="procutils-api"></a>
+
+# procutils API
+
+**Plain-language purpose:** Use `procutils` for advanced subprocess management. Stream stdout and stderr in real-time line-by-line, enforce strict process timeouts with auto-kill, and execute piped shell workflows safely.
+
+Import statement:
+
+```v
+import procutils
+```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Subprocess Management Primer: Safe Execution, Streaming & Timeouts
+
+Spawning child processes is essential for running compilers, Git commands, system tools, and third-party CLIs.
+
+#### 1. Command Injection Defense
+Never pass unescaped user inputs directly to shell interpreters (`/bin/sh` or `cmd.exe`). If a user inputs `; rm -rf /`, the shell will execute both commands!
+`procutils` avoids shell evaluation by invoking executables directly with an argument array (`args []string`) via `os.Process`.
+
+#### 2. Real-Time Streaming & Timeout Deadlines
+- **Line-by-Line Streaming (`stream_lines`):**
+  Captures both standard output (`stdout`) and standard error (`stderr`) concurrently in real time, delivering each line to your callback as it is emitted.
+- **Process Deadlines (`exec_timeout`):**
+  If a child process hangs (e.g. waiting for network input or caught in an infinite loop), `exec_timeout` enforces a strict deadline and automatically terminates the process with `SIGKILL`.
+
+#### 3. Subprocess Methods Reference Table
+
+| Tool | Real-Time? | Timeout Guard? | Best For |
+| :--- | :--- | :--- | :--- |
+| `stream_lines(cmd, cb)!` | **Yes** (line callback) | No | Long-running tasks like `v -prod main.v` or `git pull` |
+| `exec_timeout(cmd, opts)` | No (buffered) | **Yes (Auto-kill)** | Bounded tasks like `ping`, `curl`, unit test runs |
+| `pipeline(cmds)!` | No (piped stdout) | No | Unix pipelines like `cat file | grep pattern | wc -l` |
+
+---
+
+### Quick Start Example
+
+```v
+import procutils
+
+// 1. Real-time stdout & stderr streaming
+procutils.stream_lines('git status', fn (line string, is_stderr bool) {
+    if is_stderr {
+        eprintln('[STDERR] ${line}')
+    } else {
+        println('[STDOUT] ${line}')
+    }
+})!
+
+// 2. Timeout-bounded process execution
+res := procutils.exec_timeout('sleep 5', timeout_ms: 1000)
+if res.timed_out {
+    println('Process exceeded 1s deadline and was terminated.')
+}
+
+// 3. Multi-stage piped commands
+output := procutils.pipeline(['cat /etc/hosts', 'grep localhost', 'wc -l'])!
+println('Matching lines: ${output.trim_space()}')
+```
+
+### Reference: Methods & Functions
+
+- `stream_lines(cmd string, on_line fn (line string, is_stderr bool)) !`: Executes a shell command and delivers each stdout and stderr line to the callback in real time.
+- `exec_timeout(cmd string, config ExecTimeoutConfig) ProcessResult`: Runs a subprocess with a timeout deadline in milliseconds. Automatically sends `SIGKILL` to the process group if execution exceeds the deadline.
+- `pipeline(cmds []string) !string`: Chains multiple commands together in a pipeline, feeding the stdout of each stage as the stdin of the next.
+- `ProcessResult`: Struct containing `output string`, `exit_code int`, `timed_out bool`, `duration_ms i64`.
+
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
 <a id="regexutils"></a><a id="regexutils-api"></a>
 
 # regexutils API
@@ -4345,6 +5586,34 @@ Import statement:
 ```v
 import regexutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Regular Expressions Primer: Pattern Matching & Group Extraction
+
+Regular expressions provide high-speed pattern search, validation, and string replacement.
+
+#### 1. Pattern Caching & Performance
+Compiling regular expressions is computationally expensive. `regexutils` automatically caches compiled regex representations internally so calling `is_match(pattern, text)` in a tight loop does not repeatedly recompile the pattern.
+
+#### 2. Capture Groups & Dynamic Replacement
+- **Capture Groups:** Extract sub-patterns defined within parentheses `(...)` (e.g. extracting area code and number from phone formats).
+- **Callback Replacements:** `replace_with_fn(pattern, text, callback)` lets you transform matched substrings dynamically (e.g. converting temperatures or replacing user mentions).
+
+#### 3. Regex Methods Reference Table
+
+| Function | Operation | Return Type | Real-World Use Case |
+| :--- | :--- | :--- | :--- |
+| `is_match(pat, text)` | Boolean test | `bool` | Quick format check |
+| `find_first(pat, text)` | Finds first match | `?string` | Finding first URL or token |
+| `find_all(pat, text)` | Finds all matches | `[]string` | Extracting all hashtags or mentions |
+| `capture_groups(pat, text)` | Extracts groups | `[][]string` | Deconstructing log lines or timestamps |
+| `replace_all(pat, text, repl)` | Literal replacement | `string` | Sanitizing unwanted characters |
+| `replace_with_fn(...)` | Callback replacement | `string` | Custom templating or case transformation |
+
+---
 
 Ergonomic, high-level regular expression helpers eliminating boilerplate around regex queries, group indexes, and match boundaries.
 
@@ -4465,6 +5734,9 @@ println(parts) // ['apple', 'banana', 'cherry', 'date']
 
 [▲ Back to Table of Contents](#table-of-contents)
 
+
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
 
 <a id="semverutils"></a><a id="semverutils-api"></a>
@@ -4478,6 +5750,42 @@ Import statement:
 ```v
 import semverutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Semantic Versioning Primer: SemVer 2.0.0 & Range Matching
+
+Semantic Versioning (SemVer 2.0.0) standardizes version numbers so developers and package managers can safely upgrade dependencies.
+
+#### 1. Anatomy of a SemVer String
+A standard SemVer 2.0.0 string follows:
+```
+MAJOR.MINOR.PATCH-PRERELEASE+BUILD
+  1  .  2  .  3  - beta.1   + 20261010
+```
+- **MAJOR:** Breaking API changes.
+- **MINOR:** Backward-compatible new features.
+- **PATCH:** Backward-compatible bug fixes.
+- **PRERELEASE:** Alpha, beta, or release candidates (`-alpha.1`).
+- **BUILD:** Build metadata (ignored during precedence comparisons).
+
+#### 2. Version Bumping Lifecycle
+- `bump_major()`: `1.2.3` &rarr; `2.0.0` (resets minor and patch).
+- `bump_minor()`: `1.2.3` &rarr; `1.3.0` (resets patch).
+- `bump_patch()`: `1.2.3` &rarr; `1.2.4`.
+
+#### 3. Range Matching Reference Table
+
+| Range Expression | Meaning | Compatible Versions |
+| :--- | :--- | :--- |
+| `^1.2.3` (Caret) | Compatible with version 1.x (same major) | `>= 1.2.3 < 2.0.0` |
+| `~1.2.3` (Tilde) | Compatible with patch updates (same minor) | `>= 1.2.3 < 1.3.0` |
+| `>= 1.0.0 < 2.5.0` | Explicit version range | Custom upper/lower bounds |
+| `1.2.3` | Exact version match | Strictly `1.2.3` |
+
+---
 
 Complete semantic version parsing, comparison, and range requirement matching conforming strictly to the [SemVer 2.0.0](https://semver.org/) specification.
 
@@ -4600,6 +5908,9 @@ println(semverutils.satisfies(v, '^2.0.0')!) // false
 
 [▲ Back to Table of Contents](#table-of-contents)
 
+
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
 
 <a id="sliceutils"></a><a id="sliceutils-api"></a>
@@ -4613,6 +5924,34 @@ Import statement:
 ```v
 import sliceutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Slice & Collection Primer: Functional Transformations & Partitioning
+
+Slices are the primary collection type in V. `sliceutils` provides functional programming utilities without sacrificing memory efficiency.
+
+#### 1. Functional vs In-Place Modifications
+- **Non-mutating transformations (`map`, `filter`, `unique`, `chunk`):** Return a new slice leaving the original slice untouched.
+- **In-place operations (`shuffle`):** Mutate the slice directly to avoid extra memory allocations.
+
+#### 2. Slice Utilities Reference Table
+
+| Function | Operation | Time Complexity | Example |
+| :--- | :--- | :--- | :--- |
+| `unique[T](slice)` | Deduplicates items preserving order | $O(n)$ | `unique([1, 2, 2, 3])` &rarr; `[1, 2, 3]` |
+| `chunk[T](slice, size)` | Splits slice into batches | $O(n)$ | Splitting 1000 items into batches of 50 |
+| `flatten[T](nested)` | Collapses 2D slice into 1D | $O(n)$ | Flattening lists of records |
+| `intersect[T](a, b)` | Finds elements in both slices | $O(n)$ | Common tags between two articles |
+| `difference[T](a, b)` | Elements in `a` not in `b` | $O(n)$ | Finding newly added user permissions |
+| `shuffle[T](mut slice)` | Randomized in-place shuffle | $O(n)$ | Randomizing quiz questions |
+| `partition[T](slice, pred)`| Splits into matching/non-matching | $O(n)$ | Separating active and banned users |
+| `frequency[T](slice)` | Counts occurrences of elements | $O(n)$ | Word frequency count |
+| `group_by[T, K](slice, fn)`| Groups items by computed key | $O(n)$ | Grouping products by category |
+
+---
 
 ### `unique[T](arr []T) []T`
 
@@ -4776,6 +6115,139 @@ min_f := sliceutils.min_f64(floats) or { 0.0 }
 max_f := sliceutils.max_f64(floats) or { 0.0 }
 println('min: ${min_f}, max: ${max_f}') // min: -2.5, max: 8.2
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### Extended Methods & Enhancements
+
+- `zip[T, U](a []T, b []U) []Pair[T, U]`: Combine two slices into pairs.
+- `frequency[T](items []T) map[T]int`: Count occurrences of distinct elements.
+- `group_by[T, K](items []T, key_fn fn (T) K) map[K][]T`: Group slice items by key.
+- `window[T](items []T, size int, step int) [][]T`: Sliding window partitioner.
+- `binary_search[T](sorted_items []T, target T) int`: Fast $O(\log n)$ search on sorted slices.
+
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+<a id="sqlbuilder"></a><a id="sqlbuilder-api"></a>
+
+# sqlbuilder API
+
+**Plain-language purpose:** Use `sqlbuilder` to construct SQL queries programmatically with a fluent, chainable API that automatically handles parameterized placeholders (`?`) and prevents SQL injection.
+
+Import statement:
+
+```v
+import sqlbuilder
+```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 SQL Query Builder Primer: Parameterized Queries & Composable DDL
+
+Hand-concatenating SQL strings (`"SELECT * FROM users WHERE email = '" + input + "'"` is the #1 security flaw in web development.
+`sqlbuilder` provides a fluent, type-safe query builder that automatically separates SQL structure from user data using parameterized placeholders (`?`).
+
+#### 1. Security Guarantee: Automated Parameter Binding
+When you use `sqlbuilder`:
+```v
+query, params := sqlbuilder.select_from('users')
+    .columns(['id', 'email'])
+    .where_eq('email', user_input)
+    .to_sql()
+```
+The resulting SQL string is `SELECT id, email FROM users WHERE email = ?` and `params` is `[user_input]`.
+The database engine treats the input strictly as literal data, making SQL injection impossible.
+
+#### 2. Query Builders & Filtering Operators Table
+
+| Builder | Method | SQL Generated | Example |
+| :--- | :--- | :--- | :--- |
+| **Select** | `where_eq(col, val)` | `AND col = ?` | `.where_eq('status', 'active')` |
+| **Select** | `where_ne(col, val)` | `AND col != ?` | `.where_ne('role', 'banned')` |
+| **Select** | `where_gt(col, val)` | `AND col > ?` | `.where_gt('score', '100')` |
+| **Select** | `where_gte(col, val)` | `AND col >= ?` | `.where_gte('age', '18')` |
+| **Select** | `where_lt(col, val)` | `AND col < ?` | `.where_lt('stock', '5')` |
+| **Select** | `where_lte(col, val)` | `AND col <= ?` | `.where_lte('price', '49.99')` |
+| **Select** | `where_like(col, pat)` | `AND col LIKE ?` | `.where_like('email', '%@corp.com')` |
+| **Select** | `where_in(col, vals)` | `AND col IN (?, ?)` | `.where_in('dept', ['eng', 'sales'])` |
+| **Select** | `order_by(col, .desc)`| `ORDER BY col DESC` | `.order_by('created_at', .desc)` |
+| **Select** | `paginate(page, size)`| `LIMIT size OFFSET off`| `.paginate(page: 2, page_size: 20)` |
+| **Insert** | `insert_into(tbl).row(m)`| `INSERT INTO tbl (...) VALUES (...)` | Dynamic column insertions |
+| **Update** | `update_table(tbl).set(...)`| `UPDATE tbl SET ... WHERE ...` | Safe updates |
+| **Delete** | `delete_from(tbl).where_eq(...)`| `DELETE FROM tbl WHERE ...` | Safe scoped deletes |
+
+---
+
+### Quick Start Example
+
+```v
+import sqlbuilder
+
+// 1. Fluent SELECT Query with Filtering & Pagination
+query, params := sqlbuilder.select_from('users')
+    .columns(['id', 'username', 'email', 'status'])
+    .where_eq('status', 'active')
+    .where_gte('age', 18)
+    .where_like('email', '%@company.com')
+    .order_by('created_at', .desc)
+    .paginate(page: 1, page_size: 25)
+    .to_sql()
+
+println('SQL: ${query}')
+// SELECT id, username, email, status FROM users WHERE status = ? AND age >= ? AND email LIKE ? ORDER BY created_at DESC LIMIT 25 OFFSET 0
+println('Params: ${params}')
+// ['active', '18', '%@company.com']
+
+// 2. INSERT Query
+ins_query, ins_params := sqlbuilder.insert_into('audit_logs')
+    .row({
+        'user_id': '42'
+        'action':  'password_reset'
+    })
+    .to_sql()
+
+// 3. UPDATE Query
+upd_query, upd_params := sqlbuilder.update_table('users')
+    .set('status', 'suspended')
+    .where_eq('id', '42')
+    .to_sql()
+
+// 4. DELETE Query
+del_query, del_params := sqlbuilder.delete_from('sessions')
+    .where_eq('expired', '1')
+    .to_sql()
+```
+
+### Reference: Methods & Functions
+
+- `select_from(table string) &SelectQuery`: Begins building a `SELECT` statement.
+- `(q &SelectQuery) columns(cols []string) &SelectQuery`: Specifies the column list (defaults to `*`).
+- `(q &SelectQuery) where_eq(col string, val string) &SelectQuery`: Adds an `AND col = ?` clause.
+- `(q &SelectQuery) where_ne(col string, val string) &SelectQuery`: Adds an `AND col != ?` clause.
+- `(q &SelectQuery) where_gt(col string, val string) &SelectQuery`: Adds an `AND col > ?` clause.
+- `(q &SelectQuery) where_gte(col string, val string) &SelectQuery`: Adds an `AND col >= ?` clause.
+- `(q &SelectQuery) where_lt(col string, val string) &SelectQuery`: Adds an `AND col < ?` clause.
+- `(q &SelectQuery) where_lte(col string, val string) &SelectQuery`: Adds an `AND col <= ?` clause.
+- `(q &SelectQuery) where_like(col string, pattern string) &SelectQuery`: Adds an `AND col LIKE ?` clause.
+- `(q &SelectQuery) where_in(col string, values []string) &SelectQuery`: Adds an `AND col IN (?, ?, ...)` clause.
+- `(q &SelectQuery) order_by(col string, dir OrderDir) &SelectQuery`: Adds an `ORDER BY col ASC/DESC` clause.
+- `(q &SelectQuery) limit(n int) &SelectQuery`: Sets a row limit.
+- `(q &SelectQuery) offset(n int) &SelectQuery`: Sets a row offset.
+- `(q &SelectQuery) paginate(page int, page_size int) &SelectQuery`: Convenience method that calculates `limit` and `offset` for 1-based page numbers.
+- `(q &SelectQuery) to_sql() (string, []string)`: Compiles the builder into a parameterized SQL statement and an array of argument strings.
+- `insert_into(table string) &InsertQuery`: Begins building an `INSERT INTO` statement.
+- `(q &InsertQuery) row(data map[string]string) &InsertQuery`: Sets column-value pairs for insertion.
+- `update_table(table string) &UpdateQuery`: Begins building an `UPDATE` statement.
+- `(q &UpdateQuery) set(col string, val string) &UpdateQuery`: Sets a column to a new value.
+- `delete_from(table string) &DeleteQuery`: Begins building a `DELETE FROM` statement.
+
 
 [▲ Back to Table of Contents](#table-of-contents)
 
@@ -5912,20 +7384,57 @@ for col in schema {
 
 ---
 
+### Extended Methods & Enhancements
+
+- `select_rows_paged(db sqlite.DB, base_query string, page int, page_size int) !PagedResult`: Executes a paginated query, automatically calculating total count, total pages, current page, offset, has_next, has_prev, and returning the requested slice of rows.
+- `PagedResult`: Struct containing `rows []map[string]string`, `total_count int`, `page int`, `page_size int`, `total_pages int`, `has_next bool`, `has_prev bool`.
+- `transaction(mut db sqlite.DB, action fn (mut db sqlite.DB) !) !`: Safe transaction runner with auto-rollback.
+- `insert_many(mut db sqlite.DB, table string, rows []map[string]string) !int`: High-throughput atomic batch insert.
+
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
 <a id="stateutils"></a><a id="stateutils-api"></a>
 
 # stateutils API
 
 **Plain-language purpose:** Use these tools to remember an app's choices between runs, such as a theme, volume, or window size. The examples show both a named data record and flexible key-value settings, saved safely to the standard app-data location.
 
-> [!TIP]
-> **Best Practice Tip:** Always define variables or constants for your application identifier (`app_name`), state filenames, and configuration keys rather than repeating hardcoded string literals across multiple calls. This prevents typos, simplifies refactoring, and ensures consistent state handling throughout your application.
-
 Import statement:
 
 ```v
 import stateutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 State Persistence Primer: Crash-Proof Storage, Permissions & History
+
+Saving desktop or CLI application state (user preferences, window geometry, active themes, cached sessions) requires crash resilience, security against path traversal, and undo/redo capabilities.
+
+#### 1. What happens if the state file does not exist?
+- `stateutils.load_app_state[T](app_name, filename)!` will return an error indicating the file was not found.
+- `stateutils.load_app_state_or_default[T](app_name, filename, default_state) T` will detect the missing file and **safely return your fallback `default_state`** without throwing an error. This is the recommended pattern for app startup.
+
+#### 2. Atomic Crash-Proof Persistence & Permissions
+- **Atomic Writes:** `save_app_state` writes your state struct to a unique temporary file and then performs an atomic filesystem rename (`os.mv`). Even if power is abruptly lost midway through saving, the existing state file is never left corrupt or empty.
+- **Hardened Permissions:** Automatically restricts state directory permissions to `0700` (readable/writable only by the owner) and files to `0600`.
+- **Path Traversal Defense:** Sanitizes `app_name` and `filename` by stripping null bytes and directory climbers (`../`).
+
+#### 3. State Management Options Table
+
+| Tool | Type Safety | Storage Backend | Undo / Redo? | Best For |
+| :--- | :--- | :--- | :--- | :--- |
+| `save_app_state[T]` | Strong (V Struct) | JSON file | No | Application settings and user preferences |
+| `load_app_state_or_default[T]`| Strong (V Struct)| JSON file | No | App startup initialization |
+| `KeyValueState` | Dynamic strings | Key-Value JSON file | No | Plugin metadata, dynamic flags |
+| `StateHistory[T]` | Strong (V Struct) | In-memory history stack | **Yes (`undo()`, `redo()`)** | Text editors, canvas drawing, form wizards |
+
+---
 
 ### OS-Recommended Path Resolution
 
@@ -6234,6 +7743,23 @@ sqlite_kv.reset()! // clears memory and deletes state database from disk
 
 ---
 
+### Extended Methods & Enhancements
+
+- `StateHistory[T]`: Generic undo/redo history stack with configurable capacity.
+- `new_state_history[T](initial T, max_history int) StateHistory[T]`: Initializes an undo/redo stack.
+- `(mut h StateHistory[T]) push(state T)`: Pushes a new state snapshot, clearing any subsequent redo history.
+- `(mut h StateHistory[T]) undo() ?T`: Reverts to the previous snapshot.
+- `(mut h StateHistory[T]) redo() ?T`: Re-applies a previously undone snapshot.
+- `(h StateHistory[T]) can_undo() bool`: Checks if undo steps are available.
+- `(h StateHistory[T]) can_redo() bool`: Checks if redo steps are available.
+- `(h StateHistory[T]) current() T`: Returns the active state.
+- `(mut h StateHistory[T]) clear(current T)`: Resets history to a single base state.
+
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
 <a id="statutils"></a><a id="statutils-api"></a>
 
 # statutils API
@@ -6245,6 +7771,39 @@ Import statement:
 ```v
 import statutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Statistics Primer for Beginners: Distributions, Outliers & Regression
+
+Descriptive statistics summarize data distributions, identify anomalies, and model linear trends.
+
+#### 1. Measures of Central Tendency & Dispersion
+- **Mean:** The arithmetic average. Sensitive to extreme outliers.
+- **Median:** The middle value of a sorted dataset. Robust against extreme outliers.
+- **Variance & Standard Deviation:** Measures how spread out numbers are around the mean. A low standard deviation indicates values cluster tightly near the average.
+
+#### 2. Outlier Detection with Interquartile Range (IQR)
+The IQR method detects anomalies without assuming a normal bell-curve distribution:
+1. Calculates $Q1$ (25th percentile) and $Q3$ (75th percentile).
+2. $IQR = Q3 - Q1$.
+3. Any data point less than $Q1 - 1.5 	imes IQR$ or greater than $Q3 + 1.5 	imes IQR$ is classified as an outlier.
+
+#### 3. Statistical Functions Reference Table
+
+| Function | Statistical Measure | Returns | Use Case |
+| :--- | :--- | :--- | :--- |
+| `mean(data)` | Arithmetic Average | `f64` | Baseline average metrics |
+| `median(data)` | Middle Value | `f64` | Median salaries, house prices |
+| `mode(data)` | Most Frequent Element | `?f64` | Most common user choice |
+| `variance(data)` / `std_dev(data)` | Spread / Dispersion | `f64` | Quality control, volatility analysis |
+| `quartiles(data)` | Q1, Median (Q2), Q3 | `Quartiles` | Box-and-whisker plots |
+| `detect_outliers(data)` | Anomalous data points | `[]f64` | Fraud detection, sensor anomaly detection |
+| `linear_regression(x, y)` | Line of best fit ($y = mx + b$)| `RegressionResult` | Trend forecasting, predicting future metrics |
+
+---
 
 High-performance statistical analysis, distribution modeling, regression, and data profiling operating directly on `[]f64` numeric slices.
 
@@ -6454,6 +8013,9 @@ println('Excess Kurtosis: ${summary.kurtosis:.2f}')
 
 [▲ Back to Table of Contents](#table-of-contents)
 
+
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
 
 <a id="structutils"></a><a id="structutils-api"></a>
@@ -6467,6 +8029,34 @@ Import statement:
 ```v
 import structutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Data Structures Primer for Beginners: Stacks, Queues, Heaps & Sets
+
+Using the correct computer science data structure reduces algorithm complexity from $O(n^2)$ down to $O(1)$ or $O(\log n)$.
+
+#### 1. Data Structure Characteristics
+- **Stack (`Stack[T]`):** LIFO (Last-In, First-Out). Push and pop from the top in $O(1)$. Ideal for syntax undo/redo stacks, parenthesis matching, and DFS.
+- **Queue (`Queue[T]`):** FIFO (First-In, First-Out). Enqueue at back, dequeue from front in $O(1)$. Ideal for job dispatchers, BFS traversal, and request buffers.
+- **RingBuffer (`RingBuffer[T]`):** Fixed-capacity circular buffer. When full, writing new elements overwrites the oldest element in $O(1)$. Ideal for audio buffers, sliding log windows, and rolling telemetry.
+- **MinHeap (`MinHeap[T]`):** Binary priority heap. Always extracts the smallest element in $O(\log n)$ time. Ideal for priority task queues and Dijkstra's shortest path.
+- **BloomFilter:** Probabilistic space-efficient filter. Can definitively say if an item is **not** present, with zero false negatives.
+
+#### 2. Data Structures Reference Table
+
+| Data Structure | Ordering | Push Time | Pop Time | Real-World Use Case |
+| :--- | :--- | :--- | :--- | :--- |
+| `Stack[T]` | LIFO | $O(1)$ | $O(1)$ | Call stack, expression evaluation, back button |
+| `Queue[T]` | FIFO | $O(1)$ | $O(1)$ | Background job queues, printer spoolers |
+| `RingBuffer[T]` | Circular FIFO | $O(1)$ | $O(1)$ | Recent 100 log lines buffer, live audio |
+| `MinHeap[T]` | Priority Order | $O(\log n)$ | $O(\log n)$ | Highest priority job scheduling |
+| `GenericSet[T]` | Unordered Unique | $O(1)$ | $O(1)$ | Deduplicating tags, membership testing |
+| `BloomFilter` | Probabilistic | $O(k)$ | $O(k)$ | Cache skip checks, spam URL filtering |
+
+---
 
 ### 1. Generic Stack (LIFO - Last In, First Out)
 
@@ -6667,6 +8257,64 @@ println('Estimated unique visitors: ${hll.count()}') // ~3
 
 ---
 
+### Advanced Capabilities (`structutils`)
+
+Advanced Generic Collections (`GenericSet`, `BloomFilter`, `BinarySearchTree`, `SinglyLinkedList`, `DoublyLinkedList`)
+
+```v
+import structutils
+
+// GenericSet[T]
+mut s := structutils.new_set[string]()
+mut s_arr := structutils.new_set_from_array(['a', 'b', 'c'])
+s.add('first')
+s.add_all(['second', 'third'])
+has_val := s.contains('first')
+arr := s.to_array()
+var_set := structutils.GenericSet[string]{ set: s.set }
+println('s_arr size: ${s_arr.size()}, has_val: ${has_val}, arr: ${arr}, var_set size: ${var_set.size()}')
+
+// BloomFilter
+mut bf := structutils.new_bloom_filter(64, 3) or { panic(err) }
+bf.add('item1')
+exists := bf.contains('item1')
+var_bf := structutils.BloomFilter{}
+println('exists: ${exists}, var_bf: ${var_bf}')
+
+// BinarySearchTree[T]
+mut bst := structutils.new_bstree[int]()
+bst.insert(10)
+bst.insert(5)
+bst.insert(15)
+sorted_order := bst.in_order()
+smallest := bst.min()
+largest := bst.max()
+var_bst := structutils.BinarySearchTree[int]{}
+println('sorted: ${sorted_order}, min: ${smallest}, max: ${largest}, var_bst empty: ${var_bst.is_empty()}')
+
+// SinglyLinkedList[T]
+mut ll := structutils.new_linked_list[int]()
+ll.push(10)
+item := ll.pop()
+first_item := ll.shift()
+var_ll := structutils.SinglyLinkedList[int]{}
+println('item: ${item}, first: ${first_item}, var_ll len: ${var_ll.len()}')
+
+// DoublyLinkedList[T]
+mut dll := structutils.new_doubly_linked_list[string]()
+dll.push_back('tail')
+dll.push_front('head')
+popped_tail := dll.pop_back()
+popped_head := dll.pop_front()
+var_dll := structutils.DoublyLinkedList[string]{}
+println('popped tail: ${popped_tail}, popped head: ${popped_head}, var_dll len: ${var_dll.len()}')
+```
+
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
 <a id="strutils"></a><a id="strutils-api"></a>
 
 # strutils API
@@ -6678,6 +8326,34 @@ Import statement:
 ```v
 import strutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 String Manipulation Primer: Casing, Slugs & Formatting
+
+Text processing is central to web apps, CLI tooling, and URL generation.
+
+#### 1. Case Conversions & Common Uses
+- **`to_snake_case`:** `'HelloWorld'` &rarr; `'hello_world'` (Database columns, Python/C APIs).
+- **`to_camel_case`:** `'hello_world'` &rarr; `'helloWorld'` (JSON fields, JavaScript APIs).
+- **`to_pascal_case`:** `'hello_world'` &rarr; `'HelloWorld'` (Struct & class names).
+- **`to_kebab_case`:** `'hello_world'` &rarr; `'hello-world'` (CSS classes, CLI arguments).
+- **`slugify`:** Converts titles into URL-safe paths (`'Hello World! 2026'` &rarr; `'hello-world-2026'`).
+
+#### 2. Formatting & Masking Table
+
+| Function | Operation | Example Input | Example Output |
+| :--- | :--- | :--- | :--- |
+| `format_int_commas(n)` | Number grouping | `1234567` | `"1,234,567"` |
+| `ordinal(n)` | Rank suffix | `21` | `"21st"` |
+| `mask_sensitive(s, pre, suf)`| Credential masking | `"1234567890123456", 0, 4`| `"************3456"` |
+| `truncate_middle(s, len, el)`| Middle truncation | `"0123456789abcdef", 10, ".."`| `"0123..cdef"` |
+| `strip_ansi(s)` | Remove ANSI codes | `"[31mRed[0m"` | `"Red"` |
+| `levenshtein_distance(a, b)` | Edit distance | `"kitten", "sitting"` | `3` |
+
+---
 
 ### `to_snake_case(s string) string`
 
@@ -6907,6 +8583,19 @@ println(score) // ~0.8
 
 ---
 
+### Extended Methods & Enhancements
+
+- `format_int_commas(n i64) string`: Format integers with comma separators (e.g. `1,234,567`).
+- `format_number_commas(n f64, decimals int) string`: Format floating point numbers with comma grouping.
+- `ordinal(n int) string`: Ordinal suffixes (`1st`, `2nd`, `3rd`, `4th`, `11th`, `21st`).
+- `truncate_middle(s string, max_len int, ellipsis string) string`: Truncate strings in the middle (`0123...def`).
+- `strip_ansi(s string) string`: Remove ANSI terminal styling codes.
+
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
 <a id="sysutils"></a><a id="sysutils-api"></a>
 
 # sysutils API
@@ -6918,6 +8607,33 @@ Import statement:
 ```v
 import sysutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 System Telemetry & OS Primer: CPU, Memory & Clipboard
+
+`sysutils` provides operating system introspection, hardware telemetry, process management, and OS clipboard integration.
+
+#### 1. Hardware Metrics & Units
+- **Memory Metrics:** Total, used, and free RAM are returned in **bytes**. Convert to megabytes (`bytes / 1024 / 1024`) or gigabytes for UI display.
+- **Disk Metrics:** Inspects partition capacity and free space for any mounted mountpoint or drive letter.
+- **CPU Load:** Returns real-time percentage across all available processor cores.
+
+#### 2. System Operations Reference Table
+
+| Function | Telemetry / Action | Returns | Real-World Use Case |
+| :--- | :--- | :--- | :--- |
+| `cpu_usage()` | Real-time CPU % | `f64` (0.0 - 100.0) | System health dashboard |
+| `memory_info()` | RAM usage | `MemoryInfo` (bytes) | Profiling memory footprint |
+| `disk_space(path)` | Disk storage | `DiskInfo` (bytes) | Checking disk space before file download |
+| `system_uptime()` | System run time | `u64` (seconds) | Server liveness probe |
+| `runtime_system_info()`| OS and CPU arch | `RuntimeInfo` | Displaying diagnostic environment report |
+| `copy_to_clipboard(s)` | OS Clipboard Write | `bool` | "Copy to clipboard" UI buttons |
+| `read_from_clipboard()`| OS Clipboard Read | `string` | Pasting data into CLI or GUI app |
+
+---
 
 ### Hardware Telemetry & Probing
 
@@ -7153,6 +8869,27 @@ sysutils.say('Build finished successfully') or {}
 
 ---
 
+### Advanced Capabilities (`sysutils`)
+
+Runtime Info (`RuntimeInfo`) & Shell Piping
+
+```v
+import sysutils
+
+info := sysutils.runtime_system_info()
+println('OS: ${info.os_name}, Arch: ${info.arch}, CPUs: ${info.num_cpus}, 64bit: ${info.is_64bit}')
+var_rt := sysutils.RuntimeInfo{ os_name: 'macos', arch: 'arm64' }
+println('Runtime info: ${var_rt.os_name}')
+
+piped_output := sysutils.pipe_commands('echo "antigravity toolkit"', 'grep "antigravity"') or { '' }
+println(piped_output)
+```
+
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
 <a id="tarutils"></a><a id="tarutils-api"></a>
 
 # tarutils API
@@ -7164,6 +8901,33 @@ Import statement:
 ```v
 import tarutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 TAR & Tarball Primer for Beginners: Packaging & Compression
+
+TAR (Tape Archive) bundles multiple files and directories into a single stream while preserving POSIX file permissions and relative paths.
+
+#### 1. Lifecycle & Security Invariants
+- **What if the destination directory does not exist?**
+  `tarutils.tar_extract(tar, dest_dir)!` and `tarutils.targz_extract(tar, dest_dir)!` automatically create any missing destination directory hierarchy.
+- **Security: Defending Against Tar Slip Attacks:**
+  Similar to Zip Slip, malicious tar archives can embed paths like `../../etc/shadow`. `tarutils` sanitizes entry filenames and rejects any entry that attempts to extract outside the designated target folder.
+- **Uncompressed TAR vs Compressed Tarball (.tar.gz):**
+  Uncompressed TAR is fast and has zero CPU overhead; `.tar.gz` uses Gzip compression to minimize file size.
+
+#### 2. TAR Operations Reference Table
+
+| Operation | Function | Compressed? | Best For |
+| :--- | :--- | :--- | :--- |
+| `tar_create(dir, dst)!` | Create TAR | No | Fast local disk archiving |
+| `tar_extract(tar, dst)!` | Extract TAR | No | Restoring uncompressed archives |
+| `targz_create(dir, dst)!` | Create .tar.gz | **Yes (Gzip)** | Distributing software packages, backups |
+| `targz_extract(tar, dst)!` | Extract .tar.gz | **Yes (Gzip)** | Installing downloaded dependencies |
+
+---
 
 ### Core Formats
 
@@ -7260,6 +9024,9 @@ ${readme_text}')
 
 [▲ Back to Table of Contents](#table-of-contents)
 
+
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
 
 <a id="templateutils"></a><a id="templateutils-api"></a>
@@ -7273,6 +9040,28 @@ Import statement:
 ```v
 import templateutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Templating Primer for Beginners: Dynamic Substitution & Fallbacks
+
+`templateutils` provides lightweight, fast string templating for emails, configuration files, and notification messages without heavy external dependencies.
+
+#### 1. Syntax & Variable Resolution
+- **Standard Variable:** `{{ username }}` replaces with the matching value from your variable map.
+- **Fallback Default Value:** `{{ role | guest }}`: If `role` is missing from the map or is an empty string, it automatically evaluates to `"guest"`.
+- **Missing Variables:** If a variable is missing and has no fallback, it safely resolves to an empty string.
+
+#### 2. Templating Functions Reference Table
+
+| Function | Parameters | Behavior | Real-World Use Case |
+| :--- | :--- | :--- | :--- |
+| `render(tmpl, vars)` | Template, Key-Value Map | Replaces `{{ key }}` tokens | Email notifications, Slack webhooks |
+| `render_with_defaults(...)` | Template, Vars, Defaults | Uses fallback map | Config generator with base defaults |
+
+---
 
 ### Simple String Interpolation
 
@@ -7377,6 +9166,90 @@ println(colored_terminal_text)
 
 [▲ Back to Table of Contents](#table-of-contents)
 
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+<a id="testutils"></a><a id="testutils-api"></a>
+
+# testutils API
+
+**Plain-language purpose:** Use `testutils` to write clean, reliable, and isolated integration tests. Automatically manages temporary directories and files with guaranteed cleanup, scopes environment variable overrides, and provides high-precision assertions.
+
+Import statement:
+
+```v
+import testutils
+```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Testing & Sandbox Primer: Isolation, Envs & Assertions
+
+Flaky tests occur when tests share state, pollute the filesystem with leftover files, or leak modified environment variables.
+`testutils` provides hermetic isolation harnesses.
+
+#### 1. Automatic Cleanup Sandboxes
+- **`with_temp_dir(callback)!`:** Creates a unique directory in the OS temp storage, passes the path to your test, and **guarantees recursive deletion** when the callback finishes—even if an assertion fails or an error is thrown.
+- **`with_env(vars, callback)!`:** Temporarily overrides environment variables for the duration of the test, and restores all original variables upon return.
+
+#### 2. High-Precision Assertions Table
+
+| Assertion Helper | Purpose | Failure Output |
+| :--- | :--- | :--- |
+| `assert_eq[T](act, exp, msg)` | Strict equality | Displays expected vs actual values |
+| `assert_ne[T](act, exp, msg)` | Inequality check | Fails if values match |
+| `assert_contains(hay, needle, msg)`| Substring presence | Fails if needle missing from haystack |
+| `assert_in_delta(act, exp, delta, msg)`| Floating-point delta | Tolerates rounding differences ($|act - exp| \le \delta$) |
+| `assert_empty[T](slice_or_str, msg)` | Empty collection check | Fails if length > 0 |
+
+---
+
+### Quick Start Example
+
+```v
+import testutils
+import os
+
+// 1. Isolated temporary directory with automatic recursive cleanup
+testutils.with_temp_dir(fn (dir string) ! {
+    testutils.write_temp_file(dir, 'config.json', '{"port": 8080}')!
+    data := testutils.read_temp_file(dir, 'config.json')!
+    testutils.assert_contains(data, '8080', 'port found in config')
+})!
+
+// 2. Scoped environment variable overrides (restores previous state upon return)
+testutils.with_env({'APP_ENV': 'testing', 'DEBUG': '1'}, fn () ! {
+    env := os.getenv('APP_ENV')
+    testutils.assert_eq(env, 'testing', 'env variable correctly scoped')
+})!
+
+// 3. Floating-point comparison with epsilon delta
+testutils.assert_in_delta(3.14159, 3.14, 0.01, 'approximate value')
+```
+
+### Reference: Methods & Functions
+
+- `with_temp_dir(cb fn (dir string) !) !`: Creates a uniquely named temporary sandbox directory, passes its path to `cb`, and removes it recursively when `cb` finishes or errors.
+- `with_temp_file(prefix string, suffix string, cb fn (path string) !) !`: Creates an isolated temporary file, invokes `cb`, and removes the file upon completion.
+- `write_temp_file(dir string, filename string, content string) !string`: Helper to safely create a file inside a test directory.
+- `read_temp_file(dir string, filename string) !string`: Helper to read file contents from a test directory.
+- `with_env(vars map[string]string, cb fn () !) !`: Temporarily sets environment variables for the duration of `cb`, then restores the previous environment state.
+- `assert_eq[T](actual T, expected T, msg string)`: Asserts equality between two generic values with descriptive failure messages.
+- `assert_ne[T](actual T, expected T, msg string)`: Asserts inequality between two generic values.
+- `assert_contains(haystack string, needle string, msg string)`: Asserts that a substring exists within a string.
+- `assert_in_delta(actual f64, expected f64, delta f64, msg string)`: Asserts that two floating-point numbers differ by no more than `delta`.
+
+---
+
+<a id="recent-enhancements-api"></a>
+
+
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
 
 <a id="timeutils"></a><a id="timeutils-api"></a>
@@ -7389,8 +9262,38 @@ Import statement:
 
 ```v
 import timeutils
-import time
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Time & Duration Primer for Beginners: ISO 8601 & Stopwatches
+
+Time calculations must handle human-readable relative formatting, standard ISO 8601 serialization, and microsecond-level benchmarking.
+
+#### 1. Human-Readable Relative Time
+Displaying raw timestamps (`2026-10-10 14:32:00`) is jarring in user interfaces. `timeutils.time_ago(t)` converts timestamps into contextual labels:
+- `"just now"` (< 10 seconds ago)
+- `"5 minutes ago"`
+- `"yesterday"`
+- `"in 2 hours"` (future dates)
+
+#### 2. High-Precision Stopwatch & Benchmarks
+- **`Stopwatch`:** Measures execution latency with `elapsed_ms()` and `elapsed_microseconds()`.
+- **`benchmark_fn(name, iterations, fn)`:** Executes a block $N$ times, calculating total duration, average latency per operation, and throughput (Operations/Sec).
+
+#### 3. Time Utilities Reference Table
+
+| Function / Struct | Operation | Example Output | Best For |
+| :--- | :--- | :--- | :--- |
+| `time_ago(t)` | Relative format | `"3 hours ago"` | Social feeds, comment timestamps |
+| `to_iso8601(t)` | Standard serialization | `"2026-10-10T15:30:00Z"` | JSON API payloads |
+| `parse_iso8601(s)!` | Standard parsing | `time.Time` struct | Deserializing API timestamps |
+| `parse_duration(s)!` | Duration string | `90 * time.minute` | Parsing config flags (`"1h 30m"`, `"500ms"`) |
+| `new_stopwatch()` | High-res timer | `ms` and `microseconds` | Performance profiling |
+
+---
 
 ### `time_ago(t time.Time) string`
 
@@ -7491,6 +9394,36 @@ sw.reset()
 
 ---
 
+### Advanced Capabilities (`timeutils`)
+
+Benchmarking Suite (`BenchmarkResult`)
+
+```v
+import timeutils
+
+res := timeutils.benchmark_fn('loop_benchmark', 1000, fn () {
+    mut sum := 0
+    for i in 0 .. 100 { sum += i }
+})
+println(res.str())
+println('Ops/Sec: ${res.ops_per_sec}')
+var_bm := timeutils.BenchmarkResult{ name: 'demo', iterations: 10 }
+println('Benchmark result: ${var_bm.name}')
+```
+
+---
+
+### Extended Methods & Enhancements
+
+- `parse_duration(s string) !time.Duration`: Parse human duration strings (`"1h 30m"`, `"500ms"`, `"45s"`).
+- `add_business_days(start time.Time, days int) time.Time`: Skip weekend days.
+- `TimeRange`: Struct with `contains`, `overlaps`, and `duration()`.
+
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
 <a id="tomlutils"></a><a id="tomlutils-api"></a>
 
 # tomlutils API
@@ -7502,6 +9435,35 @@ Import statement:
 ```v
 import tomlutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 TOML Configuration Primer: Parsing & Typed Extraction
+
+TOML (Tom's Obvious, Minimal Language) is the preferred configuration format for modern developer tools (such as Cargo, Poetry, and V projects).
+
+#### 1. TOML Syntax & Data Types
+TOML supports key-values, tables (`[server]`), nested tables (`[server.limits]`), and arrays of tables (`[[plugins]]`).
+
+#### 2. Safe Typed Getters
+If a key is missing or has an unexpected type, getters return V option types (`?T`), enabling clean fallbacks:
+```v
+port := toml.get_int('server.port') or { 8080 }
+```
+
+#### 3. TOML Methods Reference Table
+
+| Method | Type Returned | Return on Missing Key |
+| :--- | :--- | :--- |
+| `get_string(key)` | `?string` | `none` |
+| `get_int(key)` | `?int` | `none` |
+| `get_bool(key)` | `?bool` | `none` |
+| `get_array(key)` | `?[]string` | `none` |
+| `has(key)` | `bool` | `false` |
+
+---
 
 ### Parsing TOML Documents
 
@@ -7613,6 +9575,9 @@ println('Converted JSON: ${json_str}') // {"title":"App Config","version":2}
 
 [▲ Back to Table of Contents](#table-of-contents)
 
+
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
 
 <a id="urlutils"></a><a id="urlutils-api"></a>
@@ -7626,6 +9591,33 @@ Import statement:
 ```v
 import urlutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 URL & Query String Primer: RFC 3986 Parsing & Redaction
+
+Manipulating URLs via raw string concatenation produces malformed query strings and unescaped spaces.
+
+#### 1. Safe Query String Construction
+`urlutils.build_query(params)` automatically applies RFC 3986 percent-encoding to keys and values, turning spaces into `%20` and escaping reserved characters like `&` and `=`.
+
+#### 2. Security: Credential Redaction in Logs
+Never print raw URLs containing passwords or basic auth to log files:
+`urlutils.redact_credentials("https://admin:secret@api.company.com/v1")` returns `"https://admin:***@api.company.com/v1"`.
+
+#### 3. URL Methods Reference Table
+
+| Function | Operation | Example Input | Example Output |
+| :--- | :--- | :--- | :--- |
+| `parse(url)!` | Decomposes URL | `"https://site.com:8080/path?q=1"` | `ParsedURL` struct |
+| `build_query(map)` | Encodes query params | `{'search': 'rock & roll'}` | `"search=rock%20%26%20roll"` |
+| `parse_query(str)` | Decodes query params | `"page=2&limit=50"` | `{'page': '2', 'limit': '50'}` |
+| `join_path(base, paths...)`| Normalizes slashes | `"/api/", "/v1//", "/users"` | `"/api/v1/users"` |
+| `redact_credentials(url)` | Hides passwords | `"https://u:p@host.com"` | `"https://u:***@host.com"` |
+
+---
 
 ### Parsing & URL Inspection
 
@@ -7738,6 +9730,9 @@ println(urlutils.is_same_origin('https://myapp.com', 'https://api.myapp.com')) /
 
 [▲ Back to Table of Contents](#table-of-contents)
 
+
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
 
 <a id="validutils"></a><a id="validutils-api"></a>
@@ -7751,6 +9746,31 @@ Import statement:
 ```v
 import validutils
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Input Validation Primer: High-Speed Checks & Formats
+
+Never trust input from users, query strings, or third-party webhooks without validation.
+
+#### 1. Validation Invariants & Performance
+Validation functions in `validutils` execute fast zero-allocation checks without spawning subprocesses or allocating unnecessary intermediate strings.
+
+#### 2. Validation Functions Reference Table
+
+| Validator | What It Checks | Example Valid Input | Example Rejected Input |
+| :--- | :--- | :--- | :--- |
+| `is_email(str)` | RFC 5322 syntax | `"user@example.com"` | `"user@"` or `"user@.com"` |
+| `is_url(str)` | Valid HTTP/HTTPS URL | `"https://github.com"` | `"htp://invalid"` |
+| `is_ipv4(str)` / `is_ipv6(str)` | IP address syntax | `"192.168.1.1"` | `"999.999.999.999"` |
+| `is_credit_card(str)`| Luhn algorithm checksum | Valid 16-digit card | Random 16 digits failing Luhn |
+| `is_uuid(str)` | UUID v1-v5 format | `"123e4567-e89b-12d3-a456-426614174000"` | `"not-a-uuid"` |
+| `is_in_range(n, min, max)`| Numeric boundary | `is_in_range(25, 18, 65)`| `is_in_range(12, 18, 65)` |
+| `is_valid_json(str)`| Valid JSON syntax | `'{"ok": true}'` | `'{"unclosed":'` |
+
+---
 
 ### Standalone Validation Functions (Zero Guesswork)
 
@@ -7873,6 +9893,9 @@ Form contains validation errors:
 
 [▲ Back to Table of Contents](#table-of-contents)
 
+
+[▲ Back to Table of Contents](#table-of-contents)
+
 ---
 
 <a id="webutils"></a><a id="webutils-api"></a>
@@ -7885,8 +9908,38 @@ Import statement:
 
 ```v
 import webutils
-import json2
 ```
+
+[▲ Back to Table of Contents](#table-of-contents)
+
+---
+
+### 📘 Web Framework Primer for Beginners: Routes, Middleware & SSE
+
+`webutils` provides an expressive, high-performance web framework for REST APIs, microservices, and real-time Server-Sent Events.
+
+#### 1. Security Headers & CORS Middleware
+- **Security Headers (`app.use_security_headers()`):** Automatically injects essential HTTP defenses:
+  - `X-Content-Type-Options: nosniff` (Prevents MIME sniffing)
+  - `X-Frame-Options: DENY` (Clickjacking defense)
+  - `X-XSS-Protection: 1; mode=block`
+- **CORS Middleware:** Validates origins, allowed HTTP methods (`GET`, `POST`, `OPTIONS`), and headers.
+
+#### 2. Real-Time Server-Sent Events (SSE)
+- **`c.sse(event, data)!`:** Streams a real-time event frame to a connected client. Automatically escapes line breaks to prevent HTTP response header injection and sets `Content-Type: text/event-stream`.
+- **Health Checks (`app.use_healthz()`):** Exposes a standardized `/healthz` endpoint returning JSON `{"status": "ok", "uptime_sec": ...}` for Kubernetes and cloud load balancers.
+
+#### 3. Web Framework Features Reference Table
+
+| Feature | Method | Response Type | Best For |
+| :--- | :--- | :--- | :--- |
+| **JSON Response** | `c.json(struct_or_map)` | `application/json` | REST API endpoints |
+| **HTML Response** | `c.html(html_str)` | `text/html` | Server-rendered pages |
+| **SSE Stream** | `c.sse(event, data)!` | `text/event-stream` | LLM streaming, live notifications |
+| **Health Check** | `app.use_healthz()` | JSON status | Kubernetes liveness/readiness probes |
+| **CORS Guard** | `app.use_cors(config)` | CORS headers | Securing cross-origin SPAs |
+
+---
 
 ### Quick Start Example
 
@@ -8043,522 +10096,15 @@ fn test_api_endpoints() {
 
 <a id="advanced-additions--enhancements"></a>
 
-# Advanced Additions & Enhancements
-
-### `cliutils` Clipboard Functions
-
-```v
-import cliutils
-
-if cliutils.is_clipboard_available() {
-    cliutils.copy_to_clipboard('Copied to system clipboard')
-    text := cliutils.read_from_clipboard()
-    println(text)
-}
-```
-
-### `cryptoutils` Advanced Cryptography
-
-```v
-import cryptoutils
-
-// Symmetric AES-CBC (with PKCS7 padding)
-key := cryptoutils.secure_random_bytes(32) or { panic(err) }
-iv := cryptoutils.secure_random_bytes(16) or { panic(err) }
-ciphertext := cryptoutils.aes_encrypt_string(key, iv, 'Secret Payload') or { panic(err) }
-raw_cipher := cryptoutils.aes_encrypt_cbc(key, iv, 'Secret Payload'.bytes()) or { panic(err) }
-raw_dec := cryptoutils.aes_decrypt_cbc(key, iv, raw_cipher) or { panic(err) }
-decrypted := cryptoutils.aes_decrypt_string(key, iv, ciphertext) or { panic(err) }
-
-println('Decrypted raw len: ${raw_dec.len}, decrypted text: ${decrypted}')
-
-// Password hashing with Bcrypt
-hash := cryptoutils.bcrypt_hash('user_password') or { panic(err) }
-ok := cryptoutils.bcrypt_verify('user_password', hash)
-println('Password ok: ${ok}')
-
-// Secure Entropy
-random_hex := cryptoutils.secure_random_hex(16) or { '' }
-println('Random hex: ${random_hex}')
-
-// Fast non-cryptographic hashes
-fnv32 := cryptoutils.fnv1a_32('string to hash')
-c32 := cryptoutils.crc32_hash('string to hash')
-println('FNV32: ${fnv32}, CRC32: ${c32}')
-
-// Asymmetric Ed25519 digital signatures
-pub_k, priv_k := cryptoutils.generate_ed25519_keypair() or { panic(err) }
-sig := cryptoutils.ed25519_sign(priv_k, 'message'.bytes()) or { panic(err) }
-valid := cryptoutils.ed25519_verify(pub_k, 'message'.bytes(), sig)
-println('Ed25519 signature valid: ${valid}')
-```
-
-### `netutils` Framed TCP & UDP
-
-```v
-import netutils
-import net
-
-// Framed TCP messages (4-byte length prefix to prevent fragmentation)
-mut conn := net.dial_tcp('127.0.0.1:9000') or { panic(err) }
-netutils.send_framed_msg(mut conn, 'Framed Payload'.bytes()) or { panic(err) }
-reply := netutils.read_framed_msg(mut conn, 8192) or { panic(err) }
-println('Received reply len: ${reply.len}')
-
-// UDP datagram transmission
-netutils.send_udp('127.0.0.1', 9001, 'UDP Packet'.bytes()) or { panic(err) }
-```
-
-### `structutils` Advanced Generic Collections (`GenericSet`, `BloomFilter`, `BinarySearchTree`, `SinglyLinkedList`, `DoublyLinkedList`)
-
-```v
-import structutils
-
-// GenericSet[T]
-mut s := structutils.new_set[string]()
-mut s_arr := structutils.new_set_from_array(['a', 'b', 'c'])
-s.add('first')
-s.add_all(['second', 'third'])
-has_val := s.contains('first')
-arr := s.to_array()
-var_set := structutils.GenericSet[string]{ set: s.set }
-println('s_arr size: ${s_arr.size()}, has_val: ${has_val}, arr: ${arr}, var_set size: ${var_set.size()}')
-
-// BloomFilter
-mut bf := structutils.new_bloom_filter(64, 3) or { panic(err) }
-bf.add('item1')
-exists := bf.contains('item1')
-var_bf := structutils.BloomFilter{}
-println('exists: ${exists}, var_bf: ${var_bf}')
-
-// BinarySearchTree[T]
-mut bst := structutils.new_bstree[int]()
-bst.insert(10)
-bst.insert(5)
-bst.insert(15)
-sorted_order := bst.in_order()
-smallest := bst.min()
-largest := bst.max()
-var_bst := structutils.BinarySearchTree[int]{}
-println('sorted: ${sorted_order}, min: ${smallest}, max: ${largest}, var_bst empty: ${var_bst.is_empty()}')
-
-// SinglyLinkedList[T]
-mut ll := structutils.new_linked_list[int]()
-ll.push(10)
-item := ll.pop()
-first_item := ll.shift()
-var_ll := structutils.SinglyLinkedList[int]{}
-println('item: ${item}, first: ${first_item}, var_ll len: ${var_ll.len()}')
-
-// DoublyLinkedList[T]
-mut dll := structutils.new_doubly_linked_list[string]()
-dll.push_back('tail')
-dll.push_front('head')
-popped_tail := dll.pop_back()
-popped_head := dll.pop_front()
-var_dll := structutils.DoublyLinkedList[string]{}
-println('popped tail: ${popped_tail}, popped head: ${popped_head}, var_dll len: ${var_dll.len()}')
-```
-
-### `sysutils` Runtime Info (`RuntimeInfo`) & Shell Piping
-
-```v
-import sysutils
-
-info := sysutils.runtime_system_info()
-println('OS: ${info.os_name}, Arch: ${info.arch}, CPUs: ${info.num_cpus}, 64bit: ${info.is_64bit}')
-var_rt := sysutils.RuntimeInfo{ os_name: 'macos', arch: 'arm64' }
-println('Runtime info: ${var_rt.os_name}')
-
-piped_output := sysutils.pipe_commands('echo "antigravity toolkit"', 'grep "antigravity"') or { '' }
-println(piped_output)
-```
-
-### `timeutils` Benchmarking Suite (`BenchmarkResult`)
-
-```v
-import timeutils
-
-res := timeutils.benchmark_fn('loop_benchmark', 1000, fn () {
-    mut sum := 0
-    for i in 0 .. 100 { sum += i }
-})
-println(res.str())
-println('Ops/Sec: ${res.ops_per_sec}')
-var_bm := timeutils.BenchmarkResult{ name: 'demo', iterations: 10 }
-println('Benchmark result: ${var_bm.name}')
-```
-
 ---
 
-<a id="configutils"></a><a id="configutils-api"></a>
+### Extended Methods & Enhancements
 
-# configutils API
-
-**Plain-language purpose:** Use `configutils` for 12-factor application configuration. It merges defaults, configuration files (TOML/JSON), environment variables, and CLI flags into a single unified manager with type-safe accessors and complete provenance tracking (knowing whether a value came from a default, file, ENV, or CLI).
-
-Import statement:
-
-```v
-import configutils
-```
-
-### Quick Start Example
-
-```v
-import configutils
-
-// Initialize with environment variable prefix (e.g. APP_PORT)
-mut cfg := configutils.new_manager('APP')
-
-// 1. Establish defaults
-cfg.set_default('port', '8080')
-cfg.set_default('host', '127.0.0.1')
-cfg.set_default('debug', 'false')
-
-// 2. Load configuration file (TOML or JSON) if present
-cfg.load_file('app.toml') or {}
-
-// 3. Merge environment variables (APP_PORT, APP_HOST, etc.)
-cfg.load_env()
-
-// 4. Override with CLI arguments (--port 9000 --debug)
-cfg.load_cli_args(['--port', '9000', '--debug'])!
-
-// Type-safe access
-port := cfg.get_int('port')! // 9000
-host := cfg.get('host') or { '127.0.0.1' }
-debug := cfg.get_bool('debug')! // true
-source := cfg.source_of('port') // "cli"
-```
-
-### Reference: Methods & Functions
-
-- `new_manager(env_prefix string) &ConfigManager`: Creates a new layered configuration manager with an optional environment variable prefix.
-- `(mut cm ConfigManager) set_default(key string, val string)`: Sets a base default value for a key.
-- `(mut cm ConfigManager) load_file(path string) !`: Loads and parses a `.toml` or `.json` configuration file, overriding defaults.
-- `(mut cm ConfigManager) load_env()`: Inspects environment variables matching `PREFIX_KEY` (case-insensitive) and overrides existing keys.
-- `(mut cm ConfigManager) load_cli_args(args []string) !`: Parses `--key value` or `--flag` command-line arguments and overrides existing keys.
-- `(cm &ConfigManager) get(key string) ?string`: Retrieves a configuration value by key.
-- `(cm &ConfigManager) get_or_default(key string, default_val string) string`: Retrieves a value or falls back to a provided default.
-- `(cm &ConfigManager) get_int(key string) !int`: Retrieves and parses a value as `int`.
-- `(cm &ConfigManager) get_i64(key string) !i64`: Retrieves and parses a value as `i64`.
-- `(cm &ConfigManager) get_f64(key string) !f64`: Retrieves and parses a value as `f64`.
-- `(cm &ConfigManager) get_bool(key string) !bool`: Retrieves and parses a boolean value (`true`/`false`, `1`/`0`, `yes`/`no`).
-- `(cm &ConfigManager) get_strings(key string) ![]string`: Retrieves and splits a comma-delimited string into a slice.
-- `(cm &ConfigManager) source_of(key string) string`: Returns the provenance source of a key (`"default"`, `"file"`, `"env"`, `"cli"`, or `"unknown"`).
-- `(cm &ConfigManager) all() map[string]string`: Returns a complete copy of all resolved configuration key-value pairs.
-- `(cm &ConfigManager) has(key string) bool`: Checks if a configuration key exists.
-
----
-
-<a id="idutils"></a><a id="idutils-api"></a>
-
-# idutils API
-
-**Plain-language purpose:** Use `idutils` to generate and parse collision-resistant, sortable, distributed, and URL-friendly unique identifiers without external services.
-
-Import statement:
-
-```v
-import idutils
-```
-
-### Quick Start Example
-
-```v
-import idutils
-
-// 1. ULID: 128-bit lexically sortable, Crockford Base32 ID
-id := idutils.ulid()
-println('ULID: ${id}') // e.g. "01ARZ3NDEKTSV4RRFFQ69G5FAV"
-ts := idutils.ulid_timestamp(id)
-println('Timestamp (ms): ${ts}')
-
-// Monotonic ULID generator (guarantees order within the same millisecond)
-mut gen := idutils.new_monotonic_ulid_generator()
-id1 := gen.generate()
-id2 := gen.generate()
-
-// 2. Twitter Snowflake: 64-bit distributed integer ID
-mut sf := idutils.new_snowflake(1, 1)!
-snow_id := sf.next_id()!
-println('Snowflake ID: ${snow_id}')
-parts := idutils.parse_snowflake(snow_id)
-println('Worker: ${parts.worker_id}, Time: ${parts.timestamp_ms}')
-
-// 3. Sqids: YouTube-style URL obfuscation for integers
-sq := idutils.new_sqids(min_length: 8)!
-encoded := sq.encode([42, 1337])!
-println('Sqid: ${encoded}') // e.g. "b7xK9nQ2"
-decoded := sq.decode(encoded) // [42, 1337]
-```
-
-### Reference: Methods & Functions
-
-- `ulid() string`: Generates a standard 26-character ULID using the current UTC timestamp and CSPRNG randomness.
-- `ulid_at(timestamp_ms u64) string`: Generates a ULID for a specific Unix epoch timestamp in milliseconds.
-- `ulid_timestamp(id string) u64`: Extracts the 48-bit millisecond timestamp from an existing ULID string.
-- `is_valid_ulid(id string) bool`: Validates if a string adheres to canonical ULID format and Crockford Base32 alphabet.
-- `new_monotonic_ulid_generator() &MonotonicULIDGenerator`: Creates a stateful generator that guarantees strict ascending order for IDs generated within the same millisecond.
-- `(mut g MonotonicULIDGenerator) generate() string`: Generates a monotonically increasing ULID.
-- `new_snowflake(worker_id u64, datacenter_id u64) !&Snowflake`: Initializes a 64-bit distributed Snowflake generator (supports up to 32 datacenters and 32 workers).
-- `(mut s Snowflake) next_id() !u64`: Returns the next 64-bit Snowflake identifier.
-- `(mut s Snowflake) next_id_string() !string`: Returns the next Snowflake ID formatted as a string.
-- `parse_snowflake(id u64) SnowflakeParts`: Deconstructs a 64-bit Snowflake into `timestamp_ms`, `datacenter_id`, `worker_id`, and `sequence`.
-- `new_sqids(config SqidsConfig) !&Sqids`: Initializes an obfuscator with custom alphabet, minimum length, and blocklist.
-- `(s &Sqids) encode(numbers []u64) !string`: Encodes an array of unsigned integers into a URL-friendly Sqid.
-- `(s &Sqids) decode(id string) []u64`: Decodes a Sqid string back into its original array of integers.
-
----
-
-<a id="procutils"></a><a id="procutils-api"></a>
-
-# procutils API
-
-**Plain-language purpose:** Use `procutils` for advanced subprocess management. Stream stdout and stderr in real-time line-by-line, enforce strict process timeouts with auto-kill, and execute piped shell workflows safely.
-
-Import statement:
-
-```v
-import procutils
-```
-
-### Quick Start Example
-
-```v
-import procutils
-
-// 1. Real-time stdout & stderr streaming
-procutils.stream_lines('git status', fn (line string, is_stderr bool) {
-    if is_stderr {
-        eprintln('[STDERR] ${line}')
-    } else {
-        println('[STDOUT] ${line}')
-    }
-})!
-
-// 2. Timeout-bounded process execution
-res := procutils.exec_timeout('sleep 5', timeout_ms: 1000)
-if res.timed_out {
-    println('Process exceeded 1s deadline and was terminated.')
-}
-
-// 3. Multi-stage piped commands
-output := procutils.pipeline(['cat /etc/hosts', 'grep localhost', 'wc -l'])!
-println('Matching lines: ${output.trim_space()}')
-```
-
-### Reference: Methods & Functions
-
-- `stream_lines(cmd string, on_line fn (line string, is_stderr bool)) !`: Executes a shell command and delivers each stdout and stderr line to the callback in real time.
-- `exec_timeout(cmd string, config ExecTimeoutConfig) ProcessResult`: Runs a subprocess with a timeout deadline in milliseconds. Automatically sends `SIGKILL` to the process group if execution exceeds the deadline.
-- `pipeline(cmds []string) !string`: Chains multiple commands together in a pipeline, feeding the stdout of each stage as the stdin of the next.
-- `ProcessResult`: Struct containing `output string`, `exit_code int`, `timed_out bool`, `duration_ms i64`.
-
----
-
-<a id="sqlbuilder"></a><a id="sqlbuilder-api"></a>
-
-# sqlbuilder API
-
-**Plain-language purpose:** Use `sqlbuilder` to construct SQL queries programmatically with a fluent, chainable API that automatically handles parameterized placeholders (`?`) and prevents SQL injection.
-
-Import statement:
-
-```v
-import sqlbuilder
-```
-
-### Quick Start Example
-
-```v
-import sqlbuilder
-
-// 1. Fluent SELECT Query with Filtering & Pagination
-query, params := sqlbuilder.select_from('users')
-    .columns(['id', 'username', 'email', 'status'])
-    .where_eq('status', 'active')
-    .where_gte('age', 18)
-    .where_like('email', '%@company.com')
-    .order_by('created_at', .desc)
-    .paginate(page: 1, page_size: 25)
-    .to_sql()
-
-println('SQL: ${query}')
-// SELECT id, username, email, status FROM users WHERE status = ? AND age >= ? AND email LIKE ? ORDER BY created_at DESC LIMIT 25 OFFSET 0
-println('Params: ${params}')
-// ['active', '18', '%@company.com']
-
-// 2. INSERT Query
-ins_query, ins_params := sqlbuilder.insert_into('audit_logs')
-    .row({
-        'user_id': '42'
-        'action':  'password_reset'
-    })
-    .to_sql()
-
-// 3. UPDATE Query
-upd_query, upd_params := sqlbuilder.update_table('users')
-    .set('status', 'suspended')
-    .where_eq('id', '42')
-    .to_sql()
-
-// 4. DELETE Query
-del_query, del_params := sqlbuilder.delete_from('sessions')
-    .where_eq('expired', '1')
-    .to_sql()
-```
-
-### Reference: Methods & Functions
-
-- `select_from(table string) &SelectQuery`: Begins building a `SELECT` statement.
-- `(q &SelectQuery) columns(cols []string) &SelectQuery`: Specifies the column list (defaults to `*`).
-- `(q &SelectQuery) where_eq(col string, val string) &SelectQuery`: Adds an `AND col = ?` clause.
-- `(q &SelectQuery) where_ne(col string, val string) &SelectQuery`: Adds an `AND col != ?` clause.
-- `(q &SelectQuery) where_gt(col string, val string) &SelectQuery`: Adds an `AND col > ?` clause.
-- `(q &SelectQuery) where_gte(col string, val string) &SelectQuery`: Adds an `AND col >= ?` clause.
-- `(q &SelectQuery) where_lt(col string, val string) &SelectQuery`: Adds an `AND col < ?` clause.
-- `(q &SelectQuery) where_lte(col string, val string) &SelectQuery`: Adds an `AND col <= ?` clause.
-- `(q &SelectQuery) where_like(col string, pattern string) &SelectQuery`: Adds an `AND col LIKE ?` clause.
-- `(q &SelectQuery) where_in(col string, values []string) &SelectQuery`: Adds an `AND col IN (?, ?, ...)` clause.
-- `(q &SelectQuery) order_by(col string, dir OrderDir) &SelectQuery`: Adds an `ORDER BY col ASC/DESC` clause.
-- `(q &SelectQuery) limit(n int) &SelectQuery`: Sets a row limit.
-- `(q &SelectQuery) offset(n int) &SelectQuery`: Sets a row offset.
-- `(q &SelectQuery) paginate(page int, page_size int) &SelectQuery`: Convenience method that calculates `limit` and `offset` for 1-based page numbers.
-- `(q &SelectQuery) to_sql() (string, []string)`: Compiles the builder into a parameterized SQL statement and an array of argument strings.
-- `insert_into(table string) &InsertQuery`: Begins building an `INSERT INTO` statement.
-- `(q &InsertQuery) row(data map[string]string) &InsertQuery`: Sets column-value pairs for insertion.
-- `update_table(table string) &UpdateQuery`: Begins building an `UPDATE` statement.
-- `(q &UpdateQuery) set(col string, val string) &UpdateQuery`: Sets a column to a new value.
-- `delete_from(table string) &DeleteQuery`: Begins building a `DELETE FROM` statement.
-
----
-
-<a id="testutils"></a><a id="testutils-api"></a>
-
-# testutils API
-
-**Plain-language purpose:** Use `testutils` to write clean, reliable, and isolated integration tests. Automatically manages temporary directories and files with guaranteed cleanup, scopes environment variable overrides, and provides high-precision assertions.
-
-Import statement:
-
-```v
-import testutils
-import os
-```
-
-### Quick Start Example
-
-```v
-import testutils
-import os
-
-// 1. Isolated temporary directory with automatic recursive cleanup
-testutils.with_temp_dir(fn (dir string) ! {
-    testutils.write_temp_file(dir, 'config.json', '{"port": 8080}')!
-    data := testutils.read_temp_file(dir, 'config.json')!
-    testutils.assert_contains(data, '8080', 'port found in config')
-})!
-
-// 2. Scoped environment variable overrides (restores previous state upon return)
-testutils.with_env({'APP_ENV': 'testing', 'DEBUG': '1'}, fn () ! {
-    env := os.getenv('APP_ENV')
-    testutils.assert_eq(env, 'testing', 'env variable correctly scoped')
-})!
-
-// 3. Floating-point comparison with epsilon delta
-testutils.assert_in_delta(3.14159, 3.14, 0.01, 'approximate value')
-```
-
-### Reference: Methods & Functions
-
-- `with_temp_dir(cb fn (dir string) !) !`: Creates a uniquely named temporary sandbox directory, passes its path to `cb`, and removes it recursively when `cb` finishes or errors.
-- `with_temp_file(prefix string, suffix string, cb fn (path string) !) !`: Creates an isolated temporary file, invokes `cb`, and removes the file upon completion.
-- `write_temp_file(dir string, filename string, content string) !string`: Helper to safely create a file inside a test directory.
-- `read_temp_file(dir string, filename string) !string`: Helper to read file contents from a test directory.
-- `with_env(vars map[string]string, cb fn () !) !`: Temporarily sets environment variables for the duration of `cb`, then restores the previous environment state.
-- `assert_eq[T](actual T, expected T, msg string)`: Asserts equality between two generic values with descriptive failure messages.
-- `assert_ne[T](actual T, expected T, msg string)`: Asserts inequality between two generic values.
-- `assert_contains(haystack string, needle string, msg string)`: Asserts that a substring exists within a string.
-- `assert_in_delta(actual f64, expected f64, delta f64, msg string)`: Asserts that two floating-point numbers differ by no more than `delta`.
-
----
-
-<a id="recent-enhancements-api"></a>
-## Extended Enhancements to Existing Modules
-
-### `sqliteutils`
-- `select_rows_paged(db sqlite.DB, base_query string, page int, page_size int) !PagedResult`: Executes a paginated query, automatically calculating total count, total pages, current page, offset, has_next, has_prev, and returning the requested slice of rows.
-- `PagedResult`: Struct containing `rows []map[string]string`, `total_count int`, `page int`, `page_size int`, `total_pages int`, `has_next bool`, `has_prev bool`.
-- `transaction(mut db sqlite.DB, action fn (mut db sqlite.DB) !) !`: Safe transaction runner with auto-rollback.
-- `insert_many(mut db sqlite.DB, table string, rows []map[string]string) !int`: High-throughput atomic batch insert.
-
-### `stateutils`
-- `StateHistory[T]`: Generic undo/redo history stack with configurable capacity.
-- `new_state_history[T](initial T, max_history int) StateHistory[T]`: Initializes an undo/redo stack.
-- `(mut h StateHistory[T]) push(state T)`: Pushes a new state snapshot, clearing any subsequent redo history.
-- `(mut h StateHistory[T]) undo() ?T`: Reverts to the previous snapshot.
-- `(mut h StateHistory[T]) redo() ?T`: Re-applies a previously undone snapshot.
-- `(h StateHistory[T]) can_undo() bool`: Checks if undo steps are available.
-- `(h StateHistory[T]) can_redo() bool`: Checks if redo steps are available.
-- `(h StateHistory[T]) current() T`: Returns the active state.
-- `(mut h StateHistory[T]) clear(current T)`: Resets history to a single base state.
-
-### `cliutils`
-- `prompt_multiselect(prompt string, options []string) ![]string`: Interactive multi-choice prompt in the terminal, returns array of selected options.
-- `Spinner`: Terminal loading spinner with `new_spinner(msg)`, `step()`, `update(msg)`.
-- `confirm(prompt string, default_yes bool) bool`: Interactive Yes/No prompt.
-
-### `jsonutils`
-- `encode_ndjson[T](items []T) !string`: Serializes an array of structs into newline-delimited JSON (NDJSON).
-- `decode_ndjson[T](ndjson_str string) ![]T`: Parses newline-delimited JSON (NDJSON) string into an array of typed structs.
-- `each_ndjson_line[T](ndjson_str string, handler fn (item T) !) !`: Memory-efficient line-by-line streaming of NDJSON without loading all objects into memory at once.
-
-### `webutils`
 - `c.sse(event string, data string) !`: Streams a Server-Sent Event (SSE) frame (`event: ...\ndata: ...\n\n`) with `text/event-stream` headers.
 - `app.use_healthz(path string)`: Mounts standard RFC-ready `/healthz` or custom liveness probes returning JSON `{"status": "ok", "uptime_sec": ...}`.
 
-### `httputils`
-- `post_multipart(url string, form_fields map[string]string, file_field string, file_path string) !http.Response`: Direct multipart form upload with boundary generation.
-- `stream_lines(url string, on_line fn (line string) !) !`: Streams response body line-by-line as data arrives over HTTP socket.
-- `stream_sse(url string, on_event fn (event string, data string) !) !`: Consumes Server-Sent Events from an HTTP endpoint in real time.
-- `bearer_auth_header(token string) map[string]string`: Generate Bearer authorization map.
-- `basic_auth_header(user string, pass string) map[string]string`: Generate Basic authentication map.
-- `merge_headers(maps ...map[string]string) map[string]string`: Combine multiple HTTP header sets.
-- `is_success_status`, `is_redirect_status`, `is_client_error`, `is_server_error`: Fast status code inspection.
 
-### `fileutils`
-- `write_file_atomic(path string, content string) !`: Crash-safe atomic writing via temporary file + atomic OS rename.
-- `mime_type(path string) string`: Automatic MIME detection from file extension and type signature.
-- `file_hash_sha256(path string) !string`: Hexadecimal SHA-256 checksum calculation for any file.
-
-### `strutils`
-- `format_int_commas(n i64) string`: Format integers with comma separators (e.g. `1,234,567`).
-- `format_number_commas(n f64, decimals int) string`: Format floating point numbers with comma grouping.
-- `ordinal(n int) string`: Ordinal suffixes (`1st`, `2nd`, `3rd`, `4th`, `11th`, `21st`).
-- `truncate_middle(s string, max_len int, ellipsis string) string`: Truncate strings in the middle (`0123...def`).
-- `strip_ansi(s string) string`: Remove ANSI terminal styling codes.
-
-### `sliceutils`
-- `zip[T, U](a []T, b []U) []Pair[T, U]`: Combine two slices into pairs.
-- `frequency[T](items []T) map[T]int`: Count occurrences of distinct elements.
-- `group_by[T, K](items []T, key_fn fn (T) K) map[K][]T`: Group slice items by key.
-- `window[T](items []T, size int, step int) [][]T`: Sliding window partitioner.
-- `binary_search[T](sorted_items []T, target T) int`: Fast $O(\log n)$ search on sorted slices.
-
-### `cryptoutils`
-- `secure_compare(a string, b string) bool`: Constant-time string comparison to prevent timing attacks.
-- `generate_ulid() string`: 26-character sortable unique identifier.
-- `generate_totp(secret string, counter u64, digits int) !string`: RFC 6238 Time-based One-Time Passwords.
-
-### `timeutils`
-- `parse_duration(s string) !time.Duration`: Parse human duration strings (`"1h 30m"`, `"500ms"`, `"45s"`).
-- `add_business_days(start time.Time, days int) time.Time`: Skip weekend days.
-- `TimeRange`: Struct with `contains`, `overlaps`, and `duration()`.
-
-### `flowutils`
-- `SlidingWindowRateLimiter`: Enforce request limits across moving time windows.
+[▲ Back to Table of Contents](#table-of-contents)
 
 ---
 
