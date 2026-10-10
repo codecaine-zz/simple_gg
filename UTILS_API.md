@@ -5967,6 +5967,34 @@ store.update(fn (mut s Settings) {
 })! // automatically saved to disk/db
 ```
 
+#### Struct Evolution & Dynamic Expansion
+
+When an application needs to store more data than originally created:
+- **Default Field Values**: Newly added fields in your struct should declare sensible default values (e.g. `recent_files []string = []`, `zoom f64 = 1.0`). When loading existing state files created by earlier versions, existing fields retain their values and new fields automatically take their defaults.
+- **Dynamic Extension Map (`extra map[string]string`)**: Embed a string map in your struct to hold arbitrary runtime keys and metadata without modifying the struct schema.
+
+```v
+struct AppConfigV2 {
+pub mut:
+    // Original V1 fields
+    title        string
+    width        int
+    // Newly added V2 fields with defaults:
+    height       int               = 600
+    dark_mode    bool              = true
+    recent_files []string          = []
+    // Open-ended dynamic runtime extension:
+    extra        map[string]string = map[string]string{}
+}
+
+mut v2_store := stateutils.new_app_state[AppConfigV2]('my_app', AppConfigV2{})
+v2_store.update(fn (mut s AppConfigV2) {
+    s.recent_files << '/path/to/project'
+    s.extra['custom_key'] = 'custom_value'
+})!
+v2_store.save()!
+```
+
 ---
 
 ### `KeyValueState` - Dynamic App State

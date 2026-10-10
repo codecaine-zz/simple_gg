@@ -409,3 +409,56 @@ fn test_array_state_handling() {
 	assert bookmarks[0] == 'https://vlang.io'
 }
 
+struct TestSchemaV1 {
+pub mut:
+	app_id string
+	port   int
+}
+
+struct TestSchemaV2 {
+pub mut:
+	app_id      string
+	port        int
+	debug_mode  bool              = true
+	tags        []string          = []
+	custom_meta map[string]string = map[string]string{}
+}
+
+fn test_struct_schema_evolution() {
+	app := 'vlang_utils_test_evolution_app'
+	defer {
+		os.rmdir_all(get_app_dir(app, .data)) or {}
+	}
+
+	// 1. Save v1 state with original fields
+	v1 := TestSchemaV1{
+		app_id: 'my_service'
+		port:   8080
+	}
+	save_app_state(app, 'state.json', v1) or { panic(err) }
+
+	// 2. Load into v2 struct - original fields preserved, new fields get default values
+	mut store_v2 := new_app_state[TestSchemaV2](app, TestSchemaV2{})
+	assert store_v2.data.app_id == 'my_service'
+	assert store_v2.data.port == 8080
+	assert store_v2.data.debug_mode == true
+	assert store_v2.data.tags.len == 0
+
+	// 3. Mutate newly added fields & dynamic map
+	store_v2.update(fn (mut s TestSchemaV2) {
+		s.tags << 'api'
+		s.tags << 'v2'
+		s.custom_meta['region'] = 'us-east-1'
+	}) or { panic(err) }
+	store_v2.save() or { panic(err) }
+
+	// 4. Reload v2 to verify persistence of all expanded data
+	reloaded := load_app_state[TestSchemaV2](app, 'state.json') or { panic(err) }
+	assert reloaded.app_id == 'my_service'
+	assert reloaded.port == 8080
+	assert reloaded.debug_mode == true
+	assert reloaded.tags == ['api', 'v2']
+	assert reloaded.custom_meta['region'] == 'us-east-1'
+}
+
+
