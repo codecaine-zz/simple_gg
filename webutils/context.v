@@ -16,7 +16,6 @@ pub mut:
 	req         http.Request         // the raw request
 	method      string               // upper-case method, e.g. 'GET'
 	path        string               // raw (still percent-encoded) path without query string
-	remote_addr string               // client peer address (IP:port)
 	params      map[string]string    // decoded route parameters (`:id`, `*`)
 	locals      map[string]json2.Any // per-request template data (like Express res.locals)
 	status_code int = 200
@@ -43,7 +42,7 @@ mut:
 	files_map     map[string][]http.FileData
 }
 
-fn new_context(mut app App, req http.Request, remote_addr string) Context {
+fn new_context(app &App, req http.Request) Context {
 	raw := req.url
 	q := raw.index('?') or { -1 }
 	path := if q >= 0 { raw[..q] } else { raw }
@@ -51,8 +50,7 @@ fn new_context(mut app App, req http.Request, remote_addr string) Context {
 		req:         req
 		method:      req.method.str().to_upper()
 		path:        if path == '' { '/' } else { path }
-		remote_addr: remote_addr
-		app:         &app
+		app:         app
 		res_headers: http.new_header()
 		started:     time.now()
 	}
@@ -285,7 +283,7 @@ pub fn (c &Context) ip() string {
 			return real.trim_space()
 		}
 	}
-	addr := c.remote_addr
+	addr := c.req.remote_addr
 	if addr.starts_with('[') {
 		return addr.all_before(']')[1..]
 	}

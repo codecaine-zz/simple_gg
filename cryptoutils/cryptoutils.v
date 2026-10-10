@@ -9,7 +9,7 @@ import crypto.md5 as vmd5
 import crypto.rand as crand
 import crypto.sha256 as vsha256
 import crypto.sha512 as vsha512
-import crypto.subtle
+import crypto.internal.subtle
 import encoding.base64
 import encoding.hex
 import hash.crc32

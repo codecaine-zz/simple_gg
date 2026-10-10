@@ -283,8 +283,7 @@ fn call_builtin(name string, args []json2.Any) !json2.Any {
 		'abs' {
 			if is_intlike(a) {
 				v := as_i64(a) or { 0 }
-				val := if v < 0 { -v } else { v }
-				return json2.Any(val)
+				return json2.Any(if v < 0 { -v } else { v })
 			}
 			return json2.Any(math.abs(as_num(a) or { 0.0 }))
 		}
@@ -319,16 +318,13 @@ fn call_builtin(name string, args []json2.Any) !json2.Any {
 			return json2.Any(contains_value(a, arg(args, 1)))
 		}
 		'starts_with', 'startsWith' {
-			sw := to_text(a).starts_with(arg_str(args, 1, ''))
-			return json2.Any(sw)
+			return json2.Any(to_text(a).starts_with(arg_str(args, 1, '')))
 		}
 		'ends_with', 'endsWith' {
-			ew := to_text(a).ends_with(arg_str(args, 1, ''))
-			return json2.Any(ew)
+			return json2.Any(to_text(a).ends_with(arg_str(args, 1, '')))
 		}
 		'empty', 'is_empty' {
-			is_emp := !truthy(a)
-			return json2.Any(is_emp)
+			return json2.Any(!truthy(a))
 		}
 		'slice' {
 			start := arg_int(args, 1, 0)

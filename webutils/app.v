@@ -394,12 +394,7 @@ fn split_path(raw string) ![]string {
 // handle runs one request through the app and returns the response. It is
 // transport-independent, which makes apps trivially unit-testable (see `request`).
 pub fn (mut app App) handle(req http.Request) http.Response {
-	return app.handle_with_addr(req, '127.0.0.1:0')
-}
-
-// handle_with_addr runs one request through the app with a specific remote client address.
-pub fn (mut app App) handle_with_addr(req http.Request, remote_addr string) http.Response {
-	mut c := new_context(mut app, req, remote_addr)
+	mut c := new_context(app, req)
 	if app.cfg.security_headers {
 		apply_security_headers(mut c, app.cfg.security)
 	}
@@ -515,15 +510,16 @@ pub:
 // built-in equivalent of supertest: `res := app.request(path: '/users/1')`.
 pub fn (mut app App) request(t TestRequest) http.Response {
 	mut req := http.Request{
-		method: method_from_string(t.method)
-		url:    t.path
-		data:   t.body
-		header: http.new_header()
+		method:      method_from_string(t.method)
+		url:         t.path
+		data:        t.body
+		remote_addr: t.remote_addr
+		header:      http.new_header()
 	}
 	for k, v in t.headers {
 		req.header.add_custom(k, v) or {}
 	}
-	return app.handle_with_addr(req, t.remote_addr)
+	return app.handle(req)
 }
 
 fn method_from_string(m string) http.Method {

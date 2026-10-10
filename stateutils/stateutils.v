@@ -2,6 +2,7 @@ module stateutils
 
 import os
 import time
+import db.sqlite
 import json2
 
 // ============================================================================
@@ -12,6 +13,43 @@ import json2
 pub enum StateLocation {
 	data
 	config
+}
+
+// StateBackend indicates the persistence format used by state stores.
+pub enum StateBackend {
+	json
+	sqlite
+}
+
+// StateStoreConfig configures an AppStateStore or KeyValueState instance.
+@[params]
+pub struct StateStoreConfig {
+pub:
+	filename   string
+	location   StateLocation = .data
+	backend    StateBackend  = .json
+	table_name string
+}
+
+// sanitize_table_name validates that a SQL table name is safe from injection.
+pub fn sanitize_table_name(name string) !string {
+	clean := name.trim_space()
+	if clean.len == 0 {
+		return error('Table name must not be empty')
+	}
+	if clean.len > 128 {
+		return error('Table name "${clean}" exceeds maximum allowed length of 128 characters')
+	}
+	first := clean[0]
+	if !first.is_letter() && first != `_` {
+		return error('Table name "${clean}" must start with a letter or underscore')
+	}
+	for ch in clean {
+		if !ch.is_letter() && !ch.is_digit() && ch != `_` {
+			return error('Table name "${clean}" contains disallowed character: ${ch.ascii_str()}')
+		}
+	}
+	return clean
 }
 
 // get_app_dir returns the OS recommended directory for the given application.
@@ -25,6 +63,7 @@ pub fn get_app_dir(app_name string, loc StateLocation) string {
 			.data { base }
 			.config { os.join_path(base, 'config') }
 		}
+
 		if !os.exists(target) {
 			os.mkdir_all(target) or {}
 		}
@@ -38,6 +77,7 @@ pub fn get_app_dir(app_name string, loc StateLocation) string {
 			.data { base }
 			.config { os.join_path(base, 'config') }
 		}
+
 		if !os.exists(target) {
 			os.mkdir_all(target) or {}
 		}
@@ -61,6 +101,7 @@ pub fn get_app_dir(app_name string, loc StateLocation) string {
 			os.join_path(base, name)
 		}
 	}
+
 	if !os.exists(target) {
 		os.mkdir_all(target) or {}
 	}
@@ -101,20 +142,29 @@ fn atomic_write(target_path string, content string) ! {
 	}
 }
 
+fn remove_state_file(path string) ! {
+	if os.exists(path) {
+		os.rm(path)!
+		os.rm('${path}-journal') or {}
+		os.rm('${path}-wal') or {}
+		os.rm('${path}-shm') or {}
+	}
+}
+
 fn C.fsync(fd int) int
 
 // ============================================================================
 // Direct Generic App State Helpers
 // ============================================================================
 
-// save_app_state serializes and saves a struct to the OS recommended app data directory.
+// save_app_state serializes and saves a struct to the OS recommended app data directory (JSON format).
 pub fn save_app_state[T](app_name string, filename string, state T) ! {
 	full_path := get_state_path(app_name, filename, .data)
 	encoded := json2.encode(state)
 	atomic_write(full_path, encoded)!
 }
 
-// load_app_state deserializes a struct from the OS recommended app data directory.
+// load_app_state deserializes a struct from the OS recommended app data directory (JSON format).
 pub fn load_app_state[T](app_name string, filename string) !T {
 	full_path := get_state_path(app_name, filename, .data)
 	if !os.exists(full_path) {
@@ -126,9 +176,7 @@ pub fn load_app_state[T](app_name string, filename string) !T {
 
 // load_app_state_or returns the saved state if found and valid, otherwise returns default_val.
 pub fn load_app_state_or[T](app_name string, filename string, default_val T) T {
-	res := load_app_state[T](app_name, filename) or {
-		return default_val
-	}
+	res := load_app_state[T](app_name, filename) or { return default_val }
 	return res
 }
 
@@ -146,36 +194,159 @@ pub fn delete_app_state(app_name string, filename string) ! {
 	}
 }
 
+// save_app_state_sqlite serializes and saves a struct to a SQLite database in the OS recommended app data directory.
+pub fn save_app_state_sqlite[T](app_name string, filename string, state T) ! {
+	fname := if filename.trim_space().len > 0 { filename.trim_space() } else { 'state.db' }
+	full_path := get_state_path(app_name, fname, .data)
+	parent := os.dir(full_path)
+	if !os.exists(parent) {
+		os.mkdir_all(parent)!
+	}
+	mut db := sqlite.connect(full_path)!
+	defer { db.close() or {} }
+	db.exec('CREATE TABLE IF NOT EXISTS "app_state" (key TEXT PRIMARY KEY, val TEXT, updated_at INTEGER);')!
+	encoded := json2.encode(state)
+	now := time.now().unix()
+	db.exec_param_many('INSERT INTO "app_state" (key, val, updated_at) VALUES (?, ?, ?) ON CONFLICT(key) DO UPDATE SET val=?, updated_at=?', [
+		'default',
+		encoded,
+		now.str(),
+		encoded,
+		now.str(),
+	])!
+}
+
+// load_app_state_sqlite deserializes a struct from a SQLite database in the OS recommended app data directory.
+pub fn load_app_state_sqlite[T](app_name string, filename string) !T {
+	fname := if filename.trim_space().len > 0 { filename.trim_space() } else { 'state.db' }
+	full_path := get_state_path(app_name, fname, .data)
+	if !os.exists(full_path) {
+		return error('State database does not exist: ${full_path}')
+	}
+	mut db := sqlite.connect(full_path)!
+	defer { db.close() or {} }
+	rows := db.exec_param('SELECT val FROM "app_state" WHERE key = ?', 'default')!
+	if rows.len == 0 || rows[0].vals.len == 0 {
+		return error('State record not found in database: ${full_path}')
+	}
+	return json2.decode[T](rows[0].vals[0])!
+}
+
+// load_app_state_sqlite_or returns the saved state from SQLite if found and valid, otherwise returns default_val.
+pub fn load_app_state_sqlite_or[T](app_name string, filename string, default_val T) T {
+	res := load_app_state_sqlite[T](app_name, filename) or { return default_val }
+	return res
+}
+
+// app_state_sqlite_exists checks whether the SQLite state database exists in the OS recommended directory.
+pub fn app_state_sqlite_exists(app_name string, filename string) bool {
+	fname := if filename.trim_space().len > 0 { filename.trim_space() } else { 'state.db' }
+	full_path := get_state_path(app_name, fname, .data)
+	return os.exists(full_path)
+}
+
+// delete_app_state_sqlite removes the saved SQLite state database and associated journals.
+pub fn delete_app_state_sqlite(app_name string, filename string) ! {
+	fname := if filename.trim_space().len > 0 { filename.trim_space() } else { 'state.db' }
+	full_path := get_state_path(app_name, fname, .data)
+	remove_state_file(full_path)!
+}
+
+// save_app_state_with_backend saves state using either JSON or SQLite backend.
+pub fn save_app_state_with_backend[T](app_name string, filename string, state T, backend StateBackend) ! {
+	match backend {
+		.json {
+			fname := if filename.trim_space().len > 0 { filename.trim_space() } else { 'state.json' }
+			save_app_state[T](app_name, fname, state)!
+		}
+		.sqlite {
+			save_app_state_sqlite[T](app_name, filename, state)!
+		}
+	}
+}
+
+// load_app_state_with_backend loads state using either JSON or SQLite backend.
+pub fn load_app_state_with_backend[T](app_name string, filename string, backend StateBackend) !T {
+	return match backend {
+		.json {
+			fname := if filename.trim_space().len > 0 { filename.trim_space() } else { 'state.json' }
+			load_app_state[T](app_name, fname)!
+		}
+		.sqlite {
+			load_app_state_sqlite[T](app_name, filename)!
+		}
+	}
+}
+
+// load_app_state_with_backend_or returns the saved state from either JSON or SQLite backend, or default_val.
+pub fn load_app_state_with_backend_or[T](app_name string, filename string, default_val T, backend StateBackend) T {
+	res := load_app_state_with_backend[T](app_name, filename, backend) or { return default_val }
+	return res
+}
+
 // ============================================================================
 // AppStateStore[T] - Managed Generic State Store
 // ============================================================================
 
 // AppStateStore represents a managed application state container with auto-save,
-// atomic writes, backup, and rollback capabilities.
+// atomic writes, backup, rollback, and SQLite or JSON backend support.
 pub struct AppStateStore[T] {
 pub:
 	app_name     string
 	filename     string
 	location     StateLocation
+	backend      StateBackend
+	table_name   string
 	default_data T
 pub mut:
 	data      T
 	auto_save bool
 }
 
-// new_app_state initializes an AppStateStore with automatic loading from disk.
+// new_app_state initializes an AppStateStore with automatic loading from disk (JSON format).
 // If an existing state file is found, it is loaded into memory; otherwise default_data is used.
 pub fn new_app_state[T](app_name string, default_data T) AppStateStore[T] {
 	return new_app_state_with_file[T](app_name, 'state.json', default_data, .data)
 }
 
-// new_app_state_with_file initializes an AppStateStore with a custom filename and location.
+// new_app_state_with_file initializes an AppStateStore with a custom filename and location (JSON format).
 pub fn new_app_state_with_file[T](app_name string, filename string, default_data T, loc StateLocation) AppStateStore[T] {
 	fname := if filename.trim_space().len > 0 { filename.trim_space() } else { 'state.json' }
+	return new_app_state_with_config[T](app_name, default_data,
+		filename: fname
+		location: loc
+		backend:  .json
+	)
+}
+
+// new_app_state_with_backend initializes an AppStateStore with a specified backend (JSON or SQLite).
+pub fn new_app_state_with_backend[T](app_name string, default_data T, backend StateBackend) AppStateStore[T] {
+	return new_app_state_with_config[T](app_name, default_data, backend: backend)
+}
+
+// new_app_state_with_config initializes an AppStateStore with full configuration options.
+pub fn new_app_state_with_config[T](app_name string, default_data T, cfg StateStoreConfig) AppStateStore[T] {
+	default_fname := match cfg.backend {
+		.json { 'state.json' }
+		.sqlite { 'state.db' }
+	}
+
+	fname := if cfg.filename.trim_space().len > 0 {
+		cfg.filename.trim_space()
+	} else {
+		default_fname
+	}
+	tbl := if cfg.table_name.trim_space().len > 0 {
+		cfg.table_name.trim_space()
+	} else {
+		'app_state'
+	}
 	mut store := AppStateStore[T]{
 		app_name:     app_name
 		filename:     fname
-		location:     loc
+		location:     cfg.location
+		backend:      cfg.backend
+		table_name:   tbl
 		default_data: default_data
 		data:         default_data
 		auto_save:    false
@@ -183,6 +354,33 @@ pub fn new_app_state_with_file[T](app_name string, filename string, default_data
 	// Try loading existing state automatically
 	store.load() or {}
 	return store
+}
+
+// new_sqlite_app_state initializes an AppStateStore backed by a SQLite database in the OS data directory.
+pub fn new_sqlite_app_state[T](app_name string, default_data T) AppStateStore[T] {
+	return new_app_state_with_config[T](app_name, default_data,
+		backend:  .sqlite
+		filename: 'state.db'
+	)
+}
+
+// new_sqlite_app_state_with_file initializes a SQLite-backed AppStateStore with a custom filename and location.
+pub fn new_sqlite_app_state_with_file[T](app_name string, filename string, default_data T, loc StateLocation) AppStateStore[T] {
+	return new_app_state_with_config[T](app_name, default_data,
+		backend:  .sqlite
+		filename: filename
+		location: loc
+	)
+}
+
+// new_sqlite_app_state_with_table initializes a SQLite-backed AppStateStore with a custom database filename, table name, and location.
+pub fn new_sqlite_app_state_with_table[T](app_name string, filename string, table_name string, default_data T, loc StateLocation) AppStateStore[T] {
+	return new_app_state_with_config[T](app_name, default_data,
+		backend:    .sqlite
+		filename:   filename
+		location:   loc
+		table_name: table_name
+	)
 }
 
 // path returns the resolved absolute filesystem path for this store.
@@ -195,8 +393,28 @@ pub fn (s AppStateStore[T]) exists() bool {
 	return os.exists(s.path())
 }
 
-// save persists the in-memory state to disk atomically.
+// save persists the in-memory state to disk atomically (JSON) or in a SQLite transaction.
 pub fn (s AppStateStore[T]) save() ! {
+	if s.backend == .sqlite {
+		parent := os.dir(s.path())
+		if !os.exists(parent) {
+			os.mkdir_all(parent)!
+		}
+		mut db := sqlite.connect(s.path())!
+		defer { db.close() or {} }
+		tbl := sanitize_table_name(s.table_name)!
+		db.exec('CREATE TABLE IF NOT EXISTS "${tbl}" (key TEXT PRIMARY KEY, val TEXT, updated_at INTEGER);')!
+		encoded := json2.encode(s.data)
+		now := time.now().unix()
+		db.exec_param_many('INSERT INTO "${tbl}" (key, val, updated_at) VALUES (?, ?, ?) ON CONFLICT(key) DO UPDATE SET val=?, updated_at=?', [
+			'default',
+			encoded,
+			now.str(),
+			encoded,
+			now.str(),
+		])!
+		return
+	}
 	encoded := json2.encode(s.data)
 	atomic_write(s.path(), encoded)!
 }
@@ -206,6 +424,17 @@ pub fn (mut s AppStateStore[T]) load() ! {
 	target := s.path()
 	if !os.exists(target) {
 		return error('State file not found: ${target}')
+	}
+	if s.backend == .sqlite {
+		mut db := sqlite.connect(target)!
+		defer { db.close() or {} }
+		tbl := sanitize_table_name(s.table_name)!
+		rows := db.exec_param('SELECT val FROM "${tbl}" WHERE key = ?', 'default')!
+		if rows.len == 0 || rows[0].vals.len == 0 {
+			return error('State record not found in database: ${target}')
+		}
+		s.data = json2.decode[T](rows[0].vals[0])!
+		return
 	}
 	content := os.read_file(target)!
 	s.data = json2.decode[T](content)!
@@ -232,20 +461,24 @@ pub fn (mut s AppStateStore[T]) update(updater fn (mut T)) ! {
 	}
 }
 
-// reset restores in-memory data to default_data and deletes the file from disk.
+// reset restores in-memory data to default_data and deletes the state file / database from disk.
 pub fn (mut s AppStateStore[T]) reset() ! {
 	s.data = s.default_data
 	if s.exists() {
-		os.rm(s.path())!
+		remove_state_file(s.path())!
 	}
 }
 
-// backup creates a timestamped copy of the current state file (e.g. `state.json.bak`).
+// backup creates a copy of the current state file (e.g. `state.json.bak` or `state.db.bak`).
 pub fn (s AppStateStore[T]) backup() !string {
 	if !s.exists() {
 		return error('Cannot backup non-existent state file')
 	}
 	bak_path := '${s.path()}.bak'
+	if s.backend == .sqlite {
+		os.cp(s.path(), bak_path)!
+		return bak_path
+	}
 	content := os.read_file(s.path())!
 	atomic_write(bak_path, content)!
 	return bak_path
@@ -257,6 +490,11 @@ pub fn (mut s AppStateStore[T]) rollback() ! {
 	if !os.exists(bak_path) {
 		return error('No backup file available at: ${bak_path}')
 	}
+	if s.backend == .sqlite {
+		os.cp(bak_path, s.path())!
+		s.load()!
+		return
+	}
 	content := os.read_file(bak_path)!
 	s.data = json2.decode[T](content)!
 	atomic_write(s.path(), content)!
@@ -267,58 +505,181 @@ pub fn (mut s AppStateStore[T]) rollback() ! {
 // ============================================================================
 
 // KeyValueState manages ad-hoc application settings and preferences (strings, ints, bools, floats)
-// saved in the OS recommended application directory.
+// saved in the OS recommended application directory, backed by either JSON or SQLite.
 pub struct KeyValueState {
 pub:
-	app_name string
-	filename string
-	location StateLocation
+	app_name   string
+	filename   string
+	location   StateLocation
+	backend    StateBackend
+	table_name string
 pub mut:
 	auto_save bool
 mut:
 	values map[string]string
 }
 
-// new_kv_state creates or loads a key-value store for the given application.
+// new_kv_state creates or loads a key-value store for the given application (JSON format).
 pub fn new_kv_state(app_name string) KeyValueState {
 	return new_kv_state_with_file(app_name, 'settings.json', .data)
 }
 
-// new_kv_state_with_file creates or loads a key-value store with custom filename and location.
+// new_kv_state_with_file creates or loads a key-value store with custom filename and location (JSON format).
 pub fn new_kv_state_with_file(app_name string, filename string, loc StateLocation) KeyValueState {
 	fname := if filename.trim_space().len > 0 { filename.trim_space() } else { 'settings.json' }
+	return new_kv_state_with_config(app_name,
+		filename: fname
+		location: loc
+		backend:  .json
+	)
+}
+
+// new_kv_state_with_backend creates or loads a key-value store with a specified backend (JSON or SQLite).
+pub fn new_kv_state_with_backend(app_name string, backend StateBackend) KeyValueState {
+	return new_kv_state_with_config(app_name, backend: backend)
+}
+
+// new_kv_state_with_config creates or loads a key-value store with full configuration options.
+pub fn new_kv_state_with_config(app_name string, cfg StateStoreConfig) KeyValueState {
+	default_fname := match cfg.backend {
+		.json { 'settings.json' }
+		.sqlite { 'settings.db' }
+	}
+
+	fname := if cfg.filename.trim_space().len > 0 {
+		cfg.filename.trim_space()
+	} else {
+		default_fname
+	}
+	tbl := if cfg.table_name.trim_space().len > 0 { cfg.table_name.trim_space() } else { 'kv_state' }
 	mut kv := KeyValueState{
-		app_name:  app_name
-		filename:  fname
-		location:  loc
-		auto_save: false
-		values:    map[string]string{}
+		app_name:   app_name
+		filename:   fname
+		location:   cfg.location
+		backend:    cfg.backend
+		table_name: tbl
+		auto_save:  false
+		values:     map[string]string{}
 	}
 	kv.load() or {}
 	return kv
 }
 
-// path returns the absolute path to the settings file.
+// new_sqlite_kv_state creates or loads a SQLite-backed key-value store in the OS data directory.
+pub fn new_sqlite_kv_state(app_name string) KeyValueState {
+	return new_kv_state_with_config(app_name,
+		backend:  .sqlite
+		filename: 'settings.db'
+	)
+}
+
+// new_sqlite_kv_state_with_file creates or loads a SQLite-backed key-value store with custom filename and location.
+pub fn new_sqlite_kv_state_with_file(app_name string, filename string, loc StateLocation) KeyValueState {
+	return new_kv_state_with_config(app_name,
+		backend:  .sqlite
+		filename: filename
+		location: loc
+	)
+}
+
+// new_sqlite_kv_state_with_table creates or loads a SQLite-backed key-value store with custom database filename, table name, and location.
+pub fn new_sqlite_kv_state_with_table(app_name string, filename string, table_name string, loc StateLocation) KeyValueState {
+	return new_kv_state_with_config(app_name,
+		backend:    .sqlite
+		filename:   filename
+		location:   loc
+		table_name: table_name
+	)
+}
+
+// path returns the absolute path to the settings file or database.
 pub fn (kv KeyValueState) path() string {
 	return get_state_path(kv.app_name, kv.filename, kv.location)
 }
 
-// exists returns true if the settings file is present on disk.
+// exists returns true if the settings file or database is present on disk.
 pub fn (kv KeyValueState) exists() bool {
 	return os.exists(kv.path())
 }
 
-// save persists all key-value entries to disk atomically.
+fn (kv KeyValueState) sqlite_upsert_key(key string, val string) ! {
+	parent := os.dir(kv.path())
+	if !os.exists(parent) {
+		os.mkdir_all(parent)!
+	}
+	mut db := sqlite.connect(kv.path())!
+	defer { db.close() or {} }
+	tbl := sanitize_table_name(kv.table_name)!
+	db.exec('CREATE TABLE IF NOT EXISTS "${tbl}" (key TEXT PRIMARY KEY, val TEXT);')!
+	db.exec_param_many('INSERT INTO "${tbl}" (key, val) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET val=?', [
+		key,
+		val,
+		val,
+	])!
+}
+
+fn (kv KeyValueState) sqlite_delete_key(key string) ! {
+	if !kv.exists() {
+		return
+	}
+	mut db := sqlite.connect(kv.path())!
+	defer { db.close() or {} }
+	tbl := sanitize_table_name(kv.table_name)!
+	db.exec_param('DELETE FROM "${tbl}" WHERE key = ?', key)!
+}
+
+fn (kv KeyValueState) sqlite_clear_keys() ! {
+	if !kv.exists() {
+		return
+	}
+	mut db := sqlite.connect(kv.path())!
+	defer { db.close() or {} }
+	tbl := sanitize_table_name(kv.table_name)!
+	db.exec('DELETE FROM "${tbl}";')!
+}
+
+// save persists all key-value entries to disk atomically (JSON) or in a SQLite transaction.
 pub fn (kv KeyValueState) save() ! {
+	if kv.backend == .sqlite {
+		parent := os.dir(kv.path())
+		if !os.exists(parent) {
+			os.mkdir_all(parent)!
+		}
+		mut db := sqlite.connect(kv.path())!
+		defer { db.close() or {} }
+		tbl := sanitize_table_name(kv.table_name)!
+		db.exec('CREATE TABLE IF NOT EXISTS "${tbl}" (key TEXT PRIMARY KEY, val TEXT);')!
+		db.exec('BEGIN TRANSACTION;')!
+		db.exec('DELETE FROM "${tbl}";')!
+		for k, v in kv.values {
+			db.exec_param_many('INSERT INTO "${tbl}" (key, val) VALUES (?, ?);', [k, v])!
+		}
+		db.exec('COMMIT;')!
+		return
+	}
 	encoded := json2.encode(kv.values)
 	atomic_write(kv.path(), encoded)!
 }
 
-// load reads the key-value dictionary from disk.
+// load reads the key-value dictionary from disk or SQLite database.
 pub fn (mut kv KeyValueState) load() ! {
 	target := kv.path()
 	if !os.exists(target) {
 		return error('Settings file not found: ${target}')
+	}
+	if kv.backend == .sqlite {
+		mut db := sqlite.connect(target)!
+		defer { db.close() or {} }
+		tbl := sanitize_table_name(kv.table_name)!
+		db.exec('CREATE TABLE IF NOT EXISTS "${tbl}" (key TEXT PRIMARY KEY, val TEXT);')!
+		rows := db.exec('SELECT key, val FROM "${tbl}";')!
+		kv.values.clear()
+		for row in rows {
+			if row.vals.len >= 2 {
+				kv.values[row.vals[0]] = row.vals[1]
+			}
+		}
+		return
 	}
 	content := os.read_file(target)!
 	kv.values = json2.decode[map[string]string](content)!
@@ -328,7 +689,11 @@ pub fn (mut kv KeyValueState) load() ! {
 pub fn (mut kv KeyValueState) set_str(key string, val string) ! {
 	kv.values[key] = val
 	if kv.auto_save {
-		kv.save()!
+		if kv.backend == .sqlite {
+			kv.sqlite_upsert_key(key, val)!
+		} else {
+			kv.save()!
+		}
 	}
 }
 
@@ -339,10 +704,7 @@ pub fn (kv KeyValueState) get_str(key string, default_val string) string {
 
 // set_int assigns an integer value.
 pub fn (mut kv KeyValueState) set_int(key string, val int) ! {
-	kv.values[key] = val.str()
-	if kv.auto_save {
-		kv.save()!
-	}
+	kv.set_str(key, val.str())!
 }
 
 // get_int retrieves an integer value or default_val if missing or malformed.
@@ -353,10 +715,7 @@ pub fn (kv KeyValueState) get_int(key string, default_val int) int {
 
 // set_bool assigns a boolean value.
 pub fn (mut kv KeyValueState) set_bool(key string, val bool) ! {
-	kv.values[key] = val.str()
-	if kv.auto_save {
-		kv.save()!
-	}
+	kv.set_str(key, val.str())!
 }
 
 // get_bool retrieves a boolean value or default_val if missing.
@@ -367,10 +726,7 @@ pub fn (kv KeyValueState) get_bool(key string, default_val bool) bool {
 
 // set_f64 assigns a floating point value.
 pub fn (mut kv KeyValueState) set_f64(key string, val f64) ! {
-	kv.values[key] = val.str()
-	if kv.auto_save {
-		kv.save()!
-	}
+	kv.set_str(key, val.str())!
 }
 
 // get_f64 retrieves a floating point value or default_val if missing or malformed.
@@ -388,7 +744,11 @@ pub fn (kv KeyValueState) has(key string) bool {
 pub fn (mut kv KeyValueState) delete(key string) ! {
 	kv.values.delete(key)
 	if kv.auto_save {
-		kv.save()!
+		if kv.backend == .sqlite {
+			kv.sqlite_delete_key(key)!
+		} else {
+			kv.save()!
+		}
 	}
 }
 
@@ -406,14 +766,49 @@ pub fn (kv KeyValueState) all() map[string]string {
 pub fn (mut kv KeyValueState) clear() ! {
 	kv.values.clear()
 	if kv.auto_save {
-		kv.save()!
+		if kv.backend == .sqlite {
+			kv.sqlite_clear_keys()!
+		} else {
+			kv.save()!
+		}
 	}
 }
 
-// reset clears all entries and deletes the physical file.
+// reset clears all entries and deletes the physical file or database.
 pub fn (mut kv KeyValueState) reset() ! {
 	kv.values.clear()
 	if kv.exists() {
-		os.rm(kv.path())!
+		remove_state_file(kv.path())!
 	}
+}
+
+// backup creates a copy of the settings file (e.g. `settings.json.bak` or `settings.db.bak`).
+pub fn (kv KeyValueState) backup() !string {
+	if !kv.exists() {
+		return error('Cannot backup non-existent settings file')
+	}
+	bak_path := '${kv.path()}.bak'
+	if kv.backend == .sqlite {
+		os.cp(kv.path(), bak_path)!
+		return bak_path
+	}
+	content := os.read_file(kv.path())!
+	atomic_write(bak_path, content)!
+	return bak_path
+}
+
+// rollback restores settings from the `.bak` backup file if one exists.
+pub fn (mut kv KeyValueState) rollback() ! {
+	bak_path := '${kv.path()}.bak'
+	if !os.exists(bak_path) {
+		return error('No backup file available at: ${bak_path}')
+	}
+	if kv.backend == .sqlite {
+		os.cp(bak_path, kv.path())!
+		kv.load()!
+		return
+	}
+	content := os.read_file(bak_path)!
+	kv.values = json2.decode[map[string]string](content)!
+	atomic_write(kv.path(), content)!
 }

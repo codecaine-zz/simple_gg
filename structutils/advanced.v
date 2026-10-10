@@ -320,7 +320,7 @@ pub fn new_optimal_bloom(expected_items int, fp_rate f64) !OptimalBloom {
 	}
 	n := f64(expected_items)
 	m := math.ceil(-n * math.log(fp_rate) / (math.ln2 * math.ln2))
-	k := int(math.max(1.0, math.round(m / n * math.ln2)))
+	k := int(math.max(1, math.round(m / n * math.ln2)))
 	words := int(math.ceil(m / 64.0))
 	return OptimalBloom{
 		bits: []u64{len: words}

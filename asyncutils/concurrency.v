@@ -13,7 +13,7 @@ struct TryChunk[R] {
 	ok   bool = true
 }
 
-pub fn worker_try_map[T, R](chunk []T, mapper fn (T) !R) TryChunk[R] {
+fn worker_try_map[T, R](chunk []T, mapper fn (T) !R) TryChunk[R] {
 	mut res := []R{cap: chunk.len}
 	for item in chunk {
 		v := mapper(item) or {
@@ -61,7 +61,7 @@ pub fn parallel_try_map[T, R](items []T, worker_count int, mapper fn (T) !R) ![]
 	return out
 }
 
-pub fn worker_reduce[T](chunk []T, identity T, op fn (T, T) T) T {
+fn worker_reduce[T](chunk []T, identity T, op fn (T, T) T) T {
 	mut acc := identity
 	for item in chunk {
 		acc = op(acc, item)
@@ -96,7 +96,7 @@ pub fn parallel_reduce[T](items []T, worker_count int, identity T, op fn (T, T) 
 	return worker_reduce[T](threads.wait(), identity, op)
 }
 
-pub fn run_into[T](ch chan T, f fn () T) {
+fn run_into[T](ch chan T, f fn () T) {
 	ch <- f()
 }
 

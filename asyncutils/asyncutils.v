@@ -7,19 +7,12 @@ import sync
 // 1. Parallel Collection Processing
 // ============================================================================
 
-pub struct ChunkResult[T] {
-pub mut:
-	vals []T
-}
-
-pub fn worker_map[T, R](chunk []T, mapper fn (T) R) ChunkResult[R] {
+fn worker_map[T, R](chunk []T, mapper fn (T) R) []R {
 	mut res := []R{cap: chunk.len}
 	for item in chunk {
 		res << mapper(item)
 	}
-	return ChunkResult[R]{
-		vals: res
-	}
+	return res
 }
 
 // parallel_map concurrently maps a slice of items using at most worker_count threads, preserving input order.
@@ -29,11 +22,11 @@ pub fn parallel_map[T, R](items []T, worker_count int, mapper fn (T) R) []R {
 	}
 	actual_workers := int(math.max(1, math.min(worker_count, items.len)))
 	if actual_workers <= 1 {
-		return worker_map[T, R](items, mapper).vals
+		return worker_map[T, R](items, mapper)
 	}
 
 	chunk_size := (items.len + actual_workers - 1) / actual_workers
-	mut threads := []thread ChunkResult[R]{}
+	mut threads := []thread []R{}
 
 	for w in 0 .. actual_workers {
 		start := w * chunk_size
@@ -48,21 +41,19 @@ pub fn parallel_map[T, R](items []T, worker_count int, mapper fn (T) R) []R {
 	chunk_results := threads.wait()
 	mut final_results := []R{cap: items.len}
 	for chunk_list in chunk_results {
-		final_results << chunk_list.vals
+		final_results << chunk_list
 	}
 	return final_results
 }
 
-pub fn worker_filter[T](chunk []T, predicate fn (T) bool) ChunkResult[T] {
+fn worker_filter[T](chunk []T, predicate fn (T) bool) []T {
 	mut res := []T{cap: chunk.len}
 	for item in chunk {
 		if predicate(item) {
 			res << item
 		}
 	}
-	return ChunkResult[T]{
-		vals: res
-	}
+	return res
 }
 
 // parallel_filter concurrently evaluates predicate on each item and returns matching items in order.
@@ -72,11 +63,11 @@ pub fn parallel_filter[T](items []T, worker_count int, predicate fn (T) bool) []
 	}
 	actual_workers := int(math.max(1, math.min(worker_count, items.len)))
 	if actual_workers <= 1 {
-		return worker_filter[T](items, predicate).vals
+		return worker_filter[T](items, predicate)
 	}
 
 	chunk_size := (items.len + actual_workers - 1) / actual_workers
-	mut threads := []thread ChunkResult[T]{}
+	mut threads := []thread []T{}
 
 	for w in 0 .. actual_workers {
 		start := w * chunk_size
@@ -91,7 +82,7 @@ pub fn parallel_filter[T](items []T, worker_count int, predicate fn (T) bool) []
 	chunk_results := threads.wait()
 	mut final_results := []T{}
 	for chunk_list in chunk_results {
-		final_results << chunk_list.vals
+		final_results << chunk_list
 	}
 	return final_results
 }

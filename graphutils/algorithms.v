@@ -5,7 +5,7 @@ module graphutils
 // ============================================================================
 
 // has_edge reports whether the directed edge from -> to exists.
-pub fn (g Graph[T]) has_edge[T](from T, to T) bool {
+pub fn (g Graph[T]) has_edge(from T, to T) bool {
 	if from !in g.adjacency {
 		return false
 	}
@@ -13,7 +13,7 @@ pub fn (g Graph[T]) has_edge[T](from T, to T) bool {
 }
 
 // neighbors returns the direct successors of `node`.
-pub fn (g Graph[T]) neighbors[T](node T) []T {
+pub fn (g Graph[T]) neighbors(node T) []T {
 	if node !in g.adjacency {
 		return []T{}
 	}
@@ -21,7 +21,7 @@ pub fn (g Graph[T]) neighbors[T](node T) []T {
 }
 
 // remove_edge deletes the directed edge from -> to if present.
-pub fn (mut g Graph[T]) remove_edge[T](from T, to T) {
+pub fn (mut g Graph[T]) remove_edge(from T, to T) {
 	if from !in g.adjacency {
 		return
 	}
@@ -36,7 +36,7 @@ pub fn (mut g Graph[T]) remove_edge[T](from T, to T) {
 }
 
 // shortest_path returns the path with the fewest edges from `from` to `to` (BFS).
-pub fn (g Graph[T]) shortest_path[T](from T, to T) ?[]T {
+pub fn (g Graph[T]) shortest_path(from T, to T) ?[]T {
 	if from !in g.adjacency || to !in g.adjacency {
 		return none
 	}
@@ -70,7 +70,7 @@ pub fn (g Graph[T]) shortest_path[T](from T, to T) ?[]T {
 }
 
 // reversed returns a copy of the graph with every edge direction flipped.
-pub fn (g Graph[T]) reversed[T]() Graph[T] {
+pub fn (g Graph[T]) reversed() Graph[T] {
 	mut r := new_graph[T]()
 	for n in g.nodes {
 		r.add_node(n)
@@ -85,7 +85,7 @@ pub fn (g Graph[T]) reversed[T]() Graph[T] {
 
 // strongly_connected_components returns the SCCs (Kosaraju, iterative). Each inner
 // slice is one component; a DAG yields only singleton components.
-pub fn (g Graph[T]) strongly_connected_components[T]() [][]T {
+pub fn (g Graph[T]) strongly_connected_components() [][]T {
 	// 1st pass: iterative post-order on g.
 	mut visited := map[T]bool{}
 	mut finish := []T{cap: g.nodes.len}
@@ -142,7 +142,7 @@ pub fn (g Graph[T]) strongly_connected_components[T]() [][]T {
 }
 
 // find_cycle returns one directed cycle (first node repeated at the end), or none.
-pub fn (g Graph[T]) find_cycle[T]() ?[]T {
+pub fn (g Graph[T]) find_cycle() ?[]T {
 	mut color := map[T]int{} // 0 white, 1 grey, 2 black
 	mut parent := map[T]T{}
 	for s in g.nodes {
@@ -407,7 +407,7 @@ fn (g WeightedGraph[T]) search(src int, dst int, h fn (T) f64) ?Path[T] {
 	return Path[T]{path, dist[dst]}
 }
 
-pub fn zero_heuristic[T](_ T) f64 {
+fn zero_heuristic[T](_ T) f64 {
 	return 0
 }
 

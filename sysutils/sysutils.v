@@ -133,7 +133,7 @@ pub fn get_memory_stats() (u64, u64, f64) {
 	$if linux {
 		content := os.read_file('/proc/meminfo') or { '' }
 		mut total := u64(0)
-		mut free_mem := u64(0)
+		mut free := u64(0)
 		mut avail := u64(0)
 		for line in content.split_into_lines() {
 			if line.starts_with('MemTotal:') {
@@ -144,7 +144,7 @@ pub fn get_memory_stats() (u64, u64, f64) {
 			} else if line.starts_with('MemFree:') {
 				parts := line.fields()
 				if parts.len >= 2 {
-					free_mem = parts[1].u64() * 1024
+					free = parts[1].u64() * 1024
 				}
 			} else if line.starts_with('MemAvailable:') {
 				parts := line.fields()
@@ -154,7 +154,7 @@ pub fn get_memory_stats() (u64, u64, f64) {
 			}
 		}
 		if total > 0 {
-			usable_free := if avail > 0 { avail } else { free_mem }
+			usable_free := if avail > 0 { avail } else { free }
 			used := if total > usable_free { total - usable_free } else { u64(0) }
 			return total, used, (f64(used) / f64(total)) * 100.0
 		}
@@ -367,7 +367,7 @@ pub fn exec_timeout(cmd string, timeout_ms int) ExecTimeoutResult {
 		}
 	}
 	mut p := shell_process(cmd)
-	p.set_redirect_stdio()
+	p.set_redirect_stdio_merged()
 	p.use_pgroup = true
 	p.run()
 	deadline := time.now().add(timeout_ms * time.millisecond)

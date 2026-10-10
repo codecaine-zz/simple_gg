@@ -278,7 +278,7 @@ fn list_marker(line string) ?(bool, string) {
 
 fn is_table_sep(line string) bool {
 	t := line.trim_space()
-	if !t.contains('-') || (!t.contains('|') && !t.starts_with(':') && !t.starts_with('-')) {
+	if !t.contains('-') || !t.contains('|') && !t.starts_with(':') && !t.starts_with('-') {
 		return false
 	}
 	return t.bytes().all(it in [`|`, `-`, `:`, ` `])
@@ -448,22 +448,11 @@ fn render_blocks(lines []string, opts Options, mut sb strings.Builder, mut ids m
 					task = '<input type="checkbox" checked disabled> '
 					item[0] = item[0][4..]
 				}
-				mut has_block := false
-				if item.len > 1 {
-					for sub_it in item[1..] {
-						if _, _ := list_marker(sub_it) {
-							has_block = true
-							break
-						}
-					}
-				}
+				has_block := item.len > 1 && item[1..].any(list_marker(it) != none)
 				if has_block {
 					mut first := []string{}
 					mut k := 0
-					for k < item.len {
-						if _, _ := list_marker(item[k]) {
-							break
-						}
+					for k < item.len && list_marker(item[k]) == none {
 						first << item[k]
 						k++
 					}

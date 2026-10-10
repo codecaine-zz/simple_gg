@@ -3,7 +3,7 @@ module jwtutils
 import crypto.hmac
 import crypto.sha256
 import crypto.sha512
-import crypto.subtle
+import crypto.internal.subtle
 import encoding.base64
 import json2
 import time

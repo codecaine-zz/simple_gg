@@ -60,7 +60,9 @@ fn test_direct_app_state_helpers() {
 	assert loaded.is_admin == true
 
 	// Test load_app_state_or
-	fallback := load_app_state_or[TestProfile](app, 'missing.json', TestProfile{ username: 'fallback_user' })
+	fallback := load_app_state_or[TestProfile](app, 'missing.json', TestProfile{
+		username: 'fallback_user'
+	})
 	assert fallback.username == 'fallback_user'
 
 	delete_app_state(app, 'profile.json') or { panic(err) }
@@ -166,4 +168,201 @@ fn test_key_value_state() {
 
 	kv.reset() or { panic(err) }
 	assert kv.exists() == false
+}
+
+fn test_sqlite_direct_helpers() {
+	app := 'vlang_utils_test_sqlite_direct_app'
+	defer {
+		delete_app_state_sqlite(app, 'profile.db') or {}
+		os.rmdir_all(get_app_dir(app, .data)) or {}
+	}
+
+	profile := TestProfile{
+		username:      'sqlite_alex'
+		theme:         'nord'
+		window_width:  1600
+		window_height: 900
+		tags:          ['sqlite', 'vlang', 'db']
+		is_admin:      true
+	}
+
+	assert app_state_sqlite_exists(app, 'profile.db') == false
+
+	save_app_state_sqlite(app, 'profile.db', profile) or { panic(err) }
+	assert app_state_sqlite_exists(app, 'profile.db') == true
+
+	loaded := load_app_state_sqlite[TestProfile](app, 'profile.db') or { panic(err) }
+	assert loaded.username == 'sqlite_alex'
+	assert loaded.theme == 'nord'
+	assert loaded.window_width == 1600
+	assert loaded.window_height == 900
+	assert loaded.tags.len == 3
+	assert loaded.is_admin == true
+
+	// Test fallback
+	fallback := load_app_state_sqlite_or[TestProfile](app, 'missing.db', TestProfile{
+		username: 'fallback_sqlite'
+	})
+	assert fallback.username == 'fallback_sqlite'
+
+	// Test backend switching helpers
+	save_app_state_with_backend(app, 'unified.db', profile, .sqlite) or { panic(err) }
+	assert app_state_sqlite_exists(app, 'unified.db') == true
+	loaded_unified := load_app_state_with_backend[TestProfile](app, 'unified.db', .sqlite) or {
+		panic(err)
+	}
+	assert loaded_unified.username == 'sqlite_alex'
+
+	fallback_unified := load_app_state_with_backend_or[TestProfile](app, 'missing2.db', TestProfile{
+		username: 'fb_backend'
+	}, .sqlite)
+	assert fallback_unified.username == 'fb_backend'
+
+	delete_app_state_sqlite(app, 'profile.db') or { panic(err) }
+	assert app_state_sqlite_exists(app, 'profile.db') == false
+}
+
+fn test_sqlite_app_state_store() {
+	app := 'vlang_utils_test_sqlite_store_app'
+	defer {
+		os.rmdir_all(get_app_dir(app, .data)) or {}
+	}
+
+	default_state := TestProfile{
+		username:      'default_sqlite'
+		theme:         'light'
+		window_width:  1024
+		window_height: 768
+		tags:          ['guest']
+		is_admin:      false
+	}
+
+	mut store := new_sqlite_app_state[TestProfile](app, default_state)
+	assert store.backend == .sqlite
+	assert store.get().username == 'default_sqlite'
+	assert store.exists() == false
+
+	// Persist initial state
+	store.save() or { panic(err) }
+	assert store.exists() == true
+
+	// Modify and save with update callback
+	store.update(fn (mut s TestProfile) {
+		s.theme = 'gruvbox'
+		s.window_width = 2560
+	}) or { panic(err) }
+	store.save() or { panic(err) }
+
+	// Create backup
+	bak_path := store.backup() or { panic(err) }
+	assert os.exists(bak_path)
+
+	// Change state again with auto_save enabled
+	store.auto_save = true
+	store.set(TestProfile{
+		username:      'modified_sqlite'
+		theme:         'synthwave'
+		window_width:  1920
+		window_height: 1080
+		tags:          ['sqlite_auto']
+		is_admin:      true
+	}) or { panic(err) }
+
+	// New store instance should load the auto-saved data from disk
+	mut store2 := new_sqlite_app_state[TestProfile](app, default_state)
+	assert store2.get().username == 'modified_sqlite'
+	assert store2.get().theme == 'synthwave'
+
+	// Test rollback to backup
+	store.rollback() or { panic(err) }
+	assert store.get().theme == 'gruvbox'
+	assert store.get().window_width == 2560
+
+	// Test reset
+	store.reset() or { panic(err) }
+	assert store.get().username == 'default_sqlite'
+	assert store.exists() == false
+}
+
+fn test_sqlite_key_value_state() {
+	app := 'vlang_utils_test_sqlite_kv_app'
+	defer {
+		os.rmdir_all(get_app_dir(app, .data)) or {}
+	}
+
+	mut kv := new_sqlite_kv_state(app)
+	assert kv.backend == .sqlite
+	kv.auto_save = true
+
+	kv.set_str('app_title', 'SqliteApp') or { panic(err) }
+	kv.set_int('queries_count', 99) or { panic(err) }
+	kv.set_bool('wal_mode', true) or { panic(err) }
+	kv.set_f64('ratio', 3.1415) or { panic(err) }
+
+	assert kv.exists() == true
+	assert kv.get_str('app_title', '') == 'SqliteApp'
+	assert kv.get_int('queries_count', 0) == 99
+	assert kv.get_bool('wal_mode', false) == true
+	assert kv.get_f64('ratio', 1.0) == 3.1415
+
+	assert kv.has('wal_mode') == true
+	assert kv.has('missing') == false
+	assert kv.keys().len == 4
+
+	// Load into a new instance to verify SQLite disk persistence
+	mut kv2 := new_sqlite_kv_state(app)
+	assert kv2.get_int('queries_count', 0) == 99
+	assert kv2.get_bool('wal_mode', false) == true
+	assert kv2.get_str('app_title', '') == 'SqliteApp'
+
+	// Test backup and rollback
+	bak := kv.backup() or { panic(err) }
+	assert os.exists(bak)
+
+	kv.set_str('app_title', 'OverwrittenTitle') or { panic(err) }
+	assert kv.get_str('app_title', '') == 'OverwrittenTitle'
+
+	kv.rollback() or { panic(err) }
+	assert kv.get_str('app_title', '') == 'SqliteApp'
+
+	// Delete and clear
+	kv.delete('ratio') or { panic(err) }
+	assert kv.has('ratio') == false
+
+	kv.clear() or { panic(err) }
+	assert kv.keys().len == 0
+
+	kv.reset() or { panic(err) }
+	assert kv.exists() == false
+}
+
+fn test_sqlite_custom_config_and_shared_db() {
+	app := 'vlang_utils_test_shared_db_app'
+	defer {
+		os.rmdir_all(get_app_dir(app, .data)) or {}
+	}
+
+	// Share the exact same SQLite database file for two different tables
+	shared_db := 'shared_app.db'
+
+	mut user_kv := new_sqlite_kv_state_with_table(app, shared_db, 'user_prefs', .data)
+	user_kv.auto_save = true
+	user_kv.set_str('username', 'charlie') or { panic(err) }
+
+	mut theme_kv := new_sqlite_kv_state_with_table(app, shared_db, 'theme_settings', .data)
+	theme_kv.auto_save = true
+	theme_kv.set_str('current_theme', 'cyberpunk') or { panic(err) }
+
+	assert user_kv.path() == theme_kv.path()
+	assert user_kv.get_str('username', '') == 'charlie'
+	assert theme_kv.get_str('current_theme', '') == 'cyberpunk'
+
+	// Re-load each from their respective tables
+	mut user_kv_reload := new_sqlite_kv_state_with_table(app, shared_db, 'user_prefs', .data)
+	assert user_kv_reload.get_str('username', '') == 'charlie'
+	assert user_kv_reload.has('current_theme') == false
+
+	mut theme_kv_reload := new_sqlite_kv_state_with_table(app, shared_db, 'theme_settings', .data)
+	assert theme_kv_reload.get_str('current_theme', '') == 'cyberpunk'
+	assert theme_kv_reload.has('username') == false
 }

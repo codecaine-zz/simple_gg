@@ -84,7 +84,7 @@ fn expand(op string, p Partial) []Constraint {
 	}
 	if p.n == 3 {
 		full := sv(p.major, p.minor, p.patch, p.prerelease)
-		match op {
+		return match op {
 			'^' {
 				hi := if p.major > 0 {
 					sv(p.major + 1, 0, 0, '0')
@@ -93,16 +93,16 @@ fn expand(op string, p Partial) []Constraint {
 				} else {
 					sv(0, 0, p.patch + 1, '0')
 				}
-				return [Constraint{'>=', full}, Constraint{'<', hi}]
+				[Constraint{'>=', full}, Constraint{'<', hi}]
 			}
 			'~', '~>' {
-				return [Constraint{'>=', full}, Constraint{'<', sv(p.major, p.minor + 1, 0, '0')}]
+				[Constraint{'>=', full}, Constraint{'<', sv(p.major, p.minor + 1, 0, '0')}]
 			}
 			'', '=' {
-				return [Constraint{'=', full}]
+				[Constraint{'=', full}]
 			}
 			else {
-				return [Constraint{op, full}]
+				[Constraint{op, full}]
 			}
 		}
 	}
@@ -111,12 +111,12 @@ fn expand(op string, p Partial) []Constraint {
 	if op == '^' && p.n == 2 && p.major > 0 {
 		hi = sv(p.major + 1, 0, 0, '0')
 	}
-	match op {
-		'>' { return [Constraint{'>=', sv(hi.major, hi.minor, hi.patch, '')}] }
-		'>=' { return [Constraint{'>=', lo}] }
-		'<' { return [Constraint{'<', sv(lo.major, lo.minor, 0, '0')}] }
-		'<=' { return [Constraint{'<', hi}] }
-		else { return [Constraint{'>=', lo}, Constraint{'<', hi}] }
+	return match op {
+		'>' { [Constraint{'>=', sv(hi.major, hi.minor, hi.patch, '')}] }
+		'>=' { [Constraint{'>=', lo}] }
+		'<' { [Constraint{'<', sv(lo.major, lo.minor, 0, '0')}] }
+		'<=' { [Constraint{'<', hi}] }
+		else { [Constraint{'>=', lo}, Constraint{'<', hi}] }
 	}
 }
 
