@@ -45,7 +45,8 @@ fn eval_math(mut app simplecli.SimpleCli, expr string, has_kalker bool) {
 		}
 	} else {
 		// Fallback to bc or awk
-		out, _ := app.exec("echo 'scale=6; ${expr}' | bc -l 2>/dev/null || awk 'BEGIN {print ${expr}}'")
+		out, _ :=
+			app.exec("echo 'scale=6; ${expr}' | bc -l 2>/dev/null || awk 'BEGIN {print ${expr}}'")
 		app.success('Calculated result (bc/awk fallback):')
 		println(out)
 	}

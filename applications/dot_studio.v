@@ -94,11 +94,12 @@ fn main() {
 	})
 
 	dot_path := get_dot_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${dot_path} (Graphviz Suite)  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Compiler')
+	win.add_label('lbl_engine_info',
+		'Engine: ${dot_path} (Graphviz Suite)  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Compiler')
 
 	// Diagram Configuration & Presets Bar
 	win.begin_group_box('grp_diagram_config', 'Diagram Templates & Layout Engine Specification')
-	
+
 	win.begin_row('row_presets_bar')
 	win.add_label('lbl_presets', 'Diagram Template:')
 	win.add_dropdown('dd_dot_presets', [
@@ -108,7 +109,7 @@ fn main() {
 		'4. Database Entity-Relationship (ER Diagram)',
 		'5. Network Infrastructure Topology (Circular Circo)',
 		'6. Binary Search Tree / AST Hierarchy',
-		'7. User Authentication & JWT Flowchart'
+		'7. User Authentication & JWT Flowchart',
 	], '1. SimpleGUI Microservice Architecture (DAG)')
 	win.set_control_width('dd_dot_presets', 380)
 
@@ -119,7 +120,7 @@ fn main() {
 		'fdp (Force-Directed Graph Placement)',
 		'sfdp (Large Scale Force-Directed)',
 		'circo (Circular Ring Placement)',
-		'twopi (Radial Concentric Layout)'
+		'twopi (Radial Concentric Layout)',
 	], 'dot (Hierarchical Directed Graphs)')
 	win.set_control_width('dd_layout_engine', 260)
 	win.end_row()
@@ -159,7 +160,8 @@ fn main() {
 	win.end_row()
 
 	win.append_console('dot_console', ' Graphviz & Diagram Studio Pro Initialized.\n', 1)
-	win.append_console('dot_console', ' Ready to compile and render DOT graphs into SVG, PNG, and PDF.\n', 4)
+	win.append_console('dot_console',
+		' Ready to compile and render DOT graphs into SVG, PNG, and PDF.\n', 4)
 
 	// -------------------------------------------------------------
 	// Event Handlers
@@ -260,7 +262,7 @@ fn main() {
     Resource_API -> Client [label="5. Return JSON Payload"];
 }')
 		}
-		w.toast('Loaded diagram template: ${selected.split("(")[0]}')
+		w.toast('Loaded diagram template: ${selected.split('(')[0]}')
 	})
 
 	// Render Diagram Action
@@ -283,27 +285,39 @@ fn main() {
 			return
 		}
 
-		w.append_console('dot_console', ' Compiling DOT code with layout engine: ${layout_prog}...\n', 1)
+		w.append_console('dot_console',
+			' Compiling DOT code with layout engine: ${layout_prog}...\n', 1)
 		w.set_status('Rendering diagram...')
 
 		go fn [mut w, dot_bin, layout_prog, tmp_dot, tmp_svg] () {
 			t0 := time.ticks()
-			res := simplegui.exec_safe(dot_bin, ['-K' + layout_prog, '-Tsvg', tmp_dot, '-o', tmp_svg])
+			res := simplegui.exec_safe(dot_bin,
+				['-K' + layout_prog, '-Tsvg', tmp_dot, '-o', tmp_svg])
 			elapsed_ms := time.ticks() - t0
 
 			w.run_on_main_thread(fn [res, elapsed_ms, tmp_svg] (mut win_main simplegui.SimpleWindow) {
 				if res.exit_code == 0 && os.exists(tmp_svg) {
 					svg_content := os.read_file(tmp_svg) or { '' }
 					win_main.set('txt_svg_output', svg_content)
-					win_main.append_console('dot_console', ' Diagram rendered to SVG in ${elapsed_ms} ms (${svg_content.len} bytes).\n', 4)
-					win_main.set('lbl_stats', ' Stats: SUCCESS  |  SVG: ${svg_content.len} B  |  Duration: ${elapsed_ms} ms')
+					win_main.append_console('dot_console',
+						' Diagram rendered to SVG in ${elapsed_ms} ms (${svg_content.len} bytes).\n',
+						4)
+					win_main.set('lbl_stats',
+						' Stats: SUCCESS  |  SVG: ${svg_content.len} B  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Diagram compiled in ${elapsed_ms} ms.')
 					win_main.toast('Diagram rendered successfully!')
 				} else {
-					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Graphviz dot compiler failed with exit code ${res.exit_code}. Check syntax.' }
-					win_main.set('txt_svg_output', '<!-- [GRAPHVIZ COMPILATION ERROR] -->\n<!-- Exit Code: ${res.exit_code} -->\n\n${err_msg}\n')
-					win_main.append_console('dot_console', ' Graphviz Compiler Error:\n' + err_msg + '\n', 3)
-					win_main.set('lbl_stats', ' Stats: COMPILER ERROR (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
+					err_msg := if res.output.trim_space() != '' {
+						res.output.trim_space()
+					} else {
+						'Graphviz dot compiler failed with exit code ${res.exit_code}. Check syntax.'
+					}
+					win_main.set('txt_svg_output',
+						'<!-- [GRAPHVIZ COMPILATION ERROR] -->\n<!-- Exit Code: ${res.exit_code} -->\n\n${err_msg}\n')
+					win_main.append_console('dot_console', ' Graphviz Compiler Error:\n' + err_msg +
+						'\n', 3)
+					win_main.set('lbl_stats',
+						' Stats: COMPILER ERROR (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Graphviz compilation failed.')
 					win_main.toast('Compilation error.')
 				}
@@ -341,7 +355,8 @@ fn main() {
 
 			tmp_dot := os.join_path(os.temp_dir(), 'export_${time.ticks()}.dot')
 			os.write_file(tmp_dot, dot_code) or { return }
-			res := simplegui.exec_safe(dot_bin, ['-K' + layout_prog, '-Tpng', tmp_dot, '-o', save_file])
+			res := simplegui.exec_safe(dot_bin, ['-K' + layout_prog, '-Tpng', tmp_dot, '-o',
+				save_file])
 			os.rm(tmp_dot) or {}
 
 			if res.exit_code != 0 {
@@ -371,7 +386,8 @@ fn main() {
 
 			tmp_dot := os.join_path(os.temp_dir(), 'export_${time.ticks()}.dot')
 			os.write_file(tmp_dot, dot_code) or { return }
-			res := simplegui.exec_safe(dot_bin, ['-K' + layout_prog, '-Tsvg', tmp_dot, '-o', save_file])
+			res := simplegui.exec_safe(dot_bin, ['-K' + layout_prog, '-Tsvg', tmp_dot, '-o',
+				save_file])
 			os.rm(tmp_dot) or {}
 
 			if res.exit_code != 0 {
@@ -401,7 +417,8 @@ fn main() {
 
 			tmp_dot := os.join_path(os.temp_dir(), 'export_${time.ticks()}.dot')
 			os.write_file(tmp_dot, dot_code) or { return }
-			res := simplegui.exec_safe(dot_bin, ['-K' + layout_prog, '-Tpdf', tmp_dot, '-o', save_file])
+			res := simplegui.exec_safe(dot_bin, ['-K' + layout_prog, '-Tpdf', tmp_dot, '-o',
+				save_file])
 			os.rm(tmp_dot) or {}
 
 			if res.exit_code != 0 {

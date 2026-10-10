@@ -11,6 +11,7 @@ fn main() {
 	// 1. Fluent Chaining on &Control via win.control('name')
 	win.add_label('lbl_fluent', '1. Fluent Control Chaining')
 	win.add_button('btn_custom', 'Styled Hero Button')
+
 	win.control('btn_custom')
 		.set_width(280)
 		.set_height(42)

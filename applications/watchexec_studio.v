@@ -145,15 +145,15 @@ fn main() {
 	ver_str := get_watchexec_version(bin_path)
 
 	mut state := &WatcherState{
-		is_watching: false
-		process_pid: 0
-		total_triggers: 0
+		is_watching:     false
+		process_pid:     0
+		total_triggers:  0
 		last_trigger_ts: 'None'
-		watchexec_bin: bin_path
-		active_command: 'v -check .'
-		active_dir: os.getwd()
-		output_buffer: ''
-		should_stop: false
+		watchexec_bin:   bin_path
+		active_command:  'v -check .'
+		active_dir:      os.getwd()
+		output_buffer:   ''
+		should_stop:     false
 	}
 
 	// -------------------------------------------------------------
@@ -172,7 +172,8 @@ fn main() {
 		w.toast('Theme changed to ${selected}')
 	})
 
-	win.add_label('lbl_engine_info', 'Engine: ${ver_str}  |  Platform: ${simplegui.get_platform_label()} (FSEvents Subsystem)  |  Mode: Async Daemon')
+	win.add_label('lbl_engine_info',
+		'Engine: ${ver_str}  |  Platform: ${simplegui.get_platform_label()} (FSEvents Subsystem)  |  Mode: Async Daemon')
 
 	// -------------------------------------------------------------
 	// Status & Telemetry Cards
@@ -308,7 +309,8 @@ fn main() {
 	// -------------------------------------------------------------
 	// Live Execution Output
 	win.begin_group_box('grp_live_output', 'Live Execution Output Stream')
-	win.add_textarea('txt_live_output', 'Watchexec Studio Pro Initialized.\nConfigure your watch directory and command above, then click "Start Watcher (Async)".\n')
+	win.add_textarea('txt_live_output',
+		'Watchexec Studio Pro Initialized.\nConfigure your watch directory and command above, then click "Start Watcher (Async)".\n')
 	win.set_control_height('txt_live_output', 180)
 	win.end_group_box()
 
@@ -327,7 +329,9 @@ fn main() {
 	if bin_path != '' {
 		win.append_console('watchexec_console', ' Engine located: ${bin_path} (${ver_str})\n', 4)
 	} else {
-		win.append_console('watchexec_console', ' [WARNING] watchexec binary not found in PATH or Homebrew. Install with: brew install watchexec\n', 3)
+		win.append_console('watchexec_console',
+			' [WARNING] watchexec binary not found in PATH or Homebrew. Install with: brew install watchexec\n',
+			3)
 	}
 
 	// -------------------------------------------------------------
@@ -451,7 +455,8 @@ fn main() {
 		target_dir := if watch_dir != '' && os.exists(watch_dir) { watch_dir } else { os.getwd() }
 
 		w.toast('Executing command manually...')
-		w.append_console('watchexec_console', ' [MANUAL RUN] Executing: "${cmd}" in ${target_dir}...\n', 4)
+		w.append_console('watchexec_console',
+			' [MANUAL RUN] Executing: "${cmd}" in ${target_dir}...\n', 4)
 
 		go fn [mut w, mut state, cmd, target_dir] () {
 			t0 := time.ticks()
@@ -462,8 +467,10 @@ fn main() {
 				state.total_triggers++
 				state.last_trigger_ts = time.now().format_ss()
 
-				win_main.set_metric_card_value('card_triggers', '${state.total_triggers} Triggers', 'Events')
-				win_main.set_metric_card_value('card_last_event', '${state.last_trigger_ts} (${elapsed_ms}ms)', 'Activity')
+				win_main.set_metric_card_value('card_triggers', '${state.total_triggers} Triggers',
+					'Events')
+				win_main.set_metric_card_value('card_last_event',
+					'${state.last_trigger_ts} (${elapsed_ms}ms)', 'Activity')
 
 				mut banner := '========================================================================\n'
 				banner += ' MANUAL TRIGGER RESULT: ${cmd}\n'
@@ -471,14 +478,20 @@ fn main() {
 				banner += ' Duration  : ${elapsed_ms} ms  |  Exit Code: ${res.exit_code}\n'
 				banner += '========================================================================\n\n'
 
-				out_text := if res.output.trim_space() != '' { res.output.trim_space() } else { '(Command exited with code ${res.exit_code} and produced no output)' }
+				out_text := if res.output.trim_space() != '' {
+					res.output.trim_space()
+				} else {
+					'(Command exited with code ${res.exit_code} and produced no output)'
+				}
 				win_main.set('txt_live_output', banner + out_text + '\n\n')
 
 				if res.exit_code == 0 {
-					win_main.append_console('watchexec_console', ' [SUCCESS] Manual run finished in ${elapsed_ms} ms (Code 0)\n', 1)
+					win_main.append_console('watchexec_console',
+						' [SUCCESS] Manual run finished in ${elapsed_ms} ms (Code 0)\n', 1)
 					win_main.toast('Command succeeded (${elapsed_ms} ms)')
 				} else {
-					win_main.append_console('watchexec_console', ' [ERROR] Manual run exited with code ${res.exit_code}\n', 3)
+					win_main.append_console('watchexec_console',
+						' [ERROR] Manual run exited with code ${res.exit_code}\n', 3)
 					win_main.toast('Command failed with code ${res.exit_code}')
 				}
 			})
@@ -488,7 +501,8 @@ fn main() {
 	// Start Watcher Button (Async Daemon)
 	win.on_click('btn_start_watcher', fn [bin_path, mut state] (mut w simplegui.SimpleWindow) {
 		if bin_path == '' {
-			w.alert('watchexec Missing', 'The "watchexec" command-line tool was not found.\n\nPlease install it using Homebrew:\n  brew install watchexec')
+			w.alert('watchexec Missing',
+				'The "watchexec" command-line tool was not found.\n\nPlease install it using Homebrew:\n  brew install watchexec')
 			w.toast('watchexec binary missing')
 			return
 		}
@@ -500,7 +514,8 @@ fn main() {
 
 		watch_dir := w.get('txt_watch_dir').trim_space()
 		if watch_dir == '' || !os.exists(watch_dir) {
-			w.alert('Invalid Directory', 'The specified watch directory does not exist:\n${watch_dir}')
+			w.alert('Invalid Directory',
+				'The specified watch directory does not exist:\n${watch_dir}')
 			w.toast('Directory does not exist')
 			return
 		}
@@ -600,7 +615,8 @@ fn main() {
 		w.set_stat_card('card_status', 'ACTIVE WATCHING', 'RUNNING', 'Watcher Active', true)
 		w.set('lbl_status_bar', ' Status: Launching watchexec daemon...')
 		w.toast('Starting watchexec daemon...')
-		w.append_console('watchexec_console', ' [DAEMON START] Launching watchexec on ${watch_dir}...\n', 1)
+		w.append_console('watchexec_console',
+			' [DAEMON START] Launching watchexec on ${watch_dir}...\n', 1)
 
 		// Launch background worker thread
 		go fn [bin_path, args, watch_dir, mut state, mut w] () {
@@ -615,8 +631,11 @@ fn main() {
 			w.run_on_main_thread(fn [mut state] (mut win_main simplegui.SimpleWindow) {
 				win_main.set_metric_card_value('card_pid', 'PID ${state.process_pid}', 'Process')
 				win_main.set_metric_card_value('card_status', 'WATCHING', 'Status')
-				win_main.set('lbl_status_bar', ' Status: Active Watching (PID ${state.process_pid})  |  Target: ${state.active_dir}')
-				win_main.append_console('watchexec_console', ' [DAEMON ACTIVE] Process PID ${state.process_pid} listening for file changes.\n', 4)
+				win_main.set('lbl_status_bar',
+					' Status: Active Watching (PID ${state.process_pid})  |  Target: ${state.active_dir}')
+				win_main.append_console('watchexec_console',
+					' [DAEMON ACTIVE] Process PID ${state.process_pid} listening for file changes.\n',
+					4)
 				win_main.toast('Watcher active (PID ${state.process_pid})')
 			})
 
@@ -640,13 +659,19 @@ fn main() {
 						if line.contains('[Running:') {
 							state.total_triggers++
 							state.last_trigger_ts = time.now().format_ss()
-							win_main.set_metric_card_value('card_triggers', '${state.total_triggers} Triggers', 'Events')
-							win_main.set_metric_card_value('card_last_event', state.last_trigger_ts, 'Activity')
-							win_main.append_console('watchexec_console', ' [EVENT #${state.total_triggers}] Triggered re-execution at ${state.last_trigger_ts}\n', 4)
+							win_main.set_metric_card_value('card_triggers',
+								'${state.total_triggers} Triggers', 'Events')
+							win_main.set_metric_card_value('card_last_event',
+								state.last_trigger_ts, 'Activity')
+							win_main.append_console('watchexec_console',
+								' [EVENT #${state.total_triggers}] Triggered re-execution at ${state.last_trigger_ts}\n',
+								4)
 						} else if line.contains('[Command was successful]') {
-							win_main.append_console('watchexec_console', ' [PASS] Command executed successfully.\n', 1)
+							win_main.append_console('watchexec_console',
+								' [PASS] Command executed successfully.\n', 1)
 						} else if line.contains('failed') || line.contains('exited with') {
-							win_main.append_console('watchexec_console', ' [ERROR] Command failure reported: ${line.trim_space()}\n', 3)
+							win_main.append_console('watchexec_console',
+								' [ERROR] Command failure reported: ${line.trim_space()}\n', 3)
 						}
 					})
 				}
@@ -662,7 +687,8 @@ fn main() {
 				win_main.set_metric_card_value('card_status', 'STOPPED', 'Status')
 				win_main.set_metric_card_value('card_pid', 'Idle', 'Process')
 				win_main.set('lbl_status_bar', ' Status: Stopped  |  Daemon is idle.')
-				win_main.append_console('watchexec_console', ' [DAEMON STOPPED] Watchexec process terminated.\n', 2)
+				win_main.append_console('watchexec_console',
+					' [DAEMON STOPPED] Watchexec process terminated.\n', 2)
 				win_main.toast('Watcher stopped.')
 			})
 		}()

@@ -46,11 +46,12 @@ fn main() {
 	})
 
 	brew_path := get_brew_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${brew_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker')
+	win.add_label('lbl_engine_info',
+		'Engine: ${brew_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker')
 
 	// Search & Quick Operation Bar
 	win.begin_group_box('grp_brew_search', 'Package Search & Information Inspection')
-	
+
 	win.begin_row('row_search_bar')
 	win.add_label('lbl_search', 'Package / Cask:')
 	win.add_input('txt_search_pkg', 'ffmpeg')
@@ -66,7 +67,7 @@ fn main() {
 
 	// Global Maintenance & Services Actions
 	win.begin_group_box('grp_global_actions', 'Homebrew Ecosystem & Service Controls')
-	
+
 	win.begin_row('row_global_btns_1')
 	win.add_button('btn_list_installed', 'All Installed')
 	win.add_button('btn_list_formulae', 'Formulae Only')
@@ -102,15 +103,16 @@ fn main() {
 	win.end_row()
 
 	win.append_console('brew_console', ' Homebrew Studio Pro Initialized.\n', 1)
-	win.append_console('brew_console', ' Ready to manage formulae, casks, and background services.\n', 4)
+	win.append_console('brew_console',
+		' Ready to manage formulae, casks, and background services.\n', 4)
 
 	// -------------------------------------------------------------
 	// Async Execution Helper
 	// -------------------------------------------------------------
 	run_brew_cmd := fn (mut w simplegui.SimpleWindow, desc string, args []string) {
 		brew_bin := get_brew_bin()
-		w.append_console('brew_console', ' Executing: brew ${args.join(" ")}...\n', 1)
-		w.set_status('Running brew ${args.join(" ")}...')
+		w.append_console('brew_console', ' Executing: brew ${args.join(' ')}...\n', 1)
+		w.set_status('Running brew ${args.join(' ')}...')
 		w.toast(' ${desc}...')
 
 		go fn [mut w, brew_bin, args, desc] () {
@@ -120,7 +122,7 @@ fn main() {
 
 			w.run_on_main_thread(fn [res, elapsed_ms, desc] (mut win_main simplegui.SimpleWindow) {
 				mut out := res.output.trim_space()
-				
+
 				// Strip stray cask errors if actual output was produced
 				if out.contains('Error: Cask ') && out.contains('\n') {
 					lines := out.split_into_lines()
@@ -137,15 +139,25 @@ fn main() {
 
 				lines_cnt := if out != '' { out.split_into_lines().len } else { 0 }
 				if res.exit_code == 0 || (lines_cnt > 0 && !out.starts_with('Error:')) {
-					win_main.append_console('brew_console', ' ${desc} completed in ${elapsed_ms} ms (${lines_cnt} lines output).\n', 4)
-					win_main.set('lbl_stats', ' Stats: SUCCESS  |  Action: ${desc}  |  Lines: ${lines_cnt}  |  Duration: ${elapsed_ms} ms')
+					win_main.append_console('brew_console',
+						' ${desc} completed in ${elapsed_ms} ms (${lines_cnt} lines output).\n', 4)
+					win_main.set('lbl_stats',
+						' Stats: SUCCESS  |  Action: ${desc}  |  Lines: ${lines_cnt}  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('${desc} complete.')
 					win_main.toast('${desc} complete!')
 				} else {
-					err_msg := if out != '' { out } else { 'Homebrew command failed (Exit code ${res.exit_code}).' }
-					win_main.set('txt_brew_output', '// [HOMEBREW ERROR]\n// Action: ${desc}\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
-					win_main.append_console('brew_console', ' Homebrew Error (Exit ${res.exit_code}):\n' + err_msg + '\n', 3)
-					win_main.set('lbl_stats', ' Stats: ERROR (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
+					err_msg := if out != '' {
+						out
+					} else {
+						'Homebrew command failed (Exit code ${res.exit_code}).'
+					}
+					win_main.set('txt_brew_output',
+						'// [HOMEBREW ERROR]\n// Action: ${desc}\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+					win_main.append_console('brew_console',
+
+						' Homebrew Error (Exit ${res.exit_code}):\n' + err_msg + '\n', 3)
+					win_main.set('lbl_stats',
+						' Stats: ERROR (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('${desc} failed.')
 					win_main.toast('Homebrew error!')
 				}
@@ -234,8 +246,10 @@ fn main() {
 				out += res_c.output.trim_space() + '\n'
 
 				win_main.set('txt_brew_output', out)
-				win_main.append_console('brew_console', ' Listed ${f_cnt} formulae and ${c_cnt} casks in ${elapsed_ms} ms.\n', 4)
-				win_main.set('lbl_stats', ' Stats: SUCCESS  |  Formulae: ${f_cnt}  |  Casks: ${c_cnt}  |  Duration: ${elapsed_ms} ms')
+				win_main.append_console('brew_console',
+					' Listed ${f_cnt} formulae and ${c_cnt} casks in ${elapsed_ms} ms.\n', 4)
+				win_main.set('lbl_stats',
+					' Stats: SUCCESS  |  Formulae: ${f_cnt}  |  Casks: ${c_cnt}  |  Duration: ${elapsed_ms} ms')
 				win_main.set_status('Listed all installed packages.')
 				win_main.toast('Listed all installed packages!')
 			})
@@ -293,8 +307,9 @@ fn main() {
 			return
 		}
 
-		w.append_console('brew_console', ' Scanning for orphaned Caskroom entries without installed versions...\n', 1)
-		
+		w.append_console('brew_console',
+			' Scanning for orphaned Caskroom entries without installed versions...\n', 1)
+
 		entries := os.ls(caskroom_dir) or { []string{} }
 		mut removed_cnt := 0
 		for entry in entries {
@@ -309,7 +324,8 @@ fn main() {
 					}
 				}
 				if !has_version_dir {
-					w.append_console('brew_console', ' Cleaning orphaned cask receipt: ${entry}\n', 3)
+					w.append_console('brew_console', ' Cleaning orphaned cask receipt: ${entry}\n',
+						3)
 					os.rmdir_all(dir_path) or {}
 					removed_cnt++
 				}
@@ -317,9 +333,11 @@ fn main() {
 		}
 
 		if removed_cnt > 0 {
-			w.append_console('brew_console', ' Cleaned ${removed_cnt} orphaned cask directories.\n', 4)
+			w.append_console('brew_console',
+				' Cleaned ${removed_cnt} orphaned cask directories.\n', 4)
 			w.toast('Cleaned ${removed_cnt} orphaned casks!')
-			w.alert('Orphaned Casks Cleaned', 'Successfully resolved ${removed_cnt} orphaned cask receipts. Homebrew list commands will now run cleanly.')
+			w.alert('Orphaned Casks Cleaned',
+				'Successfully resolved ${removed_cnt} orphaned cask receipts. Homebrew list commands will now run cleanly.')
 		} else {
 			w.append_console('brew_console', ' All Caskroom directories are healthy.\n', 4)
 			w.toast('Caskroom is healthy.')

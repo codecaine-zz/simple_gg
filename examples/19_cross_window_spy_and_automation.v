@@ -19,18 +19,23 @@ fn main() {
 		win.add_button('btn_list_wins', 'List Active App Windows')
 		win.on_click('btn_list_wins', fn (mut win simplegui.SimpleWindow) {
 			wins := simplegui.sys_list_app_windows()
-			win.push_toast('Registered Windows', 'Active Windows (${wins.len}): ${wins.join(", ")}', 'info', 3000)
-			win.append_console_log('console_output', '[SPY++] Discovered ${wins.len} registered windows: ${wins.join(", ")}')
+			win.push_toast('Registered Windows',
+				'Active Windows (${wins.len}): ${wins.join(', ')}', 'info', 3000)
+			win.append_console_log('console_output',
+				'[SPY++] Discovered ${wins.len} registered windows: ${wins.join(', ')}')
 		})
 
 		win.add_button('btn_spy_self', 'Spy Current Window Controls')
 		win.on_click('btn_spy_self', fn (mut win simplegui.SimpleWindow) {
 			if ctrl_info := simplegui.sys_spy_window(win.get_title()) {
-				win.push_toast('Spy++ Success', 'Discovered ${ctrl_info.len} registered controls', 'info', 3000)
-				win.append_console_log('console_output', '[SPY++] Discovered ${ctrl_info.len} window controls:')
+				win.push_toast('Spy++ Success', 'Discovered ${ctrl_info.len} registered controls',
+					'info', 3000)
+				win.append_console_log('console_output',
+					'[SPY++] Discovered ${ctrl_info.len} window controls:')
 				for idx, info in ctrl_info {
 					if idx < 4 {
-						win.append_console_log('console_output', '  - ${info.name} (${info.kind}): "${info.value}"')
+						win.append_console_log('console_output',
+							'  - ${info.name} (${info.kind}): "${info.value}"')
 					}
 				}
 			}
@@ -48,18 +53,23 @@ fn main() {
 		win.add_button('btn_broadcast', 'Broadcast Event')
 		win.on_click('btn_broadcast', fn (mut win simplegui.SimpleWindow) {
 			simplegui.sys_broadcast_event(win.get_title(), 'tbl_data', 'row_selected', 'ID_101')
-			win.push_toast('Event Broadcast', 'Transmitted event payload across bus', 'success', 2500)
-			win.append_console_log('console_output', '[BUS EVENT] Broadcasted event: tbl_data.row_selected = ID_101')
+			win.push_toast('Event Broadcast', 'Transmitted event payload across bus', 'success',
+				2500)
+			win.append_console_log('console_output',
+				'[BUS EVENT] Broadcasted event: tbl_data.row_selected = ID_101')
 		})
 
 		win.add_button('btn_list_ext', 'Scan External GUI Apps')
 		win.on_click('btn_list_ext', fn (mut win simplegui.SimpleWindow) {
 			ext_apps := simplegui.sys_list_external_apps()
-			win.push_toast('App Scanner', 'Found ${ext_apps.len} active external GUI apps', 'info', 3000)
-			win.append_console_log('console_output', '[AXUIElement] Found ${ext_apps.len} running desktop apps:')
+			win.push_toast('App Scanner', 'Found ${ext_apps.len} active external GUI apps', 'info',
+				3000)
+			win.append_console_log('console_output',
+				'[AXUIElement] Found ${ext_apps.len} running desktop apps:')
 			for idx, app in ext_apps {
 				if idx < 4 {
-					win.append_console_log('console_output', '  - ${app.name} (PID: ${app.pid}) | Bundle: ${app.bundle_id}')
+					win.append_console_log('console_output',
+						'  - ${app.name} (PID: ${app.pid}) | Bundle: ${app.bundle_id}')
 				}
 			}
 		})
@@ -67,7 +77,9 @@ fn main() {
 	})
 
 	// Console Output View
-	win.add_console_view('console_output', ['[SYSTEM] Cross-Window Spy++ subsystem ready.'])
+	win.add_console_view('console_output', [
+		'[SYSTEM] Cross-Window Spy++ subsystem ready.',
+	])
 	win.set_control_width('console_output', 700)
 	win.set_control_height('console_output', 130)
 

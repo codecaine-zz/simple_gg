@@ -52,7 +52,8 @@ fn main() {
 	wcag_pass := colorutils.is_accessible(fg, bg, 'AA')
 
 	win.add_label('lbl_col_info', 'Evaluating BG: #0f172a vs FG: #38bdf8')
-	win.add_label('lbl_col_contrast', '  - Contrast Ratio: ${contrast:.2f}:1 (WCAG AA Normal Text: ${wcag_pass})')
+	win.add_label('lbl_col_contrast',
+		'  - Contrast Ratio: ${contrast:.2f}:1 (WCAG AA Normal Text: ${wcag_pass})')
 	win.add_divider('Time, SemVer & Mock Data')
 
 	// 4. Time, Semver & Synthetic Mock Data (timeutils, semverutils, mockutils)
@@ -63,7 +64,8 @@ fn main() {
 	v2 := semverutils.parse('2.0.4') or { semverutils.SemVer{} }
 	is_gt := semverutils.compare(v1, v2) > 0
 
-	win.add_label('lbl_mock_user', '  - Synthetic Mock User: ${user.name} (${user.email}) - Role: ${user.role}')
+	win.add_label('lbl_mock_user',
+		'  - Synthetic Mock User: ${user.name} (${user.email}) - Role: ${user.role}')
 	win.add_label('lbl_rel_time', '  - Relative Time Since Jan 2026: ${rel_time}')
 	win.add_label('lbl_semver', '  - SemVer Compare (${v1} > ${v2}): ${is_gt}')
 

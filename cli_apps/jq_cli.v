@@ -76,7 +76,8 @@ fn main() {
 	}
 
 	if is_interactive {
-		app.panel('Interactive JQ Query Workbench', 'Input JSON size: ${json_data.len} bytes\nType your JQ filter expressions below (e.g. .status, .metrics, .modules[].name, keys). Type "exit" or "q" to quit.')
+		app.panel('Interactive JQ Query Workbench',
+			'Input JSON size: ${json_data.len} bytes\nType your JQ filter expressions below (e.g. .status, .metrics, .modules[].name, keys). Type "exit" or "q" to quit.')
 		for {
 			filter_expr = app.prompt('Enter JQ filter', '.')
 			if filter_expr == 'exit' || filter_expr == 'q' {

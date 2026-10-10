@@ -178,39 +178,82 @@ fn test_app_id_derivation() {
 
 fn test_control_persistence_filtering() {
 	// Persistent controls
-	input_ctrl := Control{ name: 'txt_workspace', kind: 'input', text_value: '/Users/test' }
+	input_ctrl := Control{
+		name:       'txt_workspace'
+		kind:       'input'
+		text_value: '/Users/test'
+	}
 	assert should_persist_control(&input_ctrl) == true
 
-	chk_ctrl := Control{ name: 'chk_recursive', kind: 'checkbox', bool_value: true }
+	chk_ctrl := Control{
+		name:       'chk_recursive'
+		kind:       'checkbox'
+		bool_value: true
+	}
 	assert should_persist_control(&chk_ctrl) == true
 
-	dd_ctrl := Control{ name: 'dd_mode', kind: 'dropdown', text_value: 'Fast' }
+	dd_ctrl := Control{
+		name:       'dd_mode'
+		kind:       'dropdown'
+		text_value: 'Fast'
+	}
 	assert should_persist_control(&dd_ctrl) == true
 
-	slider_ctrl := Control{ name: 'sl_depth', kind: 'slider', int_value: 5 }
+	slider_ctrl := Control{
+		name:      'sl_depth'
+		kind:      'slider'
+		int_value: 5
+	}
 	assert should_persist_control(&slider_ctrl) == true
 
-	notes_ctrl := Control{ name: 'txt_notes', kind: 'textarea', text_value: 'my notes' }
+	notes_ctrl := Control{
+		name:       'txt_notes'
+		kind:       'textarea'
+		text_value: 'my notes'
+	}
 	assert should_persist_control(&notes_ctrl) == true
 
 	// Non-persistent controls: outputs, terminals, consoles
-	output_ctrl := Control{ name: 'txt_output', kind: 'textarea', text_value: 'stale logs' }
+	output_ctrl := Control{
+		name:       'txt_output'
+		kind:       'textarea'
+		text_value: 'stale logs'
+	}
 	assert should_persist_control(&output_ctrl) == false
 
-	stdout_ctrl := Control{ name: 'txt_stdout', kind: 'textarea', text_value: 'stale stdout' }
+	stdout_ctrl := Control{
+		name:       'txt_stdout'
+		kind:       'textarea'
+		text_value: 'stale stdout'
+	}
 	assert should_persist_control(&stdout_ctrl) == false
 
-	term_ctrl := Control{ name: 'term_console', kind: 'super_terminal' }
+	term_ctrl := Control{
+		name: 'term_console'
+		kind: 'super_terminal'
+	}
 	assert should_persist_control(&term_ctrl) == false
 
-	btn_ctrl := Control{ name: 'btn_run', kind: 'button', title: 'Run' }
+	btn_ctrl := Control{
+		name:  'btn_run'
+		kind:  'button'
+		title: 'Run'
+	}
 	assert should_persist_control(&btn_ctrl) == false
 
-	lbl_ctrl := Control{ name: 'lbl_info', kind: 'label', title: 'Ready' }
+	lbl_ctrl := Control{
+		name:  'lbl_info'
+		kind:  'label'
+		title: 'Ready'
+	}
 	assert should_persist_control(&lbl_ctrl) == false
 
 	// Sensitive passwords
-	pass_ctrl := Control{ name: 'txt_password', kind: 'password', text_value: 'secret123' }
+	pass_ctrl := Control{
+		name:       'txt_password'
+		kind:       'password'
+		text_value: 'secret123'
+	}
 	assert should_persist_control(&pass_ctrl) == false
 }
 
@@ -289,4 +332,3 @@ fn test_form_state_persistence_roundtrip() {
 	assert win2.width == 1050
 	assert win2.height == 750
 }
-

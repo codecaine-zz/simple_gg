@@ -55,13 +55,14 @@ fn main() {
 		w.toast('Theme changed to ${selected}')
 	})
 	ytdlp_path := get_yt_dlp_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${ytdlp_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker (Zero UI Freezes)')
+	win.add_label('lbl_engine_info',
+		'Engine: ${ytdlp_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker (Zero UI Freezes)')
 
 	// -------------------------------------------------------------
 	// URL Input & Destination Directory
 	// -------------------------------------------------------------
 	win.begin_group_box('grp_url_box', 'Target Media URL & Save Location')
-	
+
 	win.begin_row('row_url')
 	win.add_label('lbl_url', 'Media / Playlist URL:')
 	win.add_input('txt_url', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ')
@@ -84,7 +85,7 @@ fn main() {
 	// Format, Quality & Audio Suite Presets
 	// -------------------------------------------------------------
 	win.begin_group_box('grp_quality_box', 'Quality, Container & Audio Presets')
-	
+
 	win.begin_row('row_preset_sel')
 	win.add_label('lbl_format_preset', 'Download Preset:')
 	win.add_dropdown('dd_preset', [
@@ -96,7 +97,7 @@ fn main() {
 		' Audio Only: FLAC (Lossless Audio)',
 		' Audio Only: AAC / M4A (256kbps Apple Native)',
 		' Audio Only: Opus (Best Voice / Podcast Codec)',
-		' Audio Only: WAV (Uncompressed PCM)'
+		' Audio Only: WAV (Uncompressed PCM)',
 	], ' Best Video + Best Audio (Auto MP4/MKV)')
 	win.set_control_width('dd_preset', 380)
 
@@ -157,7 +158,9 @@ fn main() {
 	win.end_row()
 
 	win.append_console('dl_console', ' yt-dlp Studio Pro Initialized.\n', 1)
-	win.append_console('dl_console', ' Ready to download and extract media streams from YouTube, Vimeo, Twitter, Twitch, Soundcloud, and 1,000+ sites.\n', 4)
+	win.append_console('dl_console',
+		' Ready to download and extract media streams from YouTube, Vimeo, Twitter, Twitch, Soundcloud, and 1,000+ sites.\n',
+		4)
 
 	// -------------------------------------------------------------
 	// Event Handlers & Async Engine
@@ -226,7 +229,8 @@ fn main() {
 			return
 		}
 		ytdlp := get_yt_dlp_bin()
-		w.append_console('dl_console', ' Inspecting streams & formats securely in background...\n', 1)
+		w.append_console('dl_console', ' Inspecting streams & formats securely in background...\n',
+			1)
 		w.set_status('Inspecting stream formats in background...')
 		w.toast('Inspecting stream formats...')
 
@@ -237,8 +241,13 @@ fn main() {
 					win_main.append_console('dl_console', res.output + '\n', 4)
 					win_main.set_status('Formats inspection completed.')
 				} else {
-					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Failed to inspect media stream formats.' }
-					win_main.append_console('dl_console', ' Error inspecting formats:\n' + err_msg + '\n', 3)
+					err_msg := if res.output.trim_space() != '' {
+						res.output.trim_space()
+					} else {
+						'Failed to inspect media stream formats.'
+					}
+					win_main.append_console('dl_console', ' Error inspecting formats:\n' + err_msg +
+						'\n', 3)
 					win_main.set_status('Failed to inspect formats.')
 					win_main.toast('Format inspection failed.')
 				}
@@ -259,19 +268,26 @@ fn main() {
 		w.toast('Fetching video metadata...')
 
 		go fn [mut w, ytdlp, url] () {
-			res := simplegui.exec_safe(ytdlp, ['--print', 'title', '--print', 'duration_string', '--print', 'uploader', url])
+			res := simplegui.exec_safe(ytdlp, ['--print', 'title', '--print', 'duration_string',
+				'--print', 'uploader', url])
 			w.run_on_main_thread(fn [res] (mut win_main simplegui.SimpleWindow) {
 				if res.exit_code == 0 {
 					lines := res.output.split_into_lines()
 					title := if lines.len > 0 { lines[0] } else { 'Unknown' }
 					uploader := if lines.len > 2 { lines[2] } else { '' }
 					dur := if lines.len > 1 { lines[1] } else { '' }
-					win_main.append_console('dl_console', ' Title: ${title} | Channel: ${uploader} | Duration: ${dur}\n', 4)
+					win_main.append_console('dl_console',
+						' Title: ${title} | Channel: ${uploader} | Duration: ${dur}\n', 4)
 					win_main.set_status('Title: ' + title)
 					win_main.toast('Loaded metadata: ' + title)
 				} else {
-					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Failed to fetch video title and metadata.' }
-					win_main.append_console('dl_console', ' Error fetching metadata:\n' + err_msg + '\n', 3)
+					err_msg := if res.output.trim_space() != '' {
+						res.output.trim_space()
+					} else {
+						'Failed to fetch video title and metadata.'
+					}
+					win_main.append_console('dl_console', ' Error fetching metadata:\n' + err_msg +
+						'\n', 3)
 					win_main.set_status('Failed to fetch metadata.')
 					win_main.toast('Metadata fetch failed.')
 				}
@@ -397,7 +413,8 @@ fn main() {
 			if playlist_range.contains('-') {
 				parts := playlist_range.split('-')
 				if parts.len >= 2 {
-					raw_args << ['--playlist-start', parts[0].trim_space(), '--playlist-end', parts[1].trim_space()]
+					raw_args << ['--playlist-start', parts[0].trim_space(), '--playlist-end',
+						parts[1].trim_space()]
 				}
 			} else {
 				raw_args << ['--playlist-items', playlist_range]
@@ -428,12 +445,19 @@ fn main() {
 
 			w.run_on_main_thread(fn [res, sec, out_dir] (mut win_main simplegui.SimpleWindow) {
 				if res.exit_code == 0 {
-					win_main.append_console('dl_console', ' Download Completed Successfully in ${sec:.1f}s!\n' + res.output + '\n', 4)
-					win_main.set('lbl_dl_stats', ' Status: COMPLETED (in ${sec:.1f}s)  |  Saved in: ${out_dir}')
+					win_main.append_console('dl_console',
+
+						' Download Completed Successfully in ${sec:.1f}s!\n' + res.output + '\n', 4)
+					win_main.set('lbl_dl_stats',
+						' Status: COMPLETED (in ${sec:.1f}s)  |  Saved in: ${out_dir}')
 					win_main.set_status('Download finished in ${sec:.1f}s.')
 					win_main.toast('Download finished successfully!')
 				} else {
-					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Download failed. Check URL, network, or format availability.' }
+					err_msg := if res.output.trim_space() != '' {
+						res.output.trim_space()
+					} else {
+						'Download failed. Check URL, network, or format availability.'
+					}
 					win_main.append_console('dl_console', ' Download Error:\n' + err_msg + '\n', 3)
 					win_main.set('lbl_dl_stats', ' Status: ERROR (Exit code ${res.exit_code})')
 					win_main.set_status('Download encountered an error.')

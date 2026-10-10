@@ -61,12 +61,12 @@ pub:
 pub fn (cli &SimpleCli) parse_url(url_str string) !SimpleURL {
 	u := urllib.parse(url_str)!
 	return SimpleURL{
-		raw: url_str
-		scheme: u.scheme
-		host: u.hostname()
-		port: u.port().int()
-		path: u.path
-		query: u.raw_query
+		raw:      url_str
+		scheme:   u.scheme
+		host:     u.hostname()
+		port:     u.port().int()
+		path:     u.path
+		query:    u.raw_query
 		fragment: u.fragment
 	}
 }
@@ -93,12 +93,13 @@ pub fn (cli &SimpleCli) http_request(method string, url string, body string) !Si
 		'HEAD' { http.Method.head }
 		else { http.Method.get }
 	}
+
 	mut req := http.new_request(req_method, url, body)
 	res := req.do()!
 	return SimpleHttpResponse{
 		status_code: res.status_code
-		body: res.body
-		url: url
+		body:        res.body
+		url:         url
 	}
 }
 
@@ -335,7 +336,8 @@ pub fn (cli &SimpleCli) validate_ip(ip_str string) bool {
 
 // validate_phone checks if a string is a valid international/national phone number.
 pub fn (cli &SimpleCli) validate_phone(phone string) bool {
-	clean := phone.replace(' ', '').replace('-', '').replace('(', '').replace(')', '').replace('+', '')
+	clean :=
+		phone.replace(' ', '').replace('-', '').replace('(', '').replace(')', '').replace('+', '')
 	return clean.len >= 7 && clean.len <= 15 && clean.int() > 0
 }
 
@@ -399,7 +401,8 @@ pub fn (cli &SimpleCli) semver_compare(v1 string, v2 string) !int {
 
 // lorem_words generates placeholder words.
 pub fn (cli &SimpleCli) lorem_words(count int) string {
-	sample := ['lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit', 'sed', 'do', 'eiusmod', 'tempor', 'incididunt', 'ut', 'labore', 'et', 'dolore', 'magna', 'aliqua']
+	sample := ['lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit', 'sed',
+		'do', 'eiusmod', 'tempor', 'incididunt', 'ut', 'labore', 'et', 'dolore', 'magna', 'aliqua']
 	mut out := []string{}
 	for i in 0 .. count {
 		out << sample[i % sample.len]
@@ -598,8 +601,12 @@ pub fn (cli &SimpleCli) levenshtein_distance(a string, b string) int {
 	if b.len == 0 { return a.len }
 
 	mut d := [][]int{len: a.len + 1, init: []int{len: b.len + 1, init: 0}}
-	for i in 0 .. a.len + 1 { d[i][0] = i }
-	for j in 0 .. b.len + 1 { d[0][j] = j }
+	for i in 0 .. a.len + 1 {
+		d[i][0] = i
+	}
+	for j in 0 .. b.len + 1 {
+		d[0][j] = j
+	}
 
 	for i in 1 .. a.len + 1 {
 		for j in 1 .. b.len + 1 {

@@ -16,6 +16,7 @@ fn main() {
 			.insert { '+' }
 			.delete { '-' }
 		}
+
 		println('${symbol} ${op.text}')
 	}
 

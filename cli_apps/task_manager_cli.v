@@ -79,15 +79,16 @@ fn display_process_table(mut app simplecli.SimpleCli) {
 	l1, l5, l15 := app.get_load_average()
 
 	app.print_kv({
-		'Total Processes': '${total_procs}',
-		'CPU Utilization': '${cpu_pct:.1f} %',
-		'Load Average': '${l1:.2f}, ${l5:.2f}, ${l15:.2f}',
-		'Active Memory': app.get_memory_info(),
+		'Total Processes': '${total_procs}'
+		'CPU Utilization': '${cpu_pct:.1f} %'
+		'Load Average':    '${l1:.2f}, ${l5:.2f}, ${l15:.2f}'
+		'Active Memory':   app.get_memory_info()
 	})
 }
 
 fn run_interactive(mut app simplecli.SimpleCli) {
-	app.panel('Task Manager Interactive Console', 'Inspect system telemetry and terminate runaway processes.')
+	app.panel('Task Manager Interactive Console',
+		'Inspect system telemetry and terminate runaway processes.')
 	for {
 		display_process_table(mut app)
 		choice := app.select('Action:', [

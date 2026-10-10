@@ -34,7 +34,8 @@ fn main() {
 
 	if app.get_flag_bool('strip') {
 		app.info('Stripping EXIF metadata for privacy...')
-		out, code := app.exec('exiftool -all= -overwrite_original "${input_path}" 2>/dev/null || sips -d all "${input_path}" 2>/dev/null')
+		out, code :=
+			app.exec('exiftool -all= -overwrite_original "${input_path}" 2>/dev/null || sips -d all "${input_path}" 2>/dev/null')
 		if code == 0 {
 			app.success('Successfully stripped EXIF metadata from: ${input_path}')
 		} else {

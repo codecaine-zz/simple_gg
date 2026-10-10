@@ -65,7 +65,13 @@ fn count_sentences(text string) int {
 			count++
 		}
 	}
-	return if count > 0 { count } else if text.trim_space() != '' { 1 } else { 0 }
+	return if count > 0 {
+		count
+	} else if text.trim_space() != '' {
+		1
+	} else {
+		0
+	}
 }
 
 fn count_paragraphs(text string) int {
@@ -110,7 +116,7 @@ fn calculate_word_frequencies(text string) []string {
 	mut pairs := []WordFrequency{}
 	for k, v in words_map {
 		pairs << WordFrequency{
-			word: k
+			word:  k
 			count: v
 		}
 	}
@@ -201,13 +207,16 @@ fn markdown_to_html(md string, theme string) string {
 		}
 
 		if trimmed == '---' || trimmed == '***' {
-			html += '<hr style="border: none; border-top: 1px solid ' + hr_color + '; margin: 20px 0;"/>\n'
+			html += '<hr style="border: none; border-top: 1px solid ' + hr_color +
+				'; margin: 20px 0;"/>\n'
 			continue
 		}
 
 		if trimmed.starts_with('# ') {
-			html += '<h1 style="color: ' + h1_color + '; margin-top: 20px; font-size: 24px; border-bottom: 1px solid ' + hr_color + '; padding-bottom: 6px;">' +
-				parse_inline(trimmed[2..], code_bg, code_fg) + '</h1>\n'
+			html += '<h1 style="color: ' + h1_color +
+				'; margin-top: 20px; font-size: 24px; border-bottom: 1px solid ' + hr_color +
+				'; padding-bottom: 6px;">' + parse_inline(trimmed[2..], code_bg, code_fg) +
+				'</h1>\n'
 			continue
 		} else if trimmed.starts_with('## ') {
 			html += '<h2 style="color: ' + h2_color + '; margin-top: 18px; font-size: 20px;">' +
@@ -225,7 +234,8 @@ fn markdown_to_html(md string, theme string) string {
 				in_list = true
 			}
 			content := trimmed[2..]
-			html += '<li style="margin-bottom: 6px;">' + parse_inline(content, code_bg, code_fg) + '</li>\n'
+			html += '<li style="margin-bottom: 6px;">' + parse_inline(content, code_bg, code_fg) +
+				'</li>\n'
 			continue
 		}
 
@@ -233,7 +243,8 @@ fn markdown_to_html(md string, theme string) string {
 			continue
 		}
 
-		html += '<p style="line-height: 1.6; margin-bottom: 12px;">' + parse_inline(line, code_bg, code_fg) + '</p>\n'
+		html += '<p style="line-height: 1.6; margin-bottom: 12px;">' +
+			parse_inline(line, code_bg, code_fg) + '</p>\n'
 	}
 
 	if in_list {
@@ -243,8 +254,10 @@ fn markdown_to_html(md string, theme string) string {
 		html += '</code></pre>\n'
 	}
 
-	return '<html><head><meta charset="utf-8"></head><body style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Helvetica, Arial, sans-serif; font-size: 14px; background-color: ' +
-		body_bg + '; color: ' + body_fg + '; padding: 22px; margin: 0; line-height: 1.6;">' + html + '</body></html>'
+	return
+		'<html><head><meta charset="utf-8"></head><body style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Helvetica, Arial, sans-serif; font-size: 14px; background-color: ' +
+		body_bg + '; color: ' + body_fg + '; padding: 22px; margin: 0; line-height: 1.6;">' + html +
+		'</body></html>'
 }
 
 fn parse_inline(text string, code_bg string, code_fg string) string {
@@ -320,7 +333,8 @@ fn generate_unified_diff(original string, modified string, title_a string, title
 		return ' Both documents are 100% IDENTICAL. No differences found.\n\n' + out.join('\n')
 	}
 
-	return ' Found differences across documents (${diff_count} line mutations):\n\n' + out.join('\n')
+	return
+		' Found differences across documents (${diff_count} line mutations):\n\n' + out.join('\n')
 }
 
 // -------------------------------------------------------------
@@ -546,7 +560,7 @@ fn main() {
 '
 		}
 		'SQL: Table & Analytics Query' {
-			return '-- ===================================================
+			return "-- ===================================================
 -- Analytics Database Schema & Performance Query
 -- ===================================================
 
@@ -554,7 +568,7 @@ CREATE TABLE IF NOT EXISTS system_telemetry (
     id BIGSERIAL PRIMARY KEY,
     session_id UUID NOT NULL,
     event_type VARCHAR(64) NOT NULL,
-    payload JSONB DEFAULT \'{}\'::jsonb,
+    payload JSONB DEFAULT '{}'::jsonb,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -567,10 +581,10 @@ SELECT
     MIN(created_at) AS first_seen,
     MAX(created_at) AS last_seen
 FROM system_telemetry
-WHERE created_at >= NOW() - INTERVAL \'7 days\'
+WHERE created_at >= NOW() - INTERVAL '7 days'
 GROUP BY event_type
 ORDER BY total_occurrences DESC;
-'
+"
 		}
 		'Bash: Automation Script' {
 			return '#!/usr/bin/env bash
@@ -617,7 +631,8 @@ ENTRYPOINT ["/root/server"]
 fn main() {
 	println('Starting SimpleGUI - Text Editor Pro (Ultimate Native macOS Developer & Document Studio)...')
 
-	mut win := simplegui.new_simple_window('Text Editor Pro -- Ultimate Native Developer & Document Studio', 1240, 960)
+	mut win := simplegui.new_simple_window('Text Editor Pro -- Ultimate Native Developer & Document Studio',
+		1240, 960)
 	win.set_fullscreen(true)
 	win.restore_saved_theme()
 	win.set_spacing(6)
@@ -625,18 +640,34 @@ fn main() {
 
 	mut state := &EditorState{
 		current_file_path: ''
-		is_dirty: false
-		font_size: 14
-		font_family: 'Menlo'
-		active_view: 'Editor & Tools'
+		is_dirty:          false
+		font_size:         14
+		font_family:       'Menlo'
+		active_view:       'Editor & Tools'
 		active_buffer_idx: 0
-		buffers: [
-			ScratchpadBuffer{ name: 'Scratchpad 1', content: '// Welcome to SimpleGUI Text Editor Pro!\n// Full-featured macOS Developer & Text Studio.\n\nfn main() {\n    println("Hello, World!")\n}\n', file: '' },
-			ScratchpadBuffer{ name: 'Scratchpad 2', content: '# Scratchpad 2\nWrite notes, queries, or ideas here.\n', file: '' },
-			ScratchpadBuffer{ name: 'Scratchpad 3', content: '{\n  "status": "ready",\n  "buffer": 3\n}\n', file: '' },
-			ScratchpadBuffer{ name: 'Scratchpad 4', content: '-- Scratchpad 4: SQL & Data\nSELECT * FROM documents WHERE active = true;\n', file: '' },
+		buffers:           [
+			ScratchpadBuffer{
+				name:    'Scratchpad 1'
+				content: '// Welcome to SimpleGUI Text Editor Pro!\n// Full-featured macOS Developer & Text Studio.\n\nfn main() {\n    println("Hello, World!")\n}\n'
+				file:    ''
+			},
+			ScratchpadBuffer{
+				name:    'Scratchpad 2'
+				content: '# Scratchpad 2\nWrite notes, queries, or ideas here.\n'
+				file:    ''
+			},
+			ScratchpadBuffer{
+				name:    'Scratchpad 3'
+				content: '{\n  "status": "ready",\n  "buffer": 3\n}\n'
+				file:    ''
+			},
+			ScratchpadBuffer{
+				name:    'Scratchpad 4'
+				content: '-- Scratchpad 4: SQL & Data\nSELECT * FROM documents WHERE active = true;\n'
+				file:    ''
+			},
 		]
-		original_content: ''
+		original_content:  ''
 	}
 
 	state.original_content = state.buffers[0].content
@@ -648,7 +679,8 @@ fn main() {
 	win.add_heading('Text Editor Pro Studio')
 
 	win.add_label('lbl_buf_sel', 'Active Buffer:')
-	win.add_dropdown('dd_buffer', ['1: Scratchpad 1', '2: Scratchpad 2', '3: Scratchpad 3', '4: Scratchpad 4'], '1: Scratchpad 1')
+	win.add_dropdown('dd_buffer', ['1: Scratchpad 1', '2: Scratchpad 2', '3: Scratchpad 3',
+		'4: Scratchpad 4'], '1: Scratchpad 1')
 	win.set_control_width('dd_buffer', 160)
 
 	win.add_label('lbl_theme_hdr', 'Theme:')
@@ -697,7 +729,7 @@ fn main() {
 		'Monaco',
 		'Courier New',
 		'Helvetica',
-		'System'
+		'System',
 	], 'Menlo')
 	win.set_control_width('dd_font_family', 100)
 
@@ -821,7 +853,7 @@ fn main() {
 		'Node.js (node)',
 		'Bash (bash -s)',
 		'Ruby (ruby)',
-		'Perl (perl)'
+		'Perl (perl)',
 	], 'V (v run)')
 	win.set_control_width('dd_runtime', 180)
 
@@ -833,7 +865,8 @@ fn main() {
 	win.add_button('btn_clear_console', 'Clear Output')
 	win.end_row()
 
-	win.add_textarea('txt_console_output', '=== SimpleGUI Code Execution Console ===\nSelect an environment above and click "RUN CURRENT CODE" to execute the active editor buffer.\n')
+	win.add_textarea('txt_console_output',
+		'=== SimpleGUI Code Execution Console ===\nSelect an environment above and click "RUN CURRENT CODE" to execute the active editor buffer.\n')
 	win.set_control_height('txt_console_output', 470)
 	win.set_control_font_name('txt_console_output', 'Menlo')
 	win.set_control_font_size('txt_console_output', 13)
@@ -868,7 +901,7 @@ fn main() {
 		'Buffer 1: Scratchpad 1',
 		'Buffer 2: Scratchpad 2',
 		'Buffer 3: Scratchpad 3',
-		'Buffer 4: Scratchpad 4'
+		'Buffer 4: Scratchpad 4',
 	], 'Saved File on Disk')
 	win.set_control_width('dd_diff_target', 200)
 
@@ -876,7 +909,8 @@ fn main() {
 	win.add_button('btn_copy_diff', 'Copy Diff')
 	win.end_row()
 
-	win.add_textarea('txt_diff_output', 'Select a comparison target above and click "Compute Unified Diff" to view line-by-line mutations.')
+	win.add_textarea('txt_diff_output',
+		'Select a comparison target above and click "Compute Unified Diff" to view line-by-line mutations.')
 	win.set_control_height('txt_diff_output', 490)
 	win.set_control_font_name('txt_diff_output', 'Menlo')
 	win.set_control_font_size('txt_diff_output', 13)
@@ -898,7 +932,7 @@ fn main() {
 		'Markdown: Documentation',
 		'SQL: Table & Analytics Query',
 		'Bash: Automation Script',
-		'Dockerfile: Multi-Stage Build'
+		'Dockerfile: Multi-Stage Build',
 	], 'V: CLI Application')
 	win.set_control_width('dd_templates', 240)
 
@@ -924,7 +958,8 @@ fn main() {
 	// 10. Status Bar & Telemetry Footer
 	// -------------------------------------------------------------
 	win.begin_row('row_status_bar')
-	win.add_label('lbl_stats', 'Lines: 6  |  Words: 15  |  Chars: 125  |  Size: 125 B  |  Encoding: UTF-8  |  Tab: 4 Spaces')
+	win.add_label('lbl_stats',
+		'Lines: 6  |  Words: 15  |  Chars: 125  |  Size: 125 B  |  Encoding: UTF-8  |  Tab: 4 Spaces')
 	win.end_row()
 
 	// -------------------------------------------------------------
@@ -943,14 +978,23 @@ fn main() {
 
 		file_display := if state.current_file_path != '' {
 			name := os.file_name(state.current_file_path)
-			if state.is_dirty { '* ' + name + ' (Modified)' } else { name }
+			if state.is_dirty {
+				'* ' + name + ' (Modified)'
+			} else {
+				name
+			}
 		} else {
 			buf_name := state.buffers[state.active_buffer_idx].name
-			if state.is_dirty { '* ' + buf_name + ' (Unsaved)' } else { buf_name }
+			if state.is_dirty {
+				'* ' + buf_name + ' (Unsaved)'
+			} else {
+				buf_name
+			}
 		}
 
 		win.set('lbl_active_file', 'Active File: ' + file_display)
-		win.set('lbl_stats', ' Lines: ${line_count}  |  Words: ${word_count}  |  Chars: ${char_count}  |  Bytes: ${byte_count} B  |  Encoding: UTF-8  |  View: ${state.active_view}')
+		win.set('lbl_stats',
+			' Lines: ${line_count}  |  Words: ${word_count}  |  Chars: ${char_count}  |  Bytes: ${byte_count} B  |  Encoding: UTF-8  |  View: ${state.active_view}')
 
 		// If telemetry tab is visible or generated, populate full report
 		mut max_line_len := 0
@@ -964,8 +1008,16 @@ fn main() {
 
 		read_time_min := f64(word_count) / 200.0
 		speak_time_min := f64(word_count) / 130.0
-		read_str := if read_time_min < 1.0 { '${int(read_time_min * 60)} seconds' } else { '${read_time_min:.1f} minutes' }
-		speak_str := if speak_time_min < 1.0 { '${int(speak_time_min * 60)} seconds' } else { '${speak_time_min:.1f} minutes' }
+		read_str := if read_time_min < 1.0 {
+			'${int(read_time_min * 60)} seconds'
+		} else {
+			'${read_time_min:.1f} minutes'
+		}
+		speak_str := if speak_time_min < 1.0 {
+			'${int(speak_time_min * 60)} seconds'
+		} else {
+			'${speak_time_min:.1f} minutes'
+		}
 
 		md5_sum := md5.hexhash(text)
 		sha256_sum := sha256.hexhash(text)
@@ -977,8 +1029,10 @@ fn main() {
 		report << ' TEXT EDITOR PRO -- DOCUMENT TELEMETRY & METRIC REPORT'
 		report << '========================================================================'
 		report << 'File Name / Buffer   : ' + file_display
-		report << 'Disk File Path       : ' + if state.current_file_path != '' { state.current_file_path } else { '(In-Memory Scratchpad Buffer)' }
-		report << 'Status               : ' + if state.is_dirty { 'Modified (Unsaved Changes)' } else { 'Saved / Clean' }
+		report << 'Disk File Path       : ' +
+			if state.current_file_path != '' { state.current_file_path } else { '(In-Memory Scratchpad Buffer)' }
+		report << 'Status               : ' +
+			if state.is_dirty { 'Modified (Unsaved Changes)' } else { 'Saved / Clean' }
 		report << 'Character Encoding   : UTF-8'
 		report << ''
 		report << ' STRUCTURAL COUNTS:'
@@ -997,10 +1051,15 @@ fn main() {
 		report << '------------------------------------------------------------------------'
 		report << 'Estimated Reading Time (200 WPM) : ${read_str}'
 		report << 'Estimated Speaking Time (130 WPM): ${speak_str}'
-		report << 'Average Word Length             : ' + if word_count > 0 { '${f64(char_count) / f64(word_count):.1f} chars/word' } else { '0' }
+		report << 'Average Word Length             : ' +
+			if word_count > 0 { '${f64(char_count) / f64(word_count):.1f} chars/word' } else { '0' }
 		report << 'Maximum Line Length             : ${max_line_len} chars'
 		if longest_line.len > 0 {
-			disp_longest := if longest_line.len > 60 { longest_line[..60] + '...' } else { longest_line }
+			disp_longest := if longest_line.len > 60 {
+				longest_line[..60] + '...'
+			} else {
+				longest_line
+			}
 			report << 'Longest Line Preview            : "${disp_longest}"'
 		}
 		report << ''
@@ -1117,7 +1176,8 @@ fn main() {
 	// New Document
 	win.on_click('btn_new', fn [mut state, update_telemetry] (mut w simplegui.SimpleWindow) {
 		if state.is_dirty {
-			if !w.confirm('Discard Changes?', 'You have unsaved modifications in this buffer. Create new document anyway?') {
+			if !w.confirm('Discard Changes?',
+				'You have unsaved modifications in this buffer. Create new document anyway?') {
 				return
 			}
 		}
@@ -1335,7 +1395,11 @@ fn main() {
 				tokens := line.split(' ')
 				mut new_tokens := []string{}
 				for tok in tokens {
-					matched := if match_case { tok == find_str } else { tok.to_lower() == find_str.to_lower() }
+					matched := if match_case {
+						tok == find_str
+					} else {
+						tok.to_lower() == find_str.to_lower()
+					}
 					if matched {
 						new_tokens << replace_str
 					} else {
@@ -1459,7 +1523,8 @@ fn main() {
 			mut out := words[0].to_lower()
 			for i in 1 .. words.len {
 				w_str := words[i]
-				out += w_str[..1].to_upper() + if w_str.len > 1 { w_str[1..].to_lower() } else { '' }
+				out += w_str[..1].to_upper() +
+					if w_str.len > 1 { w_str[1..].to_lower() } else { '' }
 			}
 			res_lines << out
 		}
@@ -1726,7 +1791,8 @@ fn main() {
 	win.on_click('btn_minify_json', fn [mut state, update_telemetry] (mut w simplegui.SimpleWindow) {
 		text := w.get('txt_editor').trim_space()
 		if text == '' { return }
-		res := simplegui.exec_safe_stdin('python3', ['-c', 'import sys, json; print(json.dumps(json.loads(sys.stdin.read()), separators=(",", ":")))'], text)
+		res := simplegui.exec_safe_stdin('python3', ['-c',
+			'import sys, json; print(json.dumps(json.loads(sys.stdin.read()), separators=(",", ":")))'], text)
 		if res.exit_code == 0 && res.output.trim_space() != '' {
 			w.set('txt_editor', res.output.trim_space())
 			state.is_dirty = true
@@ -1843,7 +1909,8 @@ fn main() {
 		mut urls := []string{}
 		for tok in tokens {
 			clean := tok.trim_space()
-			if clean.starts_with('http://') || clean.starts_with('https://') || clean.starts_with('ftp://') {
+			if clean.starts_with('http://') || clean.starts_with('https://')
+				|| clean.starts_with('ftp://') {
 				if !urls.contains(clean) {
 					urls << clean
 				}
@@ -1877,7 +1944,9 @@ fn main() {
 		}
 		res := emails.join('\n')
 		w.copy_to_clipboard(res)
-		w.alert('Extracted Emails (${emails.len})', 'Copied ${emails.len} Email(s) to clipboard:\n\n' + res)
+		w.alert('Extracted Emails (${emails.len})',
+
+			'Copied ${emails.len} Email(s) to clipboard:\n\n' + res)
 	})
 
 	// Extract IPv4 Addresses
@@ -1908,7 +1977,9 @@ fn main() {
 		}
 		res := ips.join('\n')
 		w.copy_to_clipboard(res)
-		w.alert('Extracted IPs (${ips.len})', 'Copied ${ips.len} IP address(es) to clipboard:\n\n' + res)
+		w.alert('Extracted IPs (${ips.len})',
+
+			'Copied ${ips.len} IP address(es) to clipboard:\n\n' + res)
 	})
 
 	// Extract Quoted Strings
@@ -1943,7 +2014,9 @@ fn main() {
 		}
 		res := quotes.join('\n')
 		w.copy_to_clipboard(res)
-		w.alert('Extracted Quotes (${quotes.len})', 'Copied ${quotes.len} quoted string(s) to clipboard:\n\n' + res)
+		w.alert('Extracted Quotes (${quotes.len})',
+
+			'Copied ${quotes.len} quoted string(s) to clipboard:\n\n' + res)
 	})
 
 	// CRLF to LF
@@ -2073,7 +2146,11 @@ fn main() {
 		// Clean up temporary script file
 		os.rm(tmp_script) or {}
 
-		status_badge := if res.exit_code == 0 { ' SUCCESS (Exit 0)' } else { ' FAILED (Exit ${res.exit_code})' }
+		status_badge := if res.exit_code == 0 {
+			' SUCCESS (Exit 0)'
+		} else {
+			' FAILED (Exit ${res.exit_code})'
+		}
 
 		mut out := []string{}
 		out << '========================================================================'
@@ -2151,7 +2228,8 @@ fn main() {
 			compare_text = state.buffers[3].content
 		}
 
-		diff_result := generate_unified_diff(curr_text, compare_text, 'Active Editor Buffer', title_b)
+		diff_result := generate_unified_diff(curr_text, compare_text, 'Active Editor Buffer',
+			title_b)
 		w.set('txt_diff_output', diff_result)
 		w.toast('Computed unified diff comparison.')
 	})

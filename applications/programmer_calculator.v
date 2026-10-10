@@ -49,8 +49,8 @@ fn pad_l(s string, width int) string {
 
 fn mask_value(val u64, ws WordSize) u64 {
 	match ws {
-		.ws_byte  { return val & 0xFF }
-		.ws_word  { return val & 0xFFFF }
+		.ws_byte { return val & 0xFF }
+		.ws_word { return val & 0xFFFF }
 		.ws_dword { return val & 0xFFFF_FFFF }
 		.ws_qword { return val }
 	}
@@ -80,8 +80,8 @@ fn to_signed_string(val u64, ws WordSize) string {
 fn format_binary_grouped(val u64, ws WordSize) string {
 	mut bit_len := 64
 	match ws {
-		.ws_byte  { bit_len = 8 }
-		.ws_word  { bit_len = 16 }
+		.ws_byte { bit_len = 8 }
+		.ws_word { bit_len = 16 }
 		.ws_dword { bit_len = 32 }
 		.ws_qword { bit_len = 64 }
 	}
@@ -99,8 +99,8 @@ fn format_binary_grouped(val u64, ws WordSize) string {
 
 fn format_hex_clean(val u64, ws WordSize) string {
 	match ws {
-		.ws_byte  { return '0x${(val & 0xFF):02X}' }
-		.ws_word  { return '0x${(val & 0xFFFF):04X}' }
+		.ws_byte { return '0x${(val & 0xFF):02X}' }
+		.ws_word { return '0x${(val & 0xFFFF):04X}' }
 		.ws_dword { return '0x${(val & 0xFFFF_FFFF):08X}' }
 		.ws_qword { return '0x${val:016X}' }
 	}
@@ -128,8 +128,8 @@ fn compute_bit_metrics(val u64, ws WordSize) BitMetrics {
 	masked := mask_value(val, ws)
 	mut bit_len := 64
 	match ws {
-		.ws_byte  { bit_len = 8 }
-		.ws_word  { bit_len = 16 }
+		.ws_byte { bit_len = 8 }
+		.ws_word { bit_len = 16 }
 		.ws_dword { bit_len = 32 }
 		.ws_qword { bit_len = 64 }
 	}
@@ -165,10 +165,10 @@ fn compute_bit_metrics(val u64, ws WordSize) BitMetrics {
 
 	return BitMetrics{
 		popcount: pop
-		clz: clz
-		ctz: ctz
-		parity: pop % 2
-		is_pow2: masked > 0 && (masked & (masked - 1)) == 0
+		clz:      clz
+		ctz:      ctz
+		parity:   pop % 2
+		is_pow2:  masked > 0 && (masked & (masked - 1)) == 0
 	}
 }
 
@@ -185,6 +185,7 @@ fn hex_to_u64(hex_str string) ?u64 {
 			`A`...`F` { u64(ch - `A` + 10) }
 			else { return none }
 		}
+
 		res = (res << 4) | digit
 	}
 	return res
@@ -198,6 +199,7 @@ fn bin_to_u64(bin_str string) ?u64 {
 			`1` { u64(1) }
 			else { return none }
 		}
+
 		res = (res << 1) | digit
 	}
 	return res
@@ -210,6 +212,7 @@ fn oct_to_u64(oct_str string) ?u64 {
 			`0`...`7` { u64(ch - `0`) }
 			else { return none }
 		}
+
 		res = (res << 3) | digit
 	}
 	return res
@@ -277,17 +280,23 @@ fn format_ieee754_breakdown(val u64) string {
 	lines << '========================================================================'
 	lines << ' 32-BIT SINGLE PRECISION (FLOAT):'
 	lines << '   * Floating Value   : ${f32_val}'
-	lines << '   * Sign Bit [31]    : ${sign_32} (' + (if sign_32 == 1 { 'Negative -' } else { 'Positive +' }) + ')'
+	lines <<
+		'   * Sign Bit [31]    : ${sign_32} (' + (if sign_32 == 1 { 'Negative -' } else { 'Positive +' }) +
+		')'
 	lines << '   * Exponent [30:23] : 0x${exp_32:02X} (${exp_32} unsigned, 2^${bias_exp_32} biased)'
 	lines << '   * Mantissa [22:0]  : 0x${mant_32:06X} (Fractional: 1.${mant_32:06X})'
-	lines << '   * Binary Breakdown : [${sign_32}] [' + format_bits_raw(u64(exp_32), 8) + '] [' + format_bits_raw(u64(mant_32), 23) + ']'
+	lines << '   * Binary Breakdown : [${sign_32}] [' + format_bits_raw(u64(exp_32), 8) + '] [' +
+		format_bits_raw(u64(mant_32), 23) + ']'
 	lines << '------------------------------------------------------------------------'
 	lines << ' 64-BIT DOUBLE PRECISION (DOUBLE):'
 	lines << '   * Floating Value   : ${f64_val}'
-	lines << '   * Sign Bit [63]    : ${sign_64} (' + (if sign_64 == 1 { 'Negative -' } else { 'Positive +' }) + ')'
+	lines <<
+		'   * Sign Bit [63]    : ${sign_64} (' + (if sign_64 == 1 { 'Negative -' } else { 'Positive +' }) +
+		')'
 	lines << '   * Exponent [62:52] : 0x${exp_64:03X} (${exp_64} unsigned, 2^${bias_exp_64} biased)'
 	lines << '   * Mantissa [51:0]  : 0x${mant_64:013X}'
-	lines << '   * Binary Breakdown : [${sign_64}] [' + format_bits_raw(u64(exp_64), 11) + '] [' + format_bits_raw(u64(mant_64), 52) + ']'
+	lines << '   * Binary Breakdown : [${sign_64}] [' + format_bits_raw(u64(exp_64), 11) + '] [' +
+		format_bits_raw(u64(mant_64), 52) + ']'
 	lines << '========================================================================\n'
 	return lines.join('\n')
 }
@@ -336,17 +345,25 @@ fn format_type_interpretations(val u64) string {
 	a_col := (val >> 24) & 0xFF
 
 	// UNIX Epoch timestamp
-	epoch_time := if val <= 253402300799 { time.unix(i64(val)).format_ss() } else { 'Out of range (> year 9999)' }
+	epoch_time := if val <= 253402300799 {
+		time.unix(i64(val)).format_ss()
+	} else {
+		'Out of range (> year 9999)'
+	}
 
 	mut lines := []string{}
 	lines << '========================================================================'
 	lines << ' MULTI-TYPE DATA INTERPRETATIONS'
 	lines << '========================================================================'
 	lines << ' INTEGER PRIMITIVES (SIGNED / UNSIGNED):'
-	lines << '   * 8-bit Byte    (i8 / u8)   : ' + pad_l('${i8_val}', 6) + '  /  ' + pad_l('${u8_val}', 5) + '  (0x${u8_val:02X})'
-	lines << '   * 16-bit Word   (i16 / u16) : ' + pad_l('${i16_val}', 6) + '  /  ' + pad_l('${u16_val}', 5) + '  (0x${u16_val:04X})'
-	lines << '   * 32-bit Dword  (i32 / u32) : ' + pad_l('${i32_val}', 11) + '  /  ' + pad_l('${u32_val}', 10) + '  (0x${u32_val:08X})'
-	lines << '   * 64-bit Qword  (i64 / u64) : ' + pad_l('${i64_val}', 20) + '  /  ' + pad_l('${u64_val}', 20)
+	lines << '   * 8-bit Byte    (i8 / u8)   : ' + pad_l('${i8_val}', 6) + '  /  ' +
+		pad_l('${u8_val}', 5) + '  (0x${u8_val:02X})'
+	lines << '   * 16-bit Word   (i16 / u16) : ' + pad_l('${i16_val}', 6) + '  /  ' +
+		pad_l('${u16_val}', 5) + '  (0x${u16_val:04X})'
+	lines << '   * 32-bit Dword  (i32 / u32) : ' + pad_l('${i32_val}', 11) + '  /  ' +
+		pad_l('${u32_val}', 10) + '  (0x${u32_val:08X})'
+	lines << '   * 64-bit Qword  (i64 / u64) : ' + pad_l('${i64_val}', 20) + '  /  ' +
+		pad_l('${u64_val}', 20)
 	lines << '------------------------------------------------------------------------'
 	lines << ' FLOATING-POINT INTERPRETATION:'
 	lines << '   * IEEE 754 Float32          : ${f32_val}'
@@ -368,8 +385,8 @@ fn format_type_interpretations(val u64) string {
 fn render_bit_grid(val u64, ws WordSize) string {
 	mut bit_len := 64
 	match ws {
-		.ws_byte  { bit_len = 8 }
-		.ws_word  { bit_len = 16 }
+		.ws_byte { bit_len = 8 }
+		.ws_word { bit_len = 16 }
 		.ws_dword { bit_len = 32 }
 		.ws_qword { bit_len = 64 }
 	}
@@ -387,7 +404,7 @@ fn render_bit_grid(val u64, ws WordSize) string {
 
 		mut hdr := ' Bits [${high_idx:02}:${low_idx:02}] : '
 		mut val_row := ' State       : '
-		
+
 		for i := high_idx; i >= low_idx; i-- {
 			bit := (val >> u64(i)) & 1
 			hdr += '${i:02} '
@@ -407,7 +424,8 @@ fn render_bit_grid(val u64, ws WordSize) string {
 	lines << '   * Popcount (Set Bits 1s)    : ${bm.popcount} / ${bit_len} bits'
 	lines << '   * Count Leading Zeros (CLZ) : ${bm.clz}'
 	lines << '   * Count Trailing Zeros (CTZ): ${bm.ctz}'
-	lines << '   * Parity Bit (Even/Odd)     : ' + (if bm.parity == 0 { 'Even (0)' } else { 'Odd (1)' })
+	lines <<
+		'   * Parity Bit (Even/Odd)     : ' + (if bm.parity == 0 { 'Even (0)' } else { 'Odd (1)' })
 	lines << '   * Is Power of 2 (2^k)       : ' + (if bm.is_pow2 { 'YES' } else { 'NO' })
 	lines << '========================================================================\n'
 	return lines.join('\n')
@@ -422,21 +440,11 @@ fn swap_bytes_16(v u16) u16 {
 }
 
 fn swap_bytes_32(v u32) u32 {
-	return ((v >> 24) & 0xFF) |
-		((v >> 8) & 0xFF00) |
-		((v << 8) & 0xFF_0000) |
-		((v << 24) & 0xFF00_0000)
+	return ((v >> 24) & 0xFF) | ((v >> 8) & 0xFF00) | ((v << 8) & 0xFF_0000) | ((v << 24) & 0xFF00_0000)
 }
 
 fn swap_bytes_64(v u64) u64 {
-	return ((v >> 56) & 0x0000_0000_0000_00FF) |
-		((v >> 40) & 0x0000_0000_0000_FF00) |
-		((v >> 24) & 0x0000_0000_00FF_0000) |
-		((v >> 8) & 0x0000_0000_FF00_0000) |
-		((v << 8) & 0x0000_00FF_0000_0000) |
-		((v << 24) & 0x0000_FF00_0000_0000) |
-		((v << 40) & 0x00FF_0000_0000_0000) |
-		((v << 56) & 0xFF00_0000_0000_0000)
+	return ((v >> 56) & 0x0000_0000_0000_00FF) | ((v >> 40) & 0x0000_0000_0000_FF00) | ((v >> 24) & 0x0000_0000_00FF_0000) | ((v >> 8) & 0x0000_0000_FF00_0000) | ((v << 8) & 0x0000_00FF_0000_0000) | ((v << 24) & 0x0000_FF00_0000_0000) | ((v << 40) & 0x00FF_0000_0000_0000) | ((v << 56) & 0xFF00_0000_0000_0000)
 }
 
 fn reverse_bits_64(v u64) u64 {
@@ -454,17 +462,18 @@ fn reverse_bits_64(v u64) u64 {
 fn main() {
 	println('Starting SimpleGUI - Programmer Calculator Studio Pro...')
 
-	mut win := simplegui.new_simple_window('Programmer\'s Calculator Pro -- Systems, Hex & Bitwise Engine', 1180, 920)
+	mut win := simplegui.new_simple_window("Programmer's Calculator Pro -- Systems, Hex & Bitwise Engine",
+		1180, 920)
 	win.set_fullscreen(true)
 	win.restore_saved_theme()
 	win.set_spacing(6)
 	win.set_padding(14)
 
 	mut state := &AppState{
-		current_val: 0xDEAD_BEEF
-		word_size: .ws_dword
-		is_signed: false
-		active_tab: ' Bitwise Calculator'
+		current_val:    0xDEAD_BEEF
+		word_size:      .ws_dword
+		is_signed:      false
+		active_tab:     ' Bitwise Calculator'
 		history_ledger: []string{}
 	}
 
@@ -472,7 +481,7 @@ fn main() {
 	// Header & Theme
 	// -------------------------------------------------------------
 	win.begin_row('row_header')
-	win.add_heading('Programmer\'s Calculator Pro')
+	win.add_heading("Programmer's Calculator Pro")
 
 	win.add_label('lbl_theme_hdr', 'Theme:')
 	saved_theme := simplegui.get_saved_theme()
@@ -508,7 +517,7 @@ fn main() {
 		'64-bit QWORD (uint64)',
 		'32-bit DWORD (uint32)',
 		'16-bit WORD (uint16)',
-		'8-bit BYTE (uint8)'
+		'8-bit BYTE (uint8)',
 	], '32-bit DWORD (uint32)')
 	win.set_control_width('dd_word_size', 190)
 
@@ -527,7 +536,7 @@ fn main() {
 		' Data Type Interpretations',
 		' Endianness & Byte Swapping',
 		' Bitmask Presets & Powers of 2',
-		' Operation Ledger'
+		' Operation Ledger',
 	])
 
 	// -------------------------------------------------------------
@@ -564,7 +573,8 @@ fn main() {
 	win.add_button('btn_apply_y', 'Apply Y with Selected Op')
 	win.end_row()
 
-	win.add_textarea('txt_calc_report', 'Real-time multi-radix evaluation report will appear here.\n')
+	win.add_textarea('txt_calc_report',
+		'Real-time multi-radix evaluation report will appear here.\n')
 	win.set_control_height('txt_calc_report', 300)
 	win.set_control_font_name('txt_calc_report', 'Menlo')
 	win.set_control_font_size('txt_calc_report', 12)
@@ -632,7 +642,8 @@ fn main() {
 	win.add_button('btn_revbits', 'Reverse All Bits')
 	win.end_row()
 
-	win.add_textarea('txt_endian_report', 'Endianness byte swaps and reverse bit representations will appear here.\n')
+	win.add_textarea('txt_endian_report',
+		'Endianness byte swaps and reverse bit representations will appear here.\n')
 	win.set_control_height('txt_endian_report', 340)
 	win.set_control_font_name('txt_endian_report', 'Menlo')
 	win.set_control_font_size('txt_endian_report', 12)
@@ -657,7 +668,8 @@ fn main() {
 	win.add_button('btn_pre_deadbeef', '0xDEADBEEF (Magic Value)')
 	win.end_row()
 
-	win.add_textarea('txt_presets_report', 'Quickly load common bitwise masks and constants above.\n')
+	win.add_textarea('txt_presets_report',
+		'Quickly load common bitwise masks and constants above.\n')
 	win.set_control_height('txt_presets_report', 300)
 	win.set_control_font_name('txt_presets_report', 'Menlo')
 	win.set_control_font_size('txt_presets_report', 12)
@@ -674,7 +686,8 @@ fn main() {
 	win.add_button('btn_export_ledger', 'Export Ledger...')
 	win.end_row()
 
-	win.add_textarea('txt_ledger', 'All programmer calculator operations and evaluations are recorded here.\n')
+	win.add_textarea('txt_ledger',
+		'All programmer calculator operations and evaluations are recorded here.\n')
 	win.set_control_height('txt_ledger', 380)
 	win.set_control_font_name('txt_ledger', 'Menlo')
 	win.set_control_font_size('txt_ledger', 12)
@@ -692,7 +705,7 @@ fn main() {
 	// Status Bar Footer
 	// -------------------------------------------------------------
 	win.begin_row('row_footer')
-	win.add_label('lbl_status_bar', 'Ready. Programmer\'s Multi-Radix Calculator active.')
+	win.add_label('lbl_status_bar', "Ready. Programmer's Multi-Radix Calculator active.")
 	win.end_row()
 
 	// -------------------------------------------------------------
@@ -704,7 +717,7 @@ fn main() {
 		state.history_ledger << entry
 		mut content := []string{}
 		content << '========================================================================'
-		content << ' PROGRAMMER\'S CALCULATOR PRO -- OPERATION LEDGER'
+		content << " PROGRAMMER'S CALCULATOR PRO -- OPERATION LEDGER"
 		content << '========================================================================'
 		content << state.history_ledger.join('\n')
 		content << '========================================================================\n'
@@ -780,7 +793,8 @@ fn main() {
 		w.set('txt_endian_report', end_rep.join('\n'))
 
 		w.set('lbl_status_bar', ' Value = ${hex_str} (${val} dec, 0b${bin_str})')
-		append_ledger(mut w, 'Register Update: ${hex_str}', 'DEC: ${val}, BIN: 0b${bin_str}, Popcount: ${bm.popcount}')
+		append_ledger(mut w, 'Register Update: ${hex_str}',
+			'DEC: ${val}, BIN: 0b${bin_str}, Popcount: ${bm.popcount}')
 	}
 
 	// -------------------------------------------------------------
@@ -810,10 +824,15 @@ fn main() {
 
 	// Word Size Selector
 	win.on_change('dd_word_size', fn [mut state, sync_all_views] (mut w simplegui.SimpleWindow, selected string) {
-		if selected.contains('64-bit') { state.word_size = .ws_qword }
-		else if selected.contains('32-bit') { state.word_size = .ws_dword }
-		else if selected.contains('16-bit') { state.word_size = .ws_word }
-		else { state.word_size = .ws_byte }
+		if selected.contains('64-bit') {
+			state.word_size = .ws_qword
+		} else if selected.contains('32-bit') {
+			state.word_size = .ws_dword
+		} else if selected.contains('16-bit') {
+			state.word_size = .ws_word
+		} else {
+			state.word_size = .ws_byte
+		}
 
 		sync_all_views(mut w, true)
 		w.toast('Word size changed to ' + selected.split(' ')[0])
@@ -823,7 +842,8 @@ fn main() {
 	win.on_click('btn_sync_reg', fn [mut state, sync_all_views] (mut w simplegui.SimpleWindow) {
 		raw_in := w.get('txt_main_val')
 		parsed := parse_any_radix(raw_in) or {
-			w.alert('Parse Error', 'Invalid integer or radix format: "${raw_in}".\nUse 0x.. for Hex, 0b.. for Binary, 0o.. for Octal, or Plain Decimal.')
+			w.alert('Parse Error',
+				'Invalid integer or radix format: "${raw_in}".\nUse 0x.. for Hex, 0b.. for Binary, 0o.. for Octal, or Plain Decimal.')
 			w.toast('Invalid number format: ' + raw_in)
 			return
 		}
@@ -873,11 +893,12 @@ fn main() {
 
 	win.on_click('btn_rol_1', fn [mut state, sync_all_views] (mut w simplegui.SimpleWindow) {
 		bit_len := match state.word_size {
-			.ws_byte  { 8 }
-			.ws_word  { 16 }
+			.ws_byte { 8 }
+			.ws_word { 16 }
 			.ws_dword { 32 }
 			.ws_qword { 64 }
 		}
+
 		top_bit := (state.current_val >> u64(bit_len - 1)) & 1
 		state.current_val = (state.current_val << 1) | top_bit
 		sync_all_views(mut w, true)
@@ -886,11 +907,12 @@ fn main() {
 
 	win.on_click('btn_ror_1', fn [mut state, sync_all_views] (mut w simplegui.SimpleWindow) {
 		bit_len := match state.word_size {
-			.ws_byte  { 8 }
-			.ws_word  { 16 }
+			.ws_byte { 8 }
+			.ws_word { 16 }
 			.ws_dword { 32 }
 			.ws_qword { 64 }
 		}
+
 		low_bit := state.current_val & 1
 		state.current_val = (state.current_val >> 1) | (low_bit << u64(bit_len - 1))
 		sync_all_views(mut w, true)

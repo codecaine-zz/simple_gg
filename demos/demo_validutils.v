@@ -39,8 +39,10 @@ fn main() {
 
 	// 7. Range and length
 	println('\n7. Range & Length Checks:')
-	println('  validate_numeric_range(42.0, 1.0, 100.0) -> ${validutils.validate_numeric_range(42.0, 1.0, 100.0)}')
-	println('  validate_length("antigravity", 3, 20)    -> ${validutils.validate_length('antigravity', 3, 20)}')
+	println('  validate_numeric_range(42.0, 1.0, 100.0) -> ${validutils.validate_numeric_range(42.0,
+		1.0, 100.0)}')
+	println('  validate_length("antigravity", 3, 20)    -> ${validutils.validate_length('antigravity',
+		3, 20)}')
 
 	println('\n✔ validutils demo completed successfully!')
 }

@@ -59,10 +59,17 @@ pub fn zstd_frame_content_size(data []u8) ?u64 {
 		0 {
 			if single_segment { 1 } else { 0 }
 		}
-		1 { 2 }
-		2 { 4 }
-		else { 8 }
+		1 {
+			2
+		}
+		2 {
+			4
+		}
+		else {
+			8
+		}
 	}
+
 	if fcs_size == 0 || pos + fcs_size > data.len {
 		return none
 	}
@@ -108,8 +115,8 @@ pub fn decompress_limited(algo CompressionAlgorithm, data []u8, max_bytes int) !
 		}
 		return zstd_decompress(data)
 	}
-	if algo == .deflate && (looks_like_zlib(data) || (data.len >= 2 && data[0] == 0x1f
-		&& data[1] == 0x8b)) {
+	if algo == .deflate
+		&& (looks_like_zlib(data) || (data.len >= 2 && data[0] == 0x1f && data[1] == 0x8b)) {
 		// vlib's streaming entry point would misread this raw stream as zlib/gzip;
 		// fall back to a full inflate followed by a size check.
 		out := deflate.decompress(data)!
@@ -126,6 +133,7 @@ pub fn decompress_limited(algo CompressionAlgorithm, data []u8, max_bytes int) !
 		.zlib { zlib.decompress_with_callback(data, limit_cb, sink)! }
 		else { deflate.decompress_with_callback(data, limit_cb, sink)! }
 	}
+
 	if sink.exceeded {
 		return error('decompressed data exceeds the limit of ${max_bytes} bytes')
 	}

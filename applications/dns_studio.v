@@ -12,7 +12,8 @@ fn format_dig_output(raw string, domain string, rec_type string, server_str stri
 
 	for line in lines {
 		trimmed := line.trim_space()
-		if trimmed.starts_with(';; Query time:') || trimmed.starts_with(';; SERVER:') || trimmed.starts_with(';; WHEN:') || trimmed.starts_with(';; MSG SIZE') {
+		if trimmed.starts_with(';; Query time:') || trimmed.starts_with(';; SERVER:')
+			|| trimmed.starts_with(';; WHEN:') || trimmed.starts_with(';; MSG SIZE') {
 			stats << trimmed.replace(';; ', '')
 		} else if trimmed.starts_with(';') {
 			continue
@@ -130,11 +131,12 @@ fn main() {
 
 	dig_path := get_dig_bin()
 	openssl_path := get_openssl_bin()
-	win.add_label('lbl_engine_info', 'DNS Engine: ${dig_path}  |  TLS Engine: ${openssl_path}  |  Mode: Async Worker')
+	win.add_label('lbl_engine_info',
+		'DNS Engine: ${dig_path}  |  TLS Engine: ${openssl_path}  |  Mode: Async Worker')
 
 	// Query Controls
 	win.begin_group_box('grp_dns_scope', 'Target Domain & Query Parameters')
-	
+
 	win.begin_row('row_target_bar')
 	win.add_label('lbl_domain', 'Domain Name:')
 	win.add_input('txt_domain', 'github.com')
@@ -151,7 +153,7 @@ fn main() {
 		'NS (Name Servers)',
 		'SOA (Start of Authority)',
 		'PTR (Reverse DNS)',
-		'CAA (Certificate Authority Auth)'
+		'CAA (Certificate Authority Auth)',
 	], 'ANY (All Records)')
 	win.set_control_width('dd_record_type', 210)
 
@@ -162,7 +164,7 @@ fn main() {
 		'Google (8.8.8.8)',
 		'Quad9 (9.9.9.9)',
 		'OpenDNS (208.67.222.222)',
-		'AdGuard (94.140.14.14)'
+		'AdGuard (94.140.14.14)',
 	], 'Default System DNS')
 	win.set_control_width('dd_nameserver', 180)
 	win.end_row()
@@ -203,7 +205,8 @@ fn main() {
 	win.end_row()
 
 	win.append_console('dns_console', ' DNS & SSL Studio Pro Initialized.\n', 1)
-	win.append_console('dns_console', ' Ready to inspect DNS records, authoritative name servers, and X.509 certificates.\n', 4)
+	win.append_console('dns_console',
+		' Ready to inspect DNS records, authoritative name servers, and X.509 certificates.\n', 4)
 
 	// -------------------------------------------------------------
 	// Event Handlers
@@ -223,11 +226,17 @@ fn main() {
 
 		server_raw := w.get('dd_nameserver')
 		mut server_arg := ''
-		if server_raw.contains('1.1.1.1') { server_arg = '@1.1.1.1' }
-		else if server_raw.contains('8.8.8.8') { server_arg = '@8.8.8.8' }
-		else if server_raw.contains('9.9.9.9') { server_arg = '@9.9.9.9' }
-		else if server_raw.contains('208.67.222.222') { server_arg = '@208.67.222.222' }
-		else if server_raw.contains('94.140.14.14') { server_arg = '@94.140.14.14' }
+		if server_raw.contains('1.1.1.1') {
+			server_arg = '@1.1.1.1'
+		} else if server_raw.contains('8.8.8.8') {
+			server_arg = '@8.8.8.8'
+		} else if server_raw.contains('9.9.9.9') {
+			server_arg = '@9.9.9.9'
+		} else if server_raw.contains('208.67.222.222') {
+			server_arg = '@208.67.222.222'
+		} else if server_raw.contains('94.140.14.14') {
+			server_arg = '@94.140.14.14'
+		}
 
 		is_short := w.get('chk_short') == 'true'
 		is_trace := w.get('chk_trace') == 'true'
@@ -252,7 +261,7 @@ fn main() {
 			args << '+dnssec'
 		}
 
-		w.append_console('dns_console', ' Resolving DNS: dig ${args.join(" ")}\n', 1)
+		w.append_console('dns_console', ' Resolving DNS: dig ${args.join(' ')}\n', 1)
 		w.set_status('Querying DNS records for ${domain}...')
 
 		go fn [mut w, dig_bin, args, domain, rec_type, server_raw, is_short, is_trace] () {
@@ -269,15 +278,25 @@ fn main() {
 				}
 				if res.exit_code == 0 {
 					win_main.set('txt_results', formatted)
-					win_main.append_console('dns_console', ' DNS query completed for ${domain} (${rec_type}) in ${elapsed_ms} ms.\n', 4)
-					win_main.set('lbl_stats', ' Stats: SUCCESS  |  Domain: ${domain}  |  Record: ${rec_type}  |  Duration: ${elapsed_ms} ms')
+					win_main.append_console('dns_console',
+						' DNS query completed for ${domain} (${rec_type}) in ${elapsed_ms} ms.\n',
+						4)
+					win_main.set('lbl_stats',
+						' Stats: SUCCESS  |  Domain: ${domain}  |  Record: ${rec_type}  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('DNS query completed in ${elapsed_ms} ms.')
 					win_main.toast('DNS records resolved!')
 				} else {
-					err_msg := if out != '' { out } else { 'DNS lookup failed or nameserver unreachable.' }
-					win_main.set('txt_results', '; [DNS QUERY ERROR]\n; Domain: ${domain}\n; Record: ${rec_type}\n; Exit Code: ${res.exit_code}\n\n${err_msg}\n')
-					win_main.append_console('dns_console', ' DNS Query Error:\n' + err_msg + '\n', 3)
-					win_main.set('lbl_stats', ' Stats: ERROR (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
+					err_msg := if out != '' {
+						out
+					} else {
+						'DNS lookup failed or nameserver unreachable.'
+					}
+					win_main.set('txt_results',
+						'; [DNS QUERY ERROR]\n; Domain: ${domain}\n; Record: ${rec_type}\n; Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+					win_main.append_console('dns_console', ' DNS Query Error:\n' + err_msg + '\n',
+						3)
+					win_main.set('lbl_stats',
+						' Stats: ERROR (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('DNS query failed.')
 					win_main.toast('DNS query error.')
 				}
@@ -306,17 +325,28 @@ fn main() {
 
 			w.run_on_main_thread(fn [res, elapsed_ms, domain] (mut win_main simplegui.SimpleWindow) {
 				out := res.output.trim_space()
-				if out != '' && !out.contains('unable to load certificate') && !out.contains('connect:errno') {
+				if out != '' && !out.contains('unable to load certificate')
+					&& !out.contains('connect:errno') {
 					win_main.set('txt_results', out)
-					win_main.append_console('dns_console', ' TLS Certificate extracted for ${domain} in ${elapsed_ms} ms.\n', 4)
-					win_main.set('lbl_stats', ' Stats: SSL CERT LOADED  |  Target: ${domain}  |  Duration: ${elapsed_ms} ms')
+					win_main.append_console('dns_console',
+						' TLS Certificate extracted for ${domain} in ${elapsed_ms} ms.\n', 4)
+					win_main.set('lbl_stats',
+						' Stats: SSL CERT LOADED  |  Target: ${domain}  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('SSL certificate retrieved in ${elapsed_ms} ms.')
 					win_main.toast('SSL Certificate loaded!')
 				} else {
-					err_msg := if out != '' { out } else { 'Connection refused or TLS handshake failed on port 443.' }
-					win_main.set('txt_results', '// [SSL/TLS CERTIFICATE ERROR]\n// Target: ${domain}:443\n// Failed to retrieve certificate or port 443 is unreachable.\n\n${err_msg}\n')
-					win_main.append_console('dns_console', ' Failed to connect to SSL on port 443:\n' + err_msg + '\n', 3)
-					win_main.set('lbl_stats', ' Stats: SSL ERROR  |  Target: ${domain}  |  Duration: ${elapsed_ms} ms')
+					err_msg := if out != '' {
+						out
+					} else {
+						'Connection refused or TLS handshake failed on port 443.'
+					}
+					win_main.set('txt_results',
+						'// [SSL/TLS CERTIFICATE ERROR]\n// Target: ${domain}:443\n// Failed to retrieve certificate or port 443 is unreachable.\n\n${err_msg}\n')
+					win_main.append_console('dns_console',
+
+						' Failed to connect to SSL on port 443:\n' + err_msg + '\n', 3)
+					win_main.set('lbl_stats',
+						' Stats: SSL ERROR  |  Target: ${domain}  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('SSL connection failed.')
 					win_main.toast('SSL retrieval failed.')
 				}
@@ -333,12 +363,13 @@ fn main() {
 		}
 
 		dig_bin := get_dig_bin()
-		w.append_console('dns_console', ' Checking SPF, DMARC, and MX records for ${domain}...\n', 1)
+		w.append_console('dns_console', ' Checking SPF, DMARC, and MX records for ${domain}...\n',
+			1)
 		w.set_status('Checking email authentication records...')
 
 		go fn [mut w, dig_bin, domain] () {
 			t0 := time.ticks()
-			
+
 			mx_res := simplegui.exec_safe(dig_bin, [domain, 'MX', '+short'])
 			spf_res := simplegui.exec_safe(dig_bin, [domain, 'TXT', '+short'])
 			dmarc_res := simplegui.exec_safe(dig_bin, ['_dmarc.' + domain, 'TXT', '+short'])
@@ -350,7 +381,11 @@ fn main() {
 			report += '===================================================\n\n'
 
 			report += '--- 1. MX (Mail Exchange) Servers ---\n'
-			report += if mx_res.output.trim_space() != '' { mx_res.output.trim_space() } else { 'No MX records found.' }
+			report += if mx_res.output.trim_space() != '' {
+				mx_res.output.trim_space()
+			} else {
+				'No MX records found.'
+			}
 			report += '\n\n--- 2. SPF (Sender Policy Framework) ---\n'
 			mut has_spf := false
 			for line in spf_res.output.split_into_lines() {
@@ -370,8 +405,11 @@ fn main() {
 
 			w.run_on_main_thread(fn [report, elapsed_ms, domain] (mut win_main simplegui.SimpleWindow) {
 				win_main.set('txt_results', report)
-				win_main.append_console('dns_console', ' Email authentication report generated for ${domain} in ${elapsed_ms} ms.\n', 4)
-				win_main.set('lbl_stats', ' Stats: EMAIL AUTH CHECKED  |  Domain: ${domain}  |  Duration: ${elapsed_ms} ms')
+				win_main.append_console('dns_console',
+					' Email authentication report generated for ${domain} in ${elapsed_ms} ms.\n',
+					4)
+				win_main.set('lbl_stats',
+					' Stats: EMAIL AUTH CHECKED  |  Domain: ${domain}  |  Duration: ${elapsed_ms} ms')
 				win_main.set_status('Email security analysis complete.')
 				win_main.toast('Email authentication report ready!')
 			})

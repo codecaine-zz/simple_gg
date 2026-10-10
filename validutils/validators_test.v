@@ -30,7 +30,8 @@ fn test_network_validators() {
 	assert validate_hostname('a-b.example.com.')
 	assert !validate_hostname('-bad.com')
 	assert !validate_hostname('${'a'.repeat(64)}.com')
-	assert validate_port('443') && !validate_port('0') && !validate_port('65536') && !validate_port('8a')
+	assert validate_port('443') && !validate_port('0') && !validate_port('65536')
+		&& !validate_port('8a')
 	for ok in ['::', '::1', '2001:db8::8a2e:370:7334', 'fe80::1%eth0', '::ffff:192.0.2.1',
 		'2001:0db8:0000:0000:0000:ff00:0042:8329'] {
 		assert validate_ipv6(ok), ok
@@ -70,13 +71,16 @@ fn test_financial_and_identifiers() {
 }
 
 fn test_format_validators() {
-	assert validate_hex_color('#fff') && validate_hex_color('#A1B2C3') && validate_hex_color('#a1b2c3d4')
-	assert !validate_hex_color('fff') && !validate_hex_color('#ggg') && !validate_hex_color('#12345')
+	assert validate_hex_color('#fff') && validate_hex_color('#A1B2C3')
+		&& validate_hex_color('#a1b2c3d4')
+	assert !validate_hex_color('fff') && !validate_hex_color('#ggg')
+		&& !validate_hex_color('#12345')
 	assert validate_slug('my-post-2026') && !validate_slug('My-Post') && !validate_slug('a--b')
 	assert validate_base64('aGVsbG8=') && validate_base64('aGVsbG8h')
 	assert !validate_base64('aGVsbG8') && !validate_base64('aGV$bG8=')
 	assert validate_e164('+14155552671') && !validate_e164('14155552671') && !validate_e164('+0123')
-	assert validate_date('2024-02-29') && !validate_date('2023-02-29') && !validate_date('2023-13-01')
+	assert validate_date('2024-02-29') && !validate_date('2023-02-29')
+		&& !validate_date('2023-13-01')
 	assert !validate_date('2023-1-01')
 }
 
@@ -93,6 +97,7 @@ fn test_password_strength() {
 
 fn test_fluent_validator() {
 	mut v := Validator{}
+
 	v.required('name', ' ').email('email', 'nope').min_len('password', 'short', 12).range('age',
 		150, 0, 130).one_of('role', 'root', ['user', 'admin']).date('dob', '2023-02-30')
 	assert !v.is_valid()

@@ -318,9 +318,14 @@ pub fn validate_date(s string) bool {
 		2 {
 			if leap { 29 } else { 28 }
 		}
-		4, 6, 9, 11 { 30 }
-		else { 31 }
+		4, 6, 9, 11 {
+			30
+		}
+		else {
+			31
+		}
 	}
+
 	return d <= max_d
 }
 
@@ -481,7 +486,8 @@ pub fn (mut v Validator) max_len(field string, value string, n int) &Validator {
 
 // range fails when value is outside [min, max].
 pub fn (mut v Validator) range(field string, value f64, min f64, max f64) &Validator {
-	return v.check(value >= min && value <= max, field, 'must be between ${fmt_num(min)} and ${fmt_num(max)}')
+	return v.check(value >= min && value <= max, field,
+		'must be between ${fmt_num(min)} and ${fmt_num(max)}')
 }
 
 // fmt_num renders whole numbers without a trailing ".0".

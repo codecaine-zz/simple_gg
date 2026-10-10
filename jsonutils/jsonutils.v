@@ -48,13 +48,27 @@ fn quote(s string) string {
 	sb.write_u8(`"`)
 	for c in s {
 		match c {
-			`"` { sb.write_string('\\"') }
-			`\\` { sb.write_string('\\\\') }
-			`\n` { sb.write_string('\\n') }
-			`\r` { sb.write_string('\\r') }
-			`\t` { sb.write_string('\\t') }
-			`\b` { sb.write_string('\\b') }
-			`\f` { sb.write_string('\\f') }
+			`"` {
+				sb.write_string('\\"')
+			}
+			`\\` {
+				sb.write_string('\\\\')
+			}
+			`\n` {
+				sb.write_string('\\n')
+			}
+			`\r` {
+				sb.write_string('\\r')
+			}
+			`\t` {
+				sb.write_string('\\t')
+			}
+			`\b` {
+				sb.write_string('\\b')
+			}
+			`\f` {
+				sb.write_string('\\f')
+			}
 			else {
 				if c < 0x20 {
 					sb.write_string('\\u00${c:02x}')
@@ -341,8 +355,7 @@ fn diff_into(a json2.Any, b json2.Any, path string, mut out []Change) {
 					out << Change{'remove', p, encode_canonical(av, true), ''}
 				}
 			} else {
-				out << Change{'add', p, '', encode_canonical(b[k] or { json2.Any(json2.null) },
-					true)}
+				out << Change{'add', p, '', encode_canonical(b[k] or { json2.Any(json2.null) }, true)}
 			}
 		}
 		return
@@ -389,8 +402,7 @@ fn flatten_into(a json2.Any, prefix string, mut out map[string]string) {
 				out[prefix] = '[]'
 			}
 			for i, v in a {
-				flatten_into(v, if prefix == '' { '${i}' } else { '${prefix}.${i}' }, mut
-					out)
+				flatten_into(v, if prefix == '' { '${i}' } else { '${prefix}.${i}' }, mut out)
 			}
 		}
 		string {

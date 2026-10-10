@@ -53,22 +53,34 @@ fn main() {
 	win.begin_tab_page('tab_tree', 1)
 	win.add_tree_view('file_tree', [
 		simplegui.TreeNode{
-			id: 'root_src'
-			text: 'src/'
-			icon: '[DIR]'
+			id:       'root_src'
+			text:     'src/'
+			icon:     '[DIR]'
 			expanded: true
 			children: [
-				simplegui.TreeNode{ id: 'f1', text: 'main.v', icon: '[FILE]' },
-				simplegui.TreeNode{ id: 'f2', text: 'simplegui.v', icon: '[FILE]' },
+				simplegui.TreeNode{
+					id:   'f1'
+					text: 'main.v'
+					icon: '[FILE]'
+				},
+				simplegui.TreeNode{
+					id:   'f2'
+					text: 'simplegui.v'
+					icon: '[FILE]'
+				},
 			]
 		},
 		simplegui.TreeNode{
-			id: 'root_assets'
-			text: 'assets/'
-			icon: '[DIR]'
+			id:       'root_assets'
+			text:     'assets/'
+			icon:     '[DIR]'
 			expanded: false
 			children: [
-				simplegui.TreeNode{ id: 'a1', text: 'logo.png', icon: '[IMG]' },
+				simplegui.TreeNode{
+					id:   'a1'
+					text: 'logo.png'
+					icon: '[IMG]'
+				},
 			]
 		},
 	])
@@ -78,7 +90,8 @@ fn main() {
 	win.begin_tab_page('tab_tools', 2)
 	win.add_form_search('Search Query:', 'search_input', 'Type to search repositories...')
 	win.add_form_file_picker('Target Bundle:', 'file_picker_input', '/usr/local/bin/app')
-	win.add_accordion('acc_details', 'Advanced Configuration Details', 'Config options, environment flags, and debug output parameters go here.', false)
+	win.add_accordion('acc_details', 'Advanced Configuration Details',
+		'Config options, environment flags, and debug output parameters go here.', false)
 	win.end_tab_page()
 
 	win.end_tab_container()

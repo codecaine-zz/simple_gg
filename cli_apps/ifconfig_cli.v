@@ -23,10 +23,10 @@ fn main() {
 	if app.get_flag_bool('wifi') {
 		app.info('Wi-Fi Diagnostics:')
 		app.print_kv({
-			'Connected SSID': app.get_wifi_ssid(),
-			'Local Adapter IP': app.get_local_ip(),
-			'Public IP': app.get_public_ip(),
-			'MAC Address': app.get_mac_address(),
+			'Connected SSID':   app.get_wifi_ssid()
+			'Local Adapter IP': app.get_local_ip()
+			'Public IP':        app.get_public_ip()
+			'MAC Address':      app.get_mac_address()
 		})
 		return
 	}
@@ -34,22 +34,26 @@ fn main() {
 	if app.get_flag_bool('routes') {
 		app.info('Routing & DNS Configuration:')
 		app.print_kv({
-			'Default Gateway': app.get_default_gateway(),
-			'DNS Servers': app.get_dns_servers().join(', '),
-			'Online Status': if app.is_online() { app.green('Connected') } else { app.red('Offline') },
+			'Default Gateway': app.get_default_gateway()
+			'DNS Servers':     app.get_dns_servers().join(', ')
+			'Online Status':   if app.is_online() {
+				app.green('Connected')
+			} else {
+				app.red('Offline')
+			}
 		})
 		return
 	}
 
 	// Default overview
 	app.print_kv({
-		'Local IPv4': app.get_local_ip(),
-		'Public IP': app.get_public_ip(),
-		'Default Gateway': app.get_default_gateway(),
-		'DNS Nameservers': app.get_dns_servers().join(', '),
-		'Wi-Fi SSID': app.get_wifi_ssid(),
-		'MAC Address': app.get_mac_address(),
-		'Active TCP Listeners': '${app.get_listening_ports().len} ports',
+		'Local IPv4':           app.get_local_ip()
+		'Public IP':            app.get_public_ip()
+		'Default Gateway':      app.get_default_gateway()
+		'DNS Nameservers':      app.get_dns_servers().join(', ')
+		'Wi-Fi SSID':           app.get_wifi_ssid()
+		'MAC Address':          app.get_mac_address()
+		'Active TCP Listeners': '${app.get_listening_ports().len} ports'
 	})
 
 	if app.get_flag_bool('all') {
@@ -69,14 +73,14 @@ fn run_interactive(mut app simplecli.SimpleCli) {
 	match choice {
 		'Wi-Fi Connection Details' {
 			app.print_kv({
-				'SSID': app.get_wifi_ssid(),
-				'MAC': app.get_mac_address(),
+				'SSID': app.get_wifi_ssid()
+				'MAC':  app.get_mac_address()
 			})
 		}
 		'Routing & DNS Resolvers' {
 			app.print_kv({
-				'Gateway': app.get_default_gateway(),
-				'DNS': app.get_dns_servers().join(', '),
+				'Gateway': app.get_default_gateway()
+				'DNS':     app.get_dns_servers().join(', ')
 			})
 		}
 		'Raw Adapter Details (ifconfig)' {
@@ -85,9 +89,9 @@ fn run_interactive(mut app simplecli.SimpleCli) {
 		}
 		else {
 			app.print_kv({
-				'Local IP': app.get_local_ip(),
-				'Public IP': app.get_public_ip(),
-				'Gateway': app.get_default_gateway(),
+				'Local IP':  app.get_local_ip()
+				'Public IP': app.get_public_ip()
+				'Gateway':   app.get_default_gateway()
 			})
 		}
 	}

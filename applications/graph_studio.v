@@ -207,7 +207,8 @@ fn parse_graph(text string) GraphData {
 	lines := text.split_into_lines()
 	for raw_line in lines {
 		line := raw_line.trim_space()
-		if line == '' || line.starts_with('#') || line.starts_with('//') { continue }
+		if line == '' || line.starts_with('#') || line.starts_with('//') { continue
+		 }
 
 		if line.contains('->') {
 			parts := line.split('->')
@@ -219,22 +220,22 @@ fn parse_graph(text string) GraphData {
 				w_start := to_part.index('[') or { -1 }
 				w_end := to_part.index(']') or { -1 }
 				if w_start >= 0 && w_end > w_start {
-					prop := to_part[w_start + 1 .. w_end].trim_space()
+					prop := to_part[w_start + 1..w_end].trim_space()
 					if prop.contains('=') {
 						weight_str := prop.split('=')[1].trim_space()
 						weight = weight_str.f64()
 					} else {
 						weight = prop.f64()
 					}
-					to_part = to_part[0 .. w_start].trim_space()
+					to_part = to_part[0..w_start].trim_space()
 				}
 			}
 
 			to_node := to_part.trim_space()
 			if from_node != '' && to_node != '' {
 				g.edges << GraphEdge{
-					from: from_node
-					to: to_node
+					from:   from_node
+					to:     to_node
 					weight: if weight > 0 { weight } else { 1.0 }
 				}
 				node_set[from_node] = true
@@ -245,8 +246,16 @@ fn parse_graph(text string) GraphData {
 			from_node := parts[0].trim_space()
 			to_node := parts[1].trim_space()
 			if from_node != '' && to_node != '' {
-				g.edges << GraphEdge{from: from_node, to: to_node, weight: 1.0}
-				g.edges << GraphEdge{from: to_node, to: from_node, weight: 1.0}
+				g.edges << GraphEdge{
+					from:   from_node
+					to:     to_node
+					weight: 1.0
+				}
+				g.edges << GraphEdge{
+					from:   to_node
+					to:     from_node
+					weight: 1.0
+				}
 				node_set[from_node] = true
 				node_set[to_node] = true
 			}
@@ -272,7 +281,11 @@ fn analyze_graph(g GraphData) string {
 	lines << ' GRAPH PROPERTIES:'
 	lines << '   * Total Nodes (|V|)  : ${g.nodes.len}'
 	lines << '   * Total Edges (|E|)  : ${g.edges.len}'
-	density := if g.nodes.len > 1 { f64(g.edges.len) / f64(g.nodes.len * (g.nodes.len - 1)) } else { 0.0 }
+	density := if g.nodes.len > 1 {
+		f64(g.edges.len) / f64(g.nodes.len * (g.nodes.len - 1))
+	} else {
+		0.0
+	}
 	lines << '   * Graph Density      : ${density:.4f}'
 	lines << '------------------------------------------------------------------------'
 	lines << ' NODE DEGREE CENTRALITY METRICS:'
@@ -298,13 +311,16 @@ fn analyze_graph(g GraphData) string {
 		in_str := pad_l('${in_deg}', 9)
 		out_str := pad_l('${out_deg}', 10)
 		tot_str := pad_l('${tot}', 12)
-		lines << '  ' + pad_r(node, 10) + ' | ' + in_str + ' | ' + out_str + ' | ' + tot_str + ' | ' + neighbors.join(', ')
+		lines << '  ' + pad_r(node, 10) + ' | ' + in_str + ' | ' + out_str + ' | ' + tot_str +
+			' | ' + neighbors.join(', ')
 	}
 
 	lines << '------------------------------------------------------------------------'
 	lines << ' ADJACENCY MATRIX (Cost / Weights):'
 	mut hdr := '       |'
-	for n in g.nodes { hdr += ' ' + pad_l(n, 5) + ' |' }
+	for n in g.nodes {
+		hdr += ' ' + pad_l(n, 5) + ' |'
+	}
 	lines << hdr
 	lines << '-------+' + '-------+'.repeat(g.nodes.len)
 
@@ -350,37 +366,38 @@ fn analyze_graph(g GraphData) string {
 
 struct AppState {
 mut:
-	active_tab      string
-	func_type       FuncType
-	x_min           f64
-	x_max           f64
-	p1              f64
-	p2              f64
-	samples_count   int
-	last_x_vals     []f64
-	last_y_vals     []f64
-	history_ledger  []string
+	active_tab     string
+	func_type      FuncType
+	x_min          f64
+	x_max          f64
+	p1             f64
+	p2             f64
+	samples_count  int
+	last_x_vals    []f64
+	last_y_vals    []f64
+	history_ledger []string
 }
 
 fn main() {
 	println('Starting SimpleGUI - Graph Studio Pro (2D Function Plotter & Network Graph Engine)...')
 
-	mut win := simplegui.new_simple_window('Graph Studio Pro -- 2D Function Plotter & Network Topology Studio', 1180, 920)
+	mut win := simplegui.new_simple_window('Graph Studio Pro -- 2D Function Plotter & Network Topology Studio',
+		1180, 920)
 	win.set_fullscreen(true)
 	win.restore_saved_theme()
 	win.set_spacing(6)
 	win.set_padding(14)
 
 	mut state := &AppState{
-		active_tab: ' Function Plotter'
-		func_type: .fn_sin
-		x_min: -10.0
-		x_max: 10.0
-		p1: 1.0
-		p2: 1.0
-		samples_count: 100
-		last_x_vals: []f64{}
-		last_y_vals: []f64{}
+		active_tab:     ' Function Plotter'
+		func_type:      .fn_sin
+		x_min:          -10.0
+		x_max:          10.0
+		p1:             1.0
+		p2:             1.0
+		samples_count:  100
+		last_x_vals:    []f64{}
+		last_y_vals:    []f64{}
 		history_ledger: []string{}
 	}
 
@@ -407,7 +424,7 @@ fn main() {
 		' Network Graph Topology',
 		' Category & Proportion Charts',
 		' Curve Preset Gallery',
-		' Plot Ledger'
+		' Plot Ledger',
 	])
 
 	// -------------------------------------------------------------
@@ -418,7 +435,8 @@ fn main() {
 	win.add_metric_card('card_pts', 'Sample Points', '100', 'Resolution', 'Total Samples')
 	win.add_metric_card('card_min_y', 'Global Min Y', '-1.000', 'Lower Bound', 'Minimum Value')
 	win.add_metric_card('card_max_y', 'Global Max Y', '1.000', 'Upper Bound', 'Maximum Value')
-	win.add_metric_card('card_integral', 'Definite Integral', '0.000', 'int f(x)dx', 'Area Under Curve')
+	win.add_metric_card('card_integral', 'Definite Integral', '0.000', 'int f(x)dx',
+		'Area Under Curve')
 	win.add_metric_card('card_rms', 'RMS Power', '0.707', 'Root Mean Sq', 'Signal Energy')
 	win.end_row()
 	win.end_group_box()
@@ -443,7 +461,7 @@ fn main() {
 		'Square Root: f(x) = sqrt(x)',
 		'Natural Logarithm: f(x) = ln(x)',
 		'Absolute Value: f(x) = |x|',
-		'Tangent: f(x) = tan(x)'
+		'Tangent: f(x) = tan(x)',
 	], 'Sine Wave: f(x) = sin(k  x)')
 	win.set_control_width('dd_func_model', 330)
 
@@ -476,7 +494,8 @@ fn main() {
 	// Native Cocoa Area Chart
 	win.add_chart('chart_math', 'area', 140)
 
-	win.add_textarea('txt_func_report', '2D Ascii Grid Curve Plot, Critical Points, Zeros/Roots and Calculus metrics will appear here.\n')
+	win.add_textarea('txt_func_report',
+		'2D Ascii Grid Curve Plot, Critical Points, Zeros/Roots and Calculus metrics will appear here.\n')
 	win.set_control_height('txt_func_report', 240)
 	win.set_control_font_name('txt_func_report', 'Menlo')
 	win.set_control_font_size('txt_func_report', 11)
@@ -485,10 +504,13 @@ fn main() {
 	// -------------------------------------------------------------
 	// Tab 2: Data Series & Moving Average
 	// -------------------------------------------------------------
-	win.begin_group_box('pane_series', 'Numerical Data Series Visualizer & Moving Average Smoothing')
+	win.begin_group_box('pane_series',
+		'Numerical Data Series Visualizer & Moving Average Smoothing')
 
-	win.add_label('lbl_series_input', 'Input Raw Data Series (comma or newline separated Y values):')
-	win.add_textarea('txt_series_data', '12.4, 15.8, 14.2, 18.9, 22.1, 19.5, 25.4, 28.0, 26.2, 31.5, 35.8, 33.2, 38.9, 42.1, 39.8, 45.2, 48.9, 46.5, 52.1, 55.4')
+	win.add_label('lbl_series_input',
+		'Input Raw Data Series (comma or newline separated Y values):')
+	win.add_textarea('txt_series_data',
+		'12.4, 15.8, 14.2, 18.9, 22.1, 19.5, 25.4, 28.0, 26.2, 31.5, 35.8, 33.2, 38.9, 42.1, 39.8, 45.2, 48.9, 46.5, 52.1, 55.4')
 	win.set_control_height('txt_series_data', 70)
 	win.set_control_font_name('txt_series_data', 'Menlo')
 
@@ -502,7 +524,8 @@ fn main() {
 
 	win.add_chart('chart_series', 'line', 130)
 
-	win.add_textarea('txt_series_report', 'Data series statistics and smoothed curve tables will appear here.\n')
+	win.add_textarea('txt_series_report',
+		'Data series statistics and smoothed curve tables will appear here.\n')
 	win.set_control_height('txt_series_report', 220)
 	win.set_control_font_name('txt_series_report', 'Menlo')
 	win.set_control_font_size('txt_series_report', 11)
@@ -514,7 +537,8 @@ fn main() {
 	win.begin_group_box('pane_network', 'Network Graph Topology, Directed Edges & Adjacency Engine')
 
 	win.add_label('lbl_net_prompt', 'Define Graph Edges (format: A -> B [weight=5.0] or A -- B):')
-	win.add_textarea('txt_graph_spec', 'Router_Core -> Switch_A [weight=10.0]\nRouter_Core -> Switch_B [weight=10.0]\nSwitch_A -> Server_Alpha [weight=1.0]\nSwitch_A -> Server_Beta [weight=1.0]\nSwitch_B -> Server_Gamma [weight=1.0]\nSwitch_B -> Server_Delta [weight=1.0]\nServer_Alpha -> Storage_SAN [weight=2.5]\nServer_Beta -> Storage_SAN [weight=2.5]\nServer_Gamma -> Storage_SAN [weight=2.5]\nServer_Delta -> Storage_SAN [weight=2.5]')
+	win.add_textarea('txt_graph_spec',
+		'Router_Core -> Switch_A [weight=10.0]\nRouter_Core -> Switch_B [weight=10.0]\nSwitch_A -> Server_Alpha [weight=1.0]\nSwitch_A -> Server_Beta [weight=1.0]\nSwitch_B -> Server_Gamma [weight=1.0]\nSwitch_B -> Server_Delta [weight=1.0]\nServer_Alpha -> Storage_SAN [weight=2.5]\nServer_Beta -> Storage_SAN [weight=2.5]\nServer_Gamma -> Storage_SAN [weight=2.5]\nServer_Delta -> Storage_SAN [weight=2.5]')
 	win.set_control_height('txt_graph_spec', 100)
 	win.set_control_font_name('txt_graph_spec', 'Menlo')
 
@@ -525,7 +549,8 @@ fn main() {
 	win.add_button('btn_copy_mermaid', 'Copy Mermaid Diagram')
 	win.end_row()
 
-	win.add_textarea('txt_graph_report', 'Network density, degree centralities, adjacency matrix, and Mermaid diagram code will appear here.\n')
+	win.add_textarea('txt_graph_report',
+		'Network density, degree centralities, adjacency matrix, and Mermaid diagram code will appear here.\n')
 	win.set_control_height('txt_graph_report', 300)
 	win.set_control_font_name('txt_graph_report', 'Menlo')
 	win.set_control_font_size('txt_graph_report', 11)
@@ -537,7 +562,8 @@ fn main() {
 	win.begin_group_box('pane_proportions', 'Category Frequency, Allocation & Donut Charts')
 
 	win.add_label('lbl_cat_prompt', 'Category Allocations (Label: Value):')
-	win.add_textarea('txt_categories', 'Frontend UI / SimpleGUI: 42.5\nBackend Engine / POSIX: 28.0\nMathematical Calculus: 15.5\nNetwork Intelligence: 14.0')
+	win.add_textarea('txt_categories',
+		'Frontend UI / SimpleGUI: 42.5\nBackend Engine / POSIX: 28.0\nMathematical Calculus: 15.5\nNetwork Intelligence: 14.0')
 	win.set_control_height('txt_categories', 70)
 	win.set_control_font_name('txt_categories', 'Menlo')
 
@@ -545,7 +571,8 @@ fn main() {
 	win.add_button('btn_render_bars', 'Generate Horizontal Bar Charts')
 	win.end_row()
 
-	win.add_textarea('txt_proportions_report', 'Unicode bar charts and percentage distributions will appear here.\n')
+	win.add_textarea('txt_proportions_report',
+		'Unicode bar charts and percentage distributions will appear here.\n')
 	win.set_control_height('txt_proportions_report', 360)
 	win.set_control_font_name('txt_proportions_report', 'Menlo')
 	win.set_control_font_size('txt_proportions_report', 12)
@@ -568,7 +595,8 @@ fn main() {
 	win.add_button('btn_pre_poly', '3-Root Polynomial')
 	win.end_row()
 
-	win.add_textarea('txt_preset_info', 'Click any preset above to instantly load parameters, plot the mathematical curve, and update metrics.\n')
+	win.add_textarea('txt_preset_info',
+		'Click any preset above to instantly load parameters, plot the mathematical curve, and update metrics.\n')
 	win.set_control_height('txt_preset_info', 360)
 	win.set_control_font_name('txt_preset_info', 'Menlo')
 	win.set_control_font_size('txt_preset_info', 12)
@@ -585,7 +613,8 @@ fn main() {
 	win.add_button('btn_export_ledger', 'Export Ledger...')
 	win.end_row()
 
-	win.add_textarea('txt_ledger', 'All function evaluations and graph analyses are recorded here.\n')
+	win.add_textarea('txt_ledger',
+		'All function evaluations and graph analyses are recorded here.\n')
 	win.set_control_height('txt_ledger', 380)
 	win.set_control_font_name('txt_ledger', 'Menlo')
 	win.set_control_font_size('txt_ledger', 12)
@@ -626,19 +655,33 @@ fn main() {
 	// -------------------------------------------------------------
 	run_function_plot := fn [mut state, append_ledger] (mut w simplegui.SimpleWindow) {
 		choice := w.get('dd_func_model')
-		if choice.contains('Sine') { state.func_type = .fn_sin }
-		else if choice.contains('Cosine') { state.func_type = .fn_cos }
-		else if choice.contains('Sinc') { state.func_type = .fn_sinc }
-		else if choice.contains('Gaussian Bell') { state.func_type = .fn_gaussian }
-		else if choice.contains('Damped') { state.func_type = .fn_damped_wave }
-		else if choice.contains('Sigmoid') { state.func_type = .fn_sigmoid }
-		else if choice.contains('Beat') { state.func_type = .fn_beats }
-		else if choice.contains('Polynomial') { state.func_type = .fn_poly }
-		else if choice.contains('Exponential') { state.func_type = .fn_exp }
-		else if choice.contains('Square Root') { state.func_type = .fn_sqrt }
-		else if choice.contains('Logarithm') { state.func_type = .fn_log }
-		else if choice.contains('Absolute') { state.func_type = .fn_abs }
-		else { state.func_type = .fn_tan }
+		if choice.contains('Sine') {
+			state.func_type = .fn_sin
+		} else if choice.contains('Cosine') {
+			state.func_type = .fn_cos
+		} else if choice.contains('Sinc') {
+			state.func_type = .fn_sinc
+		} else if choice.contains('Gaussian Bell') {
+			state.func_type = .fn_gaussian
+		} else if choice.contains('Damped') {
+			state.func_type = .fn_damped_wave
+		} else if choice.contains('Sigmoid') {
+			state.func_type = .fn_sigmoid
+		} else if choice.contains('Beat') {
+			state.func_type = .fn_beats
+		} else if choice.contains('Polynomial') {
+			state.func_type = .fn_poly
+		} else if choice.contains('Exponential') {
+			state.func_type = .fn_exp
+		} else if choice.contains('Square Root') {
+			state.func_type = .fn_sqrt
+		} else if choice.contains('Logarithm') {
+			state.func_type = .fn_log
+		} else if choice.contains('Absolute') {
+			state.func_type = .fn_abs
+		} else {
+			state.func_type = .fn_tan
+		}
 
 		state.x_min = w.get('txt_xmin').f64()
 		state.x_max = w.get('txt_xmax').f64()
@@ -701,8 +744,10 @@ fn main() {
 		details << '========================================================================\n'
 
 		w.set('txt_func_report', details.join('\n'))
-		w.set('lbl_status_bar', ' Evaluated ${state.samples_count} points for ' + fn_label + '. Y  [${min_y:.3f}, ${max_y:.3f}]')
-		append_ledger(mut w, 'Function Plot: ' + fn_label, 'X  [${state.x_min:.2f}, ${state.x_max:.2f}], Y  [${min_y:.3f}, ${max_y:.3f}], Integral = ${integral:.4f}')
+		w.set('lbl_status_bar', ' Evaluated ${state.samples_count} points for ' + fn_label +
+			'. Y  [${min_y:.3f}, ${max_y:.3f}]')
+		append_ledger(mut w, 'Function Plot: ' + fn_label,
+			'X  [${state.x_min:.2f}, ${state.x_max:.2f}], Y  [${min_y:.3f}, ${max_y:.3f}], Integral = ${integral:.4f}')
 	}
 
 	// -------------------------------------------------------------
@@ -755,7 +800,8 @@ fn main() {
 			}
 		}
 		if nums.len < 2 {
-			w.set('txt_series_report', '=== [DATA SERIES ERROR] ===\n\nPlease enter at least 2 numeric values separated by commas or spaces.\nExample:\n  12.5, 14.8, 19.2, 22.0, 18.5, 30.1')
+			w.set('txt_series_report',
+				'=== [DATA SERIES ERROR] ===\n\nPlease enter at least 2 numeric values separated by commas or spaces.\nExample:\n  12.5, 14.8, 19.2, 22.0, 18.5, 30.1')
 			w.alert('Input Missing', 'Please enter at least 2 data points.')
 			w.toast('Requires at least 2 numeric values')
 			return
@@ -763,7 +809,9 @@ fn main() {
 		w.set_chart_data('chart_series', nums)
 
 		mut x_idx := []f64{}
-		for i in 0 .. nums.len { x_idx << f64(i + 1) }
+		for i in 0 .. nums.len {
+			x_idx << f64(i + 1)
+		}
 		plot := render_ascii_plot('Raw Data Series (N=${nums.len})', x_idx, nums, 60, 12)
 
 		w.set('txt_series_report', plot)
@@ -784,7 +832,8 @@ fn main() {
 			}
 		}
 		if nums.len < 3 {
-			w.alert('Insufficient Data', '3-point SMA smoothing requires at least 3 data points (currently ${nums.len}).')
+			w.alert('Insufficient Data',
+				'3-point SMA smoothing requires at least 3 data points (currently ${nums.len}).')
 			w.toast('Requires at least 3 data points')
 			return
 		}
@@ -802,8 +851,11 @@ fn main() {
 		w.set_chart_data('chart_series', sma)
 
 		mut x_idx := []f64{}
-		for i in 0 .. sma.len { x_idx << f64(i + 1) }
-		plot := render_ascii_plot('3-Point Moving Average Smoothed (N=${sma.len})', x_idx, sma, 60, 12)
+		for i in 0 .. sma.len {
+			x_idx << f64(i + 1)
+		}
+		plot :=
+			render_ascii_plot('3-Point Moving Average Smoothed (N=${sma.len})', x_idx, sma, 60, 12)
 		w.set('txt_series_report', plot)
 		w.toast('Computed 3-point SMA smoothing!')
 	})
@@ -820,7 +872,8 @@ fn main() {
 			}
 		}
 		if nums.len < 5 {
-			w.alert('Insufficient Data', '5-point SMA smoothing requires at least 5 data points (currently ${nums.len}).')
+			w.alert('Insufficient Data',
+				'5-point SMA smoothing requires at least 5 data points (currently ${nums.len}).')
 			w.toast('Requires at least 5 data points')
 			return
 		}
@@ -841,8 +894,11 @@ fn main() {
 		w.set_chart_data('chart_series', sma)
 
 		mut x_idx := []f64{}
-		for i in 0 .. sma.len { x_idx << f64(i + 1) }
-		plot := render_ascii_plot('5-Point Moving Average Smoothed (N=${sma.len})', x_idx, sma, 60, 12)
+		for i in 0 .. sma.len {
+			x_idx << f64(i + 1)
+		}
+		plot :=
+			render_ascii_plot('5-Point Moving Average Smoothed (N=${sma.len})', x_idx, sma, 60, 12)
 		w.set('txt_series_report', plot)
 		w.toast('Computed 5-point SMA smoothing!')
 	})
@@ -859,7 +915,8 @@ fn main() {
 			}
 		}
 		if nums.len < 2 {
-			w.alert('Insufficient Data', 'First differences require at least 2 data points (currently ${nums.len}).')
+			w.alert('Insufficient Data',
+				'First differences require at least 2 data points (currently ${nums.len}).')
 			w.toast('Requires at least 2 data points')
 			return
 		}
@@ -871,8 +928,11 @@ fn main() {
 		w.set_chart_data('chart_series', diffs)
 
 		mut x_idx := []f64{}
-		for i in 0 .. diffs.len { x_idx << f64(i + 1) }
-		plot := render_ascii_plot('First Difference Series Y (N=${diffs.len})', x_idx, diffs, 60, 12)
+		for i in 0 .. diffs.len {
+			x_idx << f64(i + 1)
+		}
+		plot :=
+			render_ascii_plot('First Difference Series Y (N=${diffs.len})', x_idx, diffs, 60, 12)
 		w.set('txt_series_report', plot)
 		w.toast('Computed first differences!')
 	})
@@ -889,7 +949,8 @@ fn main() {
 			}
 		}
 		if nums.len < 2 {
-			w.alert('Insufficient Data', 'Cumulative sum requires at least 2 data points (currently ${nums.len}).')
+			w.alert('Insufficient Data',
+				'Cumulative sum requires at least 2 data points (currently ${nums.len}).')
 			w.toast('Requires at least 2 data points')
 			return
 		}
@@ -903,7 +964,9 @@ fn main() {
 		w.set_chart_data('chart_series', cum)
 
 		mut x_idx := []f64{}
-		for i in 0 .. cum.len { x_idx << f64(i + 1) }
+		for i in 0 .. cum.len {
+			x_idx << f64(i + 1)
+		}
 		plot := render_ascii_plot('Cumulative Sum Series Y (N=${cum.len})', x_idx, cum, 60, 12)
 		w.set('txt_series_report', plot)
 		w.toast('Computed cumulative sum!')
@@ -916,15 +979,19 @@ fn main() {
 		spec := w.get('txt_graph_spec')
 		g := parse_graph(spec)
 		if g.nodes.len == 0 {
-			w.set('txt_graph_report', '=== [GRAPH SPECIFICATION ERROR] ===\n\nNo valid nodes or edges detected.\nFormat nodes and directed edges as: A -> B or undirected as: A -- B\nExample:\n  Server -> Database\n  Server -> Client')
-			w.alert('Empty Graph Specification', 'Please enter valid graph edges (e.g. NodeA -> NodeB).')
+			w.set('txt_graph_report',
+				'=== [GRAPH SPECIFICATION ERROR] ===\n\nNo valid nodes or edges detected.\nFormat nodes and directed edges as: A -> B or undirected as: A -- B\nExample:\n  Server -> Database\n  Server -> Client')
+			w.alert('Empty Graph Specification',
+				'Please enter valid graph edges (e.g. NodeA -> NodeB).')
 			w.toast('No graph elements detected')
 			return
 		}
 		rep := analyze_graph(g)
 		w.set('txt_graph_report', rep)
-		w.set('lbl_status_bar', ' Evaluated network topology: |V| = ${g.nodes.len} nodes, |E| = ${g.edges.len} edges')
-		append_ledger(mut w, 'Network Graph Analysis', 'Analyzed graph with ${g.nodes.len} nodes and ${g.edges.len} edges')
+		w.set('lbl_status_bar',
+			' Evaluated network topology: |V| = ${g.nodes.len} nodes, |E| = ${g.edges.len} edges')
+		append_ledger(mut w, 'Network Graph Analysis',
+			'Analyzed graph with ${g.nodes.len} nodes and ${g.edges.len} edges')
 		w.toast('Evaluated network graph!')
 	})
 
@@ -975,7 +1042,8 @@ fn main() {
 
 		for raw_l in lines {
 			l := raw_l.trim_space()
-			if l == '' { continue }
+			if l == '' { continue
+			 }
 			if l.contains(':') {
 				parts := l.split(':')
 				label := parts[0].trim_space()
@@ -987,7 +1055,8 @@ fn main() {
 		}
 
 		if labels.len == 0 || total <= 0 {
-			w.set('txt_proportions_report', '=== [CATEGORICAL PARSE ERROR] ===\n\nPlease enter labels and values formatted as "Label: Value".\nExample:\n  Engineering: 45\n  Marketing: 25\n  Design: 15\n  Operations: 15')
+			w.set('txt_proportions_report',
+				'=== [CATEGORICAL PARSE ERROR] ===\n\nPlease enter labels and values formatted as "Label: Value".\nExample:\n  Engineering: 45\n  Marketing: 25\n  Design: 15\n  Operations: 15')
 			w.alert('Input Error', 'Please enter labels and values formatted as "Label: Value".')
 			w.toast('Invalid format: use Label: Value')
 			return
@@ -1011,7 +1080,9 @@ fn main() {
 			pct := (v / total) * 100.0
 			bar_len := int((v / max_v) * 28.0)
 			mut bar := ''
-			for _ in 0 .. bar_len { bar += '#' }
+			for _ in 0 .. bar_len {
+				bar += '#'
+			}
 			if bar == '' && v > 0 { bar = '=' }
 			v_str := pad_l('${v:.1f}', 5)
 			pct_str := pad_l('${pct:.1f}%', 6)
@@ -1035,7 +1106,8 @@ fn main() {
 		w.set('txt_param1', '0.2')
 		w.set('txt_param2', '3.0')
 		w.set('txt_samples', '120')
-		w.set('txt_preset_info', ' Loaded Damped Harmonic Oscillator: e^(-0.2|x|) cos(3x)\nModels physical wave decay, spring damper friction, and acoustic damping.')
+		w.set('txt_preset_info',
+			' Loaded Damped Harmonic Oscillator: e^(-0.2|x|) cos(3x)\nModels physical wave decay, spring damper friction, and acoustic damping.')
 		run_function_plot(mut w)
 		w.toast('Loaded Damped Oscillator Preset!')
 	})
@@ -1047,7 +1119,8 @@ fn main() {
 		w.set('txt_param1', '1.0')
 		w.set('txt_param2', '1.0')
 		w.set('txt_samples', '120')
-		w.set('txt_preset_info', ' Loaded Normalized Sinc Function: sin(pix)/(pix)\nFundamental brick-wall bandlimited filter kernel in signal processing and Fourier transforms.')
+		w.set('txt_preset_info',
+			' Loaded Normalized Sinc Function: sin(pix)/(pix)\nFundamental brick-wall bandlimited filter kernel in signal processing and Fourier transforms.')
 		run_function_plot(mut w)
 		w.toast('Loaded Sinc Waveform Preset!')
 	})
@@ -1059,7 +1132,8 @@ fn main() {
 		w.set('txt_param1', '0.0')
 		w.set('txt_param2', '1.5')
 		w.set('txt_samples', '100')
-		w.set('txt_preset_info', ' Loaded Gaussian Bell Curve:  = 0.0,  = 1.5\nStandard normal probability density distribution.')
+		w.set('txt_preset_info',
+			' Loaded Gaussian Bell Curve:  = 0.0,  = 1.5\nStandard normal probability density distribution.')
 		run_function_plot(mut w)
 		w.toast('Loaded Gaussian Preset!')
 	})
@@ -1071,7 +1145,8 @@ fn main() {
 		w.set('txt_param1', '5.0')
 		w.set('txt_param2', '5.5')
 		w.set('txt_samples', '200')
-		w.set('txt_preset_info', ' Loaded Acoustic Beats Waveform: 0.5(sin(5x) + sin(5.5x))\nInterference pattern producing periodic amplitude modulation envelope.')
+		w.set('txt_preset_info',
+			' Loaded Acoustic Beats Waveform: 0.5(sin(5x) + sin(5.5x))\nInterference pattern producing periodic amplitude modulation envelope.')
 		run_function_plot(mut w)
 		w.toast('Loaded Acoustic Beats Preset!')
 	})
@@ -1083,7 +1158,8 @@ fn main() {
 		w.set('txt_param1', '1.0')
 		w.set('txt_param2', '1.0')
 		w.set('txt_samples', '100')
-		w.set('txt_preset_info', ' Loaded Logistic Sigmoid Activation Function: 1 / (1 + e^-x)\nCore non-linear activation curve in neural network classifiers and logistic regression.')
+		w.set('txt_preset_info',
+			' Loaded Logistic Sigmoid Activation Function: 1 / (1 + e^-x)\nCore non-linear activation curve in neural network classifiers and logistic regression.')
 		run_function_plot(mut w)
 		w.toast('Loaded Sigmoid Preset!')
 	})
@@ -1095,7 +1171,8 @@ fn main() {
 		w.set('txt_param1', '1.0')
 		w.set('txt_param2', '1.0')
 		w.set('txt_samples', '100')
-		w.set('txt_preset_info', ' Loaded Cubic Polynomial: (x+2)(x-1)(x-3)/10\nExhibits 3 distinct real roots at x = -2, x = 1, x = 3.')
+		w.set('txt_preset_info',
+			' Loaded Cubic Polynomial: (x+2)(x-1)(x-3)/10\nExhibits 3 distinct real roots at x = -2, x = 1, x = 3.')
 		run_function_plot(mut w)
 		w.toast('Loaded Cubic Polynomial Preset!')
 	})

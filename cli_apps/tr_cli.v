@@ -59,7 +59,8 @@ fn main() {
 fn run_interactive(mut app simplecli.SimpleCli) {
 	app.panel('TR Character Workbench', 'Quick character set substitutions.')
 	sample := app.prompt('Enter string', 'API_KEY=123-abc-XYZ')
-	choice := app.select('Action:', ['To Uppercase', 'To Lowercase', 'Replace dashes with underscores'])
+	choice := app.select('Action:', ['To Uppercase', 'To Lowercase',
+		'Replace dashes with underscores'])
 
 	match choice {
 		'To Uppercase' {

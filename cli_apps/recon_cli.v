@@ -24,7 +24,8 @@ fn main() {
 
 	if app.get_flag_bool('whois') {
 		app.info('Performing WHOIS lookup for "${target}"...')
-		out, _ := app.exec('whois ${target} | grep -E "Registrar:|Creation Date:|Registry Expiry Date:|Domain Name:" | head -n 10')
+		out, _ :=
+			app.exec('whois ${target} | grep -E "Registrar:|Creation Date:|Registry Expiry Date:|Domain Name:" | head -n 10')
 		println(out)
 		return
 	}
@@ -44,10 +45,10 @@ fn main() {
 	headers_out, _ := app.exec('curl -s -I -L https://${target} | head -n 10')
 
 	app.print_kv({
-		'Target Host': target,
-		'Primary Resolved IP': primary_ip,
-		'HTTPS Available': '${app.ping_tcp_port(target, 443, 1000)}',
-		'HTTP Available': '${app.ping_tcp_port(target, 80, 1000)}',
+		'Target Host':         target
+		'Primary Resolved IP': primary_ip
+		'HTTPS Available':     '${app.ping_tcp_port(target, 443, 1000)}'
+		'HTTP Available':      '${app.ping_tcp_port(target, 80, 1000)}'
 	})
 
 	app.panel('HTTP Response Headers', headers_out)

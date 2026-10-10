@@ -46,10 +46,10 @@ fn discover_tool(name string, fallback_paths []string, desc string) ToolInfo {
 
 	if path == '' {
 		return ToolInfo{
-			name: name
-			bin_path: ''
+			name:        name
+			bin_path:    ''
 			version_str: 'Not Found'
-			is_ready: false
+			is_ready:    false
 			description: desc
 		}
 	}
@@ -69,10 +69,10 @@ fn discover_tool(name string, fallback_paths []string, desc string) ToolInfo {
 	}
 
 	return ToolInfo{
-		name: name
-		bin_path: path
+		name:        name
+		bin_path:    path
 		version_str: ver
-		is_ready: true
+		is_ready:    true
 		description: desc
 	}
 }
@@ -96,17 +96,17 @@ fn init_toolchain() map[string]ToolInfo {
 		'/usr/local/bin/wget2',
 		'/usr/bin/wget2',
 	], 'wget2 - multi-threaded accelerated network downloader')
-	tools['rip'] = discover_tool('rip', ['/opt/homebrew/bin/rip', '/usr/local/bin/rip', '/usr/bin/rip'],
-		'rip - rm-improved safe graveyard trash with undo')
+	tools['rip'] = discover_tool('rip', ['/opt/homebrew/bin/rip', '/usr/local/bin/rip',
+		'/usr/bin/rip'], 'rip - rm-improved safe graveyard trash with undo')
 	tools['ouch'] = discover_tool('ouch', [
 		'/opt/homebrew/bin/ouch',
 		'/usr/local/bin/ouch',
 		'/usr/bin/ouch',
 	], 'ouch - universal painless compression & extraction')
-	tools['bat'] = discover_tool('bat', ['/opt/homebrew/bin/bat', '/usr/local/bin/bat', '/usr/bin/bat'],
-		'bat - syntax highlighting pager & viewer')
-	tools['eza'] = discover_tool('eza', ['/opt/homebrew/bin/eza', '/usr/local/bin/eza', '/usr/bin/eza'],
-		'eza - modern tree & directory inspection')
+	tools['bat'] = discover_tool('bat', ['/opt/homebrew/bin/bat', '/usr/local/bin/bat',
+		'/usr/bin/bat'], 'bat - syntax highlighting pager & viewer')
+	tools['eza'] = discover_tool('eza', ['/opt/homebrew/bin/eza', '/usr/local/bin/eza',
+		'/usr/bin/eza'], 'eza - modern tree & directory inspection')
 
 	return tools
 }
@@ -163,15 +163,15 @@ fn main() {
 	}
 
 	mut state := &OmniState{
-		tools: tools_map
-		active_mode: '1. [Synergy Pipeline] Search -> Replace -> Diff (fd + sd + rg)'
-		active_dir: os.getwd()
+		tools:             tools_map
+		active_mode:       '1. [Synergy Pipeline] Search -> Replace -> Diff (fd + sd + rg)'
+		active_dir:        os.getwd()
 		is_process_active: false
-		active_pid: 0
-		total_ops: 0
-		last_op_status: 'Idle'
-		last_op_ts: 'Ready'
-		last_cli_command: ''
+		active_pid:        0
+		total_ops:         0
+		last_op_status:    'Idle'
+		last_op_ts:        'Ready'
+		last_cli_command:  ''
 	}
 
 	// -------------------------------------------------------------
@@ -191,7 +191,8 @@ fn main() {
 	})
 
 	// Subtitle & Platform
-	win.add_label('lbl_subhead', 'Modern Unix Developer Suite  |  fd · sd · watchexec · wget2 · rg · rip · ouch · bat · eza  |  ${simplegui.get_platform_label()}')
+	win.add_label('lbl_subhead',
+		'Modern Unix Developer Suite  |  fd · sd · watchexec · wget2 · rg · rip · ouch · bat · eza  |  ${simplegui.get_platform_label()}')
 
 	// -------------------------------------------------------------
 	// Engine Integrity & Vitals Cards
@@ -317,7 +318,8 @@ fn main() {
 	// Live Visualizer / Terminal Stream View
 	// -------------------------------------------------------------
 	win.add_label('lbl_stream_title', 'Live Execution Stream & Structured Visualizer:')
-	win.add_textarea('txt_live_output', '// OmniTool Studio Pro Initialized.\n// Select a pipeline or standalone tool engine above, configure arguments, and click "Execute Active Pipeline / Tool" or "Preview / Dry Run".\n// All 9 modern CLI utilities (fd, sd, watchexec, wget2, rg, rip, ouch, bat, eza) are mapped and ready.\n')
+	win.add_textarea('txt_live_output',
+		'// OmniTool Studio Pro Initialized.\n// Select a pipeline or standalone tool engine above, configure arguments, and click "Execute Active Pipeline / Tool" or "Preview / Dry Run".\n// All 9 modern CLI utilities (fd, sd, watchexec, wget2, rg, rip, ouch, bat, eza) are mapped and ready.\n')
 	win.set_control_height('txt_live_output', 280)
 
 	// -------------------------------------------------------------
@@ -330,7 +332,8 @@ fn main() {
 	// Bottom Status Bar
 	// -------------------------------------------------------------
 	win.begin_row('row_status_bar')
-	win.add_label('lbl_status_bar', 'Status: Ready  |  9 Modern CLI Engines Active  |  Ready for execution')
+	win.add_label('lbl_status_bar',
+		'Status: Ready  |  9 Modern CLI Engines Active  |  Ready for execution')
 	win.end_row()
 
 	// -------------------------------------------------------------
@@ -342,8 +345,8 @@ fn main() {
 		chosen := w.osascript_choose_folder()
 		if chosen != '' {
 			w.set('txt_workspace', chosen)
-			w.append_console('omni_console', '[${get_now_str()}] Workspace updated to: ${chosen}\n',
-				1)
+			w.append_console('omni_console',
+				'[${get_now_str()}] Workspace updated to: ${chosen}\n', 1)
 			w.toast('Workspace folder updated')
 		}
 	})
@@ -351,22 +354,22 @@ fn main() {
 	win.on_click('btn_curr_ws', fn (mut w simplegui.SimpleWindow) {
 		cwd := os.getwd()
 		w.set('txt_workspace', cwd)
-		w.append_console('omni_console', '[${get_now_str()}] Workspace set to current directory: ${cwd}\n',
-			1)
+		w.append_console('omni_console',
+			'[${get_now_str()}] Workspace set to current directory: ${cwd}\n', 1)
 	})
 
 	win.on_click('btn_home_ws', fn (mut w simplegui.SimpleWindow) {
 		home := os.home_dir()
 		w.set('txt_workspace', home)
-		w.append_console('omni_console', '[${get_now_str()}] Workspace set to user home: ${home}\n',
-			1)
+		w.append_console('omni_console',
+			'[${get_now_str()}] Workspace set to user home: ${home}\n', 1)
 	})
 
 	win.on_click('btn_tmp_ws', fn (mut w simplegui.SimpleWindow) {
 		tmp_dir := os.temp_dir()
 		w.set('txt_workspace', tmp_dir)
-		w.append_console('omni_console', '[${get_now_str()}] Workspace set to temp directory: ${tmp_dir}\n',
-			1)
+		w.append_console('omni_console',
+			'[${get_now_str()}] Workspace set to temp directory: ${tmp_dir}\n', 1)
 	})
 
 	// Clear View Action
@@ -378,8 +381,7 @@ fn main() {
 	// Mode Change Handler
 	win.on_change('dd_mode', fn [mut state] (mut w simplegui.SimpleWindow, selected string) {
 		state.active_mode = selected
-		w.set_metric_card_value('card_active_mode', selected.split('] ')[1] or { selected },
-			'Mode')
+		w.set_metric_card_value('card_active_mode', selected.split('] ')[1] or { selected }, 'Mode')
 
 		if selected.starts_with('1.') {
 			// Find -> Replace -> Diff
@@ -393,7 +395,8 @@ fn main() {
 		} else if selected.starts_with('2.') {
 			// Download -> Extract -> Inspect
 			w.set('lbl_primary', 'Download Asset URL:')
-			w.set('txt_primary', 'https://github.com/vlang/v/releases/latest/download/v_macos_arm64.zip')
+			w.set('txt_primary',
+				'https://github.com/vlang/v/releases/latest/download/v_macos_arm64.zip')
 			w.set('lbl_secondary', 'Destination Directory:')
 			w.set('txt_secondary', './downloads')
 			w.set('lbl_filter', 'Extraction Target:')
@@ -474,8 +477,7 @@ fn main() {
 			w.set('txt_filter', '--icons=never')
 		}
 
-		w.append_console('omni_console', '[${get_now_str()}] Switched mode to: ${selected}\n',
-			1)
+		w.append_console('omni_console', '[${get_now_str()}] Switched mode to: ${selected}\n', 1)
 	})
 
 	// Preset Change Handler
@@ -522,7 +524,7 @@ fn main() {
 		_ = ignores
 		is_case := w.get('chk_case_sens') == 'true'
 		is_hidden := w.get('chk_hidden') == 'true'
-		is_dry := force_dry_run || (w.get('chk_dry_run') == 'true')
+		is_dry := force_dry_run || w.get('chk_dry_run') == 'true'
 		is_rec := w.get('chk_recursive') == 'true'
 		_ = is_rec
 		is_unpack := w.get('chk_auto_unpack') == 'true'
@@ -530,7 +532,8 @@ fn main() {
 		state.total_ops++
 		w.set_metric_card_value('card_op_count', '${state.total_ops} Ops', 'Activity')
 		w.set_metric_card_value('card_status', 'RUNNING', 'Vitals')
-		w.set('lbl_status_bar', ' Status: Executing pipeline: ${mode.split('] ')[1] or { mode }}...')
+		w.set('lbl_status_bar',
+			' Status: Executing pipeline: ${mode.split('] ')[1] or { mode }}...')
 
 		// ---------------------------------------------------------
 		// Pipeline 1: Search -> Replace -> Diff (fd + sd + rg)
@@ -542,14 +545,15 @@ fn main() {
 
 			if rg_bin == '' || sd_bin == '' || fd_bin == '' {
 				w.toast('Required tools missing: rg, sd, or fd')
-				w.append_console('omni_console', '[${get_now_str()}] [ERROR] Missing required binary for Pipeline 1.\n',
-					3)
+				w.append_console('omni_console',
+					'[${get_now_str()}] [ERROR] Missing required binary for Pipeline 1.\n', 3)
 				w.set_metric_card_value('card_status', 'ERROR', 'Vitals')
 				w.set('lbl_status_bar', ' Status: Error - Required binary (rg, sd, or fd) missing.')
 				return
 			}
 
-			w.append_console('omni_console', '[${get_now_str()}] Launching Find->Replace->Diff pipeline (Dry Run: ${is_dry})...\n',
+			w.append_console('omni_console',
+				'[${get_now_str()}] Launching Find->Replace->Diff pipeline (Dry Run: ${is_dry})...\n',
 				1)
 
 			// Step A: Find files containing the search pattern using rg
@@ -575,12 +579,14 @@ fn main() {
 			rg_args << ws
 
 			search_res := simplegui.exec_safe(rg_bin, rg_args)
-			matching_files := search_res.output.trim_space().split_into_lines().filter(it.trim_space() != '')
+			matching_files :=
+				search_res.output.trim_space().split_into_lines().filter(it.trim_space() != '')
 
 			if matching_files.len == 0 {
-				w.set('txt_live_output', '=== PIPELINE 1: SEARCH -> REPLACE -> DIFF ===\nTarget Workspace: ${ws}\nSearch Pattern: "${primary}"\nReplacement:    "${secondary}"\n\n[INFO] No files matching the criteria contained pattern "${primary}".\nNothing to replace.\n')
-				w.append_console('omni_console', '[${get_now_str()}] Search completed: 0 files matched.\n',
-					1)
+				w.set('txt_live_output',
+					'=== PIPELINE 1: SEARCH -> REPLACE -> DIFF ===\nTarget Workspace: ${ws}\nSearch Pattern: "${primary}"\nReplacement:    "${secondary}"\n\n[INFO] No files matching the criteria contained pattern "${primary}".\nNothing to replace.\n')
+				w.append_console('omni_console',
+					'[${get_now_str()}] Search completed: 0 files matched.\n', 1)
 				w.set_metric_card_value('card_status', 'IDLE', 'Vitals')
 				w.set('lbl_status_bar', ' Status: Pipeline complete - 0 matching files found.')
 				return
@@ -591,7 +597,11 @@ fn main() {
 			out += 'Search Pattern:   "${primary}"\n'
 			out += 'Replacement:      "${secondary}"\n'
 			out += 'Matching Files:   ${matching_files.len} files identified\n'
-			out += 'Execution Mode:   ${if is_dry { 'DRY RUN (Preview Only - No Disk Changes)' } else { 'APPLIED IN-PLACE' }}\n'
+			out += 'Execution Mode:   ${if is_dry {
+				'DRY RUN (Preview Only - No Disk Changes)'
+			} else {
+				'APPLIED IN-PLACE'
+			}}\n'
 			out += '----------------------------------------------------------------------\n\n'
 
 			mut replaced_count := 0
@@ -604,8 +614,8 @@ fn main() {
 				out += '[File: ${rel_path}]\n'
 
 				// Sample preview using rg
-				preview_res := simplegui.exec_safe(rg_bin, ['-n', '--color=never', primary,
-					file_path])
+				preview_res := simplegui.exec_safe(rg_bin,
+					['-n', '--color=never', primary, file_path])
 				for line in preview_res.output.trim_space().split_into_lines() {
 					if line.trim_space() != '' {
 						out += '  - Current: ${line}\n'
@@ -640,10 +650,11 @@ fn main() {
 			}
 
 			w.set('txt_live_output', out)
-			w.append_console('omni_console', '[${get_now_str()}] Pipeline finished: ${matching_files.len} files processed.\n',
-				2)
+			w.append_console('omni_console',
+				'[${get_now_str()}] Pipeline finished: ${matching_files.len} files processed.\n', 2)
 			w.set_metric_card_value('card_status', 'SUCCESS', 'Vitals')
-			w.set('lbl_status_bar', ' Status: Pipeline complete - ${matching_files.len} files processed.')
+			w.set('lbl_status_bar',
+				' Status: Pipeline complete - ${matching_files.len} files processed.')
 			w.toast(if is_dry { 'Dry run preview generated' } else { 'Find & Replace applied!' })
 			return
 		}
@@ -668,8 +679,8 @@ fn main() {
 				os.mkdir_all(dest_dir) or {}
 			}
 
-			w.append_console('omni_console', '[${get_now_str()}] Starting accelerated download with wget2: ${primary}...\n',
-				1)
+			w.append_console('omni_console',
+				'[${get_now_str()}] Starting accelerated download with wget2: ${primary}...\n', 1)
 
 			mut out := '=== PIPELINE 2: DOWNLOAD -> EXTRACT -> INSPECT ===\n'
 			out += 'Target Asset URL: ${primary}\n'
@@ -686,8 +697,8 @@ fn main() {
 			if w_res.exit_code != 0 {
 				out += '[ERROR] Download failed with exit code ${w_res.exit_code}.\n'
 				w.set('txt_live_output', out)
-				w.append_console('omni_console', '[${get_now_str()}] [ERROR] wget2 download failed.\n',
-					3)
+				w.append_console('omni_console',
+					'[${get_now_str()}] [ERROR] wget2 download failed.\n', 3)
 				w.set_metric_card_value('card_status', 'ERROR', 'Vitals')
 				w.set('lbl_status_bar', ' Status: Error - wget2 download failed.')
 				w.toast('Download failed')
@@ -738,8 +749,8 @@ fn main() {
 			}
 
 			w.set('txt_live_output', out)
-			w.append_console('omni_console', '[${get_now_str()}] Pipeline 2 finished successfully.\n',
-				2)
+			w.append_console('omni_console',
+				'[${get_now_str()}] Pipeline 2 finished successfully.\n', 2)
 			w.set_metric_card_value('card_status', 'SUCCESS', 'Vitals')
 			w.set('lbl_status_bar', ' Status: Download & unpack complete.')
 			w.toast('Download & unpack complete!')
@@ -760,7 +771,8 @@ fn main() {
 				return
 			}
 
-			w.append_console('omni_console', '[${get_now_str()}] Searching for targets matching "${primary}" to bury with rip...\n',
+			w.append_console('omni_console',
+				'[${get_now_str()}] Searching for targets matching "${primary}" to bury with rip...\n',
 				1)
 
 			mut fd_args := ['--color=never']
@@ -777,7 +789,11 @@ fn main() {
 			out += 'Target Workspace: ${ws}\n'
 			out += 'Search Pattern:   "${primary}"\n'
 			out += 'Discovered Items: ${targets.len}\n'
-			out += 'Execution Mode:   ${if is_dry { 'DRY RUN PREVIEW (Graveyard Safe)' } else { 'BURIED TO GRAVEYARD' }}\n'
+			out += 'Execution Mode:   ${if is_dry {
+				'DRY RUN PREVIEW (Graveyard Safe)'
+			} else {
+				'BURIED TO GRAVEYARD'
+			}}\n'
 			out += '----------------------------------------------------------------------\n\n'
 
 			if targets.len == 0 {
@@ -813,8 +829,8 @@ fn main() {
 			}
 
 			w.set('txt_live_output', out)
-			w.append_console('omni_console', '[${get_now_str()}] Pipeline 3 completed: ${targets.len} items evaluated.\n',
-				2)
+			w.append_console('omni_console',
+				'[${get_now_str()}] Pipeline 3 completed: ${targets.len} items evaluated.\n', 2)
 			w.set_metric_card_value('card_status', 'SUCCESS', 'Vitals')
 			w.set('lbl_status_bar', ' Status: Safe trash pipeline complete.')
 			w.toast(if is_dry { 'Trash preview generated' } else { 'Items safely buried' })
@@ -857,8 +873,8 @@ fn main() {
 			args << ws
 
 			state.last_cli_command = '${rg_bin} ' + args.join(' ')
-			w.append_console('omni_console', '[${get_now_str()}] Running Ripgrep: ${state.last_cli_command}\n',
-				1)
+			w.append_console('omni_console',
+				'[${get_now_str()}] Running Ripgrep: ${state.last_cli_command}\n', 1)
 
 			res := simplegui.exec_safe(rg_bin, args)
 			mut out := '=== RIPGREP CODE SEARCH RESULTS (rg) ===\n'
@@ -905,8 +921,8 @@ fn main() {
 			args << ws
 
 			state.last_cli_command = '${fd_bin} ' + args.join(' ')
-			w.append_console('omni_console', '[${get_now_str()}] Running fd: ${state.last_cli_command}\n',
-				1)
+			w.append_console('omni_console',
+				'[${get_now_str()}] Running fd: ${state.last_cli_command}\n', 1)
 
 			res := simplegui.exec_safe(fd_bin, args)
 			mut out := '=== FD FILE & PATH DISCOVERY (fd) ===\n'
@@ -937,8 +953,8 @@ fn main() {
 
 			target_path := if filter != '' { os.join_path(ws, filter) } else { ws }
 			state.last_cli_command = '${sd_bin} "${primary}" "${secondary}" "${target_path}"'
-			w.append_console('omni_console', '[${get_now_str()}] Running sd: ${state.last_cli_command}\n',
-				1)
+			w.append_console('omni_console',
+				'[${get_now_str()}] Running sd: ${state.last_cli_command}\n', 1)
 
 			mut out := '=== SD REGEX TEXT SUBSTITUTION (sd) ===\n'
 			out += 'Find:    "${primary}"\n'
@@ -981,12 +997,12 @@ fn main() {
 			debounce_str := if secondary != '' { secondary } else { '250ms' }
 
 			state.last_cli_command = '${we_bin} -w "${ws}" -d ${debounce_str} -r -- ${cmd_to_run}'
-			w.append_console('omni_console', '[${get_now_str()}] watchexec CLI configuration generated.\n',
-				1)
+			w.append_console('omni_console',
+				'[${get_now_str()}] watchexec CLI configuration generated.\n', 1)
 
 			// Execute test run
-			w.append_console('omni_console', '[${get_now_str()}] Triggering command check for watchexec: ${cmd_to_run}...\n',
-				1)
+			w.append_console('omni_console',
+				'[${get_now_str()}] Triggering command check for watchexec: ${cmd_to_run}...\n', 1)
 			sh_res := simplegui.exec_safe('sh', ['-c', 'cd "${ws}" && ${cmd_to_run}'])
 
 			mut out := '=== WATCHEXEC CONTINUOUS RUNNER (watchexec) ===\n'
@@ -1020,8 +1036,8 @@ fn main() {
 			threads := if filter != '' { filter } else { '8' }
 
 			state.last_cli_command = '${wget_bin} -c -j ${threads} -P "${dest_dir}" "${primary}"'
-			w.append_console('omni_console', '[${get_now_str()}] Running wget2: ${state.last_cli_command}\n',
-				1)
+			w.append_console('omni_console',
+				'[${get_now_str()}] Running wget2: ${state.last_cli_command}\n', 1)
 
 			res := simplegui.exec_safe(wget_bin, ['-c', '-j', threads, '-P', dest_dir, primary])
 
@@ -1058,16 +1074,16 @@ fn main() {
 
 			if action.contains('unbury') || action.contains('undo') {
 				state.last_cli_command = '${rip_bin} -u'
-				w.append_console('omni_console', '[${get_now_str()}] Unburying last deleted item with rip...\n',
-					1)
+				w.append_console('omni_console',
+					'[${get_now_str()}] Unburying last deleted item with rip...\n', 1)
 				res := simplegui.exec_safe(rip_bin, ['-u'])
 				out += 'Action: Unbury / Restore Last Deleted Item\n'
 				out += '----------------------------------------------------------------------\n\n'
 				out += res.output + '\n'
 			} else if action.contains('inspect') || primary == 'graveyard_inspect' {
 				state.last_cli_command = '${rip_bin} -s'
-				w.append_console('omni_console', '[${get_now_str()}] Inspecting graveyard with rip -s...\n',
-					1)
+				w.append_console('omni_console',
+					'[${get_now_str()}] Inspecting graveyard with rip -s...\n', 1)
 				res := simplegui.exec_safe(rip_bin, ['-s'])
 				out += 'Action: Inspect Graveyard Status\n'
 				out += '----------------------------------------------------------------------\n\n'
@@ -1169,8 +1185,8 @@ fn main() {
 			args << target_dir
 
 			state.last_cli_command = '${eza_bin} ' + args.join(' ')
-			w.append_console('omni_console', '[${get_now_str()}] Running eza: ${state.last_cli_command}\n',
-				1)
+			w.append_console('omni_console',
+				'[${get_now_str()}] Running eza: ${state.last_cli_command}\n', 1)
 
 			res := simplegui.exec_safe(eza_bin, args)
 			mut out := '=== EZA MODERN DIRECTORY TREE (eza) ===\n'
@@ -1204,8 +1220,8 @@ fn main() {
 			'rg --hidden "pattern" .'
 		}
 		w.copy_to_clipboard(cmd)
-		w.append_console('omni_console', '[${get_now_str()}] Copied CLI command to clipboard:\n  ${cmd}\n',
-			1)
+		w.append_console('omni_console',
+			'[${get_now_str()}] Copied CLI command to clipboard:\n  ${cmd}\n', 1)
 		w.toast('CLI command copied to clipboard!')
 	})
 
@@ -1213,8 +1229,8 @@ fn main() {
 	win.on_click('btn_stop_proc', fn (mut w simplegui.SimpleWindow) {
 		w.set_metric_card_value('card_status', 'STOPPED', 'Vitals')
 		w.set('lbl_status_bar', ' Status: Process terminated.')
-		w.append_console('omni_console', '[${get_now_str()}] Sent termination signal to active jobs.\n',
-			2)
+		w.append_console('omni_console',
+			'[${get_now_str()}] Sent termination signal to active jobs.\n', 2)
 		w.toast('Process terminated')
 	})
 

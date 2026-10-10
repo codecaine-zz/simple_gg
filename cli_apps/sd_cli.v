@@ -44,7 +44,11 @@ fn main() {
 		return
 	}
 
-	raw := if direct_text.len > 0 { direct_text } else { 'Welcome to development server on localhost:3000' }
+	raw := if direct_text.len > 0 {
+		direct_text
+	} else {
+		'Welcome to development server on localhost:3000'
+	}
 	out := raw.replace(find_pat, replace_str)
 	app.success('Output:')
 	println(out)

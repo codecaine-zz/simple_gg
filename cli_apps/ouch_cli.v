@@ -6,7 +6,8 @@ fn main() {
 	mut app := simplecli.new_app('ouch-cli', '1.0.0')
 	app.set_description('Universal Archive Compression & Decompression CLI')
 
-	app.add_flag_string('compress', 'c', '', 'Archive destination filename (e.g. archive.tar.gz, backup.zip, files.7z)')
+	app.add_flag_string('compress', 'c', '',
+		'Archive destination filename (e.g. archive.tar.gz, backup.zip, files.7z)')
 	app.add_flag_string('decompress', 'd', '', 'Archive file path to extract')
 	app.add_flag_string('input', 'i', '', 'Input folder or files to compress')
 	app.add_flag_bool('interactive', 'x', false, 'Launch interactive archive wizard')
@@ -72,8 +73,10 @@ fn main() {
 }
 
 fn run_interactive(mut app simplecli.SimpleCli, has_ouch bool) {
-	app.panel('Archive Manager Wizard', 'Compress and decompress ZIP, TAR, GZ, 7Z, and ZSTD archives.')
-	choice := app.select('Action:', ['Compress Folder to ZIP', 'Compress Folder to Tar.gz', 'Decompress Archive'])
+	app.panel('Archive Manager Wizard',
+		'Compress and decompress ZIP, TAR, GZ, 7Z, and ZSTD archives.')
+	choice := app.select('Action:', ['Compress Folder to ZIP', 'Compress Folder to Tar.gz',
+		'Decompress Archive'])
 	match choice {
 		'Compress Folder to ZIP' {
 			src := app.prompt('Input folder', '.')

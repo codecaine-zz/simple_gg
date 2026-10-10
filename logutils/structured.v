@@ -36,8 +36,9 @@ fn logfmt_value(v string) string {
 	if !needs {
 		return v
 	}
-	return '"' + v.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n').replace('\r',
-		'\\r').replace('\t', '\\t') + '"'
+	return '"' +
+		v.replace('\\', '\\\\').replace('"', '\\"').replace('\n', '\\n').replace('\r', '\\r').replace('\t', '\\t') +
+		'"'
 }
 
 // format_logfmt renders fields as `key=value` pairs (Heroku/Go logfmt), keys sorted
@@ -50,11 +51,21 @@ fn json_escape(s string) string {
 	mut sb := strings.new_builder(s.len + 8)
 	for c in s {
 		match c {
-			`"` { sb.write_string('\\"') }
-			`\\` { sb.write_string('\\\\') }
-			`\n` { sb.write_string('\\n') }
-			`\r` { sb.write_string('\\r') }
-			`\t` { sb.write_string('\\t') }
+			`"` {
+				sb.write_string('\\"')
+			}
+			`\\` {
+				sb.write_string('\\\\')
+			}
+			`\n` {
+				sb.write_string('\\n')
+			}
+			`\r` {
+				sb.write_string('\\r')
+			}
+			`\t` {
+				sb.write_string('\\t')
+			}
 			else {
 				if c < 0x20 {
 					sb.write_string('\\u00${c:02x}')
@@ -119,8 +130,7 @@ pub fn (l Logger) log_json(level LogLevel, msg string, fields map[string]string)
 	if int(level) < int(l.level) {
 		return
 	}
-	line := format_json_record(level, msg, redact_fields(fields, default_secret_keys),
-		time.now())
+	line := format_json_record(level, msg, redact_fields(fields, default_secret_keys), time.now())
 	if l.file_path != '' && l.output != .console {
 		mut f := os.open_append(l.file_path) or { return }
 		defer {

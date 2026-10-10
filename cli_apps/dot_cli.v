@@ -7,7 +7,8 @@ fn main() {
 	app.set_description('Graphviz DOT Diagram & Network Graph Renderer CLI')
 
 	app.add_flag_string('input', 'i', '', 'Input .dot graph source file path')
-	app.add_flag_string('output', 'o', 'diagram.png', 'Output rendered image file path (png, svg, pdf)')
+	app.add_flag_string('output', 'o', 'diagram.png',
+		'Output rendered image file path (png, svg, pdf)')
 	app.add_flag_string('format', 'f', 'png', 'Output format: png, svg, pdf')
 	app.add_flag_bool('interactive', 'x', false, 'Launch interactive Graphviz wizard')
 

@@ -417,6 +417,7 @@ pub fn (h HyperLogLog) count() u64 {
 		64 { 0.709 }
 		else { 0.7213 / (1.0 + 1.079 / m) }
 	}
+
 	mut sum := 0.0
 	mut zeros := 0
 	for r in h.reg {

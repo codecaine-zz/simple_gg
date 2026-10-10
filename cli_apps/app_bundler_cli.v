@@ -87,7 +87,8 @@ fn main() {
 }
 
 fn run_interactive(mut app simplecli.SimpleCli) {
-	app.panel('App Bundler Wizard', 'Package your compiled V native binary into a macOS .app application.')
+	app.panel('App Bundler Wizard',
+		'Package your compiled V native binary into a macOS .app application.')
 	bin := app.prompt('Path to binary executable', 'bin/my_app')
 	name := app.prompt('Application Name', 'MyAwesomeApp')
 	bundle_id := app.prompt('Bundle ID', 'com.mycompany.myapp')

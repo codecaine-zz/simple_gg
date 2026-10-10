@@ -13,7 +13,6 @@ import json2
 import os
 import time
 
-
 // FileDropCallback is a callback function invoked when files are drag-and-dropped onto the window.
 pub type FileDropCallback = fn (mut win SimpleWindow, files []string)
 
@@ -279,7 +278,9 @@ pub fn write_file_atomic(file_path string, content string) ! {
 	resolved := resolve_user_path(file_path)
 	parent_dir := os.dir(resolved)
 	if parent_dir != '' && !os.exists(parent_dir) {
-		os.mkdir_all(parent_dir) or { return error('Failed to create parent directory: ${parent_dir} (${err.msg()})') }
+		os.mkdir_all(parent_dir) or {
+			return error('Failed to create parent directory: ${parent_dir} (${err.msg()})')
+		}
 	}
 
 	rand_id := '${os.getpid()}_${time.now().unix_nano()}'
@@ -508,11 +509,26 @@ pub fn should_persist_control(ctrl &Control) bool {
 
 	// Supported input/preference control kinds
 	if ctrl.kind !in [
-		'input', 'textbox', 'search_bar', 'file_picker', 'date_picker', 'number',
-		'dropdown', 'select', 'combobox', 'segmented', 'radio',
-		'checkbox', 'switch', 'toggle',
-		'slider', 'step_slider', 'range_slider', 'stepper', 'rating',
-		'textarea'
+		'input',
+		'textbox',
+		'search_bar',
+		'file_picker',
+		'date_picker',
+		'number',
+		'dropdown',
+		'select',
+		'combobox',
+		'segmented',
+		'radio',
+		'checkbox',
+		'switch',
+		'toggle',
+		'slider',
+		'step_slider',
+		'range_slider',
+		'stepper',
+		'rating',
+		'textarea',
 	] {
 		return false
 	}
@@ -524,8 +540,8 @@ pub fn should_persist_control(ctrl &Control) bool {
 		|| lower.contains('terminal') || lower.contains('console') || lower.contains('live_output')
 		|| lower.contains('preview') || lower.contains('diff') || lower.contains('logs')
 		|| lower.contains('log_area') || lower.contains('results') || lower.contains('msg_box')
-		|| lower.contains('status_bar') || lower.contains('status_lbl') || lower.contains('telemetry')
-		|| lower.contains('summary_card') {
+		|| lower.contains('status_bar') || lower.contains('status_lbl')
+		|| lower.contains('telemetry') || lower.contains('summary_card') {
 		return false
 	}
 
@@ -682,7 +698,8 @@ pub fn (mut win SimpleWindow) restore_app_form_state(app_name ...string) bool {
 				ctrl.text_value = val
 				if ctrl.kind in ['checkbox', 'switch', 'toggle'] {
 					ctrl.bool_value = (val.to_lower().trim_space() in ['true', '1', 'yes', 'on'])
-				} else if ctrl.kind in ['slider', 'number', 'progress', 'stepper', 'rating', 'spinner'] {
+				} else if ctrl.kind in ['slider', 'number', 'progress', 'stepper', 'rating',
+					'spinner'] {
 					ctrl.int_value = val.int()
 				} else if ctrl.kind in ['step_slider', 'range_slider'] {
 					ctrl.f64_value = val.f64()
@@ -724,7 +741,3 @@ pub fn (win &SimpleWindow) clear_app_form_state(app_name ...string) ! {
 		os.rm(config_file) or {}
 	}
 }
-
-
-
-

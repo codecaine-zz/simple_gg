@@ -26,7 +26,7 @@ pub mut:
 	hover_color      string // Hover highlight tint color when mouse is positioned over elements
 	surface_hover    string // Background tint color for hovered containers or list rows
 	description      string // Brief description of theme aesthetics
-	is_dark          bool // True for dark mode palettes, false for light mode palettes
+	is_dark          bool   // True for dark mode palettes, false for light mode palettes
 }
 
 // hex_char_val converts a single ASCII hex character byte (`0`-`9`, `a`-`f`, `A`-`F`)
@@ -62,15 +62,13 @@ pub fn parse_hex_color(hex string) gg.Color {
 }
 
 fn normalized_theme_name(theme_name string) string {
-	return theme_name.to_lower().replace(' ', '').replace('_', '').replace('-', '').replace('é', 'e').replace("'", '')
+	return theme_name.to_lower().replace(' ', '').replace('_', '').replace('-', '').replace('é',
+		'e').replace("'", '')
 }
 
 fn mix_theme_color(from gg.Color, to gg.Color, amount f32) gg.Color {
-	return gg.rgb(
-		u8(f32(from.r) + (f32(to.r) - f32(from.r)) * amount),
-		u8(f32(from.g) + (f32(to.g) - f32(from.g)) * amount),
-		u8(f32(from.b) + (f32(to.b) - f32(from.b)) * amount),
-	)
+	return gg.rgb(u8(f32(from.r) + (f32(to.r) - f32(from.r)) * amount), u8(f32(from.g) +
+		(f32(to.g) - f32(from.g)) * amount), u8(f32(from.b) + (f32(to.b) - f32(from.b)) * amount))
 }
 
 pub fn (theme &Theme) surface() gg.Color {
@@ -99,7 +97,8 @@ pub fn (theme &Theme) hovered_surface() gg.Color {
 }
 
 pub fn (theme &Theme) muted_text() gg.Color {
-	return mix_theme_color(parse_hex_color(theme.font_color), parse_hex_color(theme.background_color), if theme.is_dark {
+	return mix_theme_color(parse_hex_color(theme.font_color),
+		parse_hex_color(theme.background_color), if theme.is_dark {
 		f32(0.42)
 	} else {
 		f32(0.36)
@@ -151,6 +150,7 @@ pub fn get_theme(theme_name string) Theme {
 		'onedark' { 'onedarkpro' }
 		else { normalized }
 	}
+
 	for theme in bun_rad_studio_themes() {
 		if normalized == normalized_theme_name(theme.key)
 			|| normalized == normalized_theme_name(theme.name) {
@@ -207,410 +207,410 @@ fn get_legacy_theme(theme_name string) Theme {
 	return match normalized {
 		'appledark', 'dark' {
 			Theme{
-				name: 'Apple Dark'
+				name:             'Apple Dark'
 				background_color: '#1c1c1e'
-				font_color: '#f2f2f7'
-				accent_color: '#0a84ff'
-				hover_color: '#409cff'
-				surface_hover: '#2c2c2e'
-				description: 'Vibrant macOS Dark Mode surface'
-				is_dark: true
+				font_color:       '#f2f2f7'
+				accent_color:     '#0a84ff'
+				hover_color:      '#409cff'
+				surface_hover:    '#2c2c2e'
+				description:      'Vibrant macOS Dark Mode surface'
+				is_dark:          true
 			}
 		}
 		'midnightspacegray', 'midnight' {
 			Theme{
-				name: 'Midnight Space Gray'
+				name:             'Midnight Space Gray'
 				background_color: '#161618'
-				font_color: '#ebebf5'
-				accent_color: '#0a84ff'
-				hover_color: '#38bdf8'
-				surface_hover: '#27272a'
-				description: 'Pro dark titanium space gray theme'
-				is_dark: true
+				font_color:       '#ebebf5'
+				accent_color:     '#0a84ff'
+				hover_color:      '#38bdf8'
+				surface_hover:    '#27272a'
+				description:      'Pro dark titanium space gray theme'
+				is_dark:          true
 			}
 		}
 		'applesunset', 'sunset' {
 			Theme{
-				name: 'Apple Sunset'
+				name:             'Apple Sunset'
 				background_color: '#281a24'
-				font_color: '#fdf7f4'
-				accent_color: '#ff6b00'
-				hover_color: '#ff8833'
-				surface_hover: '#3a2533'
-				description: 'Warm macOS Mojave twilight sunset hues'
-				is_dark: true
+				font_color:       '#fdf7f4'
+				accent_color:     '#ff6b00'
+				hover_color:      '#ff8833'
+				surface_hover:    '#3a2533'
+				description:      'Warm macOS Mojave twilight sunset hues'
+				is_dark:          true
 			}
 		}
 		'sonomaemerald', 'emerald' {
 			Theme{
-				name: 'Sonoma Emerald'
+				name:             'Sonoma Emerald'
 				background_color: '#0d1f18'
-				font_color: '#f0fdf4'
-				accent_color: '#30d158'
-				hover_color: '#4ade80'
-				surface_hover: '#163327'
-				description: 'macOS Sonoma dark forest glass palette'
-				is_dark: true
+				font_color:       '#f0fdf4'
+				accent_color:     '#30d158'
+				hover_color:      '#4ade80'
+				surface_hover:    '#163327'
+				description:      'macOS Sonoma dark forest glass palette'
+				is_dark:          true
 			}
 		}
 		'venturaamber', 'amber' {
 			Theme{
-				name: 'Ventura Amber'
+				name:             'Ventura Amber'
 				background_color: '#211815'
-				font_color: '#fff8f0'
-				accent_color: '#ff9500'
-				hover_color: '#ffaa33'
-				surface_hover: '#332621'
-				description: 'macOS Ventura golden sunset dark hues'
-				is_dark: true
+				font_color:       '#fff8f0'
+				accent_color:     '#ff9500'
+				hover_color:      '#ffaa33'
+				surface_hover:    '#332621'
+				description:      'macOS Ventura golden sunset dark hues'
+				is_dark:          true
 			}
 		}
 		'softpastel', 'pastel' {
 			Theme{
-				name: 'Soft Pastel'
+				name:             'Soft Pastel'
 				background_color: '#faf6f0'
-				font_color: '#2d2b2a'
-				accent_color: '#e07a5f'
-				hover_color: '#f4a261'
-				surface_hover: '#f2eae1'
-				description: 'Apple Studio warm soft light theme'
-				is_dark: false
+				font_color:       '#2d2b2a'
+				accent_color:     '#e07a5f'
+				hover_color:      '#f4a261'
+				surface_hover:    '#f2eae1'
+				description:      'Apple Studio warm soft light theme'
+				is_dark:          false
 			}
 		}
 		'catppuccinmocha', 'catppuccin' {
 			Theme{
-				name: 'Catppuccin Mocha'
+				name:             'Catppuccin Mocha'
 				background_color: '#1e1e2e'
-				font_color: '#cdd6f4'
-				accent_color: '#cba6f7'
-				hover_color: '#f5c2e7'
-				surface_hover: '#313244'
-				description: 'Soothing lavender catppuccin dark mode'
-				is_dark: true
+				font_color:       '#cdd6f4'
+				accent_color:     '#cba6f7'
+				hover_color:      '#f5c2e7'
+				surface_hover:    '#313244'
+				description:      'Soothing lavender catppuccin dark mode'
+				is_dark:          true
 			}
 		}
 		'nord' {
 			Theme{
-				name: 'Nord'
+				name:             'Nord'
 				background_color: '#2e3440'
-				font_color: '#eceff4'
-				accent_color: '#88c0d0'
-				hover_color: '#81a1c1'
-				surface_hover: '#3b4252'
-				description: 'Arctic frost nord developer palette'
-				is_dark: true
+				font_color:       '#eceff4'
+				accent_color:     '#88c0d0'
+				hover_color:      '#81a1c1'
+				surface_hover:    '#3b4252'
+				description:      'Arctic frost nord developer palette'
+				is_dark:          true
 			}
 		}
 		'dracula' {
 			Theme{
-				name: 'Dracula'
+				name:             'Dracula'
 				background_color: '#282a36'
-				font_color: '#f8f8f2'
-				accent_color: '#bd93f9'
-				hover_color: '#ff79c6'
-				surface_hover: '#44475a'
-				description: 'High-contrast vampire purple palette'
-				is_dark: true
+				font_color:       '#f8f8f2'
+				accent_color:     '#bd93f9'
+				hover_color:      '#ff79c6'
+				surface_hover:    '#44475a'
+				description:      'High-contrast vampire purple palette'
+				is_dark:          true
 			}
 		}
 		'cyberpunk' {
 			Theme{
-				name: 'Cyberpunk'
+				name:             'Cyberpunk'
 				background_color: '#0d0d15'
-				font_color: '#00f5d4'
-				accent_color: '#ff007f'
-				hover_color: '#7000ff'
-				surface_hover: '#1f1f2e'
-				description: 'Neon glow dark contrast palette'
-				is_dark: true
+				font_color:       '#00f5d4'
+				accent_color:     '#ff007f'
+				hover_color:      '#7000ff'
+				surface_hover:    '#1f1f2e'
+				description:      'Neon glow dark contrast palette'
+				is_dark:          true
 			}
 		}
 		'synthwave84', 'synthwave', 'synth' {
 			Theme{
-				name: 'Synthwave 84'
+				name:             'Synthwave 84'
 				background_color: '#261535'
-				font_color: '#ffeefd'
-				accent_color: '#ff7edb'
-				hover_color: '#36f9f6'
-				surface_hover: '#361d4a'
-				description: 'Retro 80s synthwave neon twilight theme'
-				is_dark: true
+				font_color:       '#ffeefd'
+				accent_color:     '#ff7edb'
+				hover_color:      '#36f9f6'
+				surface_hover:    '#361d4a'
+				description:      'Retro 80s synthwave neon twilight theme'
+				is_dark:          true
 			}
 		}
 		'neonmatrix', 'matrix' {
 			Theme{
-				name: 'Neon Matrix'
+				name:             'Neon Matrix'
 				background_color: '#05100a'
-				font_color: '#00ff66'
-				accent_color: '#39ff14'
-				hover_color: '#00ffaa'
-				surface_hover: '#0e2417'
-				description: 'Digital phosphor green cyber terminal theme'
-				is_dark: true
+				font_color:       '#00ff66'
+				accent_color:     '#39ff14'
+				hover_color:      '#00ffaa'
+				surface_hover:    '#0e2417'
+				description:      'Digital phosphor green cyber terminal theme'
+				is_dark:          true
 			}
 		}
 		'holodeckcyan', 'holodeck', 'holo' {
 			Theme{
-				name: 'Holodeck Cyan'
+				name:             'Holodeck Cyan'
 				background_color: '#050b14'
-				font_color: '#e0f7fc'
-				accent_color: '#00f0ff'
-				hover_color: '#70f3ff'
-				surface_hover: '#0e1e38'
-				description: 'Futuristic glowing holographic cyan display'
-				is_dark: true
+				font_color:       '#e0f7fc'
+				accent_color:     '#00f0ff'
+				hover_color:      '#70f3ff'
+				surface_hover:    '#0e1e38'
+				description:      'Futuristic glowing holographic cyan display'
+				is_dark:          true
 			}
 		}
 		'scifihudorange', 'scifihud', 'hud' {
 			Theme{
-				name: 'Sci-Fi HUD Orange'
+				name:             'Sci-Fi HUD Orange'
 				background_color: '#121316'
-				font_color: '#ffaa00'
-				accent_color: '#ff6600'
-				hover_color: '#ffcc00'
-				surface_hover: '#22252d'
-				description: 'Tactical amber futuristic cockpit HUD theme'
-				is_dark: true
+				font_color:       '#ffaa00'
+				accent_color:     '#ff6600'
+				hover_color:      '#ffcc00'
+				surface_hover:    '#22252d'
+				description:      'Tactical amber futuristic cockpit HUD theme'
+				is_dark:          true
 			}
 		}
 		'quantumviolet', 'quantum' {
 			Theme{
-				name: 'Quantum Violet'
+				name:             'Quantum Violet'
 				background_color: '#110926'
-				font_color: '#f3e8ff'
-				accent_color: '#9d4edd'
-				hover_color: '#c77dff'
-				surface_hover: '#211242'
-				description: 'Quantum glow electric purple dark palette'
-				is_dark: true
+				font_color:       '#f3e8ff'
+				accent_color:     '#9d4edd'
+				hover_color:      '#c77dff'
+				surface_hover:    '#211242'
+				description:      'Quantum glow electric purple dark palette'
+				is_dark:          true
 			}
 		}
 		'corporatenavy', 'corporate' {
 			Theme{
-				name: 'Corporate Navy'
+				name:             'Corporate Navy'
 				background_color: '#f8fafc'
-				font_color: '#0f172a'
-				accent_color: '#1e40af'
-				hover_color: '#2563eb'
-				surface_hover: '#e2e8f0'
-				description: 'Professional enterprise corporate navy light theme'
-				is_dark: false
+				font_color:       '#0f172a'
+				accent_color:     '#1e40af'
+				hover_color:      '#2563eb'
+				surface_hover:    '#e2e8f0'
+				description:      'Professional enterprise corporate navy light theme'
+				is_dark:          false
 			}
 		}
 		'executiveslate', 'executive' {
 			Theme{
-				name: 'Executive Slate'
+				name:             'Executive Slate'
 				background_color: '#1e293b'
-				font_color: '#f8fafc'
-				accent_color: '#3b82f6'
-				hover_color: '#60a5fa'
-				surface_hover: '#334155'
-				description: 'Dark executive slate enterprise dashboard theme'
-				is_dark: true
+				font_color:       '#f8fafc'
+				accent_color:     '#3b82f6'
+				hover_color:      '#60a5fa'
+				surface_hover:    '#334155'
+				description:      'Dark executive slate enterprise dashboard theme'
+				is_dark:          true
 			}
 		}
 		'financialgold', 'finance', 'gold' {
 			Theme{
-				name: 'Financial Gold'
+				name:             'Financial Gold'
 				background_color: '#181614'
-				font_color: '#fef3c7'
-				accent_color: '#d97706'
-				hover_color: '#f59e0b'
-				surface_hover: '#2a241e'
-				description: 'Fintech luxury gold & dark bronze financial theme'
-				is_dark: true
+				font_color:       '#fef3c7'
+				accent_color:     '#d97706'
+				hover_color:      '#f59e0b'
+				surface_hover:    '#2a241e'
+				description:      'Fintech luxury gold & dark bronze financial theme'
+				is_dark:          true
 			}
 		}
 		'enterpriselight', 'enterprise' {
 			Theme{
-				name: 'Enterprise Light'
+				name:             'Enterprise Light'
 				background_color: '#f3f4f6'
-				font_color: '#1f2937'
-				accent_color: '#0d9488'
-				hover_color: '#14b8a6'
-				surface_hover: '#e5e7eb'
-				description: 'Clean modern enterprise admin & SaaS dashboard'
-				is_dark: false
+				font_color:       '#1f2937'
+				accent_color:     '#0d9488'
+				hover_color:      '#14b8a6'
+				surface_hover:    '#e5e7eb'
+				description:      'Clean modern enterprise admin & SaaS dashboard'
+				is_dark:          false
 			}
 		}
 		'modernminimalist', 'minimalist', 'monochrome' {
 			Theme{
-				name: 'Modern Minimalist'
+				name:             'Modern Minimalist'
 				background_color: '#ffffff'
-				font_color: '#111111'
-				accent_color: '#18181b'
-				hover_color: '#3f3f46'
-				surface_hover: '#f4f4f5'
-				description: 'High-contrast sleek monochrome minimalist theme'
-				is_dark: false
+				font_color:       '#111111'
+				accent_color:     '#18181b'
+				hover_color:      '#3f3f46'
+				surface_hover:    '#f4f4f5'
+				description:      'High-contrast sleek monochrome minimalist theme'
+				is_dark:          false
 			}
 		}
 		'procharcoal', 'charcoal' {
 			Theme{
-				name: 'Pro Charcoal'
+				name:             'Pro Charcoal'
 				background_color: '#18181b'
-				font_color: '#fafafa'
-				accent_color: '#6366f1'
-				hover_color: '#818cf8'
-				surface_hover: '#27272a'
-				description: 'Sleek pro charcoal dark mode for SaaS apps'
-				is_dark: true
+				font_color:       '#fafafa'
+				accent_color:     '#6366f1'
+				hover_color:      '#818cf8'
+				surface_hover:    '#27272a'
+				description:      'Sleek pro charcoal dark mode for SaaS apps'
+				is_dark:          true
 			}
 		}
 		'tokyonight', 'tokyo' {
 			Theme{
-				name: 'Tokyo Night'
+				name:             'Tokyo Night'
 				background_color: '#1a1b26'
-				font_color: '#c0caf5'
-				accent_color: '#7aa2f7'
-				hover_color: '#bb9af7'
-				surface_hover: '#24283b'
-				description: 'Iconic Tokyo neon night developer dark palette'
-				is_dark: true
+				font_color:       '#c0caf5'
+				accent_color:     '#7aa2f7'
+				hover_color:      '#bb9af7'
+				surface_hover:    '#24283b'
+				description:      'Iconic Tokyo neon night developer dark palette'
+				is_dark:          true
 			}
 		}
 		'onedarkpro', 'onedark' {
 			Theme{
-				name: 'One Dark Pro'
+				name:             'One Dark Pro'
 				background_color: '#282c34'
-				font_color: '#abb2bf'
-				accent_color: '#61afef'
-				hover_color: '#c678dd'
-				surface_hover: '#353b45'
-				description: 'Popular Atom One Dark editor palette'
-				is_dark: true
+				font_color:       '#abb2bf'
+				accent_color:     '#61afef'
+				hover_color:      '#c678dd'
+				surface_hover:    '#353b45'
+				description:      'Popular Atom One Dark editor palette'
+				is_dark:          true
 			}
 		}
 		'gruvboxdark', 'gruvbox' {
 			Theme{
-				name: 'Gruvbox Dark'
+				name:             'Gruvbox Dark'
 				background_color: '#282828'
-				font_color: '#ebdbb2'
-				accent_color: '#fabd2f'
-				hover_color: '#fe8019'
-				surface_hover: '#3c3836'
-				description: 'Retro warm dark orange & green developer theme'
-				is_dark: true
+				font_color:       '#ebdbb2'
+				accent_color:     '#fabd2f'
+				hover_color:      '#fe8019'
+				surface_hover:    '#3c3836'
+				description:      'Retro warm dark orange & green developer theme'
+				is_dark:          true
 			}
 		}
 		'monokaipro', 'monokai' {
 			Theme{
-				name: 'Monokai Pro'
+				name:             'Monokai Pro'
 				background_color: '#2d2a2e'
-				font_color: '#fcfcfa'
-				accent_color: '#ff6188'
-				hover_color: '#ffd866'
-				surface_hover: '#403c40'
-				description: 'Classic Monokai vivid dark contrast theme'
-				is_dark: true
+				font_color:       '#fcfcfa'
+				accent_color:     '#ff6188'
+				hover_color:      '#ffd866'
+				surface_hover:    '#403c40'
+				description:      'Classic Monokai vivid dark contrast theme'
+				is_dark:          true
 			}
 		}
 		'rosepine', 'rose' {
 			Theme{
-				name: 'Rosé Pine'
+				name:             'Rosé Pine'
 				background_color: '#191724'
-				font_color: '#e0def4'
-				accent_color: '#ebbcba'
-				hover_color: '#c4a7e7'
-				surface_hover: '#26233a'
-				description: 'Soothing natural rose gold & purple dark theme'
-				is_dark: true
+				font_color:       '#e0def4'
+				accent_color:     '#ebbcba'
+				hover_color:      '#c4a7e7'
+				surface_hover:    '#26233a'
+				description:      'Soothing natural rose gold & purple dark theme'
+				is_dark:          true
 			}
 		}
 		'coffeeroast', 'coffee', 'warm' {
 			Theme{
-				name: 'Coffee Roast'
+				name:             'Coffee Roast'
 				background_color: '#1c1613'
-				font_color: '#fef3c7'
-				accent_color: '#d97706'
-				hover_color: '#f59e0b'
-				surface_hover: '#2d231e'
-				description: 'Warm cozy coffee roast espresso dark theme'
-				is_dark: true
+				font_color:       '#fef3c7'
+				accent_color:     '#d97706'
+				hover_color:      '#f59e0b'
+				surface_hover:    '#2d231e'
+				description:      'Warm cozy coffee roast espresso dark theme'
+				is_dark:          true
 			}
 		}
 		'solarizedlight' {
 			Theme{
-				name: 'Solarized Light'
+				name:             'Solarized Light'
 				background_color: '#fdf6e3'
-				font_color: '#657b83'
-				accent_color: '#268bd2'
-				hover_color: '#2aa198'
-				surface_hover: '#eee8d5'
-				description: 'Precision engineered light palette'
-				is_dark: false
+				font_color:       '#657b83'
+				accent_color:     '#268bd2'
+				hover_color:      '#2aa198'
+				surface_hover:    '#eee8d5'
+				description:      'Precision engineered light palette'
+				is_dark:          false
 			}
 		}
 		'solarizeddark' {
 			Theme{
-				name: 'Solarized Dark'
+				name:             'Solarized Dark'
 				background_color: '#002b36'
-				font_color: '#839496'
-				accent_color: '#2aa198'
-				hover_color: '#268bd2'
-				surface_hover: '#073642'
-				description: 'Precision engineered dark palette'
-				is_dark: true
+				font_color:       '#839496'
+				accent_color:     '#2aa198'
+				hover_color:      '#268bd2'
+				surface_hover:    '#073642'
+				description:      'Precision engineered dark palette'
+				is_dark:          true
 			}
 		}
 		'githubdark' {
 			Theme{
-				name: 'GitHub Dark'
+				name:             'GitHub Dark'
 				background_color: '#0d1117'
-				font_color: '#c9d1d9'
-				accent_color: '#58a6ff'
-				hover_color: '#79c0ff'
-				surface_hover: '#161b22'
-				description: 'Official GitHub dark interface palette'
-				is_dark: true
+				font_color:       '#c9d1d9'
+				accent_color:     '#58a6ff'
+				hover_color:      '#79c0ff'
+				surface_hover:    '#161b22'
+				description:      'Official GitHub dark interface palette'
+				is_dark:          true
 			}
 		}
 		'githublight' {
 			Theme{
-				name: 'GitHub Light'
+				name:             'GitHub Light'
 				background_color: '#ffffff'
-				font_color: '#24292f'
-				accent_color: '#0969da'
-				hover_color: '#218bff'
-				surface_hover: '#f6f8fa'
-				description: 'Clean GitHub light canvas palette'
-				is_dark: false
+				font_color:       '#24292f'
+				accent_color:     '#0969da'
+				hover_color:      '#218bff'
+				surface_hover:    '#f6f8fa'
+				description:      'Clean GitHub light canvas palette'
+				is_dark:          false
 			}
 		}
 		'navyblue', 'navy' {
 			Theme{
-				name: 'Navy Blue'
+				name:             'Navy Blue'
 				background_color: '#0f172a'
-				font_color: '#f8fafc'
-				accent_color: '#38bdf8'
-				hover_color: '#60a5fa'
-				surface_hover: '#1e293b'
-				description: 'Deep slate navy dark theme'
-				is_dark: true
+				font_color:       '#f8fafc'
+				accent_color:     '#38bdf8'
+				hover_color:      '#60a5fa'
+				surface_hover:    '#1e293b'
+				description:      'Deep slate navy dark theme'
+				is_dark:          true
 			}
 		}
 		'forestgreen', 'forest' {
 			Theme{
-				name: 'Forest Green'
+				name:             'Forest Green'
 				background_color: '#14532d'
-				font_color: '#f0fdf4'
-				accent_color: '#4ade80'
-				hover_color: '#86efac'
-				surface_hover: '#166534'
-				description: 'Rich emerald green dark theme'
-				is_dark: true
+				font_color:       '#f0fdf4'
+				accent_color:     '#4ade80'
+				hover_color:      '#86efac'
+				surface_hover:    '#166534'
+				description:      'Rich emerald green dark theme'
+				is_dark:          true
 			}
 		}
 		else {
 			Theme{
-				name: 'Apple Light'
+				name:             'Apple Light'
 				background_color: '#ffffff'
-				font_color: '#1c1c1e'
-				accent_color: '#007aff'
-				hover_color: '#3395ff'
-				surface_hover: '#e5e5ea'
-				description: 'Clean macOS Aqua system light canvas'
-				is_dark: false
+				font_color:       '#1c1c1e'
+				accent_color:     '#007aff'
+				hover_color:      '#3395ff'
+				surface_hover:    '#e5e5ea'
+				description:      'Clean macOS Aqua system light canvas'
+				is_dark:          false
 			}
 		}
 	}

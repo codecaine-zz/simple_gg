@@ -122,20 +122,27 @@ fn apply_typography_to_form(mut win simplegui.SimpleWindow, font_path string, fo
 	win.set_control_font_bold('lbl_form_status', is_bold)
 	win.set_control_font_color('lbl_form_status', hex_color)
 	win.set_control_font_name('lbl_form_status', font_path)
-	win.set_text('lbl_form_status', 'Form Status: Ready • Active Font: ${font_filename} (${font_size}px, ${font_weight})')
+	win.set_text('lbl_form_status',
+		'Form Status: Ready • Active Font: ${font_filename} (${font_size}px, ${font_weight})')
 
 	// 7. Update Control Panel Status Labels
 	win.set_text('lbl_active_font', 'Active System Font: ' + font_filename + ' (' + font_path + ')')
-	win.set_text('lbl_style_status', 'Active: ${font_filename} | ${font_size}px | ${font_weight} | ${hex_color}')
+	win.set_text('lbl_style_status',
+		'Active: ${font_filename} | ${font_size}px | ${font_weight} | ${hex_color}')
 }
 
 fn main() {
-	mut win := simplegui.new_simple_window('18 - Custom Font Loading & Live Form Typography', 1060, 980)
+	mut win :=
+		simplegui.new_simple_window('18 - Custom Font Loading & Live Form Typography', 1060, 980)
 	win.set_theme('Apple Dark')
 
 	// Initial font path configuration at startup
 	initial_font_path := resolve_custom_font_for_platform()
-	initial_font_name := if initial_font_path.len > 0 { os.file_name(initial_font_path) } else { 'Default TTF' }
+	initial_font_name := if initial_font_path.len > 0 {
+		os.file_name(initial_font_path)
+	} else {
+		'Default TTF'
+	}
 	if initial_font_path.len > 0 {
 		win.set_font_path(initial_font_path)
 	}
@@ -145,10 +152,15 @@ fn main() {
 	win.set_state_bool(key_font_bold, false)
 	win.set_state(key_font_color, '#0a84ff')
 	win.set_state(key_font_name, initial_font_name)
-	win.set_state(key_font_path, if initial_font_path.len > 0 { initial_font_path } else { 'Default Sokol TTF' })
+	win.set_state(key_font_path, if initial_font_path.len > 0 {
+		initial_font_path
+	} else {
+		'Default Sokol TTF'
+	})
 
 	win.add_heading('Custom Font Loading & Live Form Typography')
-	win.add_label('lbl_subhead_guide', 'Dynamic Typography & Real-time Form Engine — Click any font, mode, size, or preset to update the form live.')
+	win.add_label('lbl_subhead_guide',
+		'Dynamic Typography & Real-time Form Engine — Click any font, mode, size, or preset to update the form live.')
 	win.control('lbl_subhead_guide').set_font_size(13).set_font_color('#98989d')
 
 	// 1. Font Family & System Discovery
@@ -160,42 +172,48 @@ fn main() {
 			win.add_button('btn_mode_sans', 'Sans-Serif')
 			win.bind_click('btn_mode_sans', fn (mut win simplegui.SimpleWindow) {
 				font_path := simplegui.resolve_font_path_by_category('sans')
-				apply_typography_to_form(mut win, font_path, win.get_state_int('font_size'), win.get_state_bool('font_bold'), win.get_state('font_color'))
+				apply_typography_to_form(mut win, font_path, win.get_state_int('font_size'),
+					win.get_state_bool('font_bold'), win.get_state('font_color'))
 				win.push_toast('Render Mode', 'Switched to Proportional Sans-Serif', 'info', 2000)
 			})
 
 			win.add_button('btn_mode_mono', 'Monospace Code')
 			win.bind_click('btn_mode_mono', fn (mut win simplegui.SimpleWindow) {
 				font_path := simplegui.resolve_font_path_by_category('mono')
-				apply_typography_to_form(mut win, font_path, win.get_state_int('font_size'), win.get_state_bool('font_bold'), win.get_state('font_color'))
+				apply_typography_to_form(mut win, font_path, win.get_state_int('font_size'),
+					win.get_state_bool('font_bold'), win.get_state('font_color'))
 				win.push_toast('Render Mode', 'Switched to Monospace Fixed-Width', 'info', 2000)
 			})
 
 			win.add_button('btn_mode_serif', 'Serif Classic')
 			win.bind_click('btn_mode_serif', fn (mut win simplegui.SimpleWindow) {
 				font_path := simplegui.resolve_font_path_by_category('serif')
-				apply_typography_to_form(mut win, font_path, win.get_state_int('font_size'), win.get_state_bool('font_bold'), win.get_state('font_color'))
+				apply_typography_to_form(mut win, font_path, win.get_state_int('font_size'),
+					win.get_state_bool('font_bold'), win.get_state('font_color'))
 				win.push_toast('Render Mode', 'Switched to Serif Classic', 'info', 2000)
 			})
 
 			win.add_button('btn_mode_display', 'Display Impact')
 			win.bind_click('btn_mode_display', fn (mut win simplegui.SimpleWindow) {
 				font_path := simplegui.resolve_font_path_by_category('display')
-				apply_typography_to_form(mut win, font_path, win.get_state_int('font_size'), win.get_state_bool('font_bold'), win.get_state('font_color'))
+				apply_typography_to_form(mut win, font_path, win.get_state_int('font_size'),
+					win.get_state_bool('font_bold'), win.get_state('font_color'))
 				win.push_toast('Render Mode', 'Switched to Display Impact', 'info', 2000)
 			})
 
 			win.add_button('btn_mode_casual', 'Casual Script')
 			win.bind_click('btn_mode_casual', fn (mut win simplegui.SimpleWindow) {
 				font_path := simplegui.resolve_font_path_by_category('casual')
-				apply_typography_to_form(mut win, font_path, win.get_state_int('font_size'), win.get_state_bool('font_bold'), win.get_state('font_color'))
+				apply_typography_to_form(mut win, font_path, win.get_state_int('font_size'),
+					win.get_state_bool('font_bold'), win.get_state('font_color'))
 				win.push_toast('Render Mode', 'Switched to Casual Comic Style', 'info', 2000)
 			})
 		})
 
 		candidates := get_platform_font_candidates()
 		if candidates.len > 0 {
-			win.add_label('lbl_cand_info', 'Discovered System TTF Fonts on this Machine (Click any to test live):')
+			win.add_label('lbl_cand_info',
+				'Discovered System TTF Fonts on this Machine (Click any to test live):')
 			cols := math.min(6, candidates.len)
 			win.grid('grid_font_candidates', cols, 8, fn [candidates] (mut win simplegui.SimpleWindow) {
 				for idx, candidate in candidates {
@@ -204,7 +222,8 @@ fn main() {
 					lower := font_filename.to_lower()
 					tag := if lower.contains('mono') || lower.contains('courier') {
 						'[Mono] '
-					} else if lower.contains('times') || lower.contains('georgia') || lower.contains('serif') {
+					} else if lower.contains('times') || lower.contains('georgia')
+						|| lower.contains('serif') {
 						'[Serif] '
 					} else if lower.contains('impact') {
 						'[Display] '
@@ -213,11 +232,15 @@ fn main() {
 					} else {
 						'[Sans] '
 					}
-					font_base := font_filename.replace('.ttf', '').replace('.ttc', '').replace('.otf', '')
+					font_base :=
+						font_filename.replace('.ttf', '').replace('.ttc', '').replace('.otf', '')
 					win.add_button(btn_id, tag + font_base)
 					win.bind_click(btn_id, fn [candidate, font_filename] (mut win simplegui.SimpleWindow) {
-						apply_typography_to_form(mut win, candidate, win.get_state_int('font_size'), win.get_state_bool('font_bold'), win.get_state('font_color'))
-						win.push_toast('Font Selected', 'Configured: ' + font_filename, 'success', 2500)
+						apply_typography_to_form(mut win, candidate,
+							win.get_state_int('font_size'), win.get_state_bool('font_bold'),
+							win.get_state('font_color'))
+						win.push_toast('Font Selected', 'Configured: ' + font_filename, 'success',
+							2500)
 					})
 				}
 			})
@@ -232,28 +255,33 @@ fn main() {
 		win.grid('grid_size_controls', 5, 8, fn (mut win simplegui.SimpleWindow) {
 			win.add_button('btn_size_13', '13px (Compact)')
 			win.bind_click('btn_size_13', fn (mut win simplegui.SimpleWindow) {
-				apply_typography_to_form(mut win, win.get_state('active_font_path'), 13, win.get_state_bool('font_bold'), win.get_state('font_color'))
+				apply_typography_to_form(mut win, win.get_state('active_font_path'), 13,
+					win.get_state_bool('font_bold'), win.get_state('font_color'))
 			})
 
 			win.add_button('btn_size_15', '15px (Standard)')
 			win.bind_click('btn_size_15', fn (mut win simplegui.SimpleWindow) {
-				apply_typography_to_form(mut win, win.get_state('active_font_path'), 15, win.get_state_bool('font_bold'), win.get_state('font_color'))
+				apply_typography_to_form(mut win, win.get_state('active_font_path'), 15,
+					win.get_state_bool('font_bold'), win.get_state('font_color'))
 			})
 
 			win.add_button('btn_size_18', '18px (Comfortable)')
 			win.bind_click('btn_size_18', fn (mut win simplegui.SimpleWindow) {
-				apply_typography_to_form(mut win, win.get_state('active_font_path'), 18, win.get_state_bool('font_bold'), win.get_state('font_color'))
+				apply_typography_to_form(mut win, win.get_state('active_font_path'), 18,
+					win.get_state_bool('font_bold'), win.get_state('font_color'))
 			})
 
 			win.add_button('btn_size_22', '22px (Large)')
 			win.bind_click('btn_size_22', fn (mut win simplegui.SimpleWindow) {
-				apply_typography_to_form(mut win, win.get_state('active_font_path'), 22, win.get_state_bool('font_bold'), win.get_state('font_color'))
+				apply_typography_to_form(mut win, win.get_state('active_font_path'), 22,
+					win.get_state_bool('font_bold'), win.get_state('font_color'))
 			})
 
 			win.add_button('btn_toggle_weight', 'Toggle Bold / Regular')
 			win.bind_click('btn_toggle_weight', fn (mut win simplegui.SimpleWindow) {
 				is_bold := win.toggle_state_bool('font_bold')
-				apply_typography_to_form(mut win, win.get_state('active_font_path'), win.get_state_int('font_size'), is_bold, win.get_state('font_color'))
+				apply_typography_to_form(mut win, win.get_state('active_font_path'),
+					win.get_state_int('font_size'), is_bold, win.get_state('font_color'))
 			})
 		})
 
@@ -304,7 +332,8 @@ fn main() {
 	// 3. Live Interactive Form (The Centerpiece of typography preview)
 	win.group('grp_form_preview', 'Live Form Preview (Interactive Typography Testing)', fn (mut win simplegui.SimpleWindow) {
 		win.add_label('lbl_form_header', 'Employee Onboarding & Account Verification')
-		win.add_label('lbl_form_subhead', 'Fill out the fields below. Every input, label, checkbox, switch, and button updates live with the selected typography.')
+		win.add_label('lbl_form_subhead',
+			'Fill out the fields below. Every input, label, checkbox, switch, and button updates live with the selected typography.')
 
 		// 2-Column Form Fields
 		win.begin_grid('grid_form_fields', 2, 10)
@@ -321,7 +350,8 @@ fn main() {
 
 		// Full-Width Mission Bio Statement
 		win.add_label('lbl_bio', 'Personal Mission Statement / Bio:')
-		win.add_input('inp_bio', 'Pioneering analytical computing engines, algorithm designs, and dynamic typography systems.')
+		win.add_input('inp_bio',
+			'Pioneering analytical computing engines, algorithm designs, and dynamic typography systems.')
 		win.control('inp_bio').set_expand_fill(true)
 
 		// Form Option Toggles (2-column grid for clean separation)
@@ -343,7 +373,8 @@ fn main() {
 		win.end_row()
 
 		// Form Status Banner
-		win.add_label('lbl_form_status', 'Form Status: Ready • All controls rendering in dynamic font')
+		win.add_label('lbl_form_status',
+			'Form Status: Ready • All controls rendering in dynamic font')
 		win.control('lbl_form_status').set_font_size(13).set_font_color('#30d158')
 
 		// Button Event Handlers
@@ -352,8 +383,10 @@ fn main() {
 			role := win.get_text('inp_role')
 			email := win.get_text('inp_email')
 			active_font := win.get_state('active_font_name')
-			win.push_toast('Registration Submitted', '${fname} (${role}) submitted in ${active_font}!', 'success', 3500)
-			win.set_text('lbl_form_status', 'Form Status: Submitted successfully! Profile verified for ${fname}')
+			win.push_toast('Registration Submitted',
+				'${fname} (${role}) submitted in ${active_font}!', 'success', 3500)
+			win.set_text('lbl_form_status',
+				'Form Status: Submitted successfully! Profile verified for ${fname}')
 			println('Form Submitted! Name: ${fname}, Role: ${role}, Email: ${email}, Font: ${active_font}')
 		})
 
@@ -362,10 +395,12 @@ fn main() {
 			win.set_text('inp_role', 'Principal Algorithm Architect')
 			win.set_text('inp_email', 'ada.lovelace@babbage-labs.io')
 			win.set_text('inp_dept', 'Applied Mathematics & Computing')
-			win.set_text('inp_bio', 'Pioneering analytical computing engines, algorithm designs, and dynamic typography systems.')
+			win.set_text('inp_bio',
+				'Pioneering analytical computing engines, algorithm designs, and dynamic typography systems.')
 			win.set_bool('chk_newsletter', true)
 			win.set_bool('sw_telemetry', true)
-			win.push_toast('Form Reset', 'All input fields restored to default values', 'info', 2500)
+			win.push_toast('Form Reset', 'All input fields restored to default values', 'info',
+				2500)
 			win.set_text('lbl_form_status', 'Form Status: Reset to default values')
 		})
 
@@ -374,7 +409,8 @@ fn main() {
 			dept := win.get_text('inp_dept')
 			active_font := win.get_state('active_font_name')
 			size := win.get_state_int('font_size')
-			win.push_toast('Profile Verification', '${fname} [${dept}] • Active Font: ${active_font} @ ${size}px', 'info', 3000)
+			win.push_toast('Profile Verification',
+				'${fname} [${dept}] • Active Font: ${active_font} @ ${size}px', 'info', 3000)
 		})
 	})
 

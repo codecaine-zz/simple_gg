@@ -57,13 +57,14 @@ fn main() {
 		w.toast('Theme changed to ${selected}')
 	})
 	wget2_path := get_wget2_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${wget2_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Multi-Threaded Worker')
+	win.add_label('lbl_engine_info',
+		'Engine: ${wget2_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Multi-Threaded Worker')
 
 	// -------------------------------------------------------------
 	// Target URL & Destination Configuration
 	// -------------------------------------------------------------
 	win.begin_group_box('grp_target_box', 'Target URL & Destination Location')
-	
+
 	win.begin_row('row_target_url')
 	win.add_label('lbl_url', 'Target URL:')
 	win.add_input('txt_url', 'https://proof.ovh.net/files/100Mb.dat')
@@ -86,7 +87,7 @@ fn main() {
 	// Download Task Presets & Modes
 	// -------------------------------------------------------------
 	win.begin_group_box('grp_presets_box', 'Download Task Presets & Crawling Modes')
-	
+
 	win.begin_row('row_presets')
 	win.add_label('lbl_preset', 'Download Preset:')
 	win.add_dropdown('dd_preset', [
@@ -95,12 +96,13 @@ fn main() {
 		' Recursive Asset Scraper (PDFs, Docs, ZIPs)',
 		' Image Gallery Scraper (JPG, PNG, WebP, SVG)',
 		' Resume Interrupted Download (--continue)',
-		' Stealth Browser Crawl (Chrome UA + HTTP/2)'
+		' Stealth Browser Crawl (Chrome UA + HTTP/2)',
 	], ' Turbo Multi-Threaded File Download (Max Speed)')
 	win.set_control_width('dd_preset', 400)
 
 	win.add_label('lbl_threads', 'Threads (-t):')
-	win.add_dropdown('dd_threads', ['1 (Single)', '2', '4', '8 (Recommended)', '16 (Max Turbo)'], '8 (Recommended)')
+	win.add_dropdown('dd_threads', ['1 (Single)', '2', '4', '8 (Recommended)', '16 (Max Turbo)'],
+		'8 (Recommended)')
 	win.set_control_width('dd_threads', 140)
 
 	win.add_label('lbl_depth', 'Depth (-l):')
@@ -127,7 +129,7 @@ fn main() {
 		'Chrome macOS',
 		'Safari macOS',
 		'Firefox macOS',
-		'iPhone Mobile'
+		'iPhone Mobile',
 	], 'Chrome macOS')
 	win.set_control_width('dd_ua', 130)
 	win.end_row()
@@ -165,7 +167,8 @@ fn main() {
 	win.end_row()
 
 	win.append_console('wget_console', ' Wget2 Studio Pro Initialized.\n', 1)
-	win.append_console('wget_console', ' Ready for high-speed multi-threaded transfers and recursive website mirroring.\n', 4)
+	win.append_console('wget_console',
+		' Ready for high-speed multi-threaded transfers and recursive website mirroring.\n', 4)
 
 	// -------------------------------------------------------------
 	// Event Handlers & Async Engine
@@ -377,13 +380,22 @@ fn main() {
 
 			w.run_on_main_thread(fn [res, sec, dest_dir] (mut win_main simplegui.SimpleWindow) {
 				if res.exit_code == 0 {
-					win_main.append_console('wget_console', ' Transfer Completed Successfully in ${sec:.1f}s!\n' + res.output + '\n', 4)
-					win_main.set('lbl_stats', ' Status: COMPLETED (in ${sec:.1f}s)  |  Saved in: ${dest_dir}')
+					win_main.append_console('wget_console',
+
+						' Transfer Completed Successfully in ${sec:.1f}s!\n' + res.output + '\n', 4)
+					win_main.set('lbl_stats',
+						' Status: COMPLETED (in ${sec:.1f}s)  |  Saved in: ${dest_dir}')
 					win_main.set_status('Wget2 completed in ${sec:.1f}s.')
 					win_main.toast('Wget2 download completed successfully!')
 				} else {
-					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Wget2 failed to connect or transfer files.' }
-					win_main.append_console('wget_console', ' Wget2 Error (Exit ${res.exit_code}):\n' + err_msg + '\n', 3)
+					err_msg := if res.output.trim_space() != '' {
+						res.output.trim_space()
+					} else {
+						'Wget2 failed to connect or transfer files.'
+					}
+					win_main.append_console('wget_console',
+
+						' Wget2 Error (Exit ${res.exit_code}):\n' + err_msg + '\n', 3)
 					win_main.set('lbl_stats', ' Status: ERROR (Exit code ${res.exit_code})')
 					win_main.set_status('Wget2 transfer failed: ${err_msg.split_into_lines()[0]}')
 					win_main.toast('Download failed (Exit ${res.exit_code})!')

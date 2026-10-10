@@ -7,7 +7,8 @@ fn main() {
 	app.set_description('Data Format Converter & Transformer CLI (CSV, TSV, JSON, TOML)')
 
 	app.add_flag_string('input', 'i', '', 'Input data file path')
-	app.add_flag_string('output', 'o', '', 'Output data file path (optional, prints to stdout if omitted)')
+	app.add_flag_string('output', 'o', '',
+		'Output data file path (optional, prints to stdout if omitted)')
 	app.add_flag_string('from', 'f', 'csv', 'Source format (csv, tsv, json, toml)')
 	app.add_flag_string('to', 't', 'json', 'Target format (csv, tsv, json, pretty-json)')
 	app.add_flag_bool('interactive', 'x', false, 'Run in interactive conversion mode')
@@ -92,7 +93,8 @@ fn convert_data(mut app simplecli.SimpleCli, content string, from_fmt string, to
 }
 
 fn run_interactive(mut app simplecli.SimpleCli) {
-	app.panel('Interactive Converter', 'Easily convert between tabular data (CSV, TSV) and JSON objects.')
+	app.panel('Interactive Converter',
+		'Easily convert between tabular data (CSV, TSV) and JSON objects.')
 	from_choice := app.select('Select source format:', ['CSV', 'TSV', 'JSON'])
 	to_choice := app.select('Select target format:', ['JSON', 'Pretty-JSON', 'Raw Text'])
 	sample_data := 'name,role,department\nAlice,Senior Engineer,DevOps\nBob,Security Lead,Infra\nCharlie,Product Manager,Core'

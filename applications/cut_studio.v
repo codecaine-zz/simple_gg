@@ -24,107 +24,107 @@ fn get_cut_bin() string {
 }
 
 struct CutRecipe {
-	title       string
-	mode        string // 'fields', 'chars', 'bytes'
-	fields      string
-	delim_type  string // 'comma', 'tab', 'colon', 'pipe', 'slash', 'semicolon', 'whitespace', 'custom'
-	custom_delim string
+	title             string
+	mode              string // 'fields', 'chars', 'bytes'
+	fields            string
+	delim_type        string // 'comma', 'tab', 'colon', 'pipe', 'slash', 'semicolon', 'whitespace', 'custom'
+	custom_delim      string
 	suppress_no_delim bool
-	sample_data string
-	desc        string
+	sample_data       string
+	desc              string
 }
 
 fn get_all_cut_recipes() []CutRecipe {
 	return [
 		CutRecipe{
-			title: ' Extract Usernames from /etc/passwd (-d: -f1)'
-			mode: 'fields'
-			fields: '1'
-			delim_type: 'colon'
-			custom_delim: ':'
+			title:             ' Extract Usernames from /etc/passwd (-d: -f1)'
+			mode:              'fields'
+			fields:            '1'
+			delim_type:        'colon'
+			custom_delim:      ':'
 			suppress_no_delim: true
-			sample_data: 'root:x:0:0:System Administrator:/var/root:/bin/sh\ndaemon:x:1:1:System Services:/var/root:/usr/bin/false\n_spotlight:x:89:89:Spotlight:/var/spotlight:/usr/bin/false\ndeveloper:x:501:20:Developer User:/Users/developer:/bin/zsh'
-			desc: 'Cuts out the 1st field (username) from standard Unix passwd format.'
+			sample_data:       'root:x:0:0:System Administrator:/var/root:/bin/sh\ndaemon:x:1:1:System Services:/var/root:/usr/bin/false\n_spotlight:x:89:89:Spotlight:/var/spotlight:/usr/bin/false\ndeveloper:x:501:20:Developer User:/Users/developer:/bin/zsh'
+			desc:              'Cuts out the 1st field (username) from standard Unix passwd format.'
 		},
 		CutRecipe{
-			title: ' Extract Username & Login Shell (-d: -f1,7)'
-			mode: 'fields'
-			fields: '1,7'
-			delim_type: 'colon'
-			custom_delim: ':'
+			title:             ' Extract Username & Login Shell (-d: -f1,7)'
+			mode:              'fields'
+			fields:            '1,7'
+			delim_type:        'colon'
+			custom_delim:      ':'
 			suppress_no_delim: true
-			sample_data: 'root:x:0:0:System Administrator:/var/root:/bin/sh\ndaemon:x:1:1:System Services:/var/root:/usr/bin/false\ndeveloper:x:501:20:Developer User:/Users/developer:/bin/zsh'
-			desc: 'Extracts username (col 1) and user shell (col 7).'
+			sample_data:       'root:x:0:0:System Administrator:/var/root:/bin/sh\ndaemon:x:1:1:System Services:/var/root:/usr/bin/false\ndeveloper:x:501:20:Developer User:/Users/developer:/bin/zsh'
+			desc:              'Extracts username (col 1) and user shell (col 7).'
 		},
 		CutRecipe{
-			title: ' Extract CSV Columns 1 to 3 (-d, -f1-3)'
-			mode: 'fields'
-			fields: '1-3'
-			delim_type: 'comma'
-			custom_delim: ','
+			title:             ' Extract CSV Columns 1 to 3 (-d, -f1-3)'
+			mode:              'fields'
+			fields:            '1-3'
+			delim_type:        'comma'
+			custom_delim:      ','
 			suppress_no_delim: false
-			sample_data: 'id,name,role,department,salary,city\n101,Alice Smith,Principal Engineer,Core Infra,185000,San Francisco\n102,Bob Jones,Senior Designer,Product Design,145000,New York\n103,Charlie Brown,Security Analyst,SecOps,160000,Austin'
-			desc: 'Cuts out the first 3 columns (id, name, role) from comma-separated data.'
+			sample_data:       'id,name,role,department,salary,city\n101,Alice Smith,Principal Engineer,Core Infra,185000,San Francisco\n102,Bob Jones,Senior Designer,Product Design,145000,New York\n103,Charlie Brown,Security Analyst,SecOps,160000,Austin'
+			desc:              'Cuts out the first 3 columns (id, name, role) from comma-separated data.'
 		},
 		CutRecipe{
-			title: ' Extract Specific CSV Columns 2 & 4 (-d, -f2,4)'
-			mode: 'fields'
-			fields: '2,4'
-			delim_type: 'comma'
-			custom_delim: ','
+			title:             ' Extract Specific CSV Columns 2 & 4 (-d, -f2,4)'
+			mode:              'fields'
+			fields:            '2,4'
+			delim_type:        'comma'
+			custom_delim:      ','
 			suppress_no_delim: false
-			sample_data: 'id,name,role,department,salary,city\n101,Alice Smith,Principal Engineer,Core Infra,185000,San Francisco\n102,Bob Jones,Senior Designer,Product Design,145000,New York\n103,Charlie Brown,Security Analyst,SecOps,160000,Austin'
-			desc: 'Cuts only name and department fields.'
+			sample_data:       'id,name,role,department,salary,city\n101,Alice Smith,Principal Engineer,Core Infra,185000,San Francisco\n102,Bob Jones,Senior Designer,Product Design,145000,New York\n103,Charlie Brown,Security Analyst,SecOps,160000,Austin'
+			desc:              'Cuts only name and department fields.'
 		},
 		CutRecipe{
-			title: ' Extract TSV Tab-Separated Field 2 (-f2)'
-			mode: 'fields'
-			fields: '2'
-			delim_type: 'tab'
-			custom_delim: '\t'
+			title:             ' Extract TSV Tab-Separated Field 2 (-f2)'
+			mode:              'fields'
+			fields:            '2'
+			delim_type:        'tab'
+			custom_delim:      '\t'
 			suppress_no_delim: false
-			sample_data: "2026-08-21\tINFO\tServer worker pool spawned successfully\n2026-08-21\tWARN\tHigh memory pressure threshold reached\n2026-08-21\tERROR\tConnection reset by peer at port 8080"
-			desc: 'Extracts the log level column from tab-separated log files.'
+			sample_data:       '2026-08-21\tINFO\tServer worker pool spawned successfully\n2026-08-21\tWARN\tHigh memory pressure threshold reached\n2026-08-21\tERROR\tConnection reset by peer at port 8080'
+			desc:              'Extracts the log level column from tab-separated log files.'
 		},
 		CutRecipe{
-			title: ' Extract Domain from URLs (-d/ -f3)'
-			mode: 'fields'
-			fields: '3'
-			delim_type: 'slash'
-			custom_delim: '/'
+			title:             ' Extract Domain from URLs (-d/ -f3)'
+			mode:              'fields'
+			fields:            '3'
+			delim_type:        'slash'
+			custom_delim:      '/'
 			suppress_no_delim: true
-			sample_data: 'https://github.com/vlang/v\nhttps://apple.com/macos/sequoia\nhttps://news.ycombinator.com/item?id=4000\nhttp://127.0.0.1:8080/api/v1/metrics'
-			desc: 'Slices out the domain / host segment from full web URLs.'
+			sample_data:       'https://github.com/vlang/v\nhttps://apple.com/macos/sequoia\nhttps://news.ycombinator.com/item?id=4000\nhttp://127.0.0.1:8080/api/v1/metrics'
+			desc:              'Slices out the domain / host segment from full web URLs.'
 		},
 		CutRecipe{
-			title: ' Extract ISO Date Part Only (-c1-10)'
-			mode: 'chars'
-			fields: '1-10'
-			delim_type: 'none'
-			custom_delim: ''
+			title:             ' Extract ISO Date Part Only (-c1-10)'
+			mode:              'chars'
+			fields:            '1-10'
+			delim_type:        'none'
+			custom_delim:      ''
 			suppress_no_delim: false
-			sample_data: '2026-08-21T21:40:15.123Z [INFO] System started\n2026-08-22T04:12:00.000Z [METRICS] GC cycle finished\n2026-08-22T09:30:45.999Z [ALERT] Latency spike detected'
-			desc: 'Cuts out exactly the first 10 characters (YYYY-MM-DD) from ISO timestamps.'
+			sample_data:       '2026-08-21T21:40:15.123Z [INFO] System started\n2026-08-22T04:12:00.000Z [METRICS] GC cycle finished\n2026-08-22T09:30:45.999Z [ALERT] Latency spike detected'
+			desc:              'Cuts out exactly the first 10 characters (YYYY-MM-DD) from ISO timestamps.'
 		},
 		CutRecipe{
-			title: ' Strip Leading 10 Characters (-c11-)'
-			mode: 'chars'
-			fields: '11-'
-			delim_type: 'none'
-			custom_delim: ''
+			title:             ' Strip Leading 10 Characters (-c11-)'
+			mode:              'chars'
+			fields:            '11-'
+			delim_type:        'none'
+			custom_delim:      ''
 			suppress_no_delim: false
-			sample_data: '0000000001: Order item initialized\n0000000002: Payment verified via Stripe\n0000000003: Fulfillment dispatched'
-			desc: 'Discards fixed-width leading IDs and retains remaining line content.'
+			sample_data:       '0000000001: Order item initialized\n0000000002: Payment verified via Stripe\n0000000003: Fulfillment dispatched'
+			desc:              'Discards fixed-width leading IDs and retains remaining line content.'
 		},
 		CutRecipe{
-			title: ' Parse Whitespace Columns (-w -f1,9)'
-			mode: 'fields'
-			fields: '1,9'
-			delim_type: 'whitespace'
-			custom_delim: ''
+			title:             ' Parse Whitespace Columns (-w -f1,9)'
+			mode:              'fields'
+			fields:            '1,9'
+			delim_type:        'whitespace'
+			custom_delim:      ''
 			suppress_no_delim: false
-			sample_data: '-rwxr-xr-x   1 root  wheel    52340 Aug 21 12:00 /usr/bin/cut\n-rwxr-xr-x   1 root  wheel   184200 Aug 21 12:00 /usr/bin/grep\n-rwxr-xr-x   1 root  wheel  1204850 Aug 21 12:00 /opt/homebrew/bin/rg'
-			desc: 'Parses space-separated ls -l output to extract file permissions and filename.'
+			sample_data:       '-rwxr-xr-x   1 root  wheel    52340 Aug 21 12:00 /usr/bin/cut\n-rwxr-xr-x   1 root  wheel   184200 Aug 21 12:00 /usr/bin/grep\n-rwxr-xr-x   1 root  wheel  1204850 Aug 21 12:00 /opt/homebrew/bin/rg'
+			desc:              'Parses space-separated ls -l output to extract file permissions and filename.'
 		},
 	]
 }
@@ -154,7 +154,8 @@ fn main() {
 	})
 
 	cut_path := get_cut_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${cut_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker (Zero UI Freezes)')
+	win.add_label('lbl_engine_info',
+		'Engine: ${cut_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker (Zero UI Freezes)')
 
 	all_recipes := get_all_cut_recipes()
 
@@ -162,13 +163,13 @@ fn main() {
 	// Cut Parameters & Slicing Mode
 	// -------------------------------------------------------------
 	win.begin_group_box('grp_params', 'Slicing Mode & Range Specification')
-	
+
 	win.begin_row('row_mode')
 	win.add_label('lbl_mode', 'Cut Mode:')
 	win.add_dropdown('dd_mode', [
 		'Fields (-f)',
 		'Character Columns (-c)',
-		'Byte Positions (-b)'
+		'Byte Positions (-b)',
 	], 'Fields (-f)')
 	win.set_control_width('dd_mode', 180)
 
@@ -185,7 +186,7 @@ fn main() {
 		'Slash (/)',
 		'Semicolon (;)',
 		'Whitespace (-w)',
-		'Custom Delimiter'
+		'Custom Delimiter',
 	], 'Comma (,)')
 	win.set_control_width('dd_delim', 160)
 
@@ -201,7 +202,7 @@ fn main() {
 	// Recipes Bar & File Input
 	// -------------------------------------------------------------
 	win.begin_group_box('grp_recipes_files', 'Slicing Recipes & External File Source')
-	
+
 	mut recipe_titles := ['-- Select a Fast Slicing Recipe --']
 	for r in all_recipes {
 		recipe_titles << r.title
@@ -284,7 +285,7 @@ fn main() {
 			} else {
 				// Fields mode
 				raw_args << ['-f', fields_val]
-				
+
 				if delim_choice.contains('Whitespace') {
 					raw_args << '-w'
 				} else if delim_choice.contains('Comma') {
@@ -336,19 +337,26 @@ fn main() {
 				if res.exit_code == 0 {
 					out_str := res.output
 					win_main.set('txt_output_stream', out_str)
-					
+
 					mut count := 0
 					if out_str.trim_space() != '' {
 						count = out_str.trim_space().split_into_lines().len
 					}
 
-					win_main.set('lbl_stats', ' Stats: SUCCESS  |  Output Lines: ${count}  |  Duration: ${elapsed_ms} ms')
+					win_main.set('lbl_stats',
+						' Stats: SUCCESS  |  Output Lines: ${count}  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Stream sliced successfully (${count} lines in ${elapsed_ms} ms).')
 					win_main.toast('Sliced ${count} lines in ${elapsed_ms} ms!')
 				} else {
-					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'cut command failed (Exit code ${res.exit_code}). Check field range or delimiter settings.' }
-					win_main.set('txt_output_stream', '// [CUT SLICING ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
-					win_main.set('lbl_stats', ' Stats: ERROR (Exit code ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
+					err_msg := if res.output.trim_space() != '' {
+						res.output.trim_space()
+					} else {
+						'cut command failed (Exit code ${res.exit_code}). Check field range or delimiter settings.'
+					}
+					win_main.set('txt_output_stream',
+						'// [CUT SLICING ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+					win_main.set('lbl_stats',
+						' Stats: ERROR (Exit code ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Cut command returned an error.')
 					win_main.toast('Cut slicing error!')
 				}
@@ -434,15 +442,22 @@ fn main() {
 					w.set_text('dd_mode', 'Fields (-f)')
 				}
 				w.set('txt_fields', r.fields)
-				
-				if r.delim_type == 'comma' { w.set_text('dd_delim', 'Comma (,)') }
-				else if r.delim_type == 'tab' { w.set_text('dd_delim', 'Tab (\\t)') }
-				else if r.delim_type == 'colon' { w.set_text('dd_delim', 'Colon (:)') }
-				else if r.delim_type == 'pipe' { w.set_text('dd_delim', 'Pipe (|)') }
-				else if r.delim_type == 'slash' { w.set_text('dd_delim', 'Slash (/)') }
-				else if r.delim_type == 'semicolon' { w.set_text('dd_delim', 'Semicolon (;)') }
-				else if r.delim_type == 'whitespace' { w.set_text('dd_delim', 'Whitespace (-w)') }
-				else if r.delim_type == 'custom' { 
+
+				if r.delim_type == 'comma' {
+					w.set_text('dd_delim', 'Comma (,)')
+				} else if r.delim_type == 'tab' {
+					w.set_text('dd_delim', 'Tab (\\t)')
+				} else if r.delim_type == 'colon' {
+					w.set_text('dd_delim', 'Colon (:)')
+				} else if r.delim_type == 'pipe' {
+					w.set_text('dd_delim', 'Pipe (|)')
+				} else if r.delim_type == 'slash' {
+					w.set_text('dd_delim', 'Slash (/)')
+				} else if r.delim_type == 'semicolon' {
+					w.set_text('dd_delim', 'Semicolon (;)')
+				} else if r.delim_type == 'whitespace' {
+					w.set_text('dd_delim', 'Whitespace (-w)')
+				} else if r.delim_type == 'custom' {
 					w.set_text('dd_delim', 'Custom Delimiter')
 					w.set('txt_custom_delim', r.custom_delim)
 				}
@@ -471,14 +486,22 @@ fn main() {
 					w.set_text('dd_mode', 'Fields (-f)')
 				}
 				w.set('txt_fields', r.fields)
-				
-				if r.delim_type == 'comma' { w.set_text('dd_delim', 'Comma (,)') }
-				else if r.delim_type == 'tab' { w.set_text('dd_delim', 'Tab (\\t)') }
-				else if r.delim_type == 'colon' { w.set_text('dd_delim', 'Colon (:)') }
-				else if r.delim_type == 'pipe' { w.set_text('dd_delim', 'Pipe (|)') }
-				else if r.delim_type == 'slash' { w.set_text('dd_delim', 'Slash (/)') }
-				else if r.delim_type == 'semicolon' { w.set_text('dd_delim', 'Semicolon (;)') }
-				else if r.delim_type == 'whitespace' { w.set_text('dd_delim', 'Whitespace (-w)') }
+
+				if r.delim_type == 'comma' {
+					w.set_text('dd_delim', 'Comma (,)')
+				} else if r.delim_type == 'tab' {
+					w.set_text('dd_delim', 'Tab (\\t)')
+				} else if r.delim_type == 'colon' {
+					w.set_text('dd_delim', 'Colon (:)')
+				} else if r.delim_type == 'pipe' {
+					w.set_text('dd_delim', 'Pipe (|)')
+				} else if r.delim_type == 'slash' {
+					w.set_text('dd_delim', 'Slash (/)')
+				} else if r.delim_type == 'semicolon' {
+					w.set_text('dd_delim', 'Semicolon (;)')
+				} else if r.delim_type == 'whitespace' {
+					w.set_text('dd_delim', 'Whitespace (-w)')
+				}
 
 				w.set('chk_suppress', r.suppress_no_delim.str())
 				if r.sample_data != '' {

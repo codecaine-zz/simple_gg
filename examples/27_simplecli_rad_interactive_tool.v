@@ -38,12 +38,10 @@ fn main() {
 
 	// 3. Summary Panel & Review Table
 	app.step(2, 'Configuration Review')
-	app.panel('Workspace Summary', 
-		'Project:     ${project_name}\n' +
+	app.panel('Workspace Summary', 'Project:     ${project_name}\n' +
 		'Environment: ${env_choice}\n' +
-		'Security:    ${if is_secured { "TLS Enabled" } else { "Plain HTTP" }}\n' +
-		'Modules:     ${features.join(", ")}'
-	)
+		'Security:    ${if is_secured { 'TLS Enabled' } else { 'Plain HTTP' }}\n' +
+		'Modules:     ${features.join(', ')}')
 
 	headers := ['Module Component', 'Target Status', 'Encryption']
 	mut rows := [][]string{}
@@ -62,9 +60,7 @@ fn main() {
 
 	// 5. State Persistence
 	state_file := app.get_system_path('state') + '/setup_wizard_state.json'
-	app.save_state(state_file) or {
-		app.warn('Could not save state to ${state_file}')
-	}
+	app.save_state(state_file) or { app.warn('Could not save state to ${state_file}') }
 
 	// 6. Completion & Notification
 	app.step(4, 'Ready to Deploy')

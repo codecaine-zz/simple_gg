@@ -641,7 +641,8 @@ fn test_render_with_views_locals_and_nonce() {
 	mut app := new_app()
 	app.locals['site'] = 'MySite'
 	app.views.add('layout', '<title><%= site %> - <%= title %></title><%- body %>')!
-	app.views.add('home', '<% layout \'layout\' %><h1>Hi <%= name %></h1><script nonce="<%= csp_nonce %>"></script>')!
+	app.views.add('home',
+		'<% layout \'layout\' %><h1>Hi <%= name %></h1><script nonce="<%= csp_nonce %>"></script>')!
 	app.get('/', fn (mut c Context) ! {
 		c.locals['name'] = '<Ann>'
 		c.render('home', {

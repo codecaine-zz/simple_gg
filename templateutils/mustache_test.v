@@ -33,8 +33,7 @@ fn test_mustache_sections() {
 		})
 		'title': Value('T')
 	}
-	assert render_mustache('{{#admin}}A{{/admin}}{{#guest}}G{{/guest}}{{^guest}}!G{{/guest}}',
-		data)! == 'A!G'
+	assert render_mustache('{{#admin}}A{{/admin}}{{#guest}}G{{/guest}}{{^guest}}!G{{/guest}}', data)! == 'A!G'
 	assert render_mustache('{{#items}}[{{.}}]{{/items}}', data)! == '[x][y][z]'
 	assert render_mustache('{{#users}}{{name}}:{{age}} ({{title}}) {{/users}}', data)! == 'Ann:31 (T) Bob:27 (T) '
 	assert render_mustache('{{user.profile.city}}|{{user.nope.x}}', data)! == 'Oslo|'

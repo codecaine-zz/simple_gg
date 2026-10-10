@@ -47,18 +47,19 @@ fn main() {
 	})
 
 	tesseract_path := get_tesseract_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${tesseract_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async OCR Pipeline')
+	win.add_label('lbl_engine_info',
+		'Engine: ${tesseract_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async OCR Pipeline')
 
 	// File Selection & Language Scope
 	win.begin_group_box('grp_ocr_source', 'Source Document / Image & Language Configuration')
-	
+
 	win.begin_row('row_source_input')
 	win.add_label('lbl_file', 'Image / Document:')
 	win.add_input('txt_image_path', '')
 	win.set_control_width('txt_image_path', 380)
 
 	win.add_button('btn_select_image', 'Open Image (PNG, JPG, TIFF, PDF)...')
-	
+
 	win.add_label('lbl_lang', 'Language (-l):')
 	win.add_dropdown('dd_ocr_lang', [
 		'eng (English)',
@@ -73,7 +74,7 @@ fn main() {
 		'por (Portuguese)',
 		'ara (Arabic)',
 		'kor (Korean)',
-		'osd (Orientation & Script Detection)'
+		'osd (Orientation & Script Detection)',
 	], 'eng (English)')
 	win.set_control_width('dd_ocr_lang', 200)
 	win.end_row()
@@ -86,7 +87,7 @@ fn main() {
 		'7 - Single text line (Banners / Headers)',
 		'8 - Single word (Badges / Signage)',
 		'11 - Sparse text (Receipts / Invoices / Diagrams)',
-		'1 - Automatic page segmentation with OSD'
+		'1 - Automatic page segmentation with OSD',
 	], '3 - Fully automatic page segmentation (Default)')
 	win.set_control_width('dd_ocr_psm', 380)
 
@@ -95,7 +96,7 @@ fn main() {
 		'Plain Text (stdout / .txt)',
 		'Searchable PDF (.pdf)',
 		'HOCR HTML (.hocr)',
-		'TSV Tabular Positions (.tsv)'
+		'TSV Tabular Positions (.tsv)',
 	], 'Plain Text (stdout / .txt)')
 	win.set_control_width('dd_ocr_out_fmt', 220)
 	win.end_row()
@@ -129,7 +130,8 @@ fn main() {
 	win.end_row()
 
 	win.append_console('ocr_console', ' Tesseract OCR Studio Pro Initialized.\n', 1)
-	win.append_console('ocr_console', ' Ready to extract text and generate searchable PDFs from scanned images.\n', 4)
+	win.append_console('ocr_console',
+		' Ready to extract text and generate searchable PDFs from scanned images.\n', 4)
 
 	// -------------------------------------------------------------
 	// Event Handlers
@@ -149,7 +151,8 @@ fn main() {
 	win.on_click('btn_list_langs', fn (mut w simplegui.SimpleWindow) {
 		tess_bin := get_tesseract_bin()
 		res := simplegui.exec_safe(tess_bin, ['--list-langs'])
-		w.append_console('ocr_console', ' Installed Tesseract Language Packs:\n' + res.output + '\n', 4)
+		w.append_console('ocr_console',
+			' Installed Tesseract Language Packs:\n' + res.output + '\n', 4)
 		w.toast('Listed installed languages in console.')
 	})
 
@@ -176,7 +179,8 @@ fn main() {
 		args << '--psm'
 		args << psm
 
-		w.append_console('ocr_console', ' Running OCR (Lang: ${lang}, PSM: ${psm}) on ${os.file_name(img_path)}...\n', 1)
+		w.append_console('ocr_console',
+			' Running OCR (Lang: ${lang}, PSM: ${psm}) on ${os.file_name(img_path)}...\n', 1)
 		w.set_status('Extracting text with Tesseract...')
 		w.toast('Extracting text...')
 
@@ -194,15 +198,25 @@ fn main() {
 
 				if res.exit_code == 0 {
 					win_main.set('txt_ocr_output', out)
-					win_main.append_console('ocr_console', ' OCR Extraction Complete: ${words_cnt} words (${chars_cnt} chars) in ${elapsed_ms} ms.\n', 4)
-					win_main.set('lbl_stats', ' Stats: SUCCESS  |  File: ${os.file_name(img_path)}  |  Words: ${words_cnt}  |  Chars: ${chars_cnt}  |  Duration: ${elapsed_ms} ms')
+					win_main.append_console('ocr_console',
+						' OCR Extraction Complete: ${words_cnt} words (${chars_cnt} chars) in ${elapsed_ms} ms.\n',
+						4)
+					win_main.set('lbl_stats',
+						' Stats: SUCCESS  |  File: ${os.file_name(img_path)}  |  Words: ${words_cnt}  |  Chars: ${chars_cnt}  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('OCR finished in ${elapsed_ms} ms.')
 					win_main.toast('Text extracted successfully!')
 				} else {
-					err_msg := if out != '' { out } else { 'Tesseract OCR failed on image: ${os.file_name(img_path)} (Exit ${res.exit_code})' }
-					win_main.set('txt_ocr_output', '// [OCR EXTRACTION ERROR]\n// File: ${img_path}\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
-					win_main.append_console('ocr_console', ' Tesseract OCR Error:\n' + err_msg + '\n', 3)
-					win_main.set('lbl_stats', ' Stats: ERROR (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
+					err_msg := if out != '' {
+						out
+					} else {
+						'Tesseract OCR failed on image: ${os.file_name(img_path)} (Exit ${res.exit_code})'
+					}
+					win_main.set('txt_ocr_output',
+						'// [OCR EXTRACTION ERROR]\n// File: ${img_path}\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+					win_main.append_console('ocr_console', ' Tesseract OCR Error:\n' + err_msg +
+						'\n', 3)
+					win_main.set('lbl_stats',
+						' Stats: ERROR (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('OCR extraction failed.')
 					win_main.toast('OCR extraction failed!')
 				}
@@ -240,12 +254,18 @@ fn main() {
 				w.run_on_main_thread(fn [res, elapsed_ms, base_out] (mut win_main simplegui.SimpleWindow) {
 					if res.exit_code == 0 {
 						pdf_name := os.file_name(base_out) + '.pdf'
-						win_main.append_console('ocr_console', ' Searchable PDF generated: ${base_out}.pdf in ${elapsed_ms} ms\n', 4)
+						win_main.append_console('ocr_console',
+							' Searchable PDF generated: ${base_out}.pdf in ${elapsed_ms} ms\n', 4)
 						win_main.toast('Saved ${pdf_name}!')
 						win_main.set_status('PDF saved successfully.')
 					} else {
-						err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Failed to generate searchable PDF.' }
-						win_main.append_console('ocr_console', ' Error compiling PDF: ' + err_msg + '\n', 3)
+						err_msg := if res.output.trim_space() != '' {
+							res.output.trim_space()
+						} else {
+							'Failed to generate searchable PDF.'
+						}
+						win_main.append_console('ocr_console', ' Error compiling PDF: ' + err_msg +
+							'\n', 3)
 						win_main.set_status('PDF generation failed.')
 						win_main.toast('Failed to create PDF!')
 					}

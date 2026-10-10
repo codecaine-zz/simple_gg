@@ -210,7 +210,8 @@ fn test_views_include_and_layout_in_memory() {
 	mut v := new_views()
 	v.add('layouts/main', '<html><title><%= title %></title><body><%- body %></body></html>')!
 	v.add('partials/item', '<li><%= item %></li>')!
-	v.add('index', "<% layout 'layouts/main' %><ul><% for item in items %><%- include('partials/item') %><% end %></ul>")!
+	v.add('index',
+		"<% layout 'layouts/main' %><ul><% for item in items %><%- include('partials/item') %><% end %></ul>")!
 	out := v.render('index', {
 		'title': json2.Any('A&B')
 		'items': json2.Any([json2.Any('<x>'), json2.Any('y')])
@@ -236,8 +237,7 @@ fn test_views_disk_and_traversal_protection() {
 	}
 	os.write_file(os.join_path(root, 'home.html'), "<h1><%= t %></h1><% include 'partials/foot' %>")!
 	os.write_file(os.join_path(root, 'partials', 'foot.html'), '<footer>f</footer>')!
-	os.write_file(os.join_path(os.temp_dir(), 'webutils_secret_${os.getpid()}.html'),
-		'SECRET')!
+	os.write_file(os.join_path(os.temp_dir(), 'webutils_secret_${os.getpid()}.html'), 'SECRET')!
 	mut v := new_views(root: root)
 	assert v.render('home', {
 		't': json2.Any('Hi')

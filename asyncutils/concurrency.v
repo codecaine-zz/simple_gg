@@ -16,12 +16,10 @@ struct TryChunk[R] {
 fn worker_try_map[T, R](chunk []T, mapper fn (T) !R) TryChunk[R] {
 	mut res := []R{cap: chunk.len}
 	for item in chunk {
-		v := mapper(item) or {
-			return TryChunk[R]{
-				err: err.msg()
-				ok:  false
-			}
-		}
+		v := mapper(item) or { return TryChunk[R]{
+			err: err.msg()
+			ok:  false
+		} }
 		res << v
 	}
 	return TryChunk[R]{

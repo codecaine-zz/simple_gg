@@ -397,6 +397,7 @@ pub fn parse_bytes(s string) !i64 {
 		'p', 'pb', 'pib' { 1024.0 * 1024 * 1024 * 1024 * 1024 }
 		else { return error('unknown size unit: "${unit}"') }
 	}
+
 	return i64(num * mult)
 }
 
@@ -454,7 +455,11 @@ pub fn mime_type_from_bytes(data []u8) string {
 	if trimmed.starts_with('{') || trimmed.starts_with('[') {
 		return 'application/json'
 	}
-	if 0 in data[..if data.len > 8192 { 8192 } else { data.len }] {
+	if 0 in data[..if data.len > 8192 {
+		8192
+	} else {
+		data.len
+	}] {
 		return 'application/octet-stream'
 	}
 	return 'text/plain'

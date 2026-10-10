@@ -53,7 +53,7 @@ fn resolve_dns(mut app simplecli.SimpleCli, domain string, rec_type string) {
 
 fn inspect_ssl(mut app simplecli.SimpleCli, domain string) {
 	app.info('Inspecting SSL/TLS certificate for ${domain}:443...')
-	cmd := "openssl s_client -connect ${domain}:443 -servername ${domain} 2>/dev/null | openssl x509 -noout -dates -subject -issuer 2>/dev/null"
+	cmd := 'openssl s_client -connect ${domain}:443 -servername ${domain} 2>/dev/null | openssl x509 -noout -dates -subject -issuer 2>/dev/null'
 	out, code := app.exec(cmd)
 	if code == 0 && out.trim_space().len > 0 {
 		app.success('SSL Certificate Information:')
@@ -64,7 +64,8 @@ fn inspect_ssl(mut app simplecli.SimpleCli, domain string) {
 }
 
 fn run_interactive(mut app simplecli.SimpleCli) {
-	app.panel('DNS & SSL Studio REPL', 'Query domain name system servers and verify TLS certificates.')
+	app.panel('DNS & SSL Studio REPL',
+		'Query domain name system servers and verify TLS certificates.')
 	target := app.prompt('Enter target domain name', 'github.com')
 	choice := app.select('Action:', [
 		'Resolve All DNS Records (A, MX, TXT)',

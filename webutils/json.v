@@ -371,8 +371,8 @@ fn (mut p JsonParser) read_string() !string {
 				}
 				mut cp := hex4(p.src[p.pos..p.pos + 4]) or { return p.fail('bad \\u escape') }
 				p.pos += 4
-				if cp >= 0xd800 && cp < 0xdc00 && p.pos + 6 <= p.src.len
-					&& p.src[p.pos] == `\\` && p.src[p.pos + 1] == `u` {
+				if cp >= 0xd800 && cp < 0xdc00 && p.pos + 6 <= p.src.len && p.src[p.pos] == `\\`
+					&& p.src[p.pos + 1] == `u` {
 					lo := hex4(p.src[p.pos + 2..p.pos + 6]) or { 0 }
 					if lo >= 0xdc00 && lo < 0xe000 {
 						cp = 0x10000 + ((cp - 0xd800) << 10) + (lo - 0xdc00)

@@ -97,7 +97,7 @@ pub fn escape_html(s string) string {
 			`<` { sb.write_string('&lt;') }
 			`>` { sb.write_string('&gt;') }
 			`"` { sb.write_string('&quot;') }
-			`\'` { sb.write_string('&#39;') }
+			`'` { sb.write_string('&#39;') }
 			else { sb.write_u8(ch) }
 		}
 	}

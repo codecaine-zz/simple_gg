@@ -103,6 +103,7 @@ pub fn hsv_to_rgb(hsv HSV) RGB {
 		4 { x, 0.0, c }
 		else { c, 0.0, x }
 	}
+
 	return RGB{to_u8(r + m), to_u8(g + m), to_u8(b + m)}
 }
 
@@ -152,8 +153,8 @@ pub fn rgb_to_oklab(c RGB) OKLab {
 	l := math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b)
 	m := math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b)
 	s := math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b)
-	return OKLab{0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s, 1.9779984951 * l - 2.4285922050 * m +
-		0.4505937099 * s, 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s}
+	return OKLab{0.2104542553 * l + 0.7936177850 * m - 0.0040720468 * s, 1.9779984951 * l -
+		2.4285922050 * m + 0.4505937099 * s, 0.0259040371 * l + 0.7827717662 * m - 0.8086757660 * s}
 }
 
 // oklab_to_rgb converts OKLab to sRGB (out-of-gamut values are clamped).
@@ -276,7 +277,8 @@ pub fn parse_color(input string) !RGB {
 		return RGB{ch[0], ch[1], ch[2]}
 	}
 	if s.starts_with('hsl(') || s.starts_with('hsla(') {
-		p := s.all_after('(').all_before(')').replace('/', ',').split(',').map(it.trim_space()).filter(it != '')
+		p :=
+			s.all_after('(').all_before(')').replace('/', ',').split(',').map(it.trim_space()).filter(it != '')
 		if p.len < 3 {
 			return error('invalid hsl() color "${input}"')
 		}

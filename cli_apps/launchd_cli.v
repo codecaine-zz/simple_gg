@@ -56,7 +56,8 @@ fn main() {
 }
 
 fn run_interactive(mut app simplecli.SimpleCli) {
-	app.panel('Launchd & Cron Inspector', 'Explore background services, agent plists, and crontabs.')
+	app.panel('Launchd & Cron Inspector',
+		'Explore background services, agent plists, and crontabs.')
 	choice := app.select('Select Action:', [
 		'List Active Apple LaunchDaemons',
 		'List Active User LaunchAgents',

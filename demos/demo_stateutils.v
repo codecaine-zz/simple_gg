@@ -27,11 +27,11 @@ pub mut:
 	title string
 	width int
 	// Newly added v2 fields with default values
-	height       int               = 600
-	dark         bool              = true
-	recent_files []string          = []
+	height       int      = 600
+	dark         bool     = true
+	recent_files []string = []
 	// Dynamic extension map for runtime ad-hoc fields without altering the struct
-	extra        map[string]string = map[string]string{}
+	extra map[string]string = map[string]string{}
 }
 
 fn main() {
@@ -178,7 +178,8 @@ fn main() {
 
 	// Step 2: Newer version of the app loads existing state into expanded AppConfigV2
 	// Existing fields retain their persisted values; newly added fields get struct default values.
-	mut v2_store := stateutils.new_app_state_with_file[AppConfigV2](evolution_app, evolution_file, AppConfigV2{}, .data)
+	mut v2_store := stateutils.new_app_state_with_file[AppConfigV2](evolution_app, evolution_file, AppConfigV2{},
+		.data)
 	println('Step 2: Loaded into expanded AppConfigV2:')
 	println('  title="${v2_store.data.title}" (preserved from v1)')
 	println('  width=${v2_store.data.width} (preserved from v1)')

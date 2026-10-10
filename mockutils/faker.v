@@ -10,8 +10,8 @@ const companies_b = ['Labs', 'Systems', 'Industries', 'Dynamics', 'Analytics', '
 	'Software']
 const streets = ['Main St', 'Oak Ave', 'Maple Dr', 'Cedar Ln', 'Pine Rd', 'Elm St', 'Lake View',
 	'Sunset Blvd']
-const cities = ['Springfield', 'Riverton', 'Fairview', 'Lakeside', 'Georgetown', 'Franklin', 'Clinton',
-	'Madison']
+const cities = ['Springfield', 'Riverton', 'Fairview', 'Lakeside', 'Georgetown', 'Franklin',
+	'Clinton', 'Madison']
 const country_codes = ['US', 'GB', 'DE', 'FR', 'JP', 'CA', 'AU', 'BR', 'IN', 'NL']
 const faker_words = ['lorem', 'ipsum', 'dolor', 'sit', 'amet', 'consectetur', 'adipiscing', 'elit',
 	'sed', 'do', 'eiusmod', 'tempor', 'incididunt', 'ut', 'labore', 'et', 'dolore', 'magna', 'aliqua']

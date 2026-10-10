@@ -100,8 +100,8 @@ fn test_menubar_creation_and_selection() {
 
 	win.add_menu('File', [
 		MenuItem{
-			title: 'New'
-			shortcut: 'Ctrl+N'
+			title:     'New'
+			shortcut:  'Ctrl+N'
 			on_select: fn [mut ctx] (mut win SimpleWindow) {
 				ctx.bool_val = true
 			}
@@ -110,7 +110,7 @@ fn test_menubar_creation_and_selection() {
 			is_separator: true
 		},
 		MenuItem{
-			title: 'Exit'
+			title:    'Exit'
 			shortcut: 'Ctrl+Q'
 		},
 	])

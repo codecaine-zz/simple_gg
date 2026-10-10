@@ -12,14 +12,14 @@ import os
 import simplecli
 
 struct RepoStatus {
-	name        string
-	path        string
-	branch      string
-	is_dirty    bool
-	untracked   int
-	modified    int
-	ahead       int
-	behind      int
+	name      string
+	path      string
+	branch    string
+	is_dirty  bool
+	untracked int
+	modified  int
+	ahead     int
+	behind    int
 }
 
 fn main() {
@@ -28,7 +28,8 @@ fn main() {
 
 	app.add_flag_string('path', 'p', '.', 'Root directory to scan for Git repositories')
 	app.add_flag_bool('fetch', 'f', false, 'Run git fetch across all repositories in parallel')
-	app.add_flag_bool('dirty-only', 'd', false, 'Only display repositories with uncommitted changes')
+	app.add_flag_bool('dirty-only', 'd', false,
+		'Only display repositories with uncommitted changes')
 	app.add_flag_bool('interactive', 'i', false, 'Launch interactive batch sync wizard')
 
 	app.parse_cli() or { return }
@@ -70,7 +71,7 @@ fn main() {
 	for r in repos {
 		branch, _ := app.exec_in_dir(r, 'git rev-parse --abbrev-ref HEAD')
 		status_out, _ := app.exec_in_dir(r, 'git status --porcelain')
-		
+
 		lines := status_out.split_into_lines().filter(it.len > 0)
 		mut untracked_cnt := 0
 		mut mod_cnt := 0
@@ -83,14 +84,14 @@ fn main() {
 		}
 
 		repo_statuses << RepoStatus{
-			name: os.file_name(r)
-			path: r
-			branch: branch
-			is_dirty: lines.len > 0
+			name:      os.file_name(r)
+			path:      r
+			branch:    branch
+			is_dirty:  lines.len > 0
 			untracked: untracked_cnt
-			modified: mod_cnt
-			ahead: 0
-			behind: 0
+			modified:  mod_cnt
+			ahead:     0
+			behind:    0
 		}
 	}
 
@@ -117,9 +118,9 @@ fn main() {
 	app.table(['Repository', 'Active Branch', 'Working Tree State', 'Directory Path'], table_rows)
 
 	app.print_kv({
-		'Total Repositories': '${repos.len}',
-		'Clean Repositories': '${repos.len - dirty_count}',
-		'Dirty Repositories': '${dirty_count}',
+		'Total Repositories': '${repos.len}'
+		'Clean Repositories': '${repos.len - dirty_count}'
+		'Dirty Repositories': '${dirty_count}'
 	})
 
 	if is_interactive && dirty_count > 0 {

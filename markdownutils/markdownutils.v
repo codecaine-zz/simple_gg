@@ -102,6 +102,7 @@ fn find_link_end(s string, from int) int {
 			}
 			else {}
 		}
+
 		i++
 	}
 	return -1
@@ -213,6 +214,7 @@ pub fn inline(s string, opts Options) string {
 						'~~' { 'del' }
 						else { 'em' }
 					}
+
 					sb.write_string('<${tag}>${inline(s[i + d.len..end], opts)}</${tag}>')
 					i = end + d.len
 					unsafe {
@@ -228,6 +230,7 @@ pub fn inline(s string, opts Options) string {
 			`"` { sb.write_string('&quot;') }
 			else { sb.write_u8(c) }
 		}
+
 		i++
 		next:
 	}
@@ -419,7 +422,8 @@ fn render_blocks(lines []string, opts Options, mut sb strings.Builder, mut ids m
 					nx := lines[i]
 					nind := nx.len - nx.trim_left(' ').len
 					if nx.trim_space() == '' {
-						if i + 1 < lines.len && (lines[i + 1].len - lines[i + 1].trim_left(' ').len) > base_indent {
+						if i + 1 < lines.len
+							&& (lines[i + 1].len - lines[i + 1].trim_left(' ').len) > base_indent {
 							item << ''
 							i++
 							continue
@@ -471,8 +475,9 @@ fn render_blocks(lines []string, opts Options, mut sb strings.Builder, mut ids m
 		for i < lines.len {
 			l := lines[i]
 			lt := l.trim_space()
-			if lt == '' || lt.starts_with('```') || lt.starts_with('~~~') || lt.starts_with('>')
-				|| is_hr(lt) || heading_of(lt) != none || (para.len > 0 && list_marker(l) != none) {
+			if lt == '' || lt.starts_with('```') || lt.starts_with('~~~')
+				|| lt.starts_with('>') || is_hr(lt) || heading_of(lt) != none
+				|| (para.len > 0 && list_marker(l) != none) {
 				break
 			}
 			para << l.trim_left(' ')

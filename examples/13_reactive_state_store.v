@@ -18,7 +18,8 @@ fn main() {
 	win.set_theme('Nord')
 
 	win.add_heading('Reactive State Store & Persistence (${app_id})')
-	win.add_label('lbl_sub', 'Store key-value states, trigger reactive listeners, and save/load JSON state.')
+	win.add_label('lbl_sub',
+		'Store key-value states, trigger reactive listeners, and save/load JSON state.')
 
 	// State Listeners (Reactive UI Updates)
 	win.on_state_change(key_counter, fn (mut win simplegui.SimpleWindow, val string) {

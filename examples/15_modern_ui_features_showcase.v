@@ -15,15 +15,10 @@ fn main() {
 	// 2. Modal Overlay Trigger
 	win.add_button('btn_modal', '[Popup] Launch Backdrop Modal Dialog')
 	win.on_click('btn_modal', fn (mut win simplegui.SimpleWindow) {
-		win.show_modal(
-			'Confirm Reset Action',
-			'Are you sure you want to reset all user configuration settings?',
-			'Confirm',
-			'Cancel',
-			fn (mut win simplegui.SimpleWindow) {
-				win.push_toast('Action Confirmed', 'Settings have been reset.', 'success', 3000)
-			}
-		)
+		win.show_modal('Confirm Reset Action',
+			'Are you sure you want to reset all user configuration settings?', 'Confirm', 'Cancel', fn (mut win simplegui.SimpleWindow) {
+			win.push_toast('Action Confirmed', 'Settings have been reset.', 'success', 3000)
+		})
 	})
 
 	// 3. Live Form Validation Error Badges

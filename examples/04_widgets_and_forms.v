@@ -29,9 +29,11 @@ fn main() {
 		rating := win.get_value_int('user_rating')
 		r_date := win.get_text('r_date')
 		if win.is_valid_date_str(r_date) {
-			win.push_toast('Form Submitted', 'User: ${user} | Date: ${r_date} | Rating: ${rating}', 'success', 3000)
+			win.push_toast('Form Submitted', 'User: ${user} | Date: ${r_date} | Rating: ${rating}',
+				'success', 3000)
 		} else {
-			win.push_toast('Validation Warning', 'Please provide a valid date (YYYY-MM-DD)', 'warning', 3000)
+			win.push_toast('Validation Warning', 'Please provide a valid date (YYYY-MM-DD)',
+				'warning', 3000)
 		}
 		println('Form Submitted! User: ${user}, Date: ${r_date}, Qty: ${qty}, Vol: ${vol}, Rating: ${rating}')
 	})

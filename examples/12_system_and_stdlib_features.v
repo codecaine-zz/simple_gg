@@ -7,7 +7,8 @@ fn main() {
 	win.set_theme('Apple Dark')
 
 	win.add_heading('System Calls & Standard Library (sys.v / stdlib.v)')
-	win.add_label('lbl_sub', 'Access OS execution, hardware specs, HTTP, cryptography, clipboard, and system paths.')
+	win.add_label('lbl_sub',
+		'Access OS execution, hardware specs, HTTP, cryptography, clipboard, and system paths.')
 
 	// System Information Group
 	win.group('grp_sys', 'System & Hardware Details', fn (mut win simplegui.SimpleWindow) {
@@ -59,7 +60,8 @@ fn main() {
 		if win.clipboard_copy(val) {
 			win.set_text('lbl_clip_status', 'Copied "${val}" to system clipboard!')
 		} else {
-			win.set_text('lbl_clip_status', 'Clipboard unavailable on this Linux session. Run in a desktop session with X11/Wayland active.')
+			win.set_text('lbl_clip_status',
+				'Clipboard unavailable on this Linux session. Run in a desktop session with X11/Wayland active.')
 		}
 	})
 
@@ -69,7 +71,8 @@ fn main() {
 			win.set_text('input_clip', clip)
 			win.set_text('lbl_clip_status', 'Pasted "${clip}" from system clipboard!')
 		} else {
-			win.set_text('lbl_clip_status', 'Clipboard is empty or unavailable on this Linux session.')
+			win.set_text('lbl_clip_status',
+				'Clipboard is empty or unavailable on this Linux session.')
 		}
 	})
 

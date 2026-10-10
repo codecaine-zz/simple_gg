@@ -36,7 +36,8 @@ fn main() {
 
 	// Read metadata using ffprobe or mid3v2 / id3v2
 	app.info('Inspecting audio tags for ${input_path}...')
-	out, _ := app.exec('ffprobe -v error -show_entries format_tags -of default=noprint_wrappers=1 "${input_path}"')
+	out, _ :=
+		app.exec('ffprobe -v error -show_entries format_tags -of default=noprint_wrappers=1 "${input_path}"')
 	if out.trim_space().len > 0 {
 		println(out)
 	} else {
@@ -51,6 +52,7 @@ fn run_interactive(mut app simplecli.SimpleCli) {
 		app.warn('File does not exist.')
 		return
 	}
-	out, _ := app.exec('ffprobe -v error -show_entries format_tags -of default=noprint_wrappers=1 "${file_path}"')
+	out, _ :=
+		app.exec('ffprobe -v error -show_entries format_tags -of default=noprint_wrappers=1 "${file_path}"')
 	println(out)
 }

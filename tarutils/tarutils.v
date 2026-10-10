@@ -299,6 +299,7 @@ pub fn unpack_bytes(data []u8) ![]TarEntry {
 			}
 			else {}
 		}
+
 		if p := pax['path'] {
 			name = p
 		} else if gnu_name.len > 0 {

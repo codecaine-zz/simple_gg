@@ -20,62 +20,30 @@ fn main() {
 	win.begin_tab_page('page_dev_hub', 0)
 
 	// Top Hero Banner
-	win.add_hero_banner(
-		'hero_cloud',
-		'assets/images/banner_cloud_devops.jpg',
+	win.add_hero_banner('hero_cloud', 'assets/images/banner_cloud_devops.jpg',
 		'Cloud Infrastructure & DevOps Suite',
 		'Deploy distributed microservices, inspect live telemetry streams, and manage clusters with native 60 FPS performance.',
-		'[Launch Cluster]'
-	)
+		'[Launch Cluster]')
 
 	// Developer Profile Cards in a side-by-side balanced row
 	win.begin_row('profiles_row')
-	win.add_user_profile_card(
-		'prof_ada',
-		'assets/images/avatar_ada_lovelace.jpg',
-		'Ada Lovelace',
-		'@ada_lovelace',
-		'Lead Systems Architect',
-		'Pioneering computing visionary & low-level compiler optimization.',
-		true,
-		'[Connect]'
-	)
-	win.add_user_profile_card(
-		'prof_alex',
-		'assets/images/avatar_alex_chen.jpg',
-		'Alex Chen',
-		'@alex_dev',
-		'Senior Staff SRE',
-		'High-concurrency cloud distributed pipelines and real-time sockets.',
-		true,
-		'[Message]'
-	)
+	win.add_user_profile_card('prof_ada', 'assets/images/avatar_ada_lovelace.jpg', 'Ada Lovelace',
+		'@ada_lovelace', 'Lead Systems Architect',
+		'Pioneering computing visionary & low-level compiler optimization.', true, '[Connect]')
+	win.add_user_profile_card('prof_alex', 'assets/images/avatar_alex_chen.jpg', 'Alex Chen',
+		'@alex_dev', 'Senior Staff SRE',
+		'High-concurrency cloud distributed pipelines and real-time sockets.', true, '[Message]')
 	win.end_row()
 
 	// 3D App / Tool Launcher Tiles Row
 	win.add_heading('Developer Quick Launcher')
 	win.begin_row('launchers_row')
-	win.add_app_launcher_tile(
-		'tool_db',
-		'assets/images/icon_db_engine.jpg',
-		'Cyber DB Engine',
-		'High-Performance Key-Value & SQL',
-		'ONLINE'
-	)
-	win.add_app_launcher_tile(
-		'tool_deploy',
-		'assets/images/icon_rocket_deploy.jpg',
-		'Continuous Delivery',
-		'Zero-Downtime Cloud Pipeline',
-		'DEPLOYING'
-	)
-	win.add_app_launcher_tile(
-		'tool_cli',
-		'assets/images/icon_terminal_cli.jpg',
-		'DevStudio CLI v2.0',
-		'Interactive Shell & Debugger',
-		'READY'
-	)
+	win.add_app_launcher_tile('tool_db', 'assets/images/icon_db_engine.jpg', 'Cyber DB Engine',
+		'High-Performance Key-Value & SQL', 'ONLINE')
+	win.add_app_launcher_tile('tool_deploy', 'assets/images/icon_rocket_deploy.jpg',
+		'Continuous Delivery', 'Zero-Downtime Cloud Pipeline', 'DEPLOYING')
+	win.add_app_launcher_tile('tool_cli', 'assets/images/icon_terminal_cli.jpg',
+		'DevStudio CLI v2.0', 'Interactive Shell & Debugger', 'READY')
 	win.end_row()
 
 	win.end_tab_page()
@@ -100,15 +68,9 @@ fn main() {
 
 	// Audio & Podcast Player Card
 	win.add_heading('Now Playing Audio')
-	win.add_media_player(
-		'synthwave_player',
-		'assets/images/cover_lofi_beats.jpg',
+	win.add_media_player('synthwave_player', 'assets/images/cover_lofi_beats.jpg',
 		'Lo-Fi Code & Beats (Synthwave Journey)',
-		'Cybernetic Waves Presents - 198X High-Fidelity Stereo',
-		240,
-		78,
-		true
-	)
+		'Cybernetic Waves Presents - 198X High-Fidelity Stereo', 240, 78, true)
 
 	win.end_tab_page()
 
@@ -118,24 +80,12 @@ fn main() {
 	win.begin_tab_page('page_products', 2)
 
 	win.begin_row('products_row')
-	win.add_product_card(
-		'prod_mech_keyboard',
-		'assets/images/product_dev_station.jpg',
-		'Custom Macro Station',
-		'Premium mechanical keyboard with walnut finish & RGB underglow',
-		'$189.00',
-		'BESTSELLER',
-		'[Buy Now]'
-	)
-	win.add_product_card(
-		'prod_ai_studio',
-		'assets/images/banner_ai_code_studio.jpg',
-		'AI Code Studio Pro',
-		'Neural assistant with automated code generation & diagnostics',
-		'$29 / mo',
-		'PRO',
-		'[Start Trial]'
-	)
+	win.add_product_card('prod_mech_keyboard', 'assets/images/product_dev_station.jpg',
+		'Custom Macro Station', 'Premium mechanical keyboard with walnut finish & RGB underglow',
+		'$189.00', 'BESTSELLER', '[Buy Now]')
+	win.add_product_card('prod_ai_studio', 'assets/images/banner_ai_code_studio.jpg',
+		'AI Code Studio Pro', 'Neural assistant with automated code generation & diagnostics',
+		'$29 / mo', 'PRO', '[Start Trial]')
 	win.add_image_box('sec_preview', 'assets/images/banner_cyber_security.jpg', 320, 270)
 	win.end_row()
 
@@ -169,7 +119,11 @@ fn main() {
 
 	win.on_click('showcase_gallery', fn (mut win simplegui.SimpleWindow) {
 		ctrl := win.control('showcase_gallery')
-		caption := if ctrl.int_value < ctrl.items_selected.len { ctrl.items_selected[ctrl.int_value] } else { '' }
+		caption := if ctrl.int_value < ctrl.items_selected.len {
+			ctrl.items_selected[ctrl.int_value]
+		} else {
+			''
+		}
 		win.show_toast('Gallery Slide', 'Viewing: ${caption}')
 	})
 

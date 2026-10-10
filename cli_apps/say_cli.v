@@ -59,7 +59,8 @@ fn main() {
 
 fn run_interactive(mut app simplecli.SimpleCli) {
 	app.panel('Say Speech Synthesizer', 'Test text-to-speech voices and export voiceovers.')
-	phrase := app.prompt('Enter phrase to speak', 'Welcome to the SimpleGUI headless console environment.')
+	phrase := app.prompt('Enter phrase to speak',
+		'Welcome to the SimpleGUI headless console environment.')
 	voice := app.select('Select voice profile:', ['Samantha', 'Alex', 'Victoria', 'Fred'])
 	app.speak_with_voice(phrase, voice)
 	app.success('Spoken using ${voice}.')

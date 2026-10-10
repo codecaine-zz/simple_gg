@@ -17,262 +17,262 @@ fn get_dependencies() []Dependency {
 
 	// Media, Audio & Graphics
 	deps << Dependency{
-		category: 'Media & Graphics'
-		formula: 'ffmpeg'
-		bin_names: ['ffmpeg', 'ffprobe']
-		name: 'FFmpeg & FFprobe'
+		category:    'Media & Graphics'
+		formula:     'ffmpeg'
+		bin_names:   ['ffmpeg', 'ffprobe']
+		name:        'FFmpeg & FFprobe'
 		description: 'Video/Audio transcoding, streaming, and audio metadata tagging'
-		studio_app: 'FFmpeg Studio, Audio Tag Studio, Media Hub'
+		studio_app:  'FFmpeg Studio, Audio Tag Studio, Media Hub'
 	}
 	deps << Dependency{
-		category: 'Media & Graphics'
-		formula: 'imagemagick'
-		bin_names: ['magick', 'convert']
-		name: 'ImageMagick'
+		category:    'Media & Graphics'
+		formula:     'imagemagick'
+		bin_names:   ['magick', 'convert']
+		name:        'ImageMagick'
 		description: 'Bitmap/Vector image manipulation and asset generation'
-		studio_app: 'ImageMagick Studio, Media Hub'
+		studio_app:  'ImageMagick Studio, Media Hub'
 	}
 	deps << Dependency{
-		category: 'Media & Graphics'
-		formula: 'yt-dlp'
-		bin_names: ['yt-dlp']
-		name: 'yt-dlp'
+		category:    'Media & Graphics'
+		formula:     'yt-dlp'
+		bin_names:   ['yt-dlp']
+		name:        'yt-dlp'
 		description: 'High-speed media and streaming archive tool'
-		studio_app: 'YT-DLP Studio, Media Hub'
+		studio_app:  'YT-DLP Studio, Media Hub'
 	}
 	deps << Dependency{
-		category: 'Media & Graphics'
-		formula: 'exiftool'
-		bin_names: ['exiftool']
-		name: 'ExifTool'
+		category:    'Media & Graphics'
+		formula:     'exiftool'
+		bin_names:   ['exiftool']
+		name:        'ExifTool'
 		description: 'Read and write image, audio & video metadata/EXIF/IPTC'
-		studio_app: 'Exif Studio'
+		studio_app:  'Exif Studio'
 	}
 	deps << Dependency{
-		category: 'Media & Graphics'
-		formula: 'tesseract'
-		bin_names: ['tesseract']
-		name: 'Tesseract OCR'
+		category:    'Media & Graphics'
+		formula:     'tesseract'
+		bin_names:   ['tesseract']
+		name:        'Tesseract OCR'
 		description: 'Optical character recognition and document scanner'
-		studio_app: 'OCR Studio'
+		studio_app:  'OCR Studio'
 	}
 	deps << Dependency{
-		category: 'Media & Graphics'
-		formula: 'graphviz'
-		bin_names: ['dot', 'neato']
-		name: 'Graphviz (DOT)'
+		category:    'Media & Graphics'
+		formula:     'graphviz'
+		bin_names:   ['dot', 'neato']
+		name:        'Graphviz (DOT)'
 		description: 'Code-to-diagram visualization and graph compilation'
-		studio_app: 'Graphviz Studio'
+		studio_app:  'Graphviz Studio'
 	}
 
 	// Data, Search & Text Engineering
 	deps << Dependency{
-		category: 'Data & Text'
-		formula: 'jq'
-		bin_names: ['jq']
-		name: 'JQ'
+		category:    'Data & Text'
+		formula:     'jq'
+		bin_names:   ['jq']
+		name:        'JQ'
 		description: 'Lightweight and flexible command-line JSON processor'
-		studio_app: 'JQ Studio'
+		studio_app:  'JQ Studio'
 	}
 	deps << Dependency{
-		category: 'Data & Text'
-		formula: 'yq'
-		bin_names: ['yq']
-		name: 'yq'
+		category:    'Data & Text'
+		formula:     'yq'
+		bin_names:   ['yq']
+		name:        'yq'
 		description: 'Portable command-line YAML, JSON, XML, and CSV processor'
-		studio_app: 'Format Converter Studio Pro, OmniTool Studio Pro'
+		studio_app:  'Format Converter Studio Pro, OmniTool Studio Pro'
 	}
 	deps << Dependency{
-		category: 'Data & Text'
-		formula: 'ripgrep'
-		bin_names: ['rg']
-		name: 'ripgrep (rg)'
+		category:    'Data & Text'
+		formula:     'ripgrep'
+		bin_names:   ['rg']
+		name:        'ripgrep (rg)'
 		description: 'Ultra-fast recursive regex pattern search engine'
-		studio_app: 'RG Studio, OmniTool Studio Pro'
+		studio_app:  'RG Studio, OmniTool Studio Pro'
 	}
 	deps << Dependency{
-		category: 'Data & Text'
-		formula: 'fd'
-		bin_names: ['fd']
-		name: 'fd'
+		category:    'Data & Text'
+		formula:     'fd'
+		bin_names:   ['fd']
+		name:        'fd'
 		description: 'Simple, fast, and user-friendly alternative to find'
-		studio_app: 'FD Studio, OmniTool Studio Pro'
+		studio_app:  'FD Studio, OmniTool Studio Pro'
 	}
 	deps << Dependency{
-		category: 'Data & Text'
-		formula: 'sd'
-		bin_names: ['sd']
-		name: 'sd'
+		category:    'Data & Text'
+		formula:     'sd'
+		bin_names:   ['sd']
+		name:        'sd'
 		description: 'Intuitive and fast find & replace CLI'
-		studio_app: 'SD Studio, OmniTool Studio Pro'
+		studio_app:  'SD Studio, OmniTool Studio Pro'
 	}
 	deps << Dependency{
-		category: 'Data & Text'
-		formula: 'eza'
-		bin_names: ['eza']
-		name: 'eza'
+		category:    'Data & Text'
+		formula:     'eza'
+		bin_names:   ['eza']
+		name:        'eza'
 		description: 'Modern replacement for ls with tree, git status, and icons'
-		studio_app: 'OmniTool Studio Pro'
+		studio_app:  'OmniTool Studio Pro'
 	}
 	deps << Dependency{
-		category: 'Data & Text'
-		formula: 'bat'
-		bin_names: ['bat']
-		name: 'bat'
+		category:    'Data & Text'
+		formula:     'bat'
+		bin_names:   ['bat']
+		name:        'bat'
 		description: 'Cat clone with syntax highlighting and Git integration'
-		studio_app: 'OmniTool Studio Pro'
+		studio_app:  'OmniTool Studio Pro'
 	}
 	deps << Dependency{
-		category: 'Data & Text'
-		formula: 'watchexec'
-		bin_names: ['watchexec']
-		name: 'Watchexec'
+		category:    'Data & Text'
+		formula:     'watchexec'
+		bin_names:   ['watchexec']
+		name:        'Watchexec'
 		description: 'Continuous file watcher daemon and automated command runner'
-		studio_app: 'Watchexec Studio Pro, OmniTool Studio Pro'
+		studio_app:  'Watchexec Studio Pro, OmniTool Studio Pro'
 	}
 	deps << Dependency{
-		category: 'Data & Text'
-		formula: 'gawk'
-		bin_names: ['gawk']
-		name: 'GNU AWK'
+		category:    'Data & Text'
+		formula:     'gawk'
+		bin_names:   ['gawk']
+		name:        'GNU AWK'
 		description: 'Pattern scanning and data stream processing language'
-		studio_app: 'GAWK Studio'
+		studio_app:  'GAWK Studio'
 	}
 	deps << Dependency{
-		category: 'Data & Text'
-		formula: 'pandoc'
-		bin_names: ['pandoc']
-		name: 'Pandoc'
+		category:    'Data & Text'
+		formula:     'pandoc'
+		bin_names:   ['pandoc']
+		name:        'Pandoc'
 		description: 'Universal document format converter and publisher'
-		studio_app: 'Pandoc Studio'
+		studio_app:  'Pandoc Studio'
 	}
 	deps << Dependency{
-		category: 'Data & Text'
-		formula: 'ouch'
-		bin_names: ['ouch']
-		name: 'Ouch'
+		category:    'Data & Text'
+		formula:     'ouch'
+		bin_names:   ['ouch']
+		name:        'Ouch'
 		description: 'Painless and ultra-fast compression/decompression tool'
-		studio_app: 'Ouch Studio, OmniTool Studio Pro'
+		studio_app:  'Ouch Studio, OmniTool Studio Pro'
 	}
 	deps << Dependency{
-		category: 'Data & Text'
-		formula: 'rip2'
-		bin_names: ['rip']
-		name: 'rip2 / rip'
+		category:    'Data & Text'
+		formula:     'rip2'
+		bin_names:   ['rip']
+		name:        'rip2 / rip'
 		description: 'Safe and ergonomic alternative to rm with graveyard recovery and seance'
-		studio_app: 'Rip Studio, OmniTool Studio Pro'
+		studio_app:  'Rip Studio, OmniTool Studio Pro'
 	}
 	deps << Dependency{
-		category: 'Data & Text'
-		formula: 'sqlite'
-		bin_names: ['sqlite3']
-		name: 'SQLite3'
+		category:    'Data & Text'
+		formula:     'sqlite'
+		bin_names:   ['sqlite3']
+		name:        'SQLite3'
 		description: 'Embedded SQL relational database engine'
-		studio_app: 'SQLite Studio'
+		studio_app:  'SQLite Studio'
 	}
 	deps << Dependency{
-		category: 'Data & Text'
-		formula: 'wget2'
-		bin_names: ['wget2', 'wget']
-		name: 'GNU Wget2'
+		category:    'Data & Text'
+		formula:     'wget2'
+		bin_names:   ['wget2', 'wget']
+		name:        'GNU Wget2'
 		description: 'Multi-threaded file download accelerator and web scraper'
-		studio_app: 'Wget2 Studio, OmniTool Studio Pro'
+		studio_app:  'Wget2 Studio, OmniTool Studio Pro'
 	}
 
 	// Network, Security & Reconnaissance
 	deps << Dependency{
-		category: 'Network & Security'
-		formula: 'nmap'
-		bin_names: ['nmap']
-		name: 'Nmap'
+		category:    'Network & Security'
+		formula:     'nmap'
+		bin_names:   ['nmap']
+		name:        'Nmap'
 		description: 'Network exploration tool and security / port scanner'
-		studio_app: 'Nmap Studio'
+		studio_app:  'Nmap Studio'
 	}
 	deps << Dependency{
-		category: 'Network & Security'
-		formula: 'bind'
-		bin_names: ['dig']
-		name: 'BIND (dig)'
+		category:    'Network & Security'
+		formula:     'bind'
+		bin_names:   ['dig']
+		name:        'BIND (dig)'
 		description: 'DNS lookup utility and nameserver diagnostics'
-		studio_app: 'DNS Studio'
+		studio_app:  'DNS Studio'
 	}
 	deps << Dependency{
-		category: 'Network & Security'
-		formula: 'openssl@3'
-		bin_names: ['openssl']
-		name: 'OpenSSL 3'
+		category:    'Network & Security'
+		formula:     'openssl@3'
+		bin_names:   ['openssl']
+		name:        'OpenSSL 3'
 		description: 'TLS/SSL cryptography toolkit and certificate inspector'
-		studio_app: 'DNS Studio'
+		studio_app:  'DNS Studio'
 	}
 	deps << Dependency{
-		category: 'Network & Security'
-		formula: 'whois'
-		bin_names: ['whois']
-		name: 'WHOIS'
+		category:    'Network & Security'
+		formula:     'whois'
+		bin_names:   ['whois']
+		name:        'WHOIS'
 		description: 'Domain and IP address registration lookup tool'
-		studio_app: 'Recon Studio'
+		studio_app:  'Recon Studio'
 	}
 	deps << Dependency{
-		category: 'Network & Security'
-		formula: 'subfinder'
-		bin_names: ['subfinder']
-		name: 'Subfinder'
+		category:    'Network & Security'
+		formula:     'subfinder'
+		bin_names:   ['subfinder']
+		name:        'Subfinder'
 		description: 'Fast passive subdomain discovery tool'
-		studio_app: 'Subfinder Studio'
+		studio_app:  'Subfinder Studio'
 	}
 	deps << Dependency{
-		category: 'Network & Security'
-		formula: 'qrencode'
-		bin_names: ['qrencode']
-		name: 'QR Code Encoder (qrencode)'
+		category:    'Network & Security'
+		formula:     'qrencode'
+		bin_names:   ['qrencode']
+		name:        'QR Code Encoder (qrencode)'
 		description: 'C library and utility for encoding data in a QR Code symbol'
-		studio_app: 'Crypto Studio'
+		studio_app:  'Crypto Studio'
 	}
 
 	// Mathematics & Scientific Calculators
 	deps << Dependency{
-		category: 'Math & Calculators'
-		formula: 'libqalculate'
-		bin_names: ['qalc']
-		name: 'Qalculate! (qalc)'
+		category:    'Math & Calculators'
+		formula:     'libqalculate'
+		bin_names:   ['qalc']
+		name:        'Qalculate! (qalc)'
 		description: 'Multi-purpose desktop calculator and unit conversion engine'
-		studio_app: 'Qalc Studio'
+		studio_app:  'Qalc Studio'
 	}
 	deps << Dependency{
-		category: 'Math & Calculators'
-		formula: 'numbat'
-		bin_names: ['numbat']
-		name: 'Numbat'
+		category:    'Math & Calculators'
+		formula:     'numbat'
+		bin_names:   ['numbat']
+		name:        'Numbat'
 		description: 'Statically-typed dimensional analysis and physical calculation engine'
-		studio_app: 'Numbat Studio'
+		studio_app:  'Numbat Studio'
 	}
 	deps << Dependency{
-		category: 'Math & Calculators'
-		formula: 'kalker'
-		bin_names: ['kalker']
-		name: 'Kalker'
+		category:    'Math & Calculators'
+		formula:     'kalker'
+		bin_names:   ['kalker']
+		name:        'Kalker'
 		description: 'Full math engine with natural calculus and matrix support'
-		studio_app: 'Kalker Studio'
+		studio_app:  'Kalker Studio'
 	}
 
 	// Cross-compilation toolchains (Optional)
 	deps << Dependency{
-		category: 'Cross-Compilation Toolchains'
-		formula: 'zig'
-		bin_names: ['zig']
-		name: 'Zig'
+		category:    'Cross-Compilation Toolchains'
+		formula:     'zig'
+		bin_names:   ['zig']
+		name:        'Zig'
 		description: 'C/C++ cross-compiler for targeting Windows/Linux'
-		studio_app: 'Multi-OS Compilation (compile_apps.vsh)'
-		optional: true
+		studio_app:  'Multi-OS Compilation (compile_apps.vsh)'
+		optional:    true
 	}
 	deps << Dependency{
-		category: 'Cross-Compilation Toolchains'
-		formula: 'mingw-w64'
-		bin_names: ['x86_64-w64-mingw32-gcc']
-		name: 'MinGW-w64'
+		category:    'Cross-Compilation Toolchains'
+		formula:     'mingw-w64'
+		bin_names:   ['x86_64-w64-mingw32-gcc']
+		name:        'MinGW-w64'
 		description: 'GCC toolchain for targeting Windows x86_64'
-		studio_app: 'Windows Compilation (compile_apps.vsh)'
-		optional: true
+		studio_app:  'Windows Compilation (compile_apps.vsh)'
+		optional:    true
 	}
 
 	return deps

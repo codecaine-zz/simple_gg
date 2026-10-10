@@ -324,8 +324,9 @@ pub fn sanitize_filename(name string) string {
 	}
 	// Windows reserved device names (CON, NUL, COM1, ...) are unusable even with an extension.
 	stem := (res.all_before('.')).to_upper()
-	if stem in ['CON', 'PRN', 'AUX', 'NUL'] || (stem.len == 4 && (stem.starts_with('COM')
-		|| stem.starts_with('LPT')) && stem[3] >= `1` && stem[3] <= `9`) {
+	if stem in ['CON', 'PRN', 'AUX', 'NUL']
+		|| (stem.len == 4 && (stem.starts_with('COM') || stem.starts_with('LPT')) && stem[3] >= `1`
+		&& stem[3] <= `9`) {
 		res = '_' + res
 	}
 	if res.len > 255 {

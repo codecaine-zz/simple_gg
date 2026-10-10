@@ -52,11 +52,12 @@ fn main() {
 		w.toast('Theme changed to ${selected}')
 	})
 
-	win.add_label('lbl_engine_info', 'Engine: macOS launchctl & crontab Subsystems  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async')
+	win.add_label('lbl_engine_info',
+		'Engine: macOS launchctl & crontab Subsystems  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async')
 
 	// Job Scheduler Specification & Presets Bar
 	win.begin_group_box('grp_job_presets', 'Scheduled Task Templates & Cron Expression Builder')
-	
+
 	win.begin_row('row_presets_bar')
 	win.add_label('lbl_template', 'Schedule Template:')
 	win.add_dropdown('dd_schedule_presets', [
@@ -66,7 +67,7 @@ fn main() {
 		'4. File Watcher Daemon (WatchPaths: ~/Downloads)',
 		'5. Cron: Every 5 Minutes (*/5 * * * *)',
 		'6. Cron: Daily at 9:00 AM (0 9 * * *)',
-		'7. Cron: Every Sunday at Midnight (0 0 * * 0)'
+		'7. Cron: Every Sunday at Midnight (0 0 * * 0)',
 	], '1. Hourly Background Task (StartInterval: 3600)')
 	win.set_control_width('dd_schedule_presets', 380)
 
@@ -89,7 +90,8 @@ fn main() {
 
 	// Dual Pane: Plist / Cron Editor & Output
 	win.begin_grid('grid_dual_pane', 2, 8)
-	win.add_form_textarea('Launchd Plist / Cron Job Definition:', 'txt_job_definition', sample_launchd_plist)
+	win.add_form_textarea('Launchd Plist / Cron Job Definition:', 'txt_job_definition',
+		sample_launchd_plist)
 	win.set_control_height('txt_job_definition', 320)
 	win.add_form_textarea('System Daemons & Service Status:', 'txt_job_output', '')
 	win.set_control_height('txt_job_output', 320)
@@ -106,7 +108,8 @@ fn main() {
 	win.end_row()
 
 	win.append_console('job_console', ' Launchd & Cron Studio Pro Initialized.\n', 1)
-	win.append_console('job_console', ' Ready to inspect launchd services, user agents, and crontab tables.\n', 4)
+	win.append_console('job_console',
+		' Ready to inspect launchd services, user agents, and crontab tables.\n', 4)
 
 	// -------------------------------------------------------------
 	// Event Handlers
@@ -182,12 +185,13 @@ fn main() {
 			w.set('txt_job_definition', '# Crontab: Run weekly backup on Sunday at Midnight
 0 0 * * 0 /usr/bin/tar -czf /tmp/weekly_backup.tar.gz /Users/Shared >> /tmp/cron_backup.log 2>&1')
 		}
-		w.toast('Loaded template: ${selected.split("(")[0]}')
+		w.toast('Loaded template: ${selected.split('(')[0]}')
 	})
 
 	// List Launchd Daemons
 	win.on_click('btn_list_launchd', fn (mut w simplegui.SimpleWindow) {
-		w.append_console('job_console', ' Querying active launchd services (launchctl list)...\n', 1)
+		w.append_console('job_console', ' Querying active launchd services (launchctl list)...\n',
+			1)
 		w.set_status('Querying launchctl...')
 
 		go fn [mut w] () {
@@ -197,15 +201,21 @@ fn main() {
 
 			w.run_on_main_thread(fn [res, elapsed_ms] (mut win_main simplegui.SimpleWindow) {
 				if res.exit_code != 0 {
-					win_main.set('txt_job_output', '=== [LAUNCHCTL QUERY ERROR] ===\nExit Code: ${res.exit_code}\n\n' + res.output.trim_space())
-					win_main.append_console('job_console', ' [ERROR] Failed to query launchctl (code ${res.exit_code}): ${res.output.trim_space()}\n', 3)
+					win_main.set('txt_job_output',
+						'=== [LAUNCHCTL QUERY ERROR] ===\nExit Code: ${res.exit_code}\n\n' +
+						res.output.trim_space())
+					win_main.append_console('job_console',
+						' [ERROR] Failed to query launchctl (code ${res.exit_code}): ${res.output.trim_space()}\n',
+						3)
 					win_main.set('lbl_stats', ' Stats: ERROR  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Launchctl query failed.')
 					win_main.toast('Failed to query launchctl services')
 				} else {
 					win_main.set('txt_job_output', res.output.trim_space())
-					win_main.append_console('job_console', ' Launchd services listed in ${elapsed_ms} ms.\n', 4)
-					win_main.set('lbl_stats', ' Stats: LAUNCHCTL ACTIVE SERVICES  |  Duration: ${elapsed_ms} ms')
+					win_main.append_console('job_console',
+						' Launchd services listed in ${elapsed_ms} ms.\n', 4)
+					win_main.set('lbl_stats',
+						' Stats: LAUNCHCTL ACTIVE SERVICES  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Launchd services loaded.')
 				}
 			})
@@ -225,15 +235,24 @@ fn main() {
 			w.run_on_main_thread(fn [res, elapsed_ms] (mut win_main simplegui.SimpleWindow) {
 				out := res.output.trim_space()
 				if res.exit_code != 0 && !out.contains('no crontab') {
-					win_main.set('txt_job_output', '=== [CRONTAB QUERY ERROR] ===\nExit Code: ${res.exit_code}\n\n' + out)
-					win_main.append_console('job_console', ' [ERROR] Crontab execution error: ${out}\n', 3)
+					win_main.set('txt_job_output',
+
+						'=== [CRONTAB QUERY ERROR] ===\nExit Code: ${res.exit_code}\n\n' + out)
+					win_main.append_console('job_console',
+						' [ERROR] Crontab execution error: ${out}\n', 3)
 					win_main.set('lbl_stats', ' Stats: ERROR  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Crontab query failed.')
 					win_main.toast('Crontab query failed')
 				} else {
-					win_main.set('txt_job_output', if out != '' { out } else { 'No crontab entries installed for current user.' })
-					win_main.append_console('job_console', ' Crontab table read in ${elapsed_ms} ms.\n', 4)
-					win_main.set('lbl_stats', ' Stats: CRONTAB CHECKED  |  Duration: ${elapsed_ms} ms')
+					win_main.set('txt_job_output', if out != '' {
+						out
+					} else {
+						'No crontab entries installed for current user.'
+					})
+					win_main.append_console('job_console',
+						' Crontab table read in ${elapsed_ms} ms.\n', 4)
+					win_main.set('lbl_stats',
+						' Stats: CRONTAB CHECKED  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Crontab loaded.')
 				}
 			})
@@ -243,7 +262,8 @@ fn main() {
 	// List User LaunchAgents
 	win.on_click('btn_list_user_agents', fn (mut w simplegui.SimpleWindow) {
 		agents_dir := os.join_path(os.home_dir(), 'Library/LaunchAgents')
-		w.append_console('job_console', ' Inspecting user agents directory: ~/Library/LaunchAgents...\n', 1)
+		w.append_console('job_console',
+			' Inspecting user agents directory: ~/Library/LaunchAgents...\n', 1)
 
 		if os.exists(agents_dir) {
 			files := os.ls(agents_dir) or { []string{} }
@@ -254,7 +274,8 @@ fn main() {
 			w.set('txt_job_output', out)
 			w.toast('Listed ${files.len} user launch agents.')
 		} else {
-			w.set('txt_job_output', '=== [DIRECTORY NOTICE] ===\n\nNo ~/Library/LaunchAgents directory found on this system.')
+			w.set('txt_job_output',
+				'=== [DIRECTORY NOTICE] ===\n\nNo ~/Library/LaunchAgents directory found on this system.')
 			w.toast('~/Library/LaunchAgents not found')
 		}
 	})

@@ -18,10 +18,10 @@ struct GraveyardRecord {
 }
 
 struct GraveyardStats {
-	path        string
-	active_cnt  int
-	total_cnt   int
-	total_bytes i64
+	path         string
+	active_cnt   int
+	total_cnt    int
+	total_bytes  i64
 	restored_cnt int
 }
 
@@ -95,10 +95,10 @@ fn load_graveyard_records(graveyard_dir string) ([]GraveyardRecord, GraveyardSta
 
 	if !os.exists(record_file) {
 		return records, GraveyardStats{
-			path: graveyard_dir
-			active_cnt: 0
-			total_cnt: 0
-			total_bytes: 0
+			path:         graveyard_dir
+			active_cnt:   0
+			total_cnt:    0
+			total_bytes:  0
 			restored_cnt: 0
 		}
 	}
@@ -144,13 +144,13 @@ fn load_graveyard_records(graveyard_dir string) ([]GraveyardRecord, GraveyardSta
 			item_name := os.file_name(orig)
 
 			records << GraveyardRecord{
-				time_str: t_clean
-				original: orig
+				time_str:    t_clean
+				original:    orig
 				destination: dest
-				name: item_name
-				size_bytes: sz
-				is_dir: is_d
-				is_active: is_active
+				name:        item_name
+				size_bytes:  sz
+				is_dir:      is_d
+				is_active:   is_active
 			}
 		}
 	}
@@ -159,10 +159,10 @@ fn load_graveyard_records(graveyard_dir string) ([]GraveyardRecord, GraveyardSta
 	records.reverse()
 
 	return records, GraveyardStats{
-		path: graveyard_dir
-		active_cnt: active_count
-		total_cnt: records.len
-		total_bytes: total_size
+		path:         graveyard_dir
+		active_cnt:   active_count
+		total_cnt:    records.len
+		total_bytes:  total_size
 		restored_cnt: restored_count
 	}
 }
@@ -173,7 +173,8 @@ fn load_graveyard_records(graveyard_dir string) ([]GraveyardRecord, GraveyardSta
 fn main() {
 	println('Starting SimpleGUI - Rip Studio Pro (AAA Safe Deletion & Graveyard Workbench)...')
 
-	mut win := simplegui.new_simple_window('Rip Studio Pro -- AAA Safe Deletion & Graveyard Workbench', 1140, 940)
+	mut win := simplegui.new_simple_window('Rip Studio Pro -- AAA Safe Deletion & Graveyard Workbench',
+		1140, 940)
 	win.set_fullscreen(true)
 	win.restore_saved_theme()
 	win.set_spacing(10)
@@ -204,17 +205,22 @@ fn main() {
 	win.end_row()
 
 	win.begin_row('row_engine_telemetry')
-	win.add_label('lbl_engine_info', 'Engine: ${rip_bin}  |  Graveyard Vault: ${current_graveyard}  |  Runtime: Async Thread Pool  |  Platform: ${simplegui.get_platform_label()}')
+	win.add_label('lbl_engine_info',
+		'Engine: ${rip_bin}  |  Graveyard Vault: ${current_graveyard}  |  Runtime: Async Thread Pool  |  Platform: ${simplegui.get_platform_label()}')
 	win.end_row()
 
 	// -------------------------------------------------------------
 	// High-Impact KPI Metric Stat Cards
 	// -------------------------------------------------------------
 	win.begin_row('row_stat_cards')
-	win.add_stat_card('card_buried_count', ' Tomb Population', '0 Active Items', 'Protected against accidental rm', true, [1.0, 3.0, 2.0, 4.0, 3.0, 5.0])
-	win.add_stat_card('card_graveyard_size', ' Graveyard Disk Footprint', '0 B', 'Temporary APFS recovery cache', true, [10.0, 25.0, 18.0, 35.0, 28.0, 42.0])
-	win.add_stat_card('card_restored_count', ' Files Resurrected', '0 Restored', '100% Recovery Success Rate', true, [0.0, 1.0, 2.0, 2.0, 3.0, 4.0])
-	win.add_stat_card('card_graveyard_path', ' Vault Storage', os.file_name(current_graveyard), 'APFS Temp Cache', true, [2.0, 3.0, 2.0, 4.0, 3.0, 5.0])
+	win.add_stat_card('card_buried_count', ' Tomb Population', '0 Active Items',
+		'Protected against accidental rm', true, [1.0, 3.0, 2.0, 4.0, 3.0, 5.0])
+	win.add_stat_card('card_graveyard_size', ' Graveyard Disk Footprint', '0 B',
+		'Temporary APFS recovery cache', true, [10.0, 25.0, 18.0, 35.0, 28.0, 42.0])
+	win.add_stat_card('card_restored_count', ' Files Resurrected', '0 Restored',
+		'100% Recovery Success Rate', true, [0.0, 1.0, 2.0, 2.0, 3.0, 4.0])
+	win.add_stat_card('card_graveyard_path', ' Vault Storage', os.file_name(current_graveyard),
+		'APFS Temp Cache', true, [2.0, 3.0, 2.0, 4.0, 3.0, 5.0])
 	win.end_row()
 
 	// -------------------------------------------------------------
@@ -251,7 +257,8 @@ fn main() {
 	win.control('btn_decompose_graveyard').set_elevation(1).set_vector_icon('trash').set_width(150)
 	win.end_row()
 
-	table_headers := ['Item Name', 'Original Path', 'Buried At', 'Type', 'Size', 'Status', 'Graveyard Destination']
+	table_headers := ['Item Name', 'Original Path', 'Buried At', 'Type', 'Size', 'Status',
+		'Graveyard Destination']
 	win.add_table('tbl_graveyard', table_headers, [][]string{})
 	win.set_control_height('tbl_graveyard', 280)
 
@@ -260,7 +267,8 @@ fn main() {
 	// Selected Item Intelligence Inspector Card
 	win.begin_group_box('grp_item_intel', 'Selected Artifact Intelligence & One-Click Actions')
 	win.begin_row('row_intel_info')
-	win.add_label('lbl_intel_name', 'Selected Item: (Click an item in the tomb above to inspect details)')
+	win.add_label('lbl_intel_name',
+		'Selected Item: (Click an item in the tomb above to inspect details)')
 	win.end_row()
 	win.begin_row('row_intel_paths')
 	win.add_label('lbl_intel_orig', 'Original Location: --')
@@ -287,7 +295,8 @@ fn main() {
 	// =============================================================
 	win.begin_tab_page('tab_bury', 1)
 
-	win.begin_group_box('grp_bury_settings', 'Safe Deletion Workspace (Enterprise Non-Destructive rm Replacement)')
+	win.begin_group_box('grp_bury_settings',
+		'Safe Deletion Workspace (Enterprise Non-Destructive rm Replacement)')
 
 	win.begin_row('row_target_input')
 	win.add_label('lbl_target_path', 'Target Path:')
@@ -322,7 +331,8 @@ fn main() {
 
 	// Pre-Flight Diagnostic Health Panel
 	win.begin_group_box('grp_preflight', 'Target Pre-Flight Telemetry & Safety Verifications')
-	win.add_textarea('txt_preflight_report', 'Select any file or folder above and click "Inspect Pre-flight Telemetry" to review permissions, file size, inodes, and safety locks before burying.\n')
+	win.add_textarea('txt_preflight_report',
+		'Select any file or folder above and click "Inspect Pre-flight Telemetry" to review permissions, file size, inodes, and safety locks before burying.\n')
 	win.set_control_height('txt_preflight_report', 240)
 	win.end_group_box()
 
@@ -333,7 +343,8 @@ fn main() {
 	// =============================================================
 	win.begin_tab_page('tab_seance', 2)
 
-	win.begin_group_box('grp_seance_box', 'Directory Séance Engine (Detect Resting Files Previously in Folder - rip -s)')
+	win.begin_group_box('grp_seance_box',
+		'Directory Séance Engine (Detect Resting Files Previously in Folder - rip -s)')
 
 	win.begin_row('row_seance_dir')
 	win.add_label('lbl_seance_scope', 'Target Directory Scope:')
@@ -350,7 +361,8 @@ fn main() {
 	win.end_group_box()
 
 	win.begin_group_box('grp_seance_output', 'Séance Discovery Registry & Instant Resurrection')
-	win.add_textarea('txt_seance_report', 'Click "Summon Ghosts (-s)" to inspect all files that once existed in the selected folder and are currently preserved in the graveyard.\n')
+	win.add_textarea('txt_seance_report',
+		'Click "Summon Ghosts (-s)" to inspect all files that once existed in the selected folder and are currently preserved in the graveyard.\n')
 	win.set_control_height('txt_seance_report', 280)
 
 	win.begin_row('row_seance_actions')
@@ -395,7 +407,8 @@ fn main() {
 
 	win.begin_group_box('grp_danger_zone', 'Permanent Deletion & Storage Reclaim (Decompose -d)')
 	win.begin_row('row_danger_info')
-	win.add_label('lbl_danger_warn', 'Warning: Decomposing permanently purges all files resting in the graveyard. This action cannot be undone.')
+	win.add_label('lbl_danger_warn',
+		'Warning: Decomposing permanently purges all files resting in the graveyard. This action cannot be undone.')
 	win.end_row()
 	win.begin_row('row_danger_btn')
 	win.add_button('btn_exec_decompose', ' Decompose Graveyard & Reclaim Disk Space')
@@ -411,7 +424,8 @@ fn main() {
 	// Live Operation Console & Action Bar
 	// -------------------------------------------------------------
 	win.begin_group_box('grp_console_dock', 'Live Activity Console & Operation Telemetry')
-	win.add_textarea('txt_activity_log', ' Rip Studio Pro v1.0.0 initialized.\n Ready for enterprise-grade safe file deletion, graveyard exploration, and resurrection.\n')
+	win.add_textarea('txt_activity_log',
+		' Rip Studio Pro v1.0.0 initialized.\n Ready for enterprise-grade safe file deletion, graveyard exploration, and resurrection.\n')
 	win.set_control_height('txt_activity_log', 110)
 
 	win.begin_row('row_bottom_bar')
@@ -465,10 +479,14 @@ fn main() {
 		win.set_table_rows('tbl_graveyard', rows)
 
 		// Update KPI Stat Cards
-		win.set_stat_card('card_buried_count', ' Tomb Population', '${stats.active_cnt} Active Items', 'Protected against accidental rm', true)
-		win.set_stat_card('card_graveyard_size', ' Graveyard Disk Footprint', format_bytes(stats.total_bytes), 'Temporary APFS recovery cache', true)
-		win.set_stat_card('card_restored_count', ' Files Resurrected', '${stats.restored_cnt} Restored', '100% Recovery Success Rate', true)
-		win.set_stat_card('card_graveyard_path', ' Vault Storage', os.file_name(stats.path), 'APFS Temp Cache', true)
+		win.set_stat_card('card_buried_count', ' Tomb Population',
+			'${stats.active_cnt} Active Items', 'Protected against accidental rm', true)
+		win.set_stat_card('card_graveyard_size', ' Graveyard Disk Footprint',
+			format_bytes(stats.total_bytes), 'Temporary APFS recovery cache', true)
+		win.set_stat_card('card_restored_count', ' Files Resurrected',
+			'${stats.restored_cnt} Restored', '100% Recovery Success Rate', true)
+		win.set_stat_card('card_graveyard_path', ' Vault Storage', os.file_name(stats.path),
+			'APFS Temp Cache', true)
 
 		// Update Raw Journal
 		record_file := os.join_path(graveyard_dir, '.record')
@@ -480,7 +498,8 @@ fn main() {
 		}
 
 		now := time.now().format_ss()
-		win.set('lbl_footer_status', 'Status: Live  |  Active Resting: ${stats.active_cnt}  |  Restored: ${stats.restored_cnt}  |  Refreshed: ${now}')
+		win.set('lbl_footer_status',
+			'Status: Live  |  Active Resting: ${stats.active_cnt}  |  Restored: ${stats.restored_cnt}  |  Refreshed: ${now}')
 	}
 
 	// Helper to extract currently selected item details from table
@@ -535,7 +554,8 @@ fn main() {
 
 	// Top Resurrect Last (-u)
 	win.on_click('btn_top_unbury_last', fn [rip_bin, current_graveyard, refresh_all_views] (mut w simplegui.SimpleWindow) {
-		w.set('txt_activity_log', ' Resurrecting the most recently buried item (-u)...\n Command: ${rip_bin} -u\n')
+		w.set('txt_activity_log',
+			' Resurrecting the most recently buried item (-u)...\n Command: ${rip_bin} -u\n')
 		w.set_status('Unburying last item...')
 		w.toast('Unburying last item...')
 
@@ -546,7 +566,9 @@ fn main() {
 
 			w.run_on_main_thread(fn [res, elapsed_ms, rip_bin, current_graveyard, refresh_all_views] (mut win_main simplegui.SimpleWindow) {
 				if res.exit_code == 0 {
-					win_main.set('txt_activity_log', ' Successfully resurrected in ${elapsed_ms} ms!\n\n' + res.output)
+					win_main.set('txt_activity_log',
+
+						' Successfully resurrected in ${elapsed_ms} ms!\n\n' + res.output)
 					win_main.set_status('Resurrection complete.')
 					win_main.toast('File resurrected!')
 					refresh_all_views(mut win_main, rip_bin, current_graveyard)
@@ -577,7 +599,8 @@ fn main() {
 	win.on_click('btn_resurrect_selected', fn [get_selected_record, rip_bin, current_graveyard, refresh_all_views] (mut w simplegui.SimpleWindow) {
 		name, orig, _, _, dest := get_selected_record(mut w)
 		if orig == '' {
-			w.alert('No Item Selected', 'Please click on an active buried item in the tomb table first.')
+			w.alert('No Item Selected',
+				'Please click on an active buried item in the tomb table first.')
 			return
 		}
 
@@ -586,7 +609,8 @@ fn main() {
 			return
 		}
 
-		w.set('txt_activity_log', ' Resurrecting ${name} back to original location: ${orig}...\n Target: ${dest}\n Command: ${rip_bin} -u "${dest}"\n')
+		w.set('txt_activity_log',
+			' Resurrecting ${name} back to original location: ${orig}...\n Target: ${dest}\n Command: ${rip_bin} -u "${dest}"\n')
 		w.set_status('Resurrecting item...')
 		w.toast('Resurrecting ${name}...')
 
@@ -597,7 +621,9 @@ fn main() {
 
 			w.run_on_main_thread(fn [res, elapsed_ms, orig, name, rip_bin, current_graveyard, refresh_all_views] (mut win_main simplegui.SimpleWindow) {
 				if res.exit_code == 0 {
-					win_main.set('txt_activity_log', ' Successfully resurrected "${name}" in ${elapsed_ms} ms!\n Restored path: ${orig}\n\n' + res.output)
+					win_main.set('txt_activity_log',
+						' Successfully resurrected "${name}" in ${elapsed_ms} ms!\n Restored path: ${orig}\n\n' +
+						res.output)
 					win_main.set_status('Resurrection complete.')
 					win_main.toast('"${name}" resurrected!')
 					refresh_all_views(mut win_main, rip_bin, current_graveyard)
@@ -628,11 +654,17 @@ fn main() {
 
 			w.run_on_main_thread(fn [res, elapsed_ms, orig, name, rip_bin, current_graveyard, refresh_all_views] (mut win_main simplegui.SimpleWindow) {
 				if res.exit_code == 0 {
-					win_main.set('txt_activity_log', ' Resurrected "${name}" in ${elapsed_ms} ms to ${orig}\n' + res.output)
+					win_main.set('txt_activity_log',
+
+						' Resurrected "${name}" in ${elapsed_ms} ms to ${orig}\n' + res.output)
 					win_main.toast('Resurrected ${name}!')
 					refresh_all_views(mut win_main, rip_bin, current_graveyard)
 				} else {
-					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Failed to resurrect "${name}".' }
+					err_msg := if res.output.trim_space() != '' {
+						res.output.trim_space()
+					} else {
+						'Failed to resurrect "${name}".'
+					}
 					win_main.set('txt_activity_log', ' Resurrection Error:\n' + err_msg)
 					win_main.set_status('Resurrection failed.')
 					win_main.toast('Failed to resurrect "${name}".')
@@ -678,7 +710,9 @@ fn main() {
 
 		if os.is_dir(dest) {
 			items := os.ls(dest) or { []string{} }
-			msg := '=== Directory Preview: ${name} ===\nOriginal: ${orig}\nTotal Child Entries: ${items.len}\n' + items.join('\n')
+			msg :=
+				'=== Directory Preview: ${name} ===\nOriginal: ${orig}\nTotal Child Entries: ${items.len}\n' +
+				items.join('\n')
 			w.set('txt_activity_log', msg)
 			w.toast('Loaded directory listing into console.')
 			return
@@ -687,20 +721,23 @@ fn main() {
 		// Read head of file up to 2KB
 		bytes_len := os.file_size(dest)
 		if bytes_len > 1024 * 1024 {
-			w.set('txt_activity_log', '=== File Preview: ${name} (${sz_str}) ===\n[File exceeds 1MB - previewing first 4KB]\n')
+			w.set('txt_activity_log',
+				'=== File Preview: ${name} (${sz_str}) ===\n[File exceeds 1MB - previewing first 4KB]\n')
 		}
 		raw_preview := os.read_file(dest) or { '[Binary Data / Unreadable]' }
-		snippet := if raw_preview.len > 4000 { raw_preview[..4000] + '\n... [truncated]' } else { raw_preview }
+		snippet := if raw_preview.len > 4000 {
+			raw_preview[..4000] + '\n... [truncated]'
+		} else {
+			raw_preview
+		}
 		w.set('txt_activity_log', '=== File Preview: ${name} (${orig}) ===\n${snippet}\n')
 		w.toast('File preview loaded in console.')
 	})
 
 	// Decompose Graveyard
 	win.on_click('btn_decompose_graveyard', fn [rip_bin, current_graveyard, refresh_all_views] (mut w simplegui.SimpleWindow) {
-		confirmed := w.confirm(
-			'Decompose Graveyard?',
-			'Decomposing permanently purges all files resting in the graveyard.\nThis action is irreversible and recovers disk space immediately.\n\nAre you sure you want to proceed?'
-		)
+		confirmed := w.confirm('Decompose Graveyard?',
+			'Decomposing permanently purges all files resting in the graveyard.\nThis action is irreversible and recovers disk space immediately.\n\nAre you sure you want to proceed?')
 		if !confirmed {
 			w.toast('Decomposition cancelled.')
 			return
@@ -717,12 +754,18 @@ fn main() {
 
 			w.run_on_main_thread(fn [res, elapsed_ms, rip_bin, current_graveyard, refresh_all_views] (mut win_main simplegui.SimpleWindow) {
 				if res.exit_code == 0 {
-					win_main.set('txt_activity_log', ' Graveyard successfully emptied in ${elapsed_ms} ms.\n Space reclaimed.\n\n' + res.output)
+					win_main.set('txt_activity_log',
+						' Graveyard successfully emptied in ${elapsed_ms} ms.\n Space reclaimed.\n\n' +
+						res.output)
 					win_main.set_status('Graveyard emptied.')
 					win_main.toast('Graveyard emptied!')
 					refresh_all_views(mut win_main, rip_bin, current_graveyard)
 				} else {
-					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Failed to empty graveyard.' }
+					err_msg := if res.output.trim_space() != '' {
+						res.output.trim_space()
+					} else {
+						'Failed to empty graveyard.'
+					}
 					win_main.set('txt_activity_log', ' Decompose Error:\n' + err_msg)
 					win_main.set_status('Failed to empty graveyard.')
 					win_main.toast('Decompose operation failed.')
@@ -734,10 +777,8 @@ fn main() {
 
 	// Wire up danger zone decompose button
 	win.on_click('btn_exec_decompose', fn [rip_bin, current_graveyard, refresh_all_views] (mut w simplegui.SimpleWindow) {
-		confirmed := w.confirm(
-			'Permanently Decompose Graveyard?',
-			'All items in ${current_graveyard} will be permanently destroyed.\nConfirm permanent deletion?'
-		)
+		confirmed := w.confirm('Permanently Decompose Graveyard?',
+			'All items in ${current_graveyard} will be permanently destroyed.\nConfirm permanent deletion?')
 		if !confirmed {
 			w.toast('Aborted.')
 			return
@@ -800,7 +841,8 @@ fn main() {
 		report += ' PRE-FLIGHT TELEMETRY & SAFETY AUDIT: ${os.file_name(target)}\n'
 		report += '======================================================================\n'
 		report += 'Path           : ${target}\n'
-		report += 'Item Type      : ' + if is_d { 'Directory (Container)' } else { 'Regular File' } + '\n'
+		report += 'Item Type      : ' +
+			if is_d { 'Directory (Container)' } else { 'Regular File' } + '\n'
 		report += 'Footprint      : ${format_bytes(sz)} (${sz} bytes)\n'
 		report += 'Last Modified  : ${mtime_str}\n'
 		report += 'Writable       : ${os.is_writable(target)}\n'
@@ -820,7 +862,8 @@ fn main() {
 	// Create and Select Demo File for testing
 	win.on_click('btn_create_demo_file', fn (mut w simplegui.SimpleWindow) {
 		temp_file := os.join_path(os.temp_dir(), 'rip_demo_artifact_${time.now().unix()}.txt')
-		os.write_file(temp_file, 'This is a test artifact created to demonstrate Rip Studio Pro safe deletion.\nTimestamp: ${time.now().str()}\n') or {
+		os.write_file(temp_file,
+			'This is a test artifact created to demonstrate Rip Studio Pro safe deletion.\nTimestamp: ${time.now().str()}\n') or {
 			w.toast('Failed to create demo file.')
 			return
 		}
@@ -837,8 +880,10 @@ fn main() {
 		}
 
 		// Enterprise safety protections
-		if target == '/' || target == '/System' || target == '/usr' || target == '/Applications' || target == '/Library' {
-			w.alert('Safety Protection Block', 'Cannot bury critical operating system directory: ${target}')
+		if target == '/' || target == '/System' || target == '/usr' || target == '/Applications'
+			|| target == '/Library' {
+			w.alert('Safety Protection Block',
+				'Cannot bury critical operating system directory: ${target}')
 			return
 		}
 
@@ -851,7 +896,8 @@ fn main() {
 		}
 		args << target
 
-		w.set('txt_activity_log', ' Safely moving target into graveyard...\n Target: ${target}\n Command: ${rip_bin} ${args.join(' ')}\n')
+		w.set('txt_activity_log',
+			' Safely moving target into graveyard...\n Target: ${target}\n Command: ${rip_bin} ${args.join(' ')}\n')
 		w.set_status('Burying target...')
 		w.toast('Burying ${os.file_name(target)}...')
 
@@ -862,14 +908,22 @@ fn main() {
 
 			w.run_on_main_thread(fn [res, elapsed_ms, target, rip_bin, current_graveyard, refresh_all_views] (mut win_main simplegui.SimpleWindow) {
 				if res.exit_code == 0 {
-					win_main.set('txt_activity_log', ' Successfully buried in ${elapsed_ms} ms:\n ${target}\n\n' + res.output)
+					win_main.set('txt_activity_log',
+
+						' Successfully buried in ${elapsed_ms} ms:\n ${target}\n\n' + res.output)
 					win_main.set_status('Target moved to graveyard.')
 					win_main.toast('Item safely buried!')
 					win_main.set('txt_target_path', '')
 					refresh_all_views(mut win_main, rip_bin, current_graveyard)
 				} else {
-					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Failed to bury target item.' }
-					win_main.set('txt_activity_log', ' Bury Error (code ${res.exit_code}):\n' + err_msg)
+					err_msg := if res.output.trim_space() != '' {
+						res.output.trim_space()
+					} else {
+						'Failed to bury target item.'
+					}
+					win_main.set('txt_activity_log',
+
+						' Bury Error (code ${res.exit_code}):\n' + err_msg)
 					win_main.set_status('Bury operation failed.')
 					win_main.toast('Failed to bury item!')
 					refresh_all_views(mut win_main, rip_bin, current_graveyard)
@@ -897,7 +951,8 @@ fn main() {
 		target_dir := w.get('txt_seance_dir').trim_space()
 		effective_dir := if target_dir == '' { '.' } else { target_dir }
 
-		w.set('txt_activity_log', ' Summoning séance ghost records for: ${effective_dir}...\n Command: cd "${effective_dir}" && ${rip_bin} -s\n')
+		w.set('txt_activity_log',
+			' Summoning séance ghost records for: ${effective_dir}...\n Command: cd "${effective_dir}" && ${rip_bin} -s\n')
 		w.set_status('Summoning ghost records...')
 		w.toast('Summoning ghosts...')
 

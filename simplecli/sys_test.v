@@ -4,7 +4,7 @@ import os
 
 fn test_sys_execution_and_env() {
 	app := new('SysTest')
-	
+
 	// Exec sync
 	out, code := app.exec('echo "Hello SimpleCLI"')
 	assert code == 0

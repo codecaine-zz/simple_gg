@@ -130,4 +130,3 @@ fn test_form_controls_font_customization() {
 		assert sw.font_name == '/custom/font.ttf'
 	}
 }
-

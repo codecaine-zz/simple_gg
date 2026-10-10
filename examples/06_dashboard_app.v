@@ -13,7 +13,8 @@ fn main() {
 
 	// Metric Cards in Grid
 	win.begin_grid('kpi_grid', 2, 12)
-	win.add_metric_card('kpi1', 'Active Sessions', '1,420 Users', '+12.4%', 'Real-time active users')
+	win.add_metric_card('kpi1', 'Active Sessions', '1,420 Users', '+12.4%',
+		'Real-time active users')
 	win.add_metric_card('kpi2', 'Server Load', '38% CPU', '-2.1%', '8 cores operational')
 	win.end_grid()
 
@@ -24,7 +25,9 @@ fn main() {
 
 	// Controls & Action Row
 	win.group('grp_config', 'Environment Settings', fn (mut win simplegui.SimpleWindow) {
-		win.add_form_dropdown('Region:', 'region_select', ['US-East (N. Virginia)', 'US-West (Oregon)', 'EU-Central (Frankfurt)', 'AP-Southeast (Tokyo)'], 'US-East (N. Virginia)')
+		win.add_form_dropdown('Region:', 'region_select', ['US-East (N. Virginia)',
+			'US-West (Oregon)', 'EU-Central (Frankfurt)', 'AP-Southeast (Tokyo)'],
+			'US-East (N. Virginia)')
 		win.add_switch('auto_scale', 'Auto-Scaling Active', true)
 		win.add_slider('max_instances', 50)
 	})

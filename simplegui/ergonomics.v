@@ -79,7 +79,8 @@ pub fn (mut win SimpleWindow) ask(title string, question string) bool {
 			return res.output.trim_space() == 'True'
 		}
 	} $else {
-		res := os.execute("zenity --question --title=\"${title}\" --text=\"${question}\" 2>/dev/null")
+		res :=
+			os.execute("zenity --question --title=\"${title}\" --text=\"${question}\" 2>/dev/null")
 		return res.exit_code == 0
 	}
 	return false
@@ -400,19 +401,19 @@ pub fn (win &SimpleWindow) select_folder() string {
 // save_file_picker opens a native save file dialog and returns the chosen path.
 pub fn (win &SimpleWindow) save_file_picker() string {
 	$if macos {
-		script := "osascript -e 'POSIX path of (choose file name with prompt \"Save As:\")'"
+		script := 'osascript -e \'POSIX path of (choose file name with prompt "Save As:")\''
 		out, code := win.exec(script)
 		if code == 0 {
 			return out.trim_space()
 		}
 	} $else $if windows {
-		cmd := "powershell -Command \"Add-Type -AssemblyName System.Windows.Forms; \$d = New-Object System.Windows.Forms.SaveFileDialog; if (\$d.ShowDialog() -eq 'OK') { \$d.FileName }\""
+		cmd := 'powershell -Command "Add-Type -AssemblyName System.Windows.Forms; \$d = New-Object System.Windows.Forms.SaveFileDialog; if (\$d.ShowDialog() -eq \'OK\') { \$d.FileName }"'
 		out, code := win.exec(cmd)
 		if code == 0 {
 			return out.trim_space()
 		}
 	} $else {
-		out, code := win.exec("zenity --file-selection --save --confirm-overwrite 2>/dev/null")
+		out, code := win.exec('zenity --file-selection --save --confirm-overwrite 2>/dev/null')
 		if code == 0 {
 			return out.trim_space()
 		}
@@ -610,7 +611,11 @@ pub fn reveal_in_finder(path string) bool {
 	} $else {
 		for opener in ['xdg-open', 'gio', 'gnome-open', 'kde-open5', 'kde-open'] {
 			if os.find_abs_path_of_executable(opener) or { '' } != '' {
-				cmd := if opener == 'gio' { 'gio open "${os.dir(path)}" 2>/dev/null' } else { '${opener} "${os.dir(path)}" 2>/dev/null' }
+				cmd := if opener == 'gio' {
+					'gio open "${os.dir(path)}" 2>/dev/null'
+				} else {
+					'${opener} "${os.dir(path)}" 2>/dev/null'
+				}
 				res := os.execute(cmd)
 				return res.exit_code == 0
 			}
@@ -618,4 +623,3 @@ pub fn reveal_in_finder(path string) bool {
 		return false
 	}
 }
-

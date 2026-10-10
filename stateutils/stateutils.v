@@ -29,7 +29,6 @@ pub const default_sqlite_kv_file = 'settings.db'
 pub const default_app_state_table = 'app_state'
 pub const default_kv_state_table = 'kv_state'
 
-
 // StateStoreConfig configures an AppStateStore or KeyValueState instance.
 @[params]
 pub struct StateStoreConfig {
@@ -256,7 +255,11 @@ pub fn app_state_sqlite_exists(app_name string, filename string) bool {
 
 // delete_app_state_sqlite removes the saved SQLite state database and associated journals.
 pub fn delete_app_state_sqlite(app_name string, filename string) ! {
-	fname := if filename.trim_space().len > 0 { filename.trim_space() } else { default_sqlite_state_file }
+	fname := if filename.trim_space().len > 0 {
+		filename.trim_space()
+	} else {
+		default_sqlite_state_file
+	}
 	full_path := get_state_path(app_name, fname, .data)
 	remove_state_file(full_path)!
 }
@@ -265,7 +268,11 @@ pub fn delete_app_state_sqlite(app_name string, filename string) ! {
 pub fn save_app_state_with_backend[T](app_name string, filename string, state T, backend StateBackend) ! {
 	match backend {
 		.json {
-			fname := if filename.trim_space().len > 0 { filename.trim_space() } else { default_state_file }
+			fname := if filename.trim_space().len > 0 {
+				filename.trim_space()
+			} else {
+				default_state_file
+			}
 			save_app_state[T](app_name, fname, state)!
 		}
 		.sqlite {
@@ -278,7 +285,11 @@ pub fn save_app_state_with_backend[T](app_name string, filename string, state T,
 pub fn load_app_state_with_backend[T](app_name string, filename string, backend StateBackend) !T {
 	return match backend {
 		.json {
-			fname := if filename.trim_space().len > 0 { filename.trim_space() } else { default_state_file }
+			fname := if filename.trim_space().len > 0 {
+				filename.trim_space()
+			} else {
+				default_state_file
+			}
 			load_app_state[T](app_name, fname)!
 		}
 		.sqlite {
@@ -560,7 +571,11 @@ pub fn new_kv_state_with_config(app_name string, cfg StateStoreConfig) KeyValueS
 	} else {
 		default_fname
 	}
-	tbl := if cfg.table_name.trim_space().len > 0 { cfg.table_name.trim_space() } else { default_kv_state_table }
+	tbl := if cfg.table_name.trim_space().len > 0 {
+		cfg.table_name.trim_space()
+	} else {
+		default_kv_state_table
+	}
 	mut kv := KeyValueState{
 		app_name:   app_name
 		filename:   fname

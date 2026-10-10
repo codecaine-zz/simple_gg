@@ -90,6 +90,7 @@ pub fn (l Logger) format_message(level LogLevel, msg string, now time.Time, colo
 			.error { '\x1b[31m[ERROR]\x1b[0m' } // red
 			.fatal { '\x1b[35m[FATAL]\x1b[0m' }
 		}
+
 		// magenta
 	}
 

@@ -12,13 +12,25 @@ pub type Value = []Value | bool | f64 | int | map[string]Value | string
 // str renders a scalar value as text (lists/maps render as '').
 pub fn (v Value) str() string {
 	return match v {
-		string { v }
-		int { v.str() }
-		f64 { v.str() }
-		bool {
-			if v { 'true' } else { '' }
+		string {
+			v
 		}
-		[]Value, map[string]Value { '' }
+		int {
+			v.str()
+		}
+		f64 {
+			v.str()
+		}
+		bool {
+			if v {
+				'true'
+			} else {
+				''
+			}
+		}
+		[]Value, map[string]Value {
+			''
+		}
 	}
 }
 

@@ -77,18 +77,19 @@ fn run_kalker(expr string, precision int, angle string, is_eng bool) (bool, stri
 fn main() {
 	println('Starting SimpleGUI - Kalker Studio Pro (Pure Math & Calculus)...')
 
-	mut win := simplegui.new_simple_window('Kalker Studio Pro -- Pure Math, Calculus & Natural Syntax', 1140, 910)
+	mut win := simplegui.new_simple_window('Kalker Studio Pro -- Pure Math, Calculus & Natural Syntax',
+		1140, 910)
 	win.set_fullscreen(true)
 	win.restore_saved_theme()
 	win.set_spacing(6)
 	win.set_padding(14)
 
 	mut state := &AppState{
-		precision: 12
-		angle_unit: 'rad'
-		eng_mode: false
-		history: []KalkerHistoryItem{}
-		active_tab: ' Natural Calculus'
+		precision:   12
+		angle_unit:  'rad'
+		eng_mode:    false
+		history:     []KalkerHistoryItem{}
+		active_tab:  ' Natural Calculus'
 		last_result: '0'
 	}
 
@@ -99,7 +100,8 @@ fn main() {
 	win.add_heading('Kalker Studio Pro')
 
 	win.add_label('lbl_prec', 'Precision:')
-	win.add_dropdown('dd_precision', ['10 digits', '12 digits', '20 digits', '30 digits', '50 digits'], '12 digits')
+	win.add_dropdown('dd_precision',
+		['10 digits', '12 digits', '20 digits', '30 digits', '50 digits'], '12 digits')
 	win.set_control_width('dd_precision', 110)
 
 	win.add_label('lbl_angle', 'Angle:')
@@ -121,7 +123,7 @@ fn main() {
 		' Matrix & Vector Algebra',
 		' Interactive Scratchpad',
 		' Pure Math & Theorem Recipes',
-		' Calculation History'
+		' Calculation History',
 	])
 
 	// -------------------------------------------------------------
@@ -142,7 +144,8 @@ fn main() {
 	// -------------------------------------------------------------
 	// Tab 1: Natural Calculus
 	// -------------------------------------------------------------
-	win.begin_group_box('pane_calculus', 'Natural Calculus Syntax: Integrals int, Derivatives f\'(x), Limits')
+	win.begin_group_box('pane_calculus',
+		"Natural Calculus Syntax: Integrals int, Derivatives f'(x), Limits")
 
 	win.begin_row('row_calc_input')
 	win.add_label('lbl_calc_prompt', 'Calculus Expression:')
@@ -158,14 +161,15 @@ fn main() {
 	// Quick Calculus Templates
 	win.begin_row('row_calc_templates')
 	win.add_button('btn_ct_integ', 'int(a, b, f(x) dx)')
-	win.add_button('btn_ct_prime', 'f(x) = sin(x); f\'(2)')
-	win.add_button('btn_ct_second_prime', 'f(x) = x^3; f\'\'(x)')
+	win.add_button('btn_ct_prime', "f(x) = sin(x); f'(2)")
+	win.add_button('btn_ct_second_prime', "f(x) = x^3; f''(x)")
 	win.add_button('btn_ct_sqrt', 'sqrt(x)')
 	win.add_button('btn_ct_cbrt', 'cbrt(x)')
 	win.add_button('btn_ct_gamma', 'gamma(x)')
 	win.end_row()
 
-	win.add_textarea('txt_calc_details', 'Natural calculus expressions will be parsed and evaluated with step approximations.\n')
+	win.add_textarea('txt_calc_details',
+		'Natural calculus expressions will be parsed and evaluated with step approximations.\n')
 	win.set_control_height('txt_calc_details', 360)
 	win.set_control_font_name('txt_calc_details', 'Menlo')
 	win.set_control_font_size('txt_calc_details', 13)
@@ -195,7 +199,8 @@ fn main() {
 	win.add_button('btn_cp_sin_i', 'sin(i)')
 	win.end_row()
 
-	win.add_textarea('txt_complex_output', 'Complex arithmetic, phase/modulus, and transcendental evaluations will appear here.\n')
+	win.add_textarea('txt_complex_output',
+		'Complex arithmetic, phase/modulus, and transcendental evaluations will appear here.\n')
 	win.set_control_height('txt_complex_output', 360)
 	win.set_control_font_name('txt_complex_output', 'Menlo')
 	win.set_control_font_size('txt_complex_output', 13)
@@ -223,7 +228,8 @@ fn main() {
 	win.add_button('btn_mp_cross', 'Cross Product')
 	win.end_row()
 
-	win.add_textarea('txt_matrix_output', 'Matrix calculations and vector products will appear here.\n')
+	win.add_textarea('txt_matrix_output',
+		'Matrix calculations and vector products will appear here.\n')
 	win.set_control_height('txt_matrix_output', 360)
 	win.set_control_font_name('txt_matrix_output', 'Menlo')
 	win.set_control_font_size('txt_matrix_output', 13)
@@ -233,8 +239,10 @@ fn main() {
 	// Tab 4: Interactive Scratchpad
 	// -------------------------------------------------------------
 	win.begin_group_box('pane_scratchpad', 'Multi-Line Calculation & Variable Scratchpad')
-	win.add_label('lbl_scratch_info', 'Scratchpad lines (define functions f(x), variables, and evaluate multiple expressions):')
-	win.add_textarea('txt_scratchpad', '// Function definition and derivative\nf(x) = x^3 - 3*x^2 + 2*x\nf(3)\nf\'(3)\n\n// Definite Integrals\nintegrate(0, 1, sqrt(1 - x^2) dx)\n\n// Complex arithmetic\nz1 = 4 + 3i\nz2 = 1 - 2i\nz1 * z2\nabs(z1)\n\n// Golden Ratio and Fibonacci\nphi = (1 + sqrt(5)) / 2\nphi^2 - phi - 1')
+	win.add_label('lbl_scratch_info',
+		'Scratchpad lines (define functions f(x), variables, and evaluate multiple expressions):')
+	win.add_textarea('txt_scratchpad',
+		"// Function definition and derivative\nf(x) = x^3 - 3*x^2 + 2*x\nf(3)\nf'(3)\n\n// Definite Integrals\nintegrate(0, 1, sqrt(1 - x^2) dx)\n\n// Complex arithmetic\nz1 = 4 + 3i\nz2 = 1 - 2i\nz1 * z2\nabs(z1)\n\n// Golden Ratio and Fibonacci\nphi = (1 + sqrt(5)) / 2\nphi^2 - phi - 1")
 	win.set_control_height('txt_scratchpad', 260)
 	win.set_control_font_name('txt_scratchpad', 'Menlo')
 	win.set_control_font_size('txt_scratchpad', 13)
@@ -264,7 +272,8 @@ fn main() {
 	win.add_button('btn_r_fresnel', 'Fresnel Sine Integral')
 	win.end_row()
 
-	win.add_textarea('txt_recipes_output', 'Click any pure mathematics theorem recipe above to evaluate and explore.\n')
+	win.add_textarea('txt_recipes_output',
+		'Click any pure mathematics theorem recipe above to evaluate and explore.\n')
 	win.set_control_height('txt_recipes_output', 380)
 	win.set_control_font_name('txt_recipes_output', 'Menlo')
 	win.set_control_font_size('txt_recipes_output', 13)
@@ -280,7 +289,8 @@ fn main() {
 	win.add_button('btn_export_history', 'Export Ledger to Text...')
 	win.end_row()
 
-	win.add_textarea('txt_history_ledger', 'Session pure math calculation history will be recorded here.\n')
+	win.add_textarea('txt_history_ledger',
+		'Session pure math calculation history will be recorded here.\n')
 	win.set_control_height('txt_history_ledger', 400)
 	win.set_control_font_name('txt_history_ledger', 'Menlo')
 	win.set_control_font_size('txt_history_ledger', 13)
@@ -338,10 +348,10 @@ fn main() {
 			w.set('txt_live_result', res)
 
 			item := KalkerHistoryItem{
-				timestamp: time.now().format_ss()
+				timestamp:  time.now().format_ss()
 				expression: clean
-				result: res
-				mode: mode_label
+				result:     res
+				mode:       mode_label
 			}
 			state.history << item
 			update_history_view(mut w)
@@ -412,12 +422,24 @@ fn main() {
 		w.set('txt_live_result', '0')
 	})
 
-	win.on_click('btn_ct_integ', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', 'integrate(0, 1, sin(x)*x dx)') })
-	win.on_click('btn_ct_prime', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', 'f(x) = sin(x); f\'(2)') })
-	win.on_click('btn_ct_second_prime', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', 'f(x) = x^3 - 5*x; f\'\'(4)') })
-	win.on_click('btn_ct_sqrt', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', 'sqrt(144) + sqrt(25)') })
-	win.on_click('btn_ct_cbrt', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', 'cbrt(27)') })
-	win.on_click('btn_ct_gamma', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', 'gamma(5)') })
+	win.on_click('btn_ct_integ', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', 'integrate(0, 1, sin(x)*x dx)')
+	})
+	win.on_click('btn_ct_prime', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', "f(x) = sin(x); f'(2)")
+	})
+	win.on_click('btn_ct_second_prime', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', "f(x) = x^3 - 5*x; f''(4)")
+	})
+	win.on_click('btn_ct_sqrt', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', 'sqrt(144) + sqrt(25)')
+	})
+	win.on_click('btn_ct_cbrt', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', 'cbrt(27)')
+	})
+	win.on_click('btn_ct_gamma', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', 'gamma(5)')
+	})
 
 	// -------------------------------------------------------------
 	// Tab 2: Complex Numbers Actions
@@ -440,11 +462,21 @@ fn main() {
 		w.set('txt_complex_output', 'Complex Argument / Phase arg(z):\n\n' + res)
 	})
 
-	win.on_click('btn_cp_euler', fn (mut w simplegui.SimpleWindow) { w.set('txt_complex_input', 'e^(i*pi)') })
-	win.on_click('btn_cp_i_pow_i', fn (mut w simplegui.SimpleWindow) { w.set('txt_complex_input', 'i^i') })
-	win.on_click('btn_cp_sqrt_neg', fn (mut w simplegui.SimpleWindow) { w.set('txt_complex_input', 'sqrt(-16)') })
-	win.on_click('btn_cp_ln_neg', fn (mut w simplegui.SimpleWindow) { w.set('txt_complex_input', 'ln(-1)') })
-	win.on_click('btn_cp_sin_i', fn (mut w simplegui.SimpleWindow) { w.set('txt_complex_input', 'sin(i)') })
+	win.on_click('btn_cp_euler', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_complex_input', 'e^(i*pi)')
+	})
+	win.on_click('btn_cp_i_pow_i', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_complex_input', 'i^i')
+	})
+	win.on_click('btn_cp_sqrt_neg', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_complex_input', 'sqrt(-16)')
+	})
+	win.on_click('btn_cp_ln_neg', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_complex_input', 'ln(-1)')
+	})
+	win.on_click('btn_cp_sin_i', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_complex_input', 'sin(i)')
+	})
 
 	// -------------------------------------------------------------
 	// Tab 3: Matrix Actions
@@ -467,10 +499,18 @@ fn main() {
 		w.set('txt_matrix_output', 'Matrix Determinant:\n\n' + res)
 	})
 
-	win.on_click('btn_mp_mult', fn (mut w simplegui.SimpleWindow) { w.set('txt_matrix_input', '[1, 2; 3, 4] * [5; 6]') })
-	win.on_click('btn_mp_3x3', fn (mut w simplegui.SimpleWindow) { w.set('txt_matrix_input', '[1, 2, 3; 0, 1, 4; 5, 6, 0]') })
-	win.on_click('btn_mp_dot', fn (mut w simplegui.SimpleWindow) { w.set('txt_matrix_input', '(1, 2, 3) . (4, 5, 6)') })
-	win.on_click('btn_mp_cross', fn (mut w simplegui.SimpleWindow) { w.set('txt_matrix_input', '(1, 0, 0) x (0, 1, 0)') })
+	win.on_click('btn_mp_mult', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_matrix_input', '[1, 2; 3, 4] * [5; 6]')
+	})
+	win.on_click('btn_mp_3x3', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_matrix_input', '[1, 2, 3; 0, 1, 4; 5, 6, 0]')
+	})
+	win.on_click('btn_mp_dot', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_matrix_input', '(1, 2, 3) . (4, 5, 6)')
+	})
+	win.on_click('btn_mp_cross', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_matrix_input', '(1, 0, 0) x (0, 1, 0)')
+	})
 
 	// -------------------------------------------------------------
 	// Tab 4: Scratchpad Actions
@@ -506,27 +546,32 @@ fn main() {
 	// -------------------------------------------------------------
 	win.on_click('btn_r_euler', fn [eval_expr_fn] (mut w simplegui.SimpleWindow) {
 		res := eval_expr_fn(mut w, 'e^(i*pi) + 1', 'Euler Recipe')
-		w.set('txt_recipes_output', ' Euler\'s Identity (e^(i*pi) + 1):\n\n' + res)
+		w.set('txt_recipes_output', " Euler's Identity (e^(i*pi) + 1):\n\n" + res)
 	})
 
 	win.on_click('btn_r_gaussian', fn [eval_expr_fn] (mut w simplegui.SimpleWindow) {
 		res := eval_expr_fn(mut w, 'integrate(0, 10, e^(-x^2) dx)', 'Gaussian Integral')
-		w.set('txt_recipes_output', ' Gaussian Error Function Integral int[0, 10] e^(-x^2) dx (~ sqrt(pi)/2):\n\n' + res)
+		w.set('txt_recipes_output',
+
+			' Gaussian Error Function Integral int[0, 10] e^(-x^2) dx (~ sqrt(pi)/2):\n\n' + res)
 	})
 
 	win.on_click('btn_r_basel', fn [eval_expr_fn] (mut w simplegui.SimpleWindow) {
 		res := eval_expr_fn(mut w, 'pi^2 / 6', 'Basel Problem')
-		w.set('txt_recipes_output', ' Euler\'s Basel Solution (sum 1/n^2 = pi^2 / 6):\n\n' + res)
+		w.set('txt_recipes_output', " Euler's Basel Solution (sum 1/n^2 = pi^2 / 6):\n\n" + res)
 	})
 
 	win.on_click('btn_r_fib', fn [eval_expr_fn] (mut w simplegui.SimpleWindow) {
-		res := eval_expr_fn(mut w, '(((1+sqrt(5))/2)^10 - ((1-sqrt(5))/2)^10) / sqrt(5)', 'Binet Fibonacci')
-		w.set('txt_recipes_output', ' Binet\'s Formula for 10th Fibonacci Number (F_10 = 55):\n\n' + res)
+		res := eval_expr_fn(mut w, '(((1+sqrt(5))/2)^10 - ((1-sqrt(5))/2)^10) / sqrt(5)',
+			'Binet Fibonacci')
+		w.set('txt_recipes_output',
+
+			" Binet's Formula for 10th Fibonacci Number (F_10 = 55):\n\n" + res)
 	})
 
 	win.on_click('btn_r_stirling', fn [eval_expr_fn] (mut w simplegui.SimpleWindow) {
 		res := eval_expr_fn(mut w, 'sqrt(2*pi*10) * (10/e)^10', 'Stirling Approx')
-		w.set('txt_recipes_output', ' Stirling\'s Approximation for 10!:\n\n' + res)
+		w.set('txt_recipes_output', " Stirling's Approximation for 10!:\n\n" + res)
 	})
 
 	win.on_click('btn_r_gamma', fn [eval_expr_fn] (mut w simplegui.SimpleWindow) {

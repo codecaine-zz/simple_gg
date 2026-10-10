@@ -2,8 +2,9 @@ module simplegui
 
 fn test_super_stat_card() {
 	mut win := new_simple_window('Stat Test', 800, 600)
-	win.add_stat_card('kpi_rev', 'Total Revenue', '$148,200', '+18.4%', true, [12.0, 34.0, 56.0, 78.0, 95.0])
-	
+	win.add_stat_card('kpi_rev', 'Total Revenue', '$148,200', '+18.4%', true, [12.0, 34.0, 56.0,
+		78.0, 95.0])
+
 	assert win.has_control('kpi_rev')
 	ctrl := win.control('kpi_rev')
 	assert ctrl.kind == 'super_stat_card'
@@ -21,8 +22,9 @@ fn test_super_stat_card() {
 
 fn test_code_studio() {
 	mut win := new_simple_window('Code Test', 800, 600)
-	win.add_code_studio('studio', 'main.v', 'v', 'fn main() {\n\tprintln(\'Hello Super Controls!\')\n}')
-	
+	win.add_code_studio('studio', 'main.v', 'v',
+		"fn main() {\n\tprintln('Hello Super Controls!')\n}")
+
 	assert win.has_control('studio')
 	ctrl := win.control('studio')
 	assert ctrl.kind == 'code_studio'
@@ -68,7 +70,7 @@ fn test_activity_feed() {
 fn test_donut_chart() {
 	mut win := new_simple_window('Donut Test', 800, 600)
 	win.add_donut_chart('cpu_gauge', 'CPU Load', 64.5)
-	
+
 	assert win.has_control('cpu_gauge')
 	ctrl := win.control('cpu_gauge')
 	assert ctrl.kind == 'donut_chart'
@@ -135,7 +137,8 @@ fn test_wizard_stepper() {
 
 fn test_floating_toolbar_and_chips() {
 	mut win := new_simple_window('Toolbar & Chips Test', 800, 600)
-	win.add_floating_toolbar('hero_bar', 'Workspace', ['Overview', 'Analytics', 'Settings', 'Deploy'])
+	win.add_floating_toolbar('hero_bar', 'Workspace',
+		['Overview', 'Analytics', 'Settings', 'Deploy'])
 	win.add_chip_input('tags_cloud', ['VLang', 'UI', 'Fast', 'Native'])
 
 	assert win.has_control('hero_bar')

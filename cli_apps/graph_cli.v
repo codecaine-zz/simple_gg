@@ -6,8 +6,10 @@ fn main() {
 	mut app := simplecli.new_app('graph-cli', '1.0.0')
 	app.set_description('ASCII Bar & Trend Chart Terminal Visualizer CLI')
 
-	app.add_flag_string('data', 'd', '15,32,48,65,92,78,54,88,100', 'Comma-separated dataset values')
-	app.add_flag_string('labels', 'l', 'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep', 'Comma-separated category labels')
+	app.add_flag_string('data', 'd', '15,32,48,65,92,78,54,88,100',
+		'Comma-separated dataset values')
+	app.add_flag_string('labels', 'l', 'Jan,Feb,Mar,Apr,May,Jun,Jul,Aug,Sep',
+		'Comma-separated category labels')
 	app.add_flag_string('title', 't', 'Monthly Throughput (kReq/s)', 'Chart title')
 	app.add_flag_bool('interactive', 'x', false, 'Launch interactive graph visualizer')
 

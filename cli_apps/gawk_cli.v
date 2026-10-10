@@ -61,7 +61,8 @@ fn run_interactive(mut app simplecli.SimpleCli) {
 			println(out)
 		}
 		'Sum Numeric Values in Column 2' {
-			out, _ := app.exec("echo '${sample}' | ${cmd} '{sum += \$2} END {print \"Total Sum:\", sum}'")
+			out, _ :=
+				app.exec("echo '${sample}' | ${cmd} '{sum += \$2} END {print \"Total Sum:\", sum}'")
 			println(out)
 		}
 		'Count Total Number of Lines (NR)' {

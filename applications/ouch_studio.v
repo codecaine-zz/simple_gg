@@ -8,98 +8,98 @@ import time
 // Ouch Preset Recipe Struct
 // -----------------------------------------------------------------------------
 struct OuchRecipe {
-	title       string
-	category    string
-	mode        string
-	format_ext  string
-	level_opt   string
-	hidden_opt  bool
-	git_opt     bool
-	desc        string
+	title      string
+	category   string
+	mode       string
+	format_ext string
+	level_opt  string
+	hidden_opt bool
+	git_opt    bool
+	desc       string
 }
 
 fn get_all_ouch_recipes() []OuchRecipe {
 	return [
 		OuchRecipe{
-			title: ' Fast Modern Zstandard Archive (.tar.zst)'
-			category: 'Modern'
-			mode: 'Compress'
+			title:      ' Fast Modern Zstandard Archive (.tar.zst)'
+			category:   'Modern'
+			mode:       'Compress'
 			format_ext: '.tar.zst'
-			level_opt: 'Fast (--fast)'
+			level_opt:  'Fast (--fast)'
 			hidden_opt: false
-			git_opt: true
-			desc: 'High-speed modern compression with incredible decompression performance.'
+			git_opt:    true
+			desc:       'High-speed modern compression with incredible decompression performance.'
 		},
 		OuchRecipe{
-			title: ' Universal Web / Linux Release Tarball (.tar.gz)'
-			category: 'Standard'
-			mode: 'Compress'
+			title:      ' Universal Web / Linux Release Tarball (.tar.gz)'
+			category:   'Standard'
+			mode:       'Compress'
 			format_ext: '.tar.gz'
-			level_opt: 'Balanced (Default)'
+			level_opt:  'Balanced (Default)'
 			hidden_opt: true
-			git_opt: true
-			desc: 'Standard POSIX distribution archive for servers, Docker, and GitHub releases.'
+			git_opt:    true
+			desc:       'Standard POSIX distribution archive for servers, Docker, and GitHub releases.'
 		},
 		OuchRecipe{
-			title: ' Cross-Platform Compatibility ZIP (.zip)'
-			category: 'Standard'
-			mode: 'Compress'
+			title:      ' Cross-Platform Compatibility ZIP (.zip)'
+			category:   'Standard'
+			mode:       'Compress'
 			format_ext: '.zip'
-			level_opt: 'Balanced (Default)'
+			level_opt:  'Balanced (Default)'
 			hidden_opt: true
-			git_opt: false
-			desc: 'Compatible with all versions of Windows, macOS, Android, and iOS.'
+			git_opt:    false
+			desc:       'Compatible with all versions of Windows, macOS, Android, and iOS.'
 		},
 		OuchRecipe{
-			title: ' Maximum Cold Storage 7-Zip (.7z - Ultra Ratio)'
-			category: 'High Ratio'
-			mode: 'Compress'
+			title:      ' Maximum Cold Storage 7-Zip (.7z - Ultra Ratio)'
+			category:   'High Ratio'
+			mode:       'Compress'
 			format_ext: '.7z'
-			level_opt: 'Maximum (--slow)'
+			level_opt:  'Maximum (--slow)'
 			hidden_opt: false
-			git_opt: false
-			desc: 'Dense, high-compression archive for cold backups and long-term storage.'
+			git_opt:    false
+			desc:       'Dense, high-compression archive for cold backups and long-term storage.'
 		},
 		OuchRecipe{
-			title: ' High-Compression Source Code Tarball (.tar.xz)'
-			category: 'High Ratio'
-			mode: 'Compress'
+			title:      ' High-Compression Source Code Tarball (.tar.xz)'
+			category:   'High Ratio'
+			mode:       'Compress'
 			format_ext: '.tar.xz'
-			level_opt: 'Maximum (--slow)'
+			level_opt:  'Maximum (--slow)'
 			hidden_opt: true
-			git_opt: true
-			desc: 'Smaller tarball footprint ideal for open-source releases and software packages.'
+			git_opt:    true
+			desc:       'Smaller tarball footprint ideal for open-source releases and software packages.'
 		},
 		OuchRecipe{
-			title: ' Rapid Single File Compressor (.zst)'
-			category: 'Single File'
-			mode: 'Compress'
+			title:      ' Rapid Single File Compressor (.zst)'
+			category:   'Single File'
+			mode:       'Compress'
 			format_ext: '.zst'
-			level_opt: 'Fast (--fast)'
+			level_opt:  'Fast (--fast)'
 			hidden_opt: false
-			git_opt: false
-			desc: 'Compresses a single large database or log file rapidly with Zstandard.'
+			git_opt:    false
+			desc:       'Compresses a single large database or log file rapidly with Zstandard.'
 		},
 		OuchRecipe{
-			title: ' Extract Archive into Destination Folder'
-			category: 'Decompress'
-			mode: 'Decompress'
+			title:      ' Extract Archive into Destination Folder'
+			category:   'Decompress'
+			mode:       'Decompress'
 			format_ext: ''
-			level_opt: ''
+			level_opt:  ''
 			hidden_opt: false
-			git_opt: false
-			desc: 'Unpacks any archive (.zip, .tar.gz, .7z, .zst, .rar) cleanly into target folder.'
+			git_opt:    false
+			desc:       'Unpacks any archive (.zip, .tar.gz, .7z, .zst, .rar) cleanly into target folder.'
 		},
 		OuchRecipe{
-			title: ' Inspect Archive Tree & File Layout'
-			category: 'Inspect'
-			mode: 'List Tree'
+			title:      ' Inspect Archive Tree & File Layout'
+			category:   'Inspect'
+			mode:       'List Tree'
 			format_ext: ''
-			level_opt: ''
+			level_opt:  ''
 			hidden_opt: false
-			git_opt: false
-			desc: 'Lists internal directory structure and uncompressed file sizes without extracting.'
-		}
+			git_opt:    false
+			desc:       'Lists internal directory structure and uncompressed file sizes without extracting.'
+		},
 	]
 }
 
@@ -115,7 +115,8 @@ fn get_ouch_bin() string {
 fn main() {
 	println('Starting SimpleGUI - Ouch Studio Pro (Universal Archive & Compression Workbench)...')
 
-	mut win := simplegui.new_simple_window('Ouch Studio Pro -- Universal Archive & Compression Workbench', 1060, 940)
+	mut win := simplegui.new_simple_window('Ouch Studio Pro -- Universal Archive & Compression Workbench',
+		1060, 940)
 	win.set_fullscreen(true)
 	win.restore_saved_theme()
 	win.set_spacing(8)
@@ -135,7 +136,8 @@ fn main() {
 	win.set_control_width('dd_theme_selector', 180)
 	win.end_row()
 
-	win.add_label('lbl_engine_info', 'Engine: ${ouch_bin} (Ouch Fast Archive Helper)  |  Formats: tar, zip, gz, 7z, xz, zst, bz2, rar, lz4  |  Async Worker')
+	win.add_label('lbl_engine_info',
+		'Engine: ${ouch_bin} (Ouch Fast Archive Helper)  |  Formats: tar, zip, gz, 7z, xz, zst, bz2, rar, lz4  |  Async Worker')
 
 	// -------------------------------------------------------------
 	// Mode Selector & Quick Presets
@@ -152,7 +154,7 @@ fn main() {
 	win.add_dropdown('dd_op_mode', [
 		' Compress (Create Archive)',
 		' Decompress (Extract Archive)',
-		' List Archive Contents (--tree)'
+		' List Archive Contents (--tree)',
 	], ' Compress (Create Archive)')
 	win.set_control_width('dd_op_mode', 260)
 
@@ -163,7 +165,8 @@ fn main() {
 	win.end_row()
 
 	win.begin_row('row_rec_desc')
-	win.add_label('lbl_recipe_desc', 'Tip: Select Compress to package files, Decompress to extract, or List Tree to inspect.')
+	win.add_label('lbl_recipe_desc',
+		'Tip: Select Compress to package files, Decompress to extract, or List Tree to inspect.')
 	win.end_row()
 	win.end_group_box()
 
@@ -206,7 +209,7 @@ fn main() {
 		'.tar.xz (XZ - High Compression Ratio)',
 		'.tar.bz2 (Bzip2 Archive)',
 		'.zst (Single File Zstandard)',
-		'.gz (Single File Gzip)'
+		'.gz (Single File Gzip)',
 	]
 	win.add_dropdown('dd_format', formats, formats[0])
 	win.set_control_width('dd_format', 360)
@@ -215,7 +218,7 @@ fn main() {
 	win.add_dropdown('dd_level', [
 		'Balanced (Default)',
 		'Fast (--fast)',
-		'Maximum (--slow)'
+		'Maximum (--slow)',
 	], 'Balanced (Default)')
 	win.set_control_width('dd_level', 180)
 	win.end_row()
@@ -249,12 +252,14 @@ fn main() {
 	// Results & Activity Console
 	// -------------------------------------------------------------
 	win.begin_group_box('grp_results', 'Operation Log & Archive Tree Output')
-	win.add_textarea('txt_log', ' Ouch Studio Pro ready. Select source path and click "Compress", "Decompress", or "Inspect Tree".\n')
+	win.add_textarea('txt_log',
+		' Ouch Studio Pro ready. Select source path and click "Compress", "Decompress", or "Inspect Tree".\n')
 	win.set_control_height('txt_log', 240)
 	win.end_group_box()
 
 	win.begin_row('row_status')
-	win.add_label('lbl_status', 'Status: Ready  |  Engine: ouch  |  Platform: ${simplegui.get_platform_label()}')
+	win.add_label('lbl_status',
+		'Status: Ready  |  Engine: ouch  |  Platform: ${simplegui.get_platform_label()}')
 	win.end_row()
 
 	// Helper to auto-update output path extension when format dropdown changes
@@ -268,17 +273,26 @@ fn main() {
 
 		fmt_sel := win.get('dd_format')
 		mut new_ext := '.tar.zst'
-		if fmt_sel.contains('.tar.gz') { new_ext = '.tar.gz' }
-		else if fmt_sel.contains('.zip') { new_ext = '.zip' }
-		else if fmt_sel.contains('.7z') { new_ext = '.7z' }
-		else if fmt_sel.contains('.tar.xz') { new_ext = '.tar.xz' }
-		else if fmt_sel.contains('.tar.bz2') { new_ext = '.tar.bz2' }
-		else if fmt_sel.contains('.zst') { new_ext = '.zst' }
-		else if fmt_sel.contains('.gz') { new_ext = '.gz' }
+		if fmt_sel.contains('.tar.gz') {
+			new_ext = '.tar.gz'
+		} else if fmt_sel.contains('.zip') {
+			new_ext = '.zip'
+		} else if fmt_sel.contains('.7z') {
+			new_ext = '.7z'
+		} else if fmt_sel.contains('.tar.xz') {
+			new_ext = '.tar.xz'
+		} else if fmt_sel.contains('.tar.bz2') {
+			new_ext = '.tar.bz2'
+		} else if fmt_sel.contains('.zst') {
+			new_ext = '.zst'
+		} else if fmt_sel.contains('.gz') {
+			new_ext = '.gz'
+		}
 
 		// Strip known archive extensions
 		mut base := dest
-		for ext_to_strip in ['.tar.zst', '.tar.gz', '.tar.xz', '.tar.bz2', '.zip', '.7z', '.zst', '.gz', '.xz', '.bz2', '.rar'] {
+		for ext_to_strip in ['.tar.zst', '.tar.gz', '.tar.xz', '.tar.bz2', '.zip', '.7z', '.zst',
+			'.gz', '.xz', '.bz2', '.rar'] {
 			if base.ends_with(ext_to_strip) {
 				base = base[..base.len - ext_to_strip.len]
 				break
@@ -399,7 +413,7 @@ fn main() {
 						'.tar.xz (XZ - High Compression Ratio)',
 						'.tar.bz2 (Bzip2 Archive)',
 						'.zst (Single File Zstandard)',
-						'.gz (Single File Gzip)'
+						'.gz (Single File Gzip)',
 					] {
 						if fmt_str.starts_with(r.format_ext) {
 							w.set_text('dd_format', fmt_str)
@@ -446,8 +460,11 @@ fn main() {
 		if w.get_bool('chk_symlinks') { args << '-S' }
 
 		level := w.get('dd_level')
-		if level.contains('Fast') { args << '--fast' }
-		else if level.contains('Maximum') { args << '--slow' }
+		if level.contains('Fast') {
+			args << '--fast'
+		} else if level.contains('Maximum') {
+			args << '--slow'
+		}
 
 		pwd := w.get('txt_password').trim_space()
 		if pwd != '' { args << ['-p', pwd] }
@@ -468,13 +485,19 @@ fn main() {
 				if res.exit_code == 0 && os.exists(dest) {
 					sz := os.file_size(dest)
 					mb := f64(sz) / (1024.0 * 1024.0)
-					msg := ' Successfully compressed archive in ${elapsed_ms} ms!\n Archive: ${dest} (${mb:.2f} MB)\n\n' + res.output
+					msg :=
+						' Successfully compressed archive in ${elapsed_ms} ms!\n Archive: ${dest} (${mb:.2f} MB)\n\n' + res.output
 					win_main.set('txt_log', msg)
 					win_main.set_status('Compression completed successfully.')
 					win_main.toast('Archive created (${mb:.2f} MB)!')
 				} else {
-					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Compression failed with exit code ${res.exit_code}' }
-					win_main.set('txt_log', '// [OUCH COMPRESSION ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+					err_msg := if res.output.trim_space() != '' {
+						res.output.trim_space()
+					} else {
+						'Compression failed with exit code ${res.exit_code}'
+					}
+					win_main.set('txt_log',
+						'// [OUCH COMPRESSION ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
 					win_main.set_status('Error compressing archive.')
 					win_main.toast('Compression failed!')
 				}
@@ -516,13 +539,20 @@ fn main() {
 
 			w.run_on_main_thread(fn [res, elapsed_ms, src] (mut win_main simplegui.SimpleWindow) {
 				if res.exit_code == 0 {
-					msg := ' Successfully extracted archive in ${elapsed_ms} ms!\n Source: ${src}\n\n' + res.output
+					msg :=
+						' Successfully extracted archive in ${elapsed_ms} ms!\n Source: ${src}\n\n' +
+						res.output
 					win_main.set('txt_log', msg)
 					win_main.set_status('Decompression finished.')
 					win_main.toast('Extraction completed!')
 				} else {
-					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Extraction failed with exit code ${res.exit_code}' }
-					win_main.set('txt_log', '// [OUCH DECOMPRESSION ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+					err_msg := if res.output.trim_space() != '' {
+						res.output.trim_space()
+					} else {
+						'Extraction failed with exit code ${res.exit_code}'
+					}
+					win_main.set('txt_log',
+						'// [OUCH DECOMPRESSION ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
 					win_main.set_status('Error extracting archive.')
 					win_main.toast('Extraction failed!')
 				}
@@ -564,8 +594,13 @@ fn main() {
 					win_main.set_status('Archive inspection complete.')
 					win_main.toast('Archive tree loaded!')
 				} else {
-					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Archive listing failed with exit code ${res.exit_code}' }
-					win_main.set('txt_log', '// [OUCH LIST ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+					err_msg := if res.output.trim_space() != '' {
+						res.output.trim_space()
+					} else {
+						'Archive listing failed with exit code ${res.exit_code}'
+					}
+					win_main.set('txt_log',
+						'// [OUCH LIST ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
 					win_main.set_status('Error listing archive.')
 					win_main.toast('Archive inspection failed!')
 				}
@@ -589,8 +624,11 @@ fn main() {
 		} else {
 			args << ['compress', '-y']
 			level := w.get('dd_level')
-			if level.contains('Fast') { args << '--fast' }
-			else if level.contains('Maximum') { args << '--slow' }
+			if level.contains('Fast') {
+				args << '--fast'
+			} else if level.contains('Maximum') {
+				args << '--slow'
+			}
 			args << src
 			args << dest
 		}

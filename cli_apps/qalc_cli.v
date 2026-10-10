@@ -6,7 +6,8 @@ fn main() {
 	mut app := simplecli.new_app('qalc-cli', '1.0.0')
 	app.set_description('Qalculate! Advanced Multi-Purpose Calculator CLI')
 
-	app.add_flag_string('expr', 'e', '', 'Qalculate expression (e.g. "50 EUR to USD" or "solve(x^2 + 5x + 6 = 0, x)")')
+	app.add_flag_string('expr', 'e', '',
+		'Qalculate expression (e.g. "50 EUR to USD" or "solve(x^2 + 5x + 6 = 0, x)")')
 	app.add_flag_bool('interactive', 'x', false, 'Launch interactive Qalculate session')
 
 	app.parse_cli() or { return }

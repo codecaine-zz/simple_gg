@@ -17,6 +17,7 @@ import time
 $if macos {
 	#flag darwin -framework Cocoa
 	#include "@VMODROOT/simplegui/native_macos.h"
+
 	fn C.mac_enter_fullscreen()
 	fn C.mac_exit_fullscreen()
 	fn C.mac_toggle_fullscreen()
@@ -45,22 +46,22 @@ pub mut:
 	title                  string // Main title text displayed in operating system window titlebar
 	width                  int    // Current window width in pixels
 	height                 int    // Current window height in pixels
-	padding                int  = 16 // Default edge padding around window content in pixels
-	spacing                int  = 10 // Default vertical spacing gap between controls in pixels
+	padding                int  = 16   // Default edge padding around window content in pixels
+	spacing                int  = 10   // Default vertical spacing gap between controls in pixels
 	responsive_layout      bool = true // Automatically recalculates control positions on window resize
-	theme                  Theme  // Active color palette theme configuration (defaults to Apple Light)
-	controls               []&Control // Sequential ordered list of all registered UI controls
+	theme                  Theme               // Active color palette theme configuration (defaults to Apple Light)
+	controls               []&Control          // Sequential ordered list of all registered UI controls
 	control_map            map[string]&Control // Fast dictionary lookup map by control name/ID
-	focused_control        string // Name of the control currently receiving keyboard input focus
-	hovered_control        string // Name of the control currently under mouse pointer
-	mouse_x                f32    // Current mouse pointer X coordinate
-	mouse_y                f32    // Current mouse pointer Y coordinate
-	mouse_down             bool   // Mouse left-click button held state
-	debug_mode             bool   // Print verbose diagnostic system logs to console
-	always_on_top          bool   // Keep window layered above all other desktop applications
-	opacity                f64  = 1.0 // Window transparency opacity (1.0 = fully opaque)
-	min_width              int  = 200 // Minimum allowed window width during resize
-	min_height             int  = 150 // Minimum allowed window height during resize
+	focused_control        string              // Name of the control currently receiving keyboard input focus
+	hovered_control        string              // Name of the control currently under mouse pointer
+	mouse_x                f32                 // Current mouse pointer X coordinate
+	mouse_y                f32                 // Current mouse pointer Y coordinate
+	mouse_down             bool                // Mouse left-click button held state
+	debug_mode             bool                // Print verbose diagnostic system logs to console
+	always_on_top          bool                // Keep window layered above all other desktop applications
+	opacity                f64  = 1.0  // Window transparency opacity (1.0 = fully opaque)
+	min_width              int  = 200  // Minimum allowed window width during resize
+	min_height             int  = 150  // Minimum allowed window height during resize
 	max_width              int  = 4000 // Maximum allowed window width
 	max_height             int  = 3000 // Maximum allowed window height
 	resizable              bool = true // Allow user window resizing
@@ -76,68 +77,68 @@ pub mut:
 	toast_title            string
 	toast_message          string
 	toast_timer            f64
-	toasts                 []Toast // List of active notification toast popups on screen
-	command_palette_active bool    // Spotlight / Command Palette overlay visibility (Ctrl+K / Cmd+K)
-	command_palette_query  string  // Command Palette search filter query text
-	command_palette_items  []CommandItem // Command items registered in palette
-	command_palette_sel    int     // Selected index in Command Palette list
-	context_menu_active    bool    // Right-click context menu overlay visibility
-	context_menu_x         f32     // Context menu popup X coordinate
-	context_menu_y         f32     // Context menu popup Y coordinate
+	toasts                 []Toast           // List of active notification toast popups on screen
+	command_palette_active bool              // Spotlight / Command Palette overlay visibility (Ctrl+K / Cmd+K)
+	command_palette_query  string            // Command Palette search filter query text
+	command_palette_items  []CommandItem     // Command items registered in palette
+	command_palette_sel    int               // Selected index in Command Palette list
+	context_menu_active    bool              // Right-click context menu overlay visibility
+	context_menu_x         f32               // Context menu popup X coordinate
+	context_menu_y         f32               // Context menu popup Y coordinate
 	context_menu_items     []ContextMenuItem // Right-click context menu item list
 	menu_categories        []MenuCategory    // Application top-level Menu Bar categories
-	active_menu_idx        int = -1          // Index of currently open menu dropdown (-1 if none)
-	menu_bar_visible       bool              // Whether application top Menu Bar is displayed
-	active_tab_map         map[string]int    // Map tracking selected tab index for container tabs
-	active_dropdown_name   string            // Name of the currently open floating dropdown/combobox overlay
-	active_dropdown_scroll f32               // Vertical scroll offset for long dropdown lists
+	active_menu_idx        int = -1 // Index of currently open menu dropdown (-1 if none)
+	menu_bar_visible       bool           // Whether application top Menu Bar is displayed
+	active_tab_map         map[string]int // Map tracking selected tab index for container tabs
+	active_dropdown_name   string         // Name of the currently open floating dropdown/combobox overlay
+	active_dropdown_scroll f32            // Vertical scroll offset for long dropdown lists
 	// Window-level event callback handlers
-	on_key_down_cb  fn (mut win SimpleWindow, key gg.KeyCode) = unsafe { nil } // Triggered when key pressed
-	on_close_cb     fn (mut win SimpleWindow) bool            = unsafe { nil } // Triggered on close request
-	on_submit_cb    VoidEventCallback                         = unsafe { nil } // Triggered on form submission
-	on_resize_cb    fn (mut win SimpleWindow, w int, h int)   = unsafe { nil } // Triggered on window resize
-	auto_id_counter int // Auto-increment counter for generating unique control IDs
-	state_store     map[string]string // Reactive key-value state store dictionary
+	on_key_down_cb    fn (mut win SimpleWindow, key gg.KeyCode) = unsafe { nil } // Triggered when key pressed
+	on_close_cb       fn (mut win SimpleWindow) bool            = unsafe { nil } // Triggered on close request
+	on_submit_cb      VoidEventCallback                         = unsafe { nil } // Triggered on form submission
+	on_resize_cb      fn (mut win SimpleWindow, w int, h int)   = unsafe { nil } // Triggered on window resize
+	auto_id_counter   int                              // Auto-increment counter for generating unique control IDs
+	state_store       map[string]string                // Reactive key-value state store dictionary
 	state_listeners   map[string][]StringEventCallback // Reactive listener callbacks for state keys
 	fullscreen        bool // Fullscreen borderless display state
 	fullscreen_synced bool // Track if initial fullscreen state was synchronized with OS window manager
 	// Modal Dialog Overlay State
-	modal_active         bool              // Modal confirm dialog popup visibility
-	modal_title          string            // Modal dialog headline text
-	modal_message        string            // Modal dialog message body text
-	modal_detail         string            // Secondary detail or error code/stack
-	modal_image_path     string            // Custom or preset icon image path
-	modal_kind           DialogKind        // Dialog kind (.info, .success, .warning, .error, etc.)
+	modal_active         bool       // Modal confirm dialog popup visibility
+	modal_title          string     // Modal dialog headline text
+	modal_message        string     // Modal dialog message body text
+	modal_detail         string     // Secondary detail or error code/stack
+	modal_image_path     string     // Custom or preset icon image path
+	modal_kind           DialogKind // Dialog kind (.info, .success, .warning, .error, etc.)
 	modal_confirm_txt    string = 'OK'     // Confirm button text label
 	modal_cancel_txt     string = 'Cancel' // Cancel button text label
-	modal_neutral_txt    string            // Optional 3rd neutral button text label
-	modal_is_destructive bool              // Destructive styling for confirm button
-	modal_checkbox_txt   string            // Optional checkbox label text
-	modal_checkbox_val   bool              // State of modal checkbox
-	modal_input_mode     bool              // If true, enables input box inside dialog
-	modal_input_val      string            // Text value in input box
-	modal_input_holder   string            // Placeholder for input box
-	modal_input_caret    int               // Text cursor/caret position in modal input box
+	modal_neutral_txt    string // Optional 3rd neutral button text label
+	modal_is_destructive bool   // Destructive styling for confirm button
+	modal_checkbox_txt   string // Optional checkbox label text
+	modal_checkbox_val   bool   // State of modal checkbox
+	modal_input_mode     bool   // If true, enables input box inside dialog
+	modal_input_val      string // Text value in input box
+	modal_input_holder   string // Placeholder for input box
+	modal_input_caret    int    // Text cursor/caret position in modal input box
 	modal_on_confirm     VoidEventCallback = unsafe { nil } // Callback when confirm button clicked
 	modal_on_cancel      VoidEventCallback = unsafe { nil } // Callback when cancel button clicked
 	modal_on_neutral     VoidEventCallback = unsafe { nil } // Callback when neutral button clicked
-	timers            map[string]&IntervalTimer // Map of scheduled interval and timeout timers
-	font_path         string // Custom font file path override (defaults to auto-detected system TTF on Linux)
-	is_selecting_text  bool   // Mouse drag text selection active flag
-	text_select_anchor int    // Mouse drag initial caret anchor index
-	image_cache       map[string]int // GPU texture cache map of image file paths to gg image cache indices
+	timers               map[string]&IntervalTimer // Map of scheduled interval and timeout timers
+	font_path            string                    // Custom font file path override (defaults to auto-detected system TTF on Linux)
+	is_selecting_text    bool                      // Mouse drag text selection active flag
+	text_select_anchor   int                       // Mouse drag initial caret anchor index
+	image_cache          map[string]int            // GPU texture cache map of image file paths to gg image cache indices
 	// Modern UI & UX Window States
-	ui_scale          f32 = 1.0 // Global UI scaling / DPI zoom factor
-	drawer_active     bool      // Slide-over drawer visibility
-	drawer_title      string    // Slide-over drawer header title
-	drawer_subtitle   string    // Slide-over drawer subheader
-	drawer_width      f32 = 340.0 // Slide-over drawer width in pixels
-	drawer_side       string = 'right' // Drawer position side ('right' or 'left')
-	drawer_controls   []&Control // Controls contained within drawer panel
-	drawer_items      []DrawerItem // Structured items / navigation links within drawer
-	focused_ctrl_idx  int = -1  // Index for keyboard Tab navigation
-	app_id            string    // Unique identifier for persisting application-specific state
-	auto_save_state   bool = true // Whether to automatically persist and restore form and window state
+	ui_scale         f32 = 1.0 // Global UI scaling / DPI zoom factor
+	drawer_active    bool   // Slide-over drawer visibility
+	drawer_title     string // Slide-over drawer header title
+	drawer_subtitle  string // Slide-over drawer subheader
+	drawer_width     f32    = 340.0   // Slide-over drawer width in pixels
+	drawer_side      string = 'right' // Drawer position side ('right' or 'left')
+	drawer_controls  []&Control   // Controls contained within drawer panel
+	drawer_items     []DrawerItem // Structured items / navigation links within drawer
+	focused_ctrl_idx int = -1 // Index for keyboard Tab navigation
+	app_id           string // Unique identifier for persisting application-specific state
+	auto_save_state  bool = true // Whether to automatically persist and restore form and window state
 }
 
 // new_simple_window creates and initializes a new `SimpleWindow` instance with specified title, width, and height.
@@ -164,11 +165,11 @@ pub fn new_window(title string, width int, height int) &SimpleWindow {
 pub fn get_platform_label() string {
 	$if macos {
 		return 'macOS Cocoa'
-	}$else $if linux {
+	} $else $if linux {
 		return 'Linux'
-	}$else $if windows {
+	} $else $if windows {
 		return 'Windows'
-	}$else {
+	} $else {
 		return 'Unknown'
 	}
 }
@@ -177,11 +178,11 @@ pub fn get_platform_label() string {
 pub fn get_os_name() string {
 	$if macos {
 		return 'macOS'
-	}$else $if linux {
+	} $else $if linux {
 		return 'Linux'
-	}$else $if windows {
+	} $else $if windows {
 		return 'Windows'
-	}$else {
+	} $else {
 		return 'Native'
 	}
 }
@@ -220,7 +221,7 @@ pub fn (win &SimpleWindow) get_dropdown_popup_layout(ctrl &Control) DropdownPopu
 	total_content_h := f32(ctrl.items.len) * item_h + 8.0
 	max_pop_h := f32(math.min(300.0, f64(f32(win.height) * 0.55)))
 	pop_h := f32(math.min(f64(total_content_h), f64(max_pop_h)))
-	open_upward := (ctrl.y + ctrl.h + pop_h > f32(win.height) - 10.0) && (ctrl.y - pop_h > 10.0)
+	open_upward := ctrl.y + ctrl.h + pop_h > f32(win.height) - 10.0 && ctrl.y - pop_h > 10.0
 	pop_y := if open_upward {
 		ctrl.y - pop_h - 3.0
 	} else {
@@ -673,7 +674,8 @@ pub fn (mut win SimpleWindow) move_cursor_to(x int, y int) &SimpleWindow {
 // get_primary_screen_size returns the detected primary screen display width and height in pixels.
 pub fn get_primary_screen_size() (int, int) {
 	$if macos {
-		raw := os.execute('osascript -e \'tell application "Finder" to get bounds of window of desktop\' 2>/dev/null').output.trim_space()
+		raw :=
+			os.execute('osascript -e \'tell application "Finder" to get bounds of window of desktop\' 2>/dev/null').output.trim_space()
 		if raw.len > 0 {
 			parts := raw.split(',').map(it.trim_space())
 			if parts.len >= 4 {
@@ -685,7 +687,8 @@ pub fn get_primary_screen_size() (int, int) {
 			}
 		}
 	} $else $if windows {
-		raw := os.execute('powershell -Command "[System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Width.ToString() + \' \' + [System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Height.ToString()"').output.trim_space()
+		raw :=
+			os.execute('powershell -Command "[System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Width.ToString() + \' \' + [System.Windows.Forms.Screen]::PrimaryScreen.Bounds.Height.ToString()"').output.trim_space()
 		if raw.len > 0 {
 			parts := raw.split(' ').map(it.trim_space())
 			if parts.len >= 2 {
@@ -697,7 +700,8 @@ pub fn get_primary_screen_size() (int, int) {
 			}
 		}
 	} $else {
-		raw := os.execute("xrandr --current 2>/dev/null | grep '\\*' | awk '{print $1}'").output.trim_space()
+		raw :=
+			os.execute("xrandr --current 2>/dev/null | grep '\\*' | awk '{print $1}'").output.trim_space()
 		if raw.len > 0 {
 			parts := raw.split('x')
 			if parts.len >= 2 {
@@ -913,6 +917,7 @@ pub fn (mut win SimpleWindow) set_size_preset(preset string) &SimpleWindow {
 		'square' { win.set_size(500, 500) }
 		else { win.set_size(640, 480) }
 	}
+
 	return win
 }
 
@@ -1210,7 +1215,13 @@ pub fn (mut win SimpleWindow) add_password(name string, value string) &SimpleWin
 }
 
 pub fn (mut win SimpleWindow) add_textarea(name string, value string) &SimpleWindow {
-	win.add_control(Control{ name: name, kind: 'textarea', text_value: value, h: 90, expand_fill: true })
+	win.add_control(Control{
+		name:        name
+		kind:        'textarea'
+		text_value:  value
+		h:           90
+		expand_fill: true
+	})
 	return win
 }
 
@@ -1343,7 +1354,6 @@ pub fn (mut win SimpleWindow) add_color_picker(name string, label string, hex_co
 	})
 	return win
 }
-
 
 pub fn (mut win SimpleWindow) add_mode_control(name string, selected string) &SimpleWindow {
 	return win.add_segmented_control(name, ['Simple', 'Advanced', 'Expert'], selected)
@@ -2422,7 +2432,6 @@ pub fn (mut win SimpleWindow) get_or_load_image(file_path string) ?&gg.Image {
 	return none
 }
 
-
 // add_image_box adds a standalone image widget with explicit width, height, and optional caption.
 pub fn (mut win SimpleWindow) add_image_box(name string, file_path string, w int, h int) &SimpleWindow {
 	mut c := Control{
@@ -2479,7 +2488,11 @@ pub fn (mut win SimpleWindow) add_image_gallery(name string, image_paths []strin
 		kind:           'image_gallery'
 		items:          image_paths.clone()
 		items_selected: captions.clone()
-		int_value:      if image_paths.len > 0 { math.max(0, math.min(image_paths.len - 1, active_idx)) } else { 0 }
+		int_value:      if image_paths.len > 0 {
+			math.max(0, math.min(image_paths.len - 1, active_idx))
+		} else {
+			0
+		}
 		expand_fill:    true
 		h:              290.0
 	}
@@ -2598,7 +2611,8 @@ pub fn (mut win SimpleWindow) add_hero_banner(name string, banner_path string, t
 		text_value:  banner_path
 		title:       title
 		placeholder: subtitle
-		items:       [if cta_text.len > 0 { cta_text } else { '[Get Started]' }, '[Learn More]', 'FEATURED']
+		items:       [if cta_text.len > 0 { cta_text } else { '[Get Started]' }, '[Learn More]',
+			'FEATURED']
 		expand_fill: true
 		h:           168.0
 	}
@@ -2613,11 +2627,13 @@ pub fn (mut win SimpleWindow) image_box(file_path string, w int, h int) &SimpleW
 }
 
 pub fn (mut win SimpleWindow) user_profile(avatar_path string, full_name string, handle string, role string, bio string) &SimpleWindow {
-	return win.add_user_profile_card(win.gen_id('profile'), avatar_path, full_name, handle, role, bio, true, '[Message]')
+	return win.add_user_profile_card(win.gen_id('profile'), avatar_path, full_name, handle, role,
+		bio, true, '[Message]')
 }
 
 pub fn (mut win SimpleWindow) product_card(image_path string, title string, price string) &SimpleWindow {
-	return win.add_product_card(win.gen_id('prod'), image_path, title, '', price, 'PRO', '[Buy Now]')
+	return win.add_product_card(win.gen_id('prod'), image_path, title, '', price, 'PRO',
+		'[Buy Now]')
 }
 
 pub fn (mut win SimpleWindow) gallery(image_paths []string) &SimpleWindow {
@@ -2629,14 +2645,13 @@ pub fn (mut win SimpleWindow) app_tile(icon_path string, title string, status st
 }
 
 pub fn (mut win SimpleWindow) media_player(cover_path string, track_title string, artist string) &SimpleWindow {
-	return win.add_media_player(win.gen_id('player'), cover_path, track_title, artist, 210, 45, false)
+	return win.add_media_player(win.gen_id('player'), cover_path, track_title, artist, 210, 45,
+		false)
 }
 
 pub fn (mut win SimpleWindow) hero_banner(banner_path string, title string, subtitle string) &SimpleWindow {
 	return win.add_hero_banner(win.gen_id('hero'), banner_path, title, subtitle, '[Get Started]')
 }
-
-
 
 pub fn (win &SimpleWindow) get_menu_selected(name string) string {
 	if ctrl := win.control_map[name] {
@@ -3007,7 +3022,8 @@ pub fn (mut win SimpleWindow) set_control_visible(name string, visible bool) &Si
 					for j := i + 1; j < win.controls.len && depth > 0; j++ {
 						if win.controls[j].kind == ctrl.kind {
 							depth++
-						} else if (ctrl.kind == 'group_start' && win.controls[j].kind == 'group_end')
+						} else if
+							(ctrl.kind == 'group_start' && win.controls[j].kind == 'group_end')
 							|| (ctrl.kind == 'row_start' && win.controls[j].kind == 'row_end')
 							|| (ctrl.kind == 'flex_start' && win.controls[j].kind == 'flex_end') {
 							depth--
@@ -3460,6 +3476,7 @@ pub fn (mut win SimpleWindow) bind_shortcut(shortcut_str string, cb fn (mut win 
 		'f5' { gg.KeyCode.f5 }
 		else { return win }
 	}
+
 	return win.bind_key(target_key, cb)
 }
 
@@ -3481,8 +3498,8 @@ pub enum DialogKind {
 
 pub struct DialogConfig {
 pub mut:
-	kind              DialogKind        = .info
-	title             string            = 'Notification'
+	kind              DialogKind = .info
+	title             string     = 'Notification'
 	message           string
 	detail            string
 	image_path        string // Custom image path or empty for auto-selected icon
@@ -3537,33 +3554,33 @@ pub fn (win &SimpleWindow) get_dialog_accent_color() gg.Color {
 
 pub struct ModalLayout {
 pub mut:
-	bx            f32
-	by            f32
-	bw            f32
-	bh            f32
-	has_image     bool
-	img_x         f32
-	img_y         f32
-	img_sz        f32
-	content_x     f32
-	content_w     f32
-	close_x       f32
-	close_y       f32
-	close_sz      f32
-	detail_y      f32
-	input_y       f32
-	input_w       f32
-	input_h       f32
-	check_y       f32
-	btn_y         f32
-	btn_h         f32
-	btn_w         f32
-	confirm_x     f32
-	confirm_w     f32
-	cancel_x      f32
-	cancel_w      f32
-	neutral_x     f32
-	neutral_w     f32
+	bx        f32
+	by        f32
+	bw        f32
+	bh        f32
+	has_image bool
+	img_x     f32
+	img_y     f32
+	img_sz    f32
+	content_x f32
+	content_w f32
+	close_x   f32
+	close_y   f32
+	close_sz  f32
+	detail_y  f32
+	input_y   f32
+	input_w   f32
+	input_h   f32
+	check_y   f32
+	btn_y     f32
+	btn_h     f32
+	btn_w     f32
+	confirm_x f32
+	confirm_w f32
+	cancel_x  f32
+	cancel_w  f32
+	neutral_x f32
+	neutral_w f32
 }
 
 pub fn (win &SimpleWindow) get_modal_layout() ModalLayout {
@@ -3627,37 +3644,41 @@ pub fn (win &SimpleWindow) get_modal_layout() ModalLayout {
 	confirm_x := f32(bx + bw - confirm_w - 20.0)
 
 	cancel_w := f32(math.max(84.0, f32(win.modal_cancel_txt.len * 8 + 20)))
-	cancel_x := if win.modal_cancel_txt.len > 0 { f32(confirm_x - cancel_w - 10.0) } else { f32(0.0) }
+	cancel_x := if win.modal_cancel_txt.len > 0 {
+		f32(confirm_x - cancel_w - 10.0)
+	} else {
+		f32(0.0)
+	}
 
 	neutral_w := f32(math.max(90.0, f32(win.modal_neutral_txt.len * 8 + 20)))
 	neutral_x := if win.modal_neutral_txt.len > 0 { f32(bx + 20.0) } else { f32(0.0) }
 
 	return ModalLayout{
-		bx: bx
-		by: by
-		bw: bw
-		bh: bh
+		bx:        bx
+		by:        by
+		bw:        bw
+		bh:        bh
 		has_image: has_image
-		img_x: bx + 18.0
-		img_y: by + 20.0
-		img_sz: img_sz
+		img_x:     bx + 18.0
+		img_y:     by + 20.0
+		img_sz:    img_sz
 		content_x: content_x
 		content_w: content_w
-		close_x: bx + bw - 32.0
-		close_y: by + 14.0
-		close_sz: 18.0
-		detail_y: detail_y
-		input_y: input_y
-		input_w: input_w
-		input_h: input_h
-		check_y: check_y
-		btn_y: btn_y
-		btn_h: btn_h
-		btn_w: confirm_w
+		close_x:   bx + bw - 32.0
+		close_y:   by + 14.0
+		close_sz:  18.0
+		detail_y:  detail_y
+		input_y:   input_y
+		input_w:   input_w
+		input_h:   input_h
+		check_y:   check_y
+		btn_y:     btn_y
+		btn_h:     btn_h
+		btn_w:     confirm_w
 		confirm_x: confirm_x
 		confirm_w: confirm_w
-		cancel_x: cancel_x
-		cancel_w: cancel_w
+		cancel_x:  cancel_x
+		cancel_w:  cancel_w
 		neutral_x: neutral_x
 		neutral_w: neutral_w
 	}
@@ -3695,43 +3716,43 @@ pub fn (mut win SimpleWindow) show_dialog(cfg DialogConfig) &SimpleWindow {
 // show_dialog_success displays a modern Success modal dialog with a glossy green check shield icon.
 pub fn (mut win SimpleWindow) show_dialog_success(title string, message string, on_confirm VoidEventCallback) &SimpleWindow {
 	return win.show_custom_dialog(DialogConfig{
-		kind: .success
-		title: title
-		message: message
+		kind:        .success
+		title:       title
+		message:     message
 		confirm_txt: 'OK'
-		on_confirm: on_confirm
+		on_confirm:  on_confirm
 	})
 }
 
 // show_dialog_error displays a modern Error modal dialog with a glossy red 'X' icon.
 pub fn (mut win SimpleWindow) show_dialog_error(title string, message string, on_confirm VoidEventCallback) &SimpleWindow {
 	return win.show_custom_dialog(DialogConfig{
-		kind: .error
-		title: title
-		message: message
+		kind:        .error
+		title:       title
+		message:     message
 		confirm_txt: 'Dismiss'
-		on_confirm: on_confirm
+		on_confirm:  on_confirm
 	})
 }
 
 // show_dialog_warning displays a Warning modal dialog with a glossy golden triangle icon and confirm/cancel actions.
 pub fn (mut win SimpleWindow) show_dialog_warning(title string, message string, confirm_txt string, cancel_txt string, on_confirm VoidEventCallback) &SimpleWindow {
 	return win.show_custom_dialog(DialogConfig{
-		kind: .warning
-		title: title
-		message: message
+		kind:        .warning
+		title:       title
+		message:     message
 		confirm_txt: if confirm_txt.len > 0 { confirm_txt } else { 'Proceed' }
-		cancel_txt: if cancel_txt.len > 0 { cancel_txt } else { 'Cancel' }
-		on_confirm: on_confirm
+		cancel_txt:  if cancel_txt.len > 0 { cancel_txt } else { 'Cancel' }
+		on_confirm:  on_confirm
 	})
 }
 
 // show_dialog_info displays an Information modal dialog with a glossy cyan info badge icon.
 pub fn (mut win SimpleWindow) show_dialog_info(title string, message string) &SimpleWindow {
 	return win.show_custom_dialog(DialogConfig{
-		kind: .info
-		title: title
-		message: message
+		kind:        .info
+		title:       title
+		message:     message
 		confirm_txt: 'Got it'
 	})
 }
@@ -3739,71 +3760,71 @@ pub fn (mut win SimpleWindow) show_dialog_info(title string, message string) &Si
 // show_dialog_confirm displays a question confirmation modal dialog with Confirm and Cancel buttons.
 pub fn (mut win SimpleWindow) show_dialog_confirm(title string, message string, on_confirm VoidEventCallback, on_cancel VoidEventCallback) &SimpleWindow {
 	return win.show_custom_dialog(DialogConfig{
-		kind: .confirm
-		title: title
-		message: message
+		kind:        .confirm
+		title:       title
+		message:     message
 		confirm_txt: 'Confirm'
-		cancel_txt: 'Cancel'
-		on_confirm: on_confirm
-		on_cancel: on_cancel
+		cancel_txt:  'Cancel'
+		on_confirm:  on_confirm
+		on_cancel:   on_cancel
 	})
 }
 
 // show_dialog_danger displays a high-hazard/destructive modal dialog with a fire hazard badge and red action button.
 pub fn (mut win SimpleWindow) show_dialog_danger(title string, message string, confirm_txt string, on_confirm VoidEventCallback) &SimpleWindow {
 	return win.show_custom_dialog(DialogConfig{
-		kind: .danger
-		title: title
-		message: message
-		confirm_txt: if confirm_txt.len > 0 { confirm_txt } else { 'Delete' }
-		cancel_txt: 'Cancel'
+		kind:           .danger
+		title:          title
+		message:        message
+		confirm_txt:    if confirm_txt.len > 0 { confirm_txt } else { 'Delete' }
+		cancel_txt:     'Cancel'
 		is_destructive: true
-		on_confirm: on_confirm
+		on_confirm:     on_confirm
 	})
 }
 
 // show_dialog_security displays a security / authentication modal dialog with a gold padlock shield icon.
 pub fn (mut win SimpleWindow) show_dialog_security(title string, message string, on_confirm VoidEventCallback) &SimpleWindow {
 	return win.show_custom_dialog(DialogConfig{
-		kind: .security
-		title: title
-		message: message
+		kind:        .security
+		title:       title
+		message:     message
 		confirm_txt: 'Authenticate'
-		cancel_txt: 'Cancel'
-		on_confirm: on_confirm
+		cancel_txt:  'Cancel'
+		on_confirm:  on_confirm
 	})
 }
 
 // show_dialog_database displays a database / storage operation modal dialog with a violet database stack icon.
 pub fn (mut win SimpleWindow) show_dialog_database(title string, message string, on_confirm VoidEventCallback) &SimpleWindow {
 	return win.show_custom_dialog(DialogConfig{
-		kind: .database
-		title: title
-		message: message
+		kind:        .database
+		title:       title
+		message:     message
 		confirm_txt: 'Run Migration'
-		cancel_txt: 'Abort'
-		on_confirm: on_confirm
+		cancel_txt:  'Abort'
+		on_confirm:  on_confirm
 	})
 }
 
 // show_dialog_cloud displays a cloud sync / remote network modal dialog with a turquoise cloud icon.
 pub fn (mut win SimpleWindow) show_dialog_cloud(title string, message string, on_confirm VoidEventCallback) &SimpleWindow {
 	return win.show_custom_dialog(DialogConfig{
-		kind: .cloud
-		title: title
-		message: message
+		kind:        .cloud
+		title:       title
+		message:     message
 		confirm_txt: 'Sync Now'
-		cancel_txt: 'Work Offline'
-		on_confirm: on_confirm
+		cancel_txt:  'Work Offline'
+		on_confirm:  on_confirm
 	})
 }
 
 // show_dialog_tip displays a helpful developer tip / guide dialog with an incandescent lightbulb icon.
 pub fn (mut win SimpleWindow) show_dialog_tip(title string, message string) &SimpleWindow {
 	return win.show_custom_dialog(DialogConfig{
-		kind: .tip
-		title: title
-		message: message
+		kind:        .tip
+		title:       title
+		message:     message
 		confirm_txt: 'Understood'
 	})
 }
@@ -3811,16 +3832,16 @@ pub fn (mut win SimpleWindow) show_dialog_tip(title string, message string) &Sim
 // show_dialog_input displays an input prompt modal dialog with an inline text field.
 pub fn (mut win SimpleWindow) show_dialog_input(title string, message string, default_val string, placeholder string, on_confirm VoidEventCallback) &SimpleWindow {
 	return win.show_custom_dialog(DialogConfig{
-		kind: .confirm
-		image_path: 'assets/images/dialog_icon_question.jpg'
-		title: title
-		message: message
-		input_mode: true
-		input_val: default_val
+		kind:              .confirm
+		image_path:        'assets/images/dialog_icon_question.jpg'
+		title:             title
+		message:           message
+		input_mode:        true
+		input_val:         default_val
 		input_placeholder: placeholder
-		confirm_txt: 'Submit'
-		cancel_txt: 'Cancel'
-		on_confirm: on_confirm
+		confirm_txt:       'Submit'
+		cancel_txt:        'Cancel'
+		on_confirm:        on_confirm
 	})
 }
 
@@ -3864,12 +3885,12 @@ pub fn (mut win SimpleWindow) hide_dialog() &SimpleWindow {
 
 pub fn (mut win SimpleWindow) show_modal(title string, message string, confirm_txt string, cancel_txt string, on_confirm VoidEventCallback) &SimpleWindow {
 	return win.show_custom_dialog(DialogConfig{
-		kind: .info
-		title: title
-		message: message
+		kind:        .info
+		title:       title
+		message:     message
 		confirm_txt: if confirm_txt.len > 0 { confirm_txt } else { 'OK' }
-		cancel_txt: cancel_txt
-		on_confirm: on_confirm
+		cancel_txt:  cancel_txt
+		on_confirm:  on_confirm
 	})
 }
 
@@ -4538,7 +4559,7 @@ pub fn (mut win SimpleWindow) add_drawer_item(item DrawerItem) &SimpleWindow {
 // add_drawer_section appends a styled category divider header to the drawer panel.
 pub fn (mut win SimpleWindow) add_drawer_section(title string) &SimpleWindow {
 	win.drawer_items << DrawerItem{
-		title: title
+		title:     title
 		is_header: true
 	}
 	return win
@@ -4702,7 +4723,8 @@ pub fn (mut win SimpleWindow) add_inline_editable_label(name string, initial_tex
 pub fn (mut win SimpleWindow) focus_next_control() &SimpleWindow {
 	mut focusables := []int{}
 	for idx, ctrl in win.controls {
-		if ctrl.visible && !ctrl.disabled && ctrl.kind in ['textbox', 'input', 'password', 'masked_input', 'textarea', 'search_bar', 'search_field', 'button', 'checkbox', 'switch', 'slider', 'list_box', 'combobox', 'number', 'time_picker', 'date_picker', 'dropdown', 'rating'] {
+		if ctrl.visible && !ctrl.disabled
+			&& ctrl.kind in ['textbox', 'input', 'password', 'masked_input', 'textarea', 'search_bar', 'search_field', 'button', 'checkbox', 'switch', 'slider', 'list_box', 'combobox', 'number', 'time_picker', 'date_picker', 'dropdown', 'rating'] {
 			focusables << idx
 		}
 	}
@@ -4735,7 +4757,8 @@ pub fn (mut win SimpleWindow) focus_next_control() &SimpleWindow {
 pub fn (mut win SimpleWindow) focus_prev_control() &SimpleWindow {
 	mut focusables := []int{}
 	for idx, ctrl in win.controls {
-		if ctrl.visible && !ctrl.disabled && ctrl.kind in ['textbox', 'input', 'password', 'masked_input', 'textarea', 'search_bar', 'search_field', 'button', 'checkbox', 'switch', 'slider', 'list_box', 'combobox', 'number', 'time_picker', 'date_picker', 'dropdown', 'rating'] {
+		if ctrl.visible && !ctrl.disabled
+			&& ctrl.kind in ['textbox', 'input', 'password', 'masked_input', 'textarea', 'search_bar', 'search_field', 'button', 'checkbox', 'switch', 'slider', 'list_box', 'combobox', 'number', 'time_picker', 'date_picker', 'dropdown', 'rating'] {
 			focusables << idx
 		}
 	}

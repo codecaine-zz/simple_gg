@@ -22,11 +22,10 @@ fn run() ! {
 	println('=== webutils Demo ===')
 
 	// 1. Template engine on its own (EJS syntax, auto-escaped, sandboxed)
-	out := webutils.render_string('<h1><%= title | upper %></h1><% for i, t in todos %><%= loop.index %>.<%= t %> <% end %>',
-		{
-			'title': json2.Any('my <list>')
-			'todos': webutils.to_any(['a', 'b'])
-		})!
+	out := webutils.render_string('<h1><%= title | upper %></h1><% for i, t in todos %><%= loop.index %>.<%= t %> <% end %>', {
+		'title': json2.Any('my <list>')
+		'todos': webutils.to_any(['a', 'b'])
+	})!
 	println('Template : ${out}')
 	assert out == '<h1>MY &lt;LIST&gt;</h1>1.a 2.b '
 
@@ -35,7 +34,8 @@ fn run() ! {
 	app.locals['site'] = 'Todo App'
 	app.views.add('layout', '<title><%= site %> - <%= title %></title><main><%- body %></main>')!
 	app.views.add('partials/todo', '<li><%= todo.title %><% if todo.done %> ✓<% end %></li>')!
-	app.views.add('index', '<% layout \'layout\' %><ul><% for todo in todos %><%- include(\'partials/todo\') %><% else %><li>empty</li><% end %></ul><form><input name="_csrf" value="<%= csrf_token %>"></form>')!
+	app.views.add('index',
+		'<% layout \'layout\' %><ul><% for todo in todos %><%- include(\'partials/todo\') %><% else %><li>empty</li><% end %></ul><form><input name="_csrf" value="<%= csrf_token %>"></form>')!
 
 	app.use(webutils.request_id())
 	app.use(webutils.cors(origins: ['https://app.example']))
@@ -46,7 +46,8 @@ fn run() ! {
 	app.get('/', fn (mut c webutils.Context) ! {
 		c.render('index', {
 			'title': json2.Any('Home')
-			'todos': webutils.to_any([Todo{'Write <code>', true}, Todo{'Ship it', false}])
+			'todos': webutils.to_any([Todo{'Write <code>', true},
+				Todo{'Ship it', false}])
 		})!
 	})
 	mut api := app.group('/api')

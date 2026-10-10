@@ -9,9 +9,11 @@ fn main() {
 
 	app.add_flag_string('bury', 'b', '', 'File or directory to safely move to the graveyard')
 	app.add_flag_bool('unbury', 'u', false, 'Restore specified file or most recent if omitted')
-	app.add_flag_bool('seance', 's', false, 'List files deleted from directory (defaults to current dir)')
+	app.add_flag_bool('seance', 's', false,
+		'List files deleted from directory (defaults to current dir)')
 	app.add_flag_bool('decompose', 'd', false, 'Permanently delete all files in the graveyard')
-	app.add_flag_bool('graveyard', 'g', false, 'Print graveyard directory path and active tomb records')
+	app.add_flag_bool('graveyard', 'g', false,
+		'Print graveyard directory path and active tomb records')
 	app.add_flag_bool('inspect', 'i', false, 'Inspect file information before burying')
 	app.add_flag_bool('force', 'f', false, 'Non-interactive mode')
 	app.add_flag_bool('interactive', 'x', false, 'Launch interactive safe-deletion wizard')
@@ -57,7 +59,8 @@ fn main() {
 
 		force := app.get_flag_bool('force')
 		if !force {
-			confirmed := app.confirm('Permanently delete all contents of the graveyard? Irreversible!', false)
+			confirmed := app.confirm('Permanently delete all contents of the graveyard? Irreversible!',
+				false)
 			if !confirmed {
 				app.warn('Decomposition aborted.')
 				return
@@ -177,7 +180,8 @@ fn main() {
 }
 
 fn run_interactive(mut app simplecli.SimpleCli, has_rip bool) {
-	app.panel('Rip Safe Deletion Wizard', 'Safely delete, inspect, restore, and maintain file graveyards.')
+	app.panel('Rip Safe Deletion Wizard',
+		'Safely delete, inspect, restore, and maintain file graveyards.')
 
 	if !has_rip {
 		app.warn('Homebrew formula "rip2" is not installed. Run: brew install rip2')
@@ -248,7 +252,9 @@ fn run_interactive(mut app simplecli.SimpleCli, has_rip bool) {
 			}
 		}
 		'Decompose Graveyard (Permanently Empty) (-d)' {
-			if app.confirm('Are you absolutely sure you want to permanently erase the graveyard?', false) {
+			if app.confirm('Are you absolutely sure you want to permanently erase the graveyard?',
+				false)
+			{
 				out, code := app.exec_safe('rip', ['-d'])
 				if code == 0 {
 					app.success('Graveyard emptied.')

@@ -18,16 +18,9 @@ fn test_image_box_creation() {
 
 fn test_user_profile_card() {
 	mut win := new_simple_window('Test Profile Card', 800, 600)
-	win.add_user_profile_card(
-		'prof_ada',
-		'assets/images/avatar_ada_lovelace.jpg',
-		'Ada Lovelace',
-		'@ada_lovelace',
-		'Lead Systems Architect',
-		'Pioneering computing visionary and V language enthusiast.',
-		true,
-		'[Connect]'
-	)
+	win.add_user_profile_card('prof_ada', 'assets/images/avatar_ada_lovelace.jpg', 'Ada Lovelace',
+		'@ada_lovelace', 'Lead Systems Architect',
+		'Pioneering computing visionary and V language enthusiast.', true, '[Connect]')
 
 	mut ctrl := win.control('prof_ada')
 	assert ctrl.name == 'prof_ada'
@@ -47,14 +40,8 @@ fn test_user_profile_card() {
 	assert ctrl.text_value == 'assets/images/avatar_ada_lovelace.jpg'
 
 	// Test method chaining update
-	ctrl.set_user_profile(
-		'assets/images/avatar_alex_chen.jpg',
-		'Alex Chen',
-		'@alex_dev',
-		'Senior Staff Engineer',
-		'Full-stack cloud infrastructure developer.',
-		true
-	)
+	ctrl.set_user_profile('assets/images/avatar_alex_chen.jpg', 'Alex Chen', '@alex_dev',
+		'Senior Staff Engineer', 'Full-stack cloud infrastructure developer.', true)
 	assert ctrl.text_value == 'assets/images/avatar_alex_chen.jpg'
 	assert ctrl.title == 'Alex Chen'
 	assert ctrl.placeholder == '@alex_dev'
@@ -64,15 +51,9 @@ fn test_user_profile_card() {
 
 fn test_product_card() {
 	mut win := new_simple_window('Test Product Card', 800, 600)
-	win.add_product_card(
-		'prod_keyboard',
-		'assets/images/product_dev_station.jpg',
-		'Cyber Workstation Pro',
-		'Custom mechanical keyboard & macro keypad with RGB underglow',
-		'$189.00',
-		'BESTSELLER',
-		'[Buy Now]'
-	)
+	win.add_product_card('prod_keyboard', 'assets/images/product_dev_station.jpg',
+		'Cyber Workstation Pro', 'Custom mechanical keyboard & macro keypad with RGB underglow',
+		'$189.00', 'BESTSELLER', '[Buy Now]')
 
 	mut ctrl := win.control('prod_keyboard')
 	assert ctrl.name == 'prod_keyboard'
@@ -84,13 +65,8 @@ fn test_product_card() {
 	assert ctrl.items[2] == '[Buy Now]'
 
 	// Method chain update
-	ctrl.set_product_info(
-		'assets/images/icon_rocket_deploy.jpg',
-		'Cloud Deploy Pro',
-		'Automated continuous delivery suite',
-		'$299.00',
-		'FEATURED'
-	)
+	ctrl.set_product_info('assets/images/icon_rocket_deploy.jpg', 'Cloud Deploy Pro',
+		'Automated continuous delivery suite', '$299.00', 'FEATURED')
 	assert ctrl.title == 'Cloud Deploy Pro'
 	assert ctrl.items[0] == '$299.00'
 	assert ctrl.items[1] == 'FEATURED'
@@ -144,13 +120,8 @@ fn test_image_gallery_navigation() {
 
 fn test_app_launcher_tile() {
 	mut win := new_simple_window('Test App Tile', 800, 600)
-	win.add_app_launcher_tile(
-		'tile_db',
-		'assets/images/icon_db_engine.jpg',
-		'Cyber DB Engine',
-		'Distributed SQL & Key-Value',
-		'RUNNING'
-	)
+	win.add_app_launcher_tile('tile_db', 'assets/images/icon_db_engine.jpg', 'Cyber DB Engine',
+		'Distributed SQL & Key-Value', 'RUNNING')
 
 	ctrl := win.control('tile_db')
 	assert ctrl.name == 'tile_db'
@@ -166,15 +137,8 @@ fn test_app_launcher_tile() {
 
 fn test_media_player_card() {
 	mut win := new_simple_window('Test Media Player', 800, 600)
-	win.add_media_player(
-		'synth_player',
-		'assets/images/cover_lofi_beats.jpg',
-		'Lo-Fi Code & Beats',
-		'Cybernetic Waves - Synthwave Journeys',
-		240,
-		65,
-		false
-	)
+	win.add_media_player('synth_player', 'assets/images/cover_lofi_beats.jpg',
+		'Lo-Fi Code & Beats', 'Cybernetic Waves - Synthwave Journeys', 240, 65, false)
 
 	mut ctrl := win.control('synth_player')
 	assert ctrl.kind == 'media_player'
@@ -197,13 +161,10 @@ fn test_media_player_card() {
 
 fn test_hero_banner() {
 	mut win := new_simple_window('Test Hero Banner', 800, 600)
-	win.add_hero_banner(
-		'hero_main',
-		'assets/images/banner_cloud_devops.jpg',
+	win.add_hero_banner('hero_main', 'assets/images/banner_cloud_devops.jpg',
 		'Supercharge Your Developer Workflow',
 		'Build, test, and deploy mission-critical desktop tools at 60 FPS with native Metal acceleration.',
-		'[Get Started Now]'
-	)
+		'[Get Started Now]')
 
 	ctrl := win.control('hero_main')
 	assert ctrl.name == 'hero_main'

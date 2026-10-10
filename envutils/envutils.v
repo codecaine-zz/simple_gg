@@ -147,15 +147,24 @@ pub fn parse_dotenv_content(content string) map[string]string {
 				if q == `"` && c == `\\` && j + 1 < src.len {
 					n := src[j + 1]
 					match n {
-						`n` { sb.write_u8(`\n`) }
-						`r` { sb.write_u8(`\r`) }
-						`t` { sb.write_u8(`\t`) }
-						`"`, `\\`, `$` { sb.write_u8(n) }
+						`n` {
+							sb.write_u8(`\n`)
+						}
+						`r` {
+							sb.write_u8(`\r`)
+						}
+						`t` {
+							sb.write_u8(`\t`)
+						}
+						`"`, `\\`, `$` {
+							sb.write_u8(n)
+						}
 						else {
 							sb.write_u8(c)
 							sb.write_u8(n)
 						}
 					}
+
 					j += 2
 					continue
 				}
@@ -172,7 +181,9 @@ pub fn parse_dotenv_content(content string) map[string]string {
 			// Unterminated quote: fall back to the raw single-line value.
 		}
 		mut val := src[p..line_end].trim_space()
-		hash_pos := val.index(' #') or { if val.starts_with('#') { 0 } else { -1 } }
+		hash_pos := val.index(' #') or {
+			if val.starts_with('#') { 0 } else { -1 }
+		}
 		if hash_pos >= 0 {
 			val = val[..hash_pos].trim_space()
 		}

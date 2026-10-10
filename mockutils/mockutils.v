@@ -89,14 +89,14 @@ pub fn lorem_sentence() string {
 
 // mock_first_name returns a random common first name.
 pub fn mock_first_name() string {
-	idx := rand.int_in_range(0, mockutils.first_names.len) or { 0 }
-	return mockutils.first_names[idx]
+	idx := rand.int_in_range(0, first_names.len) or { 0 }
+	return first_names[idx]
 }
 
 // mock_last_name returns a random common last name.
 pub fn mock_last_name() string {
-	idx := rand.int_in_range(0, mockutils.last_names.len) or { 0 }
-	return mockutils.last_names[idx]
+	idx := rand.int_in_range(0, last_names.len) or { 0 }
+	return last_names[idx]
 }
 
 // mock_full_name returns a random full name.
@@ -109,8 +109,8 @@ pub fn mock_email() string {
 	first := mock_first_name().to_lower()
 	last := mock_last_name().to_lower()
 	num := rand.int_in_range(10, 999) or { 42 }
-	d_idx := rand.int_in_range(0, mockutils.domains.len) or { 0 }
-	return '${first}.${last}${num}@${mockutils.domains[d_idx]}'
+	d_idx := rand.int_in_range(0, domains.len) or { 0 }
+	return '${first}.${last}${num}@${domains[d_idx]}'
 }
 
 // mock_phone returns a synthetic telephone number in format "+1-XXX-555-XXXX".
@@ -132,9 +132,9 @@ pub fn mock_ipv4() string {
 // mock_url returns a synthetic URL.
 pub fn mock_url() string {
 	proto := if (rand.int_in_range(0, 2) or { 0 }) == 1 { 'https' } else { 'http' }
-	d_idx := rand.int_in_range(0, mockutils.domains.len) or { 0 }
+	d_idx := rand.int_in_range(0, domains.len) or { 0 }
 	slug := mock_first_name().to_lower()
-	return '${proto}://${mockutils.domains[d_idx]}/${slug}'
+	return '${proto}://${domains[d_idx]}/${slug}'
 }
 
 // mock_user returns a populated synthetic user profile.
@@ -144,14 +144,14 @@ pub fn mock_user() MockUser {
 	email := mock_email()
 	phone := mock_phone()
 	ip := mock_ipv4()
-	r_idx := rand.int_in_range(0, mockutils.roles.len) or { 0 }
+	r_idx := rand.int_in_range(0, roles.len) or { 0 }
 	return MockUser{
 		id:    id
 		name:  name
 		email: email
 		phone: phone
 		ip:    ip
-		role:  mockutils.roles[r_idx]
+		role:  roles[r_idx]
 	}
 }
 

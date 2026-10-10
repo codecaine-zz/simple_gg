@@ -8,152 +8,152 @@ import time
 // Sed Preset Recipe Data Structure
 // -----------------------------------------------------------------------------
 struct SedRecipe {
-	title      string
-	category   string
-	script     string
-	extended   bool
-	quiet      bool
-	desc       string
-	sample     string
+	title    string
+	category string
+	script   string
+	extended bool
+	quiet    bool
+	desc     string
+	sample   string
 }
 
 fn get_all_sed_recipes() []SedRecipe {
 	return [
 		SedRecipe{
-			title: ' Strip Trailing Whitespace'
+			title:    ' Strip Trailing Whitespace'
 			category: 'Cleaning'
-			script: 's/[[:space:]]+$//g'
+			script:   's/[[:space:]]+$//g'
 			extended: true
-			quiet: false
-			desc: 'Removes unnecessary trailing spaces and tabs from the end of every line.'
-			sample: 'func main() {    \n    println("Hello") \t\t\n    return 0   \n}'
+			quiet:    false
+			desc:     'Removes unnecessary trailing spaces and tabs from the end of every line.'
+			sample:   'func main() {    \n    println("Hello") \t\t\n    return 0   \n}'
 		},
 		SedRecipe{
-			title: ' Delete Empty & Blank Lines'
+			title:    ' Delete Empty & Blank Lines'
 			category: 'Cleaning'
-			script: '/^[[:space:]]*$/d'
+			script:   '/^[[:space:]]*$/d'
 			extended: true
-			quiet: false
-			desc: 'Deletes all empty lines or lines containing only whitespace characters.'
-			sample: 'Line 1\n\n   \nLine 2\n\n\t\nLine 3'
+			quiet:    false
+			desc:     'Deletes all empty lines or lines containing only whitespace characters.'
+			sample:   'Line 1\n\n   \nLine 2\n\n\t\nLine 3'
 		},
 		SedRecipe{
-			title: ' Strip Comment Lines (#)'
+			title:    ' Strip Comment Lines (#)'
 			category: 'Cleaning'
-			script: '/^[[:space:]]*#/d'
+			script:   '/^[[:space:]]*#/d'
 			extended: true
-			quiet: false
-			desc: 'Removes shell, Python, YAML, or config comment lines starting with #.'
-			sample: '# Configuration File\nport=8080\n# Database settings\ndb_host=localhost\n# db_port=5432'
+			quiet:    false
+			desc:     'Removes shell, Python, YAML, or config comment lines starting with #.'
+			sample:   '# Configuration File\nport=8080\n# Database settings\ndb_host=localhost\n# db_port=5432'
 		},
 		SedRecipe{
-			title: ' Strip HTML / XML Tags'
+			title:    ' Strip HTML / XML Tags'
 			category: 'Web & Text'
-			script: 's/<[^>]*>//g'
+			script:   's/<[^>]*>//g'
 			extended: true
-			quiet: false
-			desc: 'Removes all HTML/XML markup tags, leaving clean extracted plain text.'
-			sample: '<div class="card"><h1>Title</h1><p>Welcome to <b>SimpleGUI</b>!</p></div>'
+			quiet:    false
+			desc:     'Removes all HTML/XML markup tags, leaving clean extracted plain text.'
+			sample:   '<div class="card"><h1>Title</h1><p>Welcome to <b>SimpleGUI</b>!</p></div>'
 		},
 		SedRecipe{
-			title: ' Convert Windows CRLF (\\r\\n) to Unix LF'
+			title:    ' Convert Windows CRLF (\\r\\n) to Unix LF'
 			category: 'Normalization'
-			script: 's/\\r$//'
+			script:   's/\\r$//'
 			extended: false
-			quiet: false
-			desc: 'Strips trailing carriage returns (\\r) from Windows format files.'
-			sample: 'Windows line 1\r\nWindows line 2\r\nWindows line 3\r\n'
+			quiet:    false
+			desc:     'Strips trailing carriage returns (\\r) from Windows format files.'
+			sample:   'Windows line 1\r\nWindows line 2\r\nWindows line 3\r\n'
 		},
 		SedRecipe{
-			title: ' Extract First 10 Lines'
+			title:    ' Extract First 10 Lines'
 			category: 'Filtering'
-			script: '1,10p'
+			script:   '1,10p'
 			extended: false
-			quiet: true
-			desc: 'Prints only lines 1 through 10 (head utility equivalent in sed).'
-			sample: 'Line 1\nLine 2\nLine 3\nLine 4\nLine 5\nLine 6\nLine 7\nLine 8\nLine 9\nLine 10\nLine 11\nLine 12'
+			quiet:    true
+			desc:     'Prints only lines 1 through 10 (head utility equivalent in sed).'
+			sample:   'Line 1\nLine 2\nLine 3\nLine 4\nLine 5\nLine 6\nLine 7\nLine 8\nLine 9\nLine 10\nLine 11\nLine 12'
 		},
 		SedRecipe{
-			title: ' Delete Header / First 3 Lines'
+			title:    ' Delete Header / First 3 Lines'
 			category: 'Filtering'
-			script: '1,3d'
+			script:   '1,3d'
 			extended: false
-			quiet: false
-			desc: 'Deletes the first 3 lines of the file or stream.'
-			sample: '--- HEADER START ---\nAuthor: Team\nDate: 2026-08-22\n--- DATA ---\nRecord 1\nRecord 2'
+			quiet:    false
+			desc:     'Deletes the first 3 lines of the file or stream.'
+			sample:   '--- HEADER START ---\nAuthor: Team\nDate: 2026-08-22\n--- DATA ---\nRecord 1\nRecord 2'
 		},
 		SedRecipe{
-			title: ' Extract Lines Containing Keyword'
+			title:    ' Extract Lines Containing Keyword'
 			category: 'Filtering'
-			script: '/ERROR/p'
+			script:   '/ERROR/p'
 			extended: false
-			quiet: true
-			desc: 'Filters and prints only log lines matching the pattern ERROR.'
-			sample: 'INFO: Server started\nERROR: Connection timed out to redis\nINFO: Worker ready\nERROR: Out of memory in worker 4'
+			quiet:    true
+			desc:     'Filters and prints only log lines matching the pattern ERROR.'
+			sample:   'INFO: Server started\nERROR: Connection timed out to redis\nINFO: Worker ready\nERROR: Out of memory in worker 4'
 		},
 		SedRecipe{
-			title: ' Global Substring Replace'
+			title:    ' Global Substring Replace'
 			category: 'Transform'
-			script: 's/http:\\/\\//https:\\/\\//g'
+			script:   's/http:\\/\\//https:\\/\\//g'
 			extended: false
-			quiet: false
-			desc: 'Replaces all occurrences of http:// with https:// globally.'
-			sample: 'Visit http://example.com or http://api.service.org for docs.'
+			quiet:    false
+			desc:     'Replaces all occurrences of http:// with https:// globally.'
+			sample:   'Visit http://example.com or http://api.service.org for docs.'
 		},
 		SedRecipe{
-			title: ' Prepend Line Prefix'
+			title:    ' Prepend Line Prefix'
 			category: 'Formatting'
-			script: 's/^/[LOG] /'
+			script:   's/^/[LOG] /'
 			extended: false
-			quiet: false
-			desc: 'Prepends a tag or comment prefix to the beginning of each line.'
-			sample: 'Booting kernel\nMounting filesystem\nInitializing network'
+			quiet:    false
+			desc:     'Prepends a tag or comment prefix to the beginning of each line.'
+			sample:   'Booting kernel\nMounting filesystem\nInitializing network'
 		},
 		SedRecipe{
-			title: ' Append Suffix to Every Line'
+			title:    ' Append Suffix to Every Line'
 			category: 'Formatting'
-			script: 's/$/;/'
+			script:   's/$/;/'
 			extended: false
-			quiet: false
-			desc: 'Appends a semicolon or delimiter to the end of every line.'
-			sample: 'int a = 1\nint b = 2\nint c = 3'
+			quiet:    false
+			desc:     'Appends a semicolon or delimiter to the end of every line.'
+			sample:   'int a = 1\nint b = 2\nint c = 3'
 		},
 		SedRecipe{
-			title: ' Swap Two Words / Delimited Columns'
+			title:    ' Swap Two Words / Delimited Columns'
 			category: 'RegEx'
-			script: 's/([a-zA-Z0-9_]+)[[:space:]]*=[[:space:]]*([a-zA-Z0-9_]+)/\\2 : \\1/g'
+			script:   's/([a-zA-Z0-9_]+)[[:space:]]*=[[:space:]]*([a-zA-Z0-9_]+)/\\2 : \\1/g'
 			extended: true
-			quiet: false
-			desc: 'Swaps key=value pairs into value : key format using backreferences.'
-			sample: 'user=john\nrole=admin\nstatus=active'
+			quiet:    false
+			desc:     'Swaps key=value pairs into value : key format using backreferences.'
+			sample:   'user=john\nrole=admin\nstatus=active'
 		},
 		SedRecipe{
-			title: ' Transliterate Lowercase to Uppercase'
+			title:    ' Transliterate Lowercase to Uppercase'
 			category: 'Transform'
-			script: 'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'
+			script:   'y/abcdefghijklmnopqrstuvwxyz/ABCDEFGHIJKLMNOPQRSTUVWXYZ/'
 			extended: false
-			quiet: false
-			desc: 'Transliterates every lowercase ASCII character to uppercase without regex.'
-			sample: 'hello simplegui world! fast stream transformation with sed.'
+			quiet:    false
+			desc:     'Transliterates every lowercase ASCII character to uppercase without regex.'
+			sample:   'hello simplegui world! fast stream transformation with sed.'
 		},
 		SedRecipe{
-			title: ' Extract Domain from URL'
+			title:    ' Extract Domain from URL'
 			category: 'RegEx'
-			script: 's/https?:\\/\\/([^\\/]+).*/\\1/p'
+			script:   's/https?:\\/\\/([^\\/]+).*/\\1/p'
 			extended: true
-			quiet: true
-			desc: 'Extracts domain hostname from full URL paths using pattern matching.'
-			sample: 'https://github.com/vlang/v/issues/100\nhttps://developer.apple.com/documentation/cocoa\nhttps://news.ycombinator.com/item?id=42'
+			quiet:    true
+			desc:     'Extracts domain hostname from full URL paths using pattern matching.'
+			sample:   'https://github.com/vlang/v/issues/100\nhttps://developer.apple.com/documentation/cocoa\nhttps://news.ycombinator.com/item?id=42'
 		},
 		SedRecipe{
-			title: ' Double-Space All Lines'
+			title:    ' Double-Space All Lines'
 			category: 'Formatting'
-			script: 'G'
+			script:   'G'
 			extended: false
-			quiet: false
-			desc: 'Inserts an empty blank line after each line (double spacing text).'
-			sample: 'Paragraph one\nParagraph two\nParagraph three'
-		}
+			quiet:    false
+			desc:     'Inserts an empty blank line after each line (double spacing text).'
+			sample:   'Paragraph one\nParagraph two\nParagraph three'
+		},
 	]
 }
 
@@ -169,7 +169,8 @@ fn get_sed_bin() string {
 fn main() {
 	println('Starting SimpleGUI - Sed Studio Pro (Stream Editor & RegEx Workbench)...')
 
-	mut win := simplegui.new_simple_window('Sed Studio Pro -- Stream Editor & RegEx Transformation Workbench', 1100, 940)
+	mut win := simplegui.new_simple_window('Sed Studio Pro -- Stream Editor & RegEx Transformation Workbench',
+		1100, 940)
 	win.set_fullscreen(true)
 	win.restore_saved_theme()
 	win.set_spacing(8)
@@ -189,7 +190,8 @@ fn main() {
 	win.set_control_width('dd_theme_selector', 180)
 	win.end_row()
 
-	win.add_label('lbl_engine', 'Engine: ${sed_bin} (POSIX/BSD Stream Editor)  |  Dual-Pane Scratchpad & File In-Place Processor')
+	win.add_label('lbl_engine',
+		'Engine: ${sed_bin} (POSIX/BSD Stream Editor)  |  Dual-Pane Scratchpad & File In-Place Processor')
 
 	// -------------------------------------------------------------
 	// Script Builder & Preset Recipes
@@ -210,7 +212,8 @@ fn main() {
 	win.end_row()
 
 	win.begin_row('row_rec_info')
-	win.add_label('lbl_recipe_desc', 'Tip: Select any preset recipe above to load tested pattern expressions and flags.')
+	win.add_label('lbl_recipe_desc',
+		'Tip: Select any preset recipe above to load tested pattern expressions and flags.')
 	win.end_row()
 
 	win.begin_row('row_cmd_input')
@@ -261,7 +264,7 @@ fn main() {
 	win.end_row()
 
 	win.begin_row('row_file_actions')
-	win.add_checkbox('chk_inplace', 'In-Place Edit File (-i \'\')', false)
+	win.add_checkbox('chk_inplace', "In-Place Edit File (-i '')", false)
 	win.add_checkbox('chk_backup', 'Create .bak Backup', true)
 	win.add_button('btn_process_file', 'Run sed on File')
 	win.add_button('btn_save_out_to_file', 'Save Output to File...')
@@ -293,7 +296,8 @@ fn main() {
 		use_quiet := win.get_bool('chk_quiet')
 
 		if script_expr == '' {
-			win.alert('Empty Script', 'Please enter a valid sed expression (e.g. s/find/replace/g).')
+			win.alert('Empty Script',
+				'Please enter a valid sed expression (e.g. s/find/replace/g).')
 			return
 		}
 
@@ -327,11 +331,17 @@ fn main() {
 			out_lines := res.output.split_into_lines().len
 			win.set('lbl_in_stats', '  (${input_text.len} chars, ${in_lines} lines)')
 			win.set('lbl_out_stats', '  (${res.output.len} chars, ${out_lines} lines)')
-			win.set('lbl_status', ' Status: Transformed in ${elapsed_ms} ms  |  In: ${in_lines} lines  |  Out: ${out_lines} lines')
+			win.set('lbl_status',
+				' Status: Transformed in ${elapsed_ms} ms  |  In: ${in_lines} lines  |  Out: ${out_lines} lines')
 			win.toast('Stream processed in ${elapsed_ms} ms!')
 		} else {
-			err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'sed execution failed with exit code ${res.exit_code}' }
-			win.set('txt_output', '// [SED EXECUTION ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+			err_msg := if res.output.trim_space() != '' {
+				res.output.trim_space()
+			} else {
+				'sed execution failed with exit code ${res.exit_code}'
+			}
+			win.set('txt_output',
+				'// [SED EXECUTION ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
 			win.set('lbl_status', ' sed execution error.')
 			win.toast('sed execution error!')
 		}
@@ -500,7 +510,8 @@ fn main() {
 		}
 
 		if use_inplace {
-			if !w.confirm('In-Place Modification', 'Are you sure you want to modify "${os.file_name(file)}" in-place on disk?') {
+			if !w.confirm('In-Place Modification',
+				'Are you sure you want to modify "${os.file_name(file)}" in-place on disk?') {
 				return
 			}
 
@@ -540,8 +551,13 @@ fn main() {
 				w.set('lbl_out_stats', '  (${res.output.len} chars, ${out_lines} lines)')
 				w.toast('File processed in ${elapsed_ms} ms!')
 			} else {
-				err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'sed execution failed with exit code ${res.exit_code}' }
-				w.set('txt_output', '// [SED FILE PROCESSING ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+				err_msg := if res.output.trim_space() != '' {
+					res.output.trim_space()
+				} else {
+					'sed execution failed with exit code ${res.exit_code}'
+				}
+				w.set('txt_output',
+					'// [SED FILE PROCESSING ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
 				w.alert('sed Error', 'Error processing file:\n' + err_msg)
 			}
 		}

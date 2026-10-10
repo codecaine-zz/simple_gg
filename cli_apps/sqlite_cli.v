@@ -64,7 +64,8 @@ fn main() {
 	}
 
 	// Interactive REPL
-	app.panel('SQLite Interactive Console', 'Connected to: ${db_path}\nCommands: .tables, .schema, or any SQL SELECT/INSERT/UPDATE query. Type "exit" or "q" to quit.')
+	app.panel('SQLite Interactive Console',
+		'Connected to: ${db_path}\nCommands: .tables, .schema, or any SQL SELECT/INSERT/UPDATE query. Type "exit" or "q" to quit.')
 	for {
 		sql_cmd := app.prompt('sqlite', 'SELECT * FROM users LIMIT 5;')
 		if sql_cmd == 'exit' || sql_cmd == 'q' {

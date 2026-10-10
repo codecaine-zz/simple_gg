@@ -23,15 +23,15 @@ fn main() {
 
 	win.add_menu('Theme', [
 		simplegui.MenuItem{
-			title: 'Toggle Light / Dark'
-			shortcut: 'Ctrl+T'
+			title:     'Toggle Light / Dark'
+			shortcut:  'Ctrl+T'
 			on_select: fn (mut win simplegui.SimpleWindow) {
 				win.toggle_window_theme()
 				sync_theme_controls(mut win)
 			}
 		},
 		simplegui.MenuItem{
-			title: 'Reset to Catppuccin Mocha'
+			title:     'Reset to Catppuccin Mocha'
 			on_select: fn (mut win simplegui.SimpleWindow) {
 				win.set_theme(initial_theme)
 				sync_theme_controls(mut win)
@@ -40,15 +40,17 @@ fn main() {
 	])
 	win.add_menu('Help', [
 		simplegui.MenuItem{
-			title: 'About Theme Gallery'
+			title:     'About Theme Gallery'
 			on_select: fn (mut win simplegui.SimpleWindow) {
-				win.show_dialog_info('Complete Theme Gallery', 'Use the theme combobox to preview every control with any built-in palette.')
+				win.show_dialog_info('Complete Theme Gallery',
+					'Use the theme combobox to preview every control with any built-in palette.')
 			}
 		},
 	])
 
 	win.add_heading('Complete Theme & Controls Gallery')
-	win.add_label('gallery_intro', 'Switch among all 87 themes. The controls below update immediately using each palette.')
+	win.add_label('gallery_intro',
+		'Switch among all 87 themes. The controls below update immediately using each palette.')
 
 	all_themes := simplegui.list_themes()
 	win.begin_row('theme_toolbar')
@@ -77,7 +79,8 @@ fn main() {
 		win.add_form_field('Username:', 'sample_username', 'developer@example.com')
 		win.add_form_password('Password:', 'sample_password', 'theme-preview')
 		win.add_form_search('Search:', 'sample_search', 'Search controls...')
-		win.add_form_textarea('Notes:', 'sample_notes', 'Every control inherits the active theme surface, border, text, and accent colors.')
+		win.add_form_textarea('Notes:', 'sample_notes',
+			'Every control inherits the active theme surface, border, text, and accent colors.')
 		win.set_control_height('sample_notes', 76)
 		win.add_form_number('Build count:', 'sample_number', 42)
 	})
@@ -156,7 +159,8 @@ fn main() {
 	win.add_stepper('sample_steps', ['Choose', 'Inspect', 'Validate', 'Ship'], 2)
 
 	win.begin_row('metric_row')
-	win.add_metric_card('sample_metric', 'Theme Coverage', '87 / 87', '+76 imported', 'Bun RAD Studio parity')
+	win.add_metric_card('sample_metric', 'Theme Coverage', '87 / 87', '+76 imported',
+		'Bun RAD Studio parity')
 	win.add_metric_trend('sample_trend', 'Render Consistency', '100%', '+12 surfaces', true, [
 		62.0,
 		68.0,
@@ -167,9 +171,15 @@ fn main() {
 	])
 	win.end_row()
 
-	win.add_alert_banner('sample_alert', 'Theme applied', 'Menus, dialogs, inputs, tables, cards, borders, and hover states share the active palette.', 'info')
-	win.add_accordion('sample_accordion', 'Theme token details', 'Each Bun RAD Studio theme includes primary and secondary accents, card surfaces, borders, readable text, and derived hover colors.', true)
-	win.add_code_editor('sample_code', "mut win := simplegui.new_simple_window('Themed App', 800, 600)\nwin.set_theme('codefreelance')\nwin.run()", 'v')
+	win.add_alert_banner('sample_alert', 'Theme applied',
+		'Menus, dialogs, inputs, tables, cards, borders, and hover states share the active palette.',
+		'info')
+	win.add_accordion('sample_accordion', 'Theme token details',
+		'Each Bun RAD Studio theme includes primary and secondary accents, card surfaces, borders, readable text, and derived hover colors.',
+		true)
+	win.add_code_editor('sample_code',
+		"mut win := simplegui.new_simple_window('Themed App', 800, 600)\nwin.set_theme('codefreelance')\nwin.run()",
+		'v')
 	win.set_control_height('sample_code', 92)
 
 	win.begin_row('action_row')
@@ -180,7 +190,8 @@ fn main() {
 	win.end_tab_page()
 
 	win.end_tab_container()
-	win.add_status_bar('gallery_status', 'Ready - choose a theme to update the complete gallery', '87 THEMES')
+	win.add_status_bar('gallery_status', 'Ready - choose a theme to update the complete gallery',
+		'87 THEMES')
 
 	win.on_change('theme_picker', fn (mut win simplegui.SimpleWindow, selected_theme string) {
 		win.set_theme(selected_theme)
@@ -194,13 +205,16 @@ fn main() {
 	})
 
 	win.on_click('btn_success_toast', fn (mut win simplegui.SimpleWindow) {
-		win.push_toast('Theme Preview', 'Success feedback uses the active theme surface.', 'success', 3000)
+		win.push_toast('Theme Preview', 'Success feedback uses the active theme surface.',
+			'success', 3000)
 	})
 	win.on_click('btn_warning_toast', fn (mut win simplegui.SimpleWindow) {
-		win.push_toast('Theme Preview', 'Warning feedback remains readable in every theme.', 'warning', 3000)
+		win.push_toast('Theme Preview', 'Warning feedback remains readable in every theme.',
+			'warning', 3000)
 	})
 	win.on_click('btn_theme_dialog', fn (mut win simplegui.SimpleWindow) {
-		win.show_dialog_info('Themed Dialog', 'This dialog uses the active theme surface, border, text, and accent tokens.')
+		win.show_dialog_info('Themed Dialog',
+			'This dialog uses the active theme surface, border, text, and accent tokens.')
 	})
 
 	win.run()

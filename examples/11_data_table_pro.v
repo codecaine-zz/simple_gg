@@ -13,7 +13,8 @@ fn main() {
 	win.set_theme('Apple Dark')
 
 	win.add_heading('Data Table Pro')
-	win.add_label('lbl_sub', 'Click a column header to sort. Scroll the wheel over the table to scroll rows.')
+	win.add_label('lbl_sub',
+		'Click a column header to sort. Scroll the wheel over the table to scroll rows.')
 
 	// 1. Interactive Sortable / Scrollable Data Table
 	headers := ['ID', 'Name', 'Age', 'Status']

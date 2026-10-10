@@ -51,7 +51,8 @@ fn main() {
 	assert 'usr_01' in keys
 
 	// 3. SQL execution & Parameterized CRUD
-	sqliteutils.exec_sql(mut db, 'CREATE TABLE audit_logs (id INTEGER PRIMARY KEY, action TEXT, created_at TEXT);')!
+	sqliteutils.exec_sql(mut db,
+		'CREATE TABLE audit_logs (id INTEGER PRIMARY KEY, action TEXT, created_at TEXT);')!
 	new_id := sqliteutils.insert_row(mut db, 'audit_logs', {
 		'action':     'USER_LOGIN'
 		'created_at': '2026-09-10 12:00:00'

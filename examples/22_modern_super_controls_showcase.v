@@ -38,10 +38,24 @@ fn main() {
 	// High-Impact KPI Row with Sparklines & Donut Meter
 	win.begin_row('stats_row')
 	win.add_stat_card('stat_revenue', 'Monthly Revenue', '$184,520', '+22.4% vs last mo', true, [
-		20.0, 35.0, 30.0, 50.0, 45.0, 70.0, 85.0, 95.0,
+		20.0,
+		35.0,
+		30.0,
+		50.0,
+		45.0,
+		70.0,
+		85.0,
+		95.0,
 	])
 	win.add_stat_card('stat_latency', 'API Response Time', '14.2 ms', '-18.6% faster', true, [
-		60.0, 55.0, 48.0, 40.0, 32.0, 24.0, 18.0, 14.0,
+		60.0,
+		55.0,
+		48.0,
+		40.0,
+		32.0,
+		24.0,
+		18.0,
+		14.0,
 	])
 	win.add_donut_chart('cpu_meter', 'CPU Core Load', 78.5)
 	win.end_row()
@@ -55,7 +69,11 @@ fn main() {
 		'INFO|45m ago|Automated daily backup completed (2.4 GB)',
 	])
 	win.add_score_card('score', 'Developer Satisfaction', 4.95, 3840, [
-		92.0, 6.0, 1.2, 0.5, 0.3,
+		92.0,
+		6.0,
+		1.2,
+		0.5,
+		0.3,
 	])
 	win.end_row()
 
@@ -75,7 +93,8 @@ fn main() {
 	// ==========================================
 	win.begin_tab_page('page_code_term', 1)
 
-	win.add_code_studio('studio', 'main.v', 'v', 'module main\n\nimport simplegui\n\nfn main() {\n    mut win := simplegui.new_simple_window(\'Super App\', 800, 600)\n    win.stat(\'Revenue\', \'$184k\', \'+22%\', true, [20.0, 50.0, 85.0])\n    win.run()\n}')
+	win.add_code_studio('studio', 'main.v', 'v',
+		"module main\n\nimport simplegui\n\nfn main() {\n    mut win := simplegui.new_simple_window('Super App', 800, 600)\n    win.stat('Revenue', '$184k', '+22%', true, [20.0, 50.0, 85.0])\n    win.run()\n}")
 
 	win.add_terminal_console('term_logs', [
 		'Build Server',

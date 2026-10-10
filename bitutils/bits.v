@@ -199,7 +199,15 @@ pub fn (mut b BitSet) clear_all() {
 
 // set_range turns on bits [start, end) (clamped to the set's size).
 pub fn (mut b BitSet) set_range(start int, end int) {
-	for i in (if start < 0 { 0 } else { start }) .. (if end > b.size() { b.size() } else { end }) {
+	for i in (if start < 0 {
+		0
+	} else {
+		start
+	}) .. (if end > b.size() {
+		b.size()
+	} else {
+		end
+	}) {
 		b.bf.set_bit(i)
 	}
 }

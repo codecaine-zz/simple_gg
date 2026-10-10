@@ -121,7 +121,8 @@ pub fn sanitize_html(input string, allowed []string) string {
 			inner := input[i + 1..gt]
 			closing := inner.starts_with('/')
 			body := if closing { inner[1..] } else { inner }
-			name := body.all_before(' ').all_before('\t').all_before('\n').trim_right('/').to_lower()
+			name :=
+				body.all_before(' ').all_before('\t').all_before('\n').trim_right('/').to_lower()
 			if !closing && name in ['script', 'style', 'iframe', 'object', 'embed', 'template'] {
 				close := lower.index_after('</${name}', gt) or { input.len }
 				end := lower.index_after('>', close) or { input.len - 1 }
@@ -171,6 +172,7 @@ pub fn sanitize_html(input string, allowed []string) string {
 			`'` { sb.write_string('&#39;') }
 			else { sb.write_u8(c) }
 		}
+
 		i++
 	}
 	return sb.str()

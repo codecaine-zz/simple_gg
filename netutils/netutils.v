@@ -67,7 +67,9 @@ pub fn get_local_ip() string {
 
 // get_public_ip resolves the public WAN IP address by querying api.ipify.org.
 pub fn get_public_ip() !string {
-	res := http.get('https://api.ipify.org') or { return error('failed to reach IP lookup service: ${err}') }
+	res := http.get('https://api.ipify.org') or {
+		return error('failed to reach IP lookup service: ${err}')
+	}
 	if res.status_code == 200 && res.body.len > 0 {
 		return res.body.trim_space()
 	}

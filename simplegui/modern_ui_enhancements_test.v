@@ -22,9 +22,23 @@ fn test_vector_icons_and_elevation() {
 fn test_sidebar_and_nav_rail() {
 	mut win := new_simple_window('Nav Test', 800, 600)
 	items := [
-		SidebarItem{ id: 'home', title: 'Dashboard', icon: 'home', is_active: true },
-		SidebarItem{ id: 'settings', title: 'Settings', icon: 'gear', badge: 'NEW' },
-		SidebarItem{ id: 'users', title: 'Users', icon: 'user' },
+		SidebarItem{
+			id:        'home'
+			title:     'Dashboard'
+			icon:      'home'
+			is_active: true
+		},
+		SidebarItem{
+			id:    'settings'
+			title: 'Settings'
+			icon:  'gear'
+			badge: 'NEW'
+		},
+		SidebarItem{
+			id:    'users'
+			title: 'Users'
+			icon:  'user'
+		},
 	]
 	mut sb := win.add_sidebar('main_sidebar', items)
 	assert sb.sidebar_items.len == 3
@@ -51,7 +65,7 @@ fn test_sidebar_and_nav_rail() {
 
 fn test_stacks_and_flow_layout() {
 	mut win := new_simple_window('Layouts Test', 800, 600)
-	
+
 	// Stacks
 	win.vstack('stack_col', 'center', 10, fn (mut w SimpleWindow) {
 		w.add_button('v_btn1', 'Item 1')
@@ -83,17 +97,17 @@ fn test_slide_over_drawer() {
 	win.show_drawer('Quick Filters', 360, 'right', fn (mut w SimpleWindow) {
 		w.add_drawer_section('Services')
 		w.add_drawer_item(DrawerItem{
-			id: 'd_cluster'
-			title: 'Database Cluster'
-			subtitle: 'Active node v16'
-			icon: 'database'
-			badge: 'PRO'
+			id:        'd_cluster'
+			title:     'Database Cluster'
+			subtitle:  'Active node v16'
+			icon:      'database'
+			badge:     'PRO'
 			is_active: true
 		})
 		w.add_drawer_item(DrawerItem{
-			id: 'd_settings'
+			id:    'd_settings'
 			title: 'Settings'
-			icon: 'gear'
+			icon:  'gear'
 		})
 	})
 	assert win.is_drawer_active() == true
@@ -144,14 +158,12 @@ fn test_tree_table() {
 	headers := ['Name', 'Size', 'Type']
 	nodes := [
 		TreeTableRow{
-			id: 'root'
-			values: ['src', '--', 'Folder']
+			id:          'root'
+			values:      ['src', '--', 'Folder']
 			is_expanded: true
-			children: [
-				TreeTableRow{ id: 'main', values: ['main.v', '4.2 KB', 'V File'] },
-				TreeTableRow{ id: 'utils', values: ['utils.v', '2.1 KB', 'V File'] },
-			]
-		}
+			children:    [TreeTableRow{ id: 'main', values: ['main.v', '4.2 KB', 'V File'] },
+				TreeTableRow{ id: 'utils', values: ['utils.v', '2.1 KB', 'V File'] }]
+		},
 	]
 	mut tt := win.add_tree_table('code_tree', headers, nodes)
 	assert tt.kind == 'tree_table'

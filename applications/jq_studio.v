@@ -73,11 +73,12 @@ fn main() {
 	})
 
 	jq_path := get_jq_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${jq_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker (Non-Blocking)')
+	win.add_label('lbl_engine_info',
+		'Engine: ${jq_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker (Non-Blocking)')
 
 	// Filter & Query Configuration Bar
 	win.begin_group_box('grp_query', 'JQ Filter Expression & Query Builder')
-	
+
 	win.begin_row('row_query_input')
 	win.add_label('lbl_filter', 'JQ Filter:')
 	win.add_input('txt_filter', '.')
@@ -96,7 +97,7 @@ fn main() {
 		'9. Filter Modules with Lines > 2000 (.modules[] | select(.lines > 2000))',
 		'10. Total Lines Sum ([.modules[].lines] | add)',
 		'11. Flatten Nested Structure (.. | strings)',
-		'12. Group Modules by Status (.modules | group_by(.status))'
+		'12. Group Modules by Status (.modules | group_by(.status))',
 	], '1. Pretty-Print Identity (.)')
 	win.set_control_width('dd_presets', 280)
 	win.end_row()
@@ -140,11 +141,13 @@ fn main() {
 
 	// Status & Metrics Row
 	win.begin_row('row_stats')
-	win.add_label('lbl_stats', 'Stats: Ready  |  Input Length: ${sample_json.len} bytes  |  Duration: 0 ms')
+	win.add_label('lbl_stats',
+		'Stats: Ready  |  Input Length: ${sample_json.len} bytes  |  Duration: 0 ms')
 	win.end_row()
 
 	win.append_console('jq_console', ' JQ Studio Pro initialized.\n', 1)
-	win.append_console('jq_console', ' Ready to process high-speed JSON stream transformations.\n', 4)
+	win.append_console('jq_console', ' Ready to process high-speed JSON stream transformations.\n',
+		4)
 
 	// -------------------------------------------------------------
 	// Event Handlers
@@ -153,18 +156,31 @@ fn main() {
 	// Preset Selection Handler
 	win.on_change('dd_presets', fn (mut w simplegui.SimpleWindow, selected string) {
 		mut filter := '.'
-		if selected.starts_with('1.') { filter = '.' }
-		else if selected.starts_with('2.') { filter = 'keys' }
-		else if selected.starts_with('3.') { filter = '.modules | map(.name)' }
-		else if selected.starts_with('4.') { filter = '.modules[] | select(.status == "stable")' }
-		else if selected.starts_with('5.') { filter = '{app: .project, total_lines: ([.modules[].lines] | add)}' }
-		else if selected.starts_with('6.') { filter = '.modules | sort_by(.lines) | reverse' }
-		else if selected.starts_with('7.') { filter = 'to_entries[]' }
-		else if selected.starts_with('8.') { filter = '.tags | join(", ")' }
-		else if selected.starts_with('9.') { filter = '.modules[] | select(.lines > 2000)' }
-		else if selected.starts_with('10.') { filter = '[.modules[].lines] | add' }
-		else if selected.starts_with('11.') { filter = '.. | strings' }
-		else if selected.starts_with('12.') { filter = '.modules | group_by(.status)' }
+		if selected.starts_with('1.') {
+			filter = '.'
+		} else if selected.starts_with('2.') {
+			filter = 'keys'
+		} else if selected.starts_with('3.') {
+			filter = '.modules | map(.name)'
+		} else if selected.starts_with('4.') {
+			filter = '.modules[] | select(.status == "stable")'
+		} else if selected.starts_with('5.') {
+			filter = '{app: .project, total_lines: ([.modules[].lines] | add)}'
+		} else if selected.starts_with('6.') {
+			filter = '.modules | sort_by(.lines) | reverse'
+		} else if selected.starts_with('7.') {
+			filter = 'to_entries[]'
+		} else if selected.starts_with('8.') {
+			filter = '.tags | join(", ")'
+		} else if selected.starts_with('9.') {
+			filter = '.modules[] | select(.lines > 2000)'
+		} else if selected.starts_with('10.') {
+			filter = '[.modules[].lines] | add'
+		} else if selected.starts_with('11.') {
+			filter = '.. | strings'
+		} else if selected.starts_with('12.') {
+			filter = '.modules | group_by(.status)'
+		}
 		w.set('txt_filter', filter)
 		w.toast('Applied preset filter: ${filter}')
 	})
@@ -212,12 +228,12 @@ fn main() {
 		if is_slurp { args << '-s' }
 		args << filter
 
-		w.append_console('jq_console', ' Executing: jq ${args.join(" ")}\n', 1)
+		w.append_console('jq_console', ' Executing: jq ${args.join(' ')}\n', 1)
 		w.set_status('Running JQ query...')
 
 		go fn [mut w, jq_bin, args, input_data] () {
 			t0 := time.ticks()
-			
+
 			// Use temp file for safe stdin streaming
 			tmp_path := os.join_path(os.temp_dir(), 'simplegui_jq_${time.ticks()}.json')
 			os.write_file(tmp_path, input_data) or {
@@ -238,15 +254,24 @@ fn main() {
 				if res.exit_code == 0 {
 					win_main.set('txt_output_json', res.output)
 					lines_cnt := res.output.split_into_lines().len
-					win_main.append_console('jq_console', ' Success: processed in ${elapsed_ms} ms (${res.output.len} bytes, ${lines_cnt} lines)\n', 4)
-					win_main.set('lbl_stats', ' Stats: SUCCESS  |  Input: ${input_data.len}B  |  Output: ${res.output.len}B (${lines_cnt} lines)  |  Duration: ${elapsed_ms} ms')
+					win_main.append_console('jq_console',
+						' Success: processed in ${elapsed_ms} ms (${res.output.len} bytes, ${lines_cnt} lines)\n',
+						4)
+					win_main.set('lbl_stats',
+						' Stats: SUCCESS  |  Input: ${input_data.len}B  |  Output: ${res.output.len}B (${lines_cnt} lines)  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Query finished in ${elapsed_ms} ms.')
 					win_main.toast('JQ query evaluated successfully!')
 				} else {
-					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'JQ query failed (Exit code ${res.exit_code}). Check filter syntax or JSON validity.' }
-					win_main.set('txt_output_json', '// [JQ QUERY ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+					err_msg := if res.output.trim_space() != '' {
+						res.output.trim_space()
+					} else {
+						'JQ query failed (Exit code ${res.exit_code}). Check filter syntax or JSON validity.'
+					}
+					win_main.set('txt_output_json',
+						'// [JQ QUERY ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
 					win_main.append_console('jq_console', ' JQ Error:\n' + err_msg + '\n', 3)
-					win_main.set('lbl_stats', ' Stats: ERROR (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
+					win_main.set('lbl_stats',
+						' Stats: ERROR (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('JQ evaluation error.')
 					win_main.toast('JQ error encountered.')
 				}

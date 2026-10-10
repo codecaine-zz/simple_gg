@@ -7,7 +7,8 @@ fn main() {
 	println('              demo_compressutils                  ')
 	println('==================================================')
 
-	sample_text := 'Vlang Utilities is a fast, modular, zero-dependency suite of production-ready tools for V programming. '.repeat(5)
+	sample_text :=
+		'Vlang Utilities is a fast, modular, zero-dependency suite of production-ready tools for V programming. '.repeat(5)
 	println('Original payload size: ${sample_text.len} bytes')
 
 	// 1. Gzip

@@ -93,7 +93,8 @@ fn convert_data_format(input_str string, from_fmt string, to_fmt string) (string
 		return input_str, ''
 	}
 
-	tmp_in := os.join_path(os.temp_dir(), 'simplegui_in_${time.ticks()}_${os.getpid()}.${from_clean}')
+	tmp_in := os.join_path(os.temp_dir(),
+		'simplegui_in_${time.ticks()}_${os.getpid()}.${from_clean}')
 	os.write_file(tmp_in, input_str) or { return '', 'Failed to create input temp file: ${err}' }
 	defer { os.rm(tmp_in) or {} }
 
@@ -122,31 +123,31 @@ fn convert_data_format(input_str string, from_fmt string, to_fmt string) (string
 	}
 
 	// Secondary Fallback Engine: Python 3
-	script := '
+	script := "
 import sys, json, csv, io
 
 input_data = sys.stdin.read()
-from_f = "${from_clean}"
-to_f = "${to_clean}"
+from_f = \"${from_clean}\"
+to_f = \"${to_clean}\"
 
 obj = None
 try:
-    if from_f == "json":
+    if from_f == \"json\":
         obj = json.loads(input_data)
-    elif from_f == "csv":
+    elif from_f == \"csv\":
         reader = csv.DictReader(io.StringIO(input_data))
         obj = list(reader)
-    elif from_f == "yaml":
+    elif from_f == \"yaml\":
         try:
             import yaml
             obj = yaml.safe_load(input_data)
         except ImportError:
-            sys.stderr.write("YAML parser not installed. Please install yq or pyyaml.")
+            sys.stderr.write(\"YAML parser not installed. Please install yq or pyyaml.\")
             sys.exit(1)
         except Exception as e:
-            sys.stderr.write(f"YAML Parse Error: {e}")
+            sys.stderr.write(f\"YAML Parse Error: {e}\")
             sys.exit(1)
-    elif from_f == "toml":
+    elif from_f == \"toml\":
         try:
             import tomllib
             obj = tomllib.loads(input_data)
@@ -155,12 +156,12 @@ try:
                 import toml
                 obj = toml.loads(input_data)
             except Exception as e:
-                sys.stderr.write(f"TOML parser error: {e}")
+                sys.stderr.write(f\"TOML parser error: {e}\")
                 sys.exit(1)
         except Exception as e:
-            sys.stderr.write(f"TOML Parse Error: {e}")
+            sys.stderr.write(f\"TOML Parse Error: {e}\")
             sys.exit(1)
-    elif from_f == "xml":
+    elif from_f == \"xml\":
         import xml.etree.ElementTree as ET
         root = ET.fromstring(input_data)
         def elem_to_dict(elem):
@@ -181,23 +182,23 @@ try:
             return {elem.tag: d}
         obj = elem_to_dict(root)
     else:
-        sys.stderr.write(f"Unsupported source format: {from_f}")
+        sys.stderr.write(f\"Unsupported source format: {from_f}\")
         sys.exit(1)
 except Exception as e:
-    sys.stderr.write(f"Parse Error ({from_f}): {e}")
+    sys.stderr.write(f\"Parse Error ({from_f}): {e}\")
     sys.exit(1)
 
 try:
-    if to_f == "json":
+    if to_f == \"json\":
         print(json.dumps(obj, indent=2))
-    elif to_f == "yaml":
+    elif to_f == \"yaml\":
         try:
             import yaml
             print(yaml.dump(obj, sort_keys=False))
         except Exception:
-            sys.stderr.write("YAML serializer not installed. Please install yq or pyyaml.")
+            sys.stderr.write(\"YAML serializer not installed. Please install yq or pyyaml.\")
             sys.exit(1)
-    elif to_f == "csv":
+    elif to_f == \"csv\":
         if isinstance(obj, list) and len(obj) > 0 and isinstance(obj[0], dict):
             out = io.StringIO()
             writer = csv.DictWriter(out, fieldnames=list(obj[0].keys()))
@@ -206,35 +207,35 @@ try:
                 writer.writerow(row)
             print(out.getvalue().strip())
         else:
-            sys.stderr.write("CSV export requires a list of row objects.")
+            sys.stderr.write(\"CSV export requires a list of row objects.\")
             sys.exit(1)
-    elif to_f == "toml":
+    elif to_f == \"toml\":
         try:
             import tomli_w
             print(tomli_w.dumps(obj))
         except Exception:
             print(json.dumps(obj, indent=2))
-    elif to_f == "xml":
+    elif to_f == \"xml\":
         def dict_to_xml(tag, d):
-            parts = [f"<{tag}>"]
+            parts = [f\"<{tag}>\"]
             if isinstance(d, dict):
                 for k, v in d.items():
                     parts.append(dict_to_xml(k, v))
             elif isinstance(d, list):
                 for item in d:
-                    parts.append(dict_to_xml("item", item))
+                    parts.append(dict_to_xml(\"item\", item))
             else:
                 parts.append(str(d))
-            parts.append(f"</{tag}>")
-            return "".join(parts)
-        print("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + dict_to_xml("root", obj))
+            parts.append(f\"</{tag}>\")
+            return \"\".join(parts)
+        print(\"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\" + dict_to_xml(\"root\", obj))
     else:
-        sys.stderr.write(f"Unsupported target format: {to_f}")
+        sys.stderr.write(f\"Unsupported target format: {to_f}\")
         sys.exit(1)
 except Exception as e:
-    sys.stderr.write(f"Export Error ({to_f}): {e}")
+    sys.stderr.write(f\"Export Error ({to_f}): {e}\")
     sys.exit(1)
-'
+"
 
 	tmp_py := os.join_path(os.temp_dir(), 'simplegui_conv_${time.ticks()}_${os.getpid()}.py')
 	os.write_file(tmp_py, script) or { return '', 'Failed to create worker script: ${err}' }
@@ -281,11 +282,12 @@ fn main() {
 
 	yq_bin := find_yq()
 	engine_label := if yq_bin != '' { 'yq (${yq_bin})' } else { 'python3 Translation Worker' }
-	win.add_label('lbl_engine_info', 'Engine: ${engine_label}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Non-Blocking')
+	win.add_label('lbl_engine_info',
+		'Engine: ${engine_label}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Non-Blocking')
 
 	// Format Selector & Preset Configuration
 	win.begin_group_box('grp_format_config', 'Format Direction & Data Templates')
-	
+
 	win.begin_row('row_formats')
 	win.add_label('lbl_from', 'From Format:')
 	win.add_dropdown('dd_from_fmt', ['JSON', 'YAML', 'TOML', 'CSV', 'XML'], 'JSON')
@@ -303,7 +305,7 @@ fn main() {
 		'2. CSV Employees Database',
 		'3. YAML Deployment Manifest',
 		'4. TOML Application Config',
-		'5. XML Meta Document'
+		'5. XML Meta Document',
 	], '1. JSON Server Architecture')
 	win.set_control_width('dd_sample_data', 230)
 	win.end_row()
@@ -334,11 +336,13 @@ fn main() {
 
 	// Status Row
 	win.begin_row('row_stats')
-	win.add_label('lbl_stats', 'Stats: Ready  |  Source: JSON (${sample_json_data.len} bytes)  |  Duration: 0 ms')
+	win.add_label('lbl_stats',
+		'Stats: Ready  |  Source: JSON (${sample_json_data.len} bytes)  |  Duration: 0 ms')
 	win.end_row()
 
 	win.append_console('conv_console', ' Format Converter Studio Pro Initialized.\n', 1)
-	win.append_console('conv_console', ' Ready to convert JSON, YAML, TOML, CSV, and XML datasets.\n', 4)
+	win.append_console('conv_console',
+		' Ready to convert JSON, YAML, TOML, CSV, and XML datasets.\n', 4)
 
 	// -------------------------------------------------------------
 	// Event Handlers
@@ -391,8 +395,10 @@ fn main() {
 		in_data := w.get('txt_input_data')
 		if in_data.trim_space() == '' {
 			w.alert('Data Required', 'Please enter or paste source data into the input pane.')
-			w.set('txt_output_data', '// [ERROR] Input data stream is empty.\n// Please paste valid data or load a sample template from above.')
-			w.append_console('conv_console', ' [ERROR] Conversion aborted: Input data stream is empty.\n', 2)
+			w.set('txt_output_data',
+				'// [ERROR] Input data stream is empty.\n// Please paste valid data or load a sample template from above.')
+			w.append_console('conv_console',
+				' [ERROR] Conversion aborted: Input data stream is empty.\n', 2)
 			w.set_status('Conversion error: input data is empty.')
 			w.toast('Conversion error: input data is empty')
 			return
@@ -412,8 +418,11 @@ fn main() {
 			w.run_on_main_thread(fn [out_str, err_msg, elapsed_ms, from_fmt, to_fmt, in_data] (mut win_main simplegui.SimpleWindow) {
 				if err_msg == '' && out_str.trim_space() != '' {
 					win_main.set('txt_output_data', out_str)
-					win_main.append_console('conv_console', ' Converted ${from_fmt} to ${to_fmt} in ${elapsed_ms} ms (${out_str.len} bytes)\n', 4)
-					win_main.set('lbl_stats', ' Stats: SUCCESS  |  ${from_fmt} (${in_data.len}B) -> ${to_fmt} (${out_str.len}B)  |  Duration: ${elapsed_ms} ms')
+					win_main.append_console('conv_console',
+						' Converted ${from_fmt} to ${to_fmt} in ${elapsed_ms} ms (${out_str.len} bytes)\n',
+						4)
+					win_main.set('lbl_stats',
+						' Stats: SUCCESS  |  ${from_fmt} (${in_data.len}B) -> ${to_fmt} (${out_str.len}B)  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Conversion finished in ${elapsed_ms} ms.')
 					win_main.toast('Conversion complete!')
 				} else {
@@ -427,12 +436,15 @@ fn main() {
 						'// Duration: ${elapsed_ms} ms\n' +
 						'// ========================================================\n\n' +
 						'// Diagnostic Parser Details:\n' +
-						'// ${actual_err.replace("\n", "\n// ")}\n\n' +
+						'// ${actual_err.replace('\n', '\n// ')}\n\n' +
 						'// Please check the syntax of your source ${from_fmt} stream.'
 					win_main.set('txt_output_data', error_view)
-					win_main.append_console('conv_console', ' [CONVERSION ERROR] ${from_fmt} -> ${to_fmt}:\n' + actual_err + '\n', 2)
+					win_main.append_console('conv_console',
+
+						' [CONVERSION ERROR] ${from_fmt} -> ${to_fmt}:\n' + actual_err + '\n', 2)
 					first_line := actual_err.split_into_lines()[0] or { actual_err }
-					win_main.set('lbl_stats', ' Stats: ERROR  |  ${from_fmt} -> ${to_fmt}  |  ${first_line}')
+					win_main.set('lbl_stats',
+						' Stats: ERROR  |  ${from_fmt} -> ${to_fmt}  |  ${first_line}')
 					win_main.set_status('Conversion error: ' + first_line)
 					win_main.toast('Conversion error: ' + first_line)
 				}
@@ -446,13 +458,19 @@ fn main() {
 		if path != '' && os.exists(path) {
 			content := os.read_file(path) or { '' }
 			w.set('txt_input_data', content)
-			
+
 			// Detect format by extension
-			if path.ends_with('.json') { w.set('dd_from_fmt', 'JSON') }
-			else if path.ends_with('.yaml') || path.ends_with('.yml') { w.set('dd_from_fmt', 'YAML') }
-			else if path.ends_with('.toml') { w.set('dd_from_fmt', 'TOML') }
-			else if path.ends_with('.csv') { w.set('dd_from_fmt', 'CSV') }
-			else if path.ends_with('.xml') { w.set('dd_from_fmt', 'XML') }
+			if path.ends_with('.json') {
+				w.set('dd_from_fmt', 'JSON')
+			} else if path.ends_with('.yaml') || path.ends_with('.yml') {
+				w.set('dd_from_fmt', 'YAML')
+			} else if path.ends_with('.toml') {
+				w.set('dd_from_fmt', 'TOML')
+			} else if path.ends_with('.csv') {
+				w.set('dd_from_fmt', 'CSV')
+			} else if path.ends_with('.xml') {
+				w.set('dd_from_fmt', 'XML')
+			}
 
 			w.toast('Loaded ${os.file_name(path)}')
 			w.append_console('conv_console', ' Loaded file: ${path} (${content.len} bytes)\n', 1)
@@ -482,10 +500,11 @@ fn main() {
 			'json' { '.json' }
 			'yaml' { '.yaml' }
 			'toml' { '.toml' }
-			'csv'  { '.csv' }
-			'xml'  { '.xml' }
-			else   { '.txt' }
+			'csv' { '.csv' }
+			'xml' { '.xml' }
+			else { '.txt' }
 		}
+
 		path := w.save_file_picker()
 		if path != '' {
 			mut save_file := path

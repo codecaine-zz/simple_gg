@@ -7,7 +7,8 @@ fn main() {
 	app.set_description('yt-dlp High-Performance Media Downloader CLI')
 
 	app.add_flag_string('url', 'u', '', 'Media video/audio URL to download')
-	app.add_flag_string('format', 'f', 'bestvideo+bestaudio/best', 'Target download format selector (e.g. mp4, mp3, 1080p, best)')
+	app.add_flag_string('format', 'f', 'bestvideo+bestaudio/best',
+		'Target download format selector (e.g. mp4, mp3, 1080p, best)')
 	app.add_flag_bool('audio-only', 'a', false, 'Extract audio only (MP3)')
 	app.add_flag_bool('info', 'i', false, 'Print video metadata without downloading')
 	app.add_flag_string('output', 'o', '%(title)s.%(ext)s', 'Output filename template')
@@ -58,7 +59,8 @@ fn main() {
 }
 
 fn run_interactive(mut app simplecli.SimpleCli) {
-	app.panel('yt-dlp Interactive Wizard', 'Download web video, extract MP3 audio, or inspect media formats.')
+	app.panel('yt-dlp Interactive Wizard',
+		'Download web video, extract MP3 audio, or inspect media formats.')
 	url := app.prompt('Enter media URL', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ')
 	choice := app.select('Download Mode:', [
 		'Best Quality Video (MP4 / WebM)',

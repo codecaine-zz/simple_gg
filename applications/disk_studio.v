@@ -39,11 +39,12 @@ fn main() {
 		w.toast('Theme changed to ${selected}')
 	})
 
-	win.add_label('lbl_engine_info', 'Engine: macOS APFS Core Utilities (du, df, find)  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async')
+	win.add_label('lbl_engine_info',
+		'Engine: macOS APFS Core Utilities (du, df, find)  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async')
 
 	// Directory Scope Selector
 	win.begin_group_box('grp_disk_scope', 'Target Directory & Filesystem Scope')
-	
+
 	win.begin_row('row_target_dir')
 	win.add_label('lbl_dir', 'Directory:')
 	win.add_input('txt_target_dir', '~')
@@ -58,7 +59,7 @@ fn main() {
 
 	// Analysis & Cleanup Actions Bar
 	win.begin_group_box('grp_disk_actions', 'Storage Telemetry & Cleanup Tools')
-	
+
 	win.begin_row('row_actions_btns')
 	win.add_button('btn_analyze_usage', 'Directory Breakdown (du -sh)')
 	win.add_button('btn_largest_files', 'Top 30 Largest Files')
@@ -88,7 +89,8 @@ fn main() {
 	win.end_row()
 
 	win.append_console('disk_console', ' Disk Space & Cleanup Studio Pro Initialized.\n', 1)
-	win.append_console('disk_console', ' Ready to analyze directory sizes, top large files, and clean developer caches.\n', 4)
+	win.append_console('disk_console',
+		' Ready to analyze directory sizes, top large files, and clean developer caches.\n', 4)
 
 	// -------------------------------------------------------------
 	// Event Handlers
@@ -138,15 +140,26 @@ fn main() {
 				if out != '' && !out.contains('No such file') && !out.contains('Permission denied') {
 					win_main.set('txt_disk_output', out)
 					lines_cnt := out.split_into_lines().len
-					win_main.append_console('disk_console', ' Directory breakdown complete in ${elapsed_ms} ms (${lines_cnt} entries sorted by size).\n', 4)
-					win_main.set('lbl_stats', ' Stats: SUCCESS  |  Target: ${raw_target}  |  Entries: ${lines_cnt}  |  Duration: ${elapsed_ms} ms')
+					win_main.append_console('disk_console',
+						' Directory breakdown complete in ${elapsed_ms} ms (${lines_cnt} entries sorted by size).\n',
+						4)
+					win_main.set('lbl_stats',
+						' Stats: SUCCESS  |  Target: ${raw_target}  |  Entries: ${lines_cnt}  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Disk usage analysis complete.')
 					win_main.toast('Disk breakdown calculated!')
 				} else {
-					err_info := if out != '' { out } else { 'No readable subdirectories or files found in: ${raw_target} (directory may be empty or access restricted).' }
-					win_main.set('txt_disk_output', '// [NOTICE / ERROR] Failed to calculate breakdown for ${raw_target}\n\n' + err_info)
-					win_main.append_console('disk_console', ' [ERROR] Directory breakdown notice: ${err_info}\n', 2)
-					win_main.set('lbl_stats', ' Stats: ERROR / EMPTY  |  Target: ${raw_target}  |  Duration: ${elapsed_ms} ms')
+					err_info := if out != '' {
+						out
+					} else {
+						'No readable subdirectories or files found in: ${raw_target} (directory may be empty or access restricted).'
+					}
+					win_main.set('txt_disk_output',
+						'// [NOTICE / ERROR] Failed to calculate breakdown for ${raw_target}\n\n' +
+						err_info)
+					win_main.append_console('disk_console',
+						' [ERROR] Directory breakdown notice: ${err_info}\n', 2)
+					win_main.set('lbl_stats',
+						' Stats: ERROR / EMPTY  |  Target: ${raw_target}  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Notice: ' + err_info)
 					win_main.toast('Notice: No entries or permission denied')
 				}
@@ -163,7 +176,8 @@ fn main() {
 			return
 		}
 
-		w.append_console('disk_console', ' Searching for top largest files in: ${raw_target}...\n', 1)
+		w.append_console('disk_console', ' Searching for top largest files in: ${raw_target}...\n',
+			1)
 		w.set_status('Finding largest files...')
 		w.toast('Scanning for large files...')
 
@@ -178,15 +192,25 @@ fn main() {
 				if out != '' && !out.contains('No such file') {
 					win_main.set('txt_disk_output', out)
 					lines_cnt := out.split_into_lines().len
-					win_main.append_console('disk_console', ' Top largest files located in ${elapsed_ms} ms (${lines_cnt} files).\n', 4)
-					win_main.set('lbl_stats', ' Stats: SUCCESS  |  Scope: ${raw_target}  |  Duration: ${elapsed_ms} ms')
+					win_main.append_console('disk_console',
+						' Top largest files located in ${elapsed_ms} ms (${lines_cnt} files).\n', 4)
+					win_main.set('lbl_stats',
+						' Stats: SUCCESS  |  Scope: ${raw_target}  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Largest files found.')
 					win_main.toast('Largest files located!')
 				} else {
-					err_info := if out != '' { out } else { 'No accessible files found in: ${raw_target} (directory may be empty or access restricted).' }
-					win_main.set('txt_disk_output', '// [NOTICE / ERROR] No files found for ${raw_target}\n\n' + err_info)
-					win_main.append_console('disk_console', ' [NOTICE] No files located: ${err_info}\n', 2)
-					win_main.set('lbl_stats', ' Stats: NO FILES FOUND  |  Scope: ${raw_target}  |  Duration: ${elapsed_ms} ms')
+					err_info := if out != '' {
+						out
+					} else {
+						'No accessible files found in: ${raw_target} (directory may be empty or access restricted).'
+					}
+					win_main.set('txt_disk_output',
+
+						'// [NOTICE / ERROR] No files found for ${raw_target}\n\n' + err_info)
+					win_main.append_console('disk_console',
+						' [NOTICE] No files located: ${err_info}\n', 2)
+					win_main.set('lbl_stats',
+						' Stats: NO FILES FOUND  |  Scope: ${raw_target}  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Notice: No files found.')
 					win_main.toast('Notice: No files located')
 				}
@@ -206,8 +230,10 @@ fn main() {
 
 			w.run_on_main_thread(fn [res, elapsed_ms] (mut win_main simplegui.SimpleWindow) {
 				win_main.set('txt_disk_output', res.output.trim_space())
-				win_main.append_console('disk_console', ' APFS volume telemetry loaded in ${elapsed_ms} ms.\n', 4)
-				win_main.set('lbl_stats', ' Stats: APFS MOUNTED VOLUMES  |  Duration: ${elapsed_ms} ms')
+				win_main.append_console('disk_console',
+					' APFS volume telemetry loaded in ${elapsed_ms} ms.\n', 4)
+				win_main.set('lbl_stats',
+					' Stats: APFS MOUNTED VOLUMES  |  Duration: ${elapsed_ms} ms')
 				win_main.set_status('Mounted volume stats loaded.')
 			})
 		}()
@@ -222,7 +248,8 @@ fn main() {
 			return
 		}
 
-		w.append_console('disk_console', ' Scanning for developer junk (node_modules, target, .cache, __pycache__)...\n', 1)
+		w.append_console('disk_console',
+			' Scanning for developer junk (node_modules, target, .cache, __pycache__)...\n', 1)
 		w.set_status('Scanning developer caches...')
 
 		go fn [mut w, target_dir] () {
@@ -233,9 +260,15 @@ fn main() {
 
 			w.run_on_main_thread(fn [res, elapsed_ms] (mut win_main simplegui.SimpleWindow) {
 				out := res.output.trim_space()
-				win_main.set('txt_disk_output', if out != '' { out } else { 'No developer junk directories found in this path.' })
-				win_main.append_console('disk_console', ' Developer junk scan complete in ${elapsed_ms} ms.\n', 4)
-				win_main.set('lbl_stats', ' Stats: DEV JUNK SCAN COMPLETE  |  Duration: ${elapsed_ms} ms')
+				win_main.set('txt_disk_output', if out != '' {
+					out
+				} else {
+					'No developer junk directories found in this path.'
+				})
+				win_main.append_console('disk_console',
+					' Developer junk scan complete in ${elapsed_ms} ms.\n', 4)
+				win_main.set('lbl_stats',
+					' Stats: DEV JUNK SCAN COMPLETE  |  Duration: ${elapsed_ms} ms')
 				win_main.set_status('Developer junk scan finished.')
 				win_main.toast('Scan complete!')
 			})
@@ -249,7 +282,8 @@ fn main() {
 			w.alert('No DerivedData', 'Xcode DerivedData folder not found or already empty.')
 			return
 		}
-		if !w.confirm('Clean Xcode DerivedData', 'Delete all Xcode DerivedData cache to reclaim disk space?') {
+		if !w.confirm('Clean Xcode DerivedData',
+			'Delete all Xcode DerivedData cache to reclaim disk space?') {
 			return
 		}
 		w.append_console('disk_console', ' Cleaning Xcode DerivedData: ${derived_path}...\n', 1)

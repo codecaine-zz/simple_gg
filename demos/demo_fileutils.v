@@ -42,8 +42,16 @@ fn main() {
 
 	// 3. Struct array JSON serialization
 	servers := [
-		ServerConfig{ host: 'primary', port: 80, ssl: false },
-		ServerConfig{ host: 'backup', port: 443, ssl: true },
+		ServerConfig{
+			host: 'primary'
+			port: 80
+			ssl:  false
+		},
+		ServerConfig{
+			host: 'backup'
+			port: 443
+			ssl:  true
+		},
 	]
 	arr_path := os.join_path(demo_dir, 'servers.json')
 	fileutils.save_struct_array_to_file(arr_path, servers)!

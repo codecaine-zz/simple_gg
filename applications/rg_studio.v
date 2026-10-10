@@ -24,97 +24,97 @@ fn get_rg_bin() string {
 }
 
 struct RgRecipe {
-	title     string
-	pattern   string
+	title       string
+	pattern     string
 	type_filter string
 	glob_filter string
-	is_fixed  bool
-	is_word   bool
-	is_case_s bool
-	desc      string
+	is_fixed    bool
+	is_word     bool
+	is_case_s   bool
+	desc        string
 }
 
 fn get_all_rg_recipes() []RgRecipe {
 	return [
 		RgRecipe{
-			title: ' TODO / FIXME / BUG / HACK Comments'
-			pattern: r'(TODO|FIXME|BUG|HACK|NOTE|XXX):?'
+			title:       ' TODO / FIXME / BUG / HACK Comments'
+			pattern:     r'(TODO|FIXME|BUG|HACK|NOTE|XXX):?'
 			type_filter: 'All Types'
 			glob_filter: ''
-			is_fixed: false
-			is_word: false
-			is_case_s: true
-			desc: 'Finds technical debt, todos, and bug annotations across codebase.'
+			is_fixed:    false
+			is_word:     false
+			is_case_s:   true
+			desc:        'Finds technical debt, todos, and bug annotations across codebase.'
 		},
 		RgRecipe{
-			title: ' Potential API Keys, Tokens & Secrets'
-			pattern: r'(?i)(api[_-]?key|secret|token|password|bearer|auth[_-]?key)\s*[:=]\s*["\x27][A-Za-z0-9_\-]{8,}["\x27]'
+			title:       ' Potential API Keys, Tokens & Secrets'
+			pattern:     r'(?i)(api[_-]?key|secret|token|password|bearer|auth[_-]?key)\s*[:=]\s*["\x27][A-Za-z0-9_\-]{8,}["\x27]'
 			type_filter: 'All Types'
 			glob_filter: '!*.lock'
-			is_fixed: false
-			is_word: false
-			is_case_s: false
-			desc: 'Finds hardcoded tokens, credentials, and API secret assignments.'
+			is_fixed:    false
+			is_word:     false
+			is_case_s:   false
+			desc:        'Finds hardcoded tokens, credentials, and API secret assignments.'
 		},
 		RgRecipe{
-			title: ' URLs & Web Endpoints (http/https)'
-			pattern: r'https?://[a-zA-Z0-9./?=_%&:-]+'
+			title:       ' URLs & Web Endpoints (http/https)'
+			pattern:     r'https?://[a-zA-Z0-9./?=_%&:-]+'
 			type_filter: 'All Types'
 			glob_filter: ''
-			is_fixed: false
-			is_word: false
-			is_case_s: false
-			desc: 'Finds all HTTP and HTTPS endpoints referenced in source files.'
+			is_fixed:    false
+			is_word:     false
+			is_case_s:   false
+			desc:        'Finds all HTTP and HTTPS endpoints referenced in source files.'
 		},
 		RgRecipe{
-			title: ' Function & Method Definitions (fn / func / def)'
-			pattern: r'(pub\s+)?(fn|func|def|function)\s+([A-Za-z0-9_]+)'
+			title:       ' Function & Method Definitions (fn / func / def)'
+			pattern:     r'(pub\s+)?(fn|func|def|function)\s+([A-Za-z0-9_]+)'
 			type_filter: 'All Types'
 			glob_filter: ''
-			is_fixed: false
-			is_word: false
-			is_case_s: true
-			desc: 'Finds declared functions and methods across multiple languages.'
+			is_fixed:    false
+			is_word:     false
+			is_case_s:   true
+			desc:        'Finds declared functions and methods across multiple languages.'
 		},
 		RgRecipe{
-			title: ' Import & Module Dependencies'
-			pattern: r'^(import|from|#include|require|use)\s+.*'
+			title:       ' Import & Module Dependencies'
+			pattern:     r'^(import|from|#include|require|use)\s+.*'
 			type_filter: 'All Types'
 			glob_filter: ''
-			is_fixed: false
-			is_word: false
-			is_case_s: true
-			desc: 'Finds all dependency imports and header includes.'
+			is_fixed:    false
+			is_word:     false
+			is_case_s:   true
+			desc:        'Finds all dependency imports and header includes.'
 		},
 		RgRecipe{
-			title: ' Panic / Throw / Fatal Error Handlers'
-			pattern: r'(panic|throw\s+new|fatal|assert|die)\('
+			title:       ' Panic / Throw / Fatal Error Handlers'
+			pattern:     r'(panic|throw\s+new|fatal|assert|die)\('
 			type_filter: 'All Types'
 			glob_filter: ''
-			is_fixed: false
-			is_word: false
-			is_case_s: false
-			desc: 'Finds critical assertions, panics, and exception triggers.'
+			is_fixed:    false
+			is_word:     false
+			is_case_s:   false
+			desc:        'Finds critical assertions, panics, and exception triggers.'
 		},
 		RgRecipe{
-			title: ' Markdown Document Headings (#, ##, ###)'
-			pattern: r'^#{1,6}\s+.*'
+			title:       ' Markdown Document Headings (#, ##, ###)'
+			pattern:     r'^#{1,6}\s+.*'
 			type_filter: 'md (Markdown)'
 			glob_filter: '*.md'
-			is_fixed: false
-			is_word: false
-			is_case_s: false
-			desc: 'Extracts section heading hierarchy from Markdown documentation.'
+			is_fixed:    false
+			is_word:     false
+			is_case_s:   false
+			desc:        'Extracts section heading hierarchy from Markdown documentation.'
 		},
 		RgRecipe{
-			title: ' Struct / Class / Interface Definitions'
-			pattern: r'(pub\s+)?(struct|class|interface|type|enum)\s+([A-Za-z0-9_]+)'
+			title:       ' Struct / Class / Interface Definitions'
+			pattern:     r'(pub\s+)?(struct|class|interface|type|enum)\s+([A-Za-z0-9_]+)'
 			type_filter: 'All Types'
 			glob_filter: ''
-			is_fixed: false
-			is_word: false
-			is_case_s: true
-			desc: 'Finds type, class, struct, and interface declarations.'
+			is_fixed:    false
+			is_word:     false
+			is_case_s:   true
+			desc:        'Finds type, class, struct, and interface declarations.'
 		},
 	]
 }
@@ -144,7 +144,8 @@ fn main() {
 	})
 
 	rg_path := get_rg_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${rg_path} (ripgrep)  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker (Zero Freezes)')
+	win.add_label('lbl_engine_info',
+		'Engine: ${rg_path} (ripgrep)  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker (Zero Freezes)')
 
 	all_recipes := get_all_rg_recipes()
 
@@ -152,7 +153,7 @@ fn main() {
 	// Search Query & Target Folder
 	// -------------------------------------------------------------
 	win.begin_group_box('grp_search_box', 'Search Pattern & Target Scope')
-	
+
 	win.begin_row('row_query')
 	win.add_label('lbl_pattern', 'Search Pattern (Regex / Text):')
 	win.add_input('txt_pattern', 'fn main')
@@ -178,7 +179,7 @@ fn main() {
 	// Filters & Preset Recipes
 	// -------------------------------------------------------------
 	win.begin_group_box('grp_filters', 'File Types, Glob Filters & Search Recipes')
-	
+
 	mut recipe_titles := ['-- Select a Fast Search Recipe --']
 	for r in all_recipes {
 		recipe_titles << r.title
@@ -207,7 +208,7 @@ fn main() {
 		'json (JSON)',
 		'html (HTML)',
 		'css (CSS)',
-		'sh (Shell Script)'
+		'sh (Shell Script)',
 	], 'All Types')
 	win.set_control_width('dd_type', 160)
 
@@ -295,7 +296,11 @@ fn main() {
 
 			if is_fixed { raw_args << '-F' }
 			if is_word { raw_args << '-w' }
-			if is_case_s { raw_args << '-s' } else { raw_args << '-S' } // Smart Case default
+			if is_case_s {
+				raw_args << '-s'
+			} else {
+				raw_args << '-S'
+			} // Smart Case default
 			if is_invert { raw_args << '-v' }
 			if is_hidden { raw_args << '--hidden' }
 			if is_no_ignore { raw_args << '--no-ignore' }
@@ -327,7 +332,8 @@ fn main() {
 					out_str := res.output.trim_space()
 					count := if out_str != '' { out_str.split_into_lines().len } else { 0 }
 					win_main.set('txt_results', out_str)
-					win_main.set('lbl_stats', ' Stats: SUCCESS  |  Matches: ${count}  |  Duration: ${elapsed_ms} ms')
+					win_main.set('lbl_stats',
+						' Stats: SUCCESS  |  Matches: ${count}  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Found ${count} lines matching query in ${elapsed_ms} ms.')
 					win_main.toast('Found ${count} matches in ${elapsed_ms} ms!')
 				} else if res.exit_code == 1 {
@@ -336,9 +342,15 @@ fn main() {
 					win_main.set_status('No matches found for query in ${elapsed_ms} ms.')
 					win_main.toast('No matches found.')
 				} else {
-					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Ripgrep failed with exit code ${res.exit_code}. Check regex syntax or directory.' }
-					win_main.set('txt_results', '// [RIPGREP SEARCH ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
-					win_main.set('lbl_stats', ' Stats: ERROR (Exit code ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
+					err_msg := if res.output.trim_space() != '' {
+						res.output.trim_space()
+					} else {
+						'Ripgrep failed with exit code ${res.exit_code}. Check regex syntax or directory.'
+					}
+					win_main.set('txt_results',
+						'// [RIPGREP SEARCH ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+					win_main.set('lbl_stats',
+						' Stats: ERROR (Exit code ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Ripgrep search failed.')
 					win_main.toast('Ripgrep search error!')
 				}

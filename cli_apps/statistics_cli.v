@@ -6,7 +6,8 @@ fn main() {
 	mut app := simplecli.new_app('statistics-cli', '1.0.0')
 	app.set_description('Statistical Analysis & Dataset Metrics CLI')
 
-	app.add_flag_string('data', 'd', '10,25,32,45,58,62,75,88,94', 'Comma-separated list of float numbers')
+	app.add_flag_string('data', 'd', '10,25,32,45,58,62,75,88,94',
+		'Comma-separated list of float numbers')
 	app.add_flag_string('file', 'f', '', 'Input text/CSV file with numeric column')
 	app.add_flag_bool('interactive', 'x', false, 'Launch interactive statistics calculator')
 
@@ -58,21 +59,18 @@ fn display_stats(mut app simplecli.SimpleCli, data []f64) {
 	max_val := app.stats_max(data)
 	range_val := max_val - min_val
 
-	app.table(
-		['Statistical Metric', 'Calculated Value'],
-		[
-			['Sample Count (N)', '${data.len}'],
-			['Arithmetic Mean (μ)', '${mean_val:.4f}'],
-			['Median (Q2)', '${median_val:.4f}'],
-			['Standard Deviation (σ)', '${std_dev:.4f}'],
-			['Root Mean Square (RMS)', '${rms_val:.4f}'],
-			['Geometric Mean', '${geo_mean:.4f}'],
-			['Harmonic Mean', '${harm_mean:.4f}'],
-			['Minimum Value', '${min_val:.4f}'],
-			['Maximum Value', '${max_val:.4f}'],
-			['Range (Max - Min)', '${range_val:.4f}'],
-		]
-	)
+	app.table(['Statistical Metric', 'Calculated Value'], [
+		['Sample Count (N)', '${data.len}'],
+		['Arithmetic Mean (μ)', '${mean_val:.4f}'],
+		['Median (Q2)', '${median_val:.4f}'],
+		['Standard Deviation (σ)', '${std_dev:.4f}'],
+		['Root Mean Square (RMS)', '${rms_val:.4f}'],
+		['Geometric Mean', '${geo_mean:.4f}'],
+		['Harmonic Mean', '${harm_mean:.4f}'],
+		['Minimum Value', '${min_val:.4f}'],
+		['Maximum Value', '${max_val:.4f}'],
+		['Range (Max - Min)', '${range_val:.4f}'],
+	])
 	app.success('Calculated in ${app.elapsed_ms()} ms.')
 }
 

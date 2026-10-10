@@ -120,12 +120,14 @@ fn test_checksum_verified() {
 }
 
 fn test_mode_mtime_roundtrip() {
-	raw := pack_bytes([TarEntry{
-		name:  'run.sh'
-		data:  '#!/bin/sh'.bytes()
-		mode:  0o755
-		mtime: 1700000000
-	}])
+	raw := pack_bytes([
+		TarEntry{
+			name:  'run.sh'
+			data:  '#!/bin/sh'.bytes()
+			mode:  0o755
+			mtime: 1700000000
+		},
+	])
 	e := unpack_bytes(raw) or { panic(err) }
 	assert e[0].mode == 0o755
 	assert e[0].mtime == 1700000000
@@ -182,6 +184,8 @@ fn test_interop_with_system_tar() {
 	assert res.exit_code == 0
 	entries := list_tar_entries(theirs) or { panic(err) }
 	want := './' + 'q'.repeat(90) + '/' + 'w'.repeat(90) + '.txt'
-	e := find_entry(entries, want) or { panic('system tar entry not found; got ${entries.map(it.name)}') }
+	e := find_entry(entries, want) or {
+		panic('system tar entry not found; got ${entries.map(it.name)}')
+	}
 	assert e.data.bytestr() == 'sys'
 }

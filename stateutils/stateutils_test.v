@@ -460,5 +460,3 @@ fn test_struct_schema_evolution() {
 	assert reloaded.tags == ['api', 'v2']
 	assert reloaded.custom_meta['region'] == 'us-east-1'
 }
-
-

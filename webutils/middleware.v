@@ -338,8 +338,8 @@ pub:
 
 fn compressible(ct string) bool {
 	t := ct.all_before(';').trim_space().to_lower()
-	return t.starts_with('text/') || t in ['application/json', 'application/javascript',
-		'application/xml', 'image/svg+xml', 'application/manifest+json']
+	return t.starts_with('text/')
+		|| t in ['application/json', 'application/javascript', 'application/xml', 'image/svg+xml', 'application/manifest+json']
 		|| t.ends_with('+json') || t.ends_with('+xml')
 }
 

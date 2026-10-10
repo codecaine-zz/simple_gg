@@ -43,7 +43,8 @@ fn test_header_helpers() {
 		'b': '2 3'
 		'a': 'x&y'
 	}) == 'a=x%26y&b=2+3'
-	links := parse_link_header('<https://api.x/r?page=2>; rel="next", <https://api.x/r?page=9>; rel="last"')
+	links :=
+		parse_link_header('<https://api.x/r?page=2>; rel="next", <https://api.x/r?page=9>; rel="last"')
 	assert links['next'] == 'https://api.x/r?page=2'
 	assert links['last'] == 'https://api.x/r?page=9'
 	media, params := parse_content_type('Text/HTML; charset="UTF-8"')

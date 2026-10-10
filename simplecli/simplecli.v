@@ -17,11 +17,11 @@ import strings
 
 // LogLevel defines the severity threshold for console and file logging.
 pub enum LogLevel {
-	trace = 0
-	debug = 1
-	info  = 2
-	warn  = 3
-	error = 4
+	trace  = 0
+	debug  = 1
+	info   = 2
+	warn   = 3
+	error  = 4
 	silent = 5
 }
 
@@ -128,26 +128,26 @@ pub:
 @[heap]
 pub struct SimpleCli {
 pub mut:
-	app_name     string = 'SimpleCli Application'
-	version      string = '1.0.0'
-	author       string
-	description  string
-	debug_mode   bool
-	no_color     bool
-	silent_mode  bool
-	log_level    LogLevel = .info
-	log_file     string
-	state        map[string]string
-	flags_def    map[string]FlagOption
-	flags_val    map[string]string
-	pos_args     []string
-	bench_start  time.Time
+	app_name    string = 'SimpleCli Application'
+	version     string = '1.0.0'
+	author      string
+	description string
+	debug_mode  bool
+	no_color    bool
+	silent_mode bool
+	log_level   LogLevel = .info
+	log_file    string
+	state       map[string]string
+	flags_def   map[string]FlagOption
+	flags_val   map[string]string
+	pos_args    []string
+	bench_start time.Time
 }
 
 // new creates a new SimpleCli application instance with the given name.
 pub fn new(app_name string) &SimpleCli {
 	return &SimpleCli{
-		app_name: app_name
+		app_name:    app_name
 		bench_start: time.now()
 	}
 }
@@ -155,8 +155,8 @@ pub fn new(app_name string) &SimpleCli {
 // new_app creates a new SimpleCli application instance with name and version.
 pub fn new_app(app_name string, version string) &SimpleCli {
 	return &SimpleCli{
-		app_name: app_name
-		version: version
+		app_name:    app_name
+		version:     version
 		bench_start: time.now()
 	}
 }
@@ -235,11 +235,11 @@ pub fn (mut cli SimpleCli) set_log_file(file_path string) &SimpleCli {
 // add_flag_string defines a string CLI flag (e.g. `--config` or `-c`).
 pub fn (mut cli SimpleCli) add_flag_string(name string, short string, default_val string, desc string) &SimpleCli {
 	cli.flags_def[name] = FlagOption{
-		name: name
-		short: short
-		kind: 'string'
+		name:        name
+		short:       short
+		kind:        'string'
 		default_val: default_val
-		desc: desc
+		desc:        desc
 	}
 	cli.flags_val[name] = default_val
 	return cli
@@ -248,11 +248,11 @@ pub fn (mut cli SimpleCli) add_flag_string(name string, short string, default_va
 // add_flag_int defines an integer CLI flag (e.g. `--port` or `-p`).
 pub fn (mut cli SimpleCli) add_flag_int(name string, short string, default_val int, desc string) &SimpleCli {
 	cli.flags_def[name] = FlagOption{
-		name: name
-		short: short
-		kind: 'int'
+		name:        name
+		short:       short
+		kind:        'int'
 		default_val: default_val.str()
-		desc: desc
+		desc:        desc
 	}
 	cli.flags_val[name] = default_val.str()
 	return cli
@@ -261,11 +261,11 @@ pub fn (mut cli SimpleCli) add_flag_int(name string, short string, default_val i
 // add_flag_bool defines a boolean flag toggle (e.g. `--verbose` or `-v`).
 pub fn (mut cli SimpleCli) add_flag_bool(name string, short string, default_val bool, desc string) &SimpleCli {
 	cli.flags_def[name] = FlagOption{
-		name: name
-		short: short
-		kind: 'bool'
+		name:        name
+		short:       short
+		kind:        'bool'
 		default_val: default_val.str()
-		desc: desc
+		desc:        desc
 	}
 	cli.flags_val[name] = default_val.str()
 	return cli
@@ -274,11 +274,11 @@ pub fn (mut cli SimpleCli) add_flag_bool(name string, short string, default_val 
 // add_flag_float defines a floating-point flag (e.g. `--rate` or `-r`).
 pub fn (mut cli SimpleCli) add_flag_float(name string, short string, default_val f64, desc string) &SimpleCli {
 	cli.flags_def[name] = FlagOption{
-		name: name
-		short: short
-		kind: 'float'
+		name:        name
+		short:       short
+		kind:        'float'
 		default_val: default_val.str()
-		desc: desc
+		desc:        desc
 	}
 	cli.flags_val[name] = default_val.str()
 	return cli
@@ -413,7 +413,7 @@ pub fn (cli &SimpleCli) print_help() {
 	}
 	println('\n${cli.bold('USAGE:')}')
 	println('  ${cli.cyan(cli.app_name.to_lower().replace(' ', '-'))} [options] [arguments]')
-	
+
 	println('\n${cli.bold('OPTIONS:')}')
 	println('  ${cli.cyan('--help, -h')}            Show this help information')
 	println('  ${cli.cyan('--version, -v')}         Show application version')
@@ -424,7 +424,11 @@ pub fn (cli &SimpleCli) print_help() {
 	for name, def in cli.flags_def {
 		short_str := if def.short.len > 0 { '-${def.short}, ' } else { '    ' }
 		pad := ' '.repeat(int_max(0, 18 - name.len))
-		def_str := if def.default_val.len > 0 { ' ' + cli.dim('(default: ' + def.default_val + ')') } else { '' }
+		def_str := if def.default_val.len > 0 {
+			' ' + cli.dim('(default: ' + def.default_val + ')')
+		} else {
+			''
+		}
 		println('  ${cli.cyan(short_str + '--' + name)}${pad} ${def.desc}${def_str}')
 	}
 	println('')
@@ -607,12 +611,14 @@ pub fn (cli &SimpleCli) banner(title string, subtitle string) &SimpleCli {
 	}
 	t := if title.len > 0 { title } else { cli.app_name }
 	s := if subtitle.len > 0 { subtitle } else { 'v' + cli.version }
-	
+
 	line_len := 64
 	println(cli.cyan('┌' + '─'.repeat(line_len) + '┐'))
-	println(cli.cyan('│') + '  ' + cli.bold(t) + ' '.repeat(int_max(0, line_len - t.len - 2)) + cli.cyan('│'))
+	println(cli.cyan('│') + '  ' + cli.bold(t) + ' '.repeat(int_max(0, line_len - t.len - 2)) +
+		cli.cyan('│'))
 	if s.len > 0 {
-		println(cli.cyan('│') + '  ' + cli.dim(s) + ' '.repeat(int_max(0, line_len - s.len - 2)) + cli.cyan('│'))
+		println(cli.cyan('│') + '  ' + cli.dim(s) + ' '.repeat(int_max(0, line_len - s.len - 2)) +
+			cli.cyan('│'))
 	}
 	println(cli.cyan('└' + '─'.repeat(line_len) + '┘'))
 	return cli
@@ -631,7 +637,7 @@ pub fn (cli &SimpleCli) panel(title string, content string) &SimpleCli {
 		}
 	}
 	max_len = int_max(max_len, 40)
-	
+
 	header := '─ ' + cli.bold(title) + ' '
 	header_dashes := int_max(0, max_len - title.len - 3)
 	println(cli.cyan('┌' + header + '─'.repeat(header_dashes) + '┐'))
@@ -674,10 +680,10 @@ pub fn (cli &SimpleCli) table(headers []string, rows [][]string) &SimpleCli {
 	if headers.len == 0 && rows.len == 0 {
 		return cli
 	}
-	
+
 	col_count := if headers.len > 0 { headers.len } else { rows[0].len }
 	mut col_widths := []int{len: col_count, init: 4}
-	
+
 	// Determine header widths
 	for i, h in headers {
 		if i < col_widths.len && h.len > col_widths[i] {
@@ -692,7 +698,7 @@ pub fn (cli &SimpleCli) table(headers []string, rows [][]string) &SimpleCli {
 			}
 		}
 	}
-	
+
 	// Top border
 	mut top := '┌'
 	mut sep := '├'
@@ -712,7 +718,7 @@ pub fn (cli &SimpleCli) table(headers []string, rows [][]string) &SimpleCli {
 		}
 	}
 	println(cli.dim(top))
-	
+
 	// Headers
 	if headers.len > 0 {
 		mut h_row := '│'
@@ -724,7 +730,7 @@ pub fn (cli &SimpleCli) table(headers []string, rows [][]string) &SimpleCli {
 		println(h_row)
 		println(cli.dim(sep))
 	}
-	
+
 	// Rows
 	for r in rows {
 		mut row_str := '│'
@@ -736,7 +742,7 @@ pub fn (cli &SimpleCli) table(headers []string, rows [][]string) &SimpleCli {
 		}
 		println(row_str)
 	}
-	
+
 	println(cli.dim(bot))
 	return cli
 }
@@ -750,7 +756,7 @@ pub fn (cli &SimpleCli) progress_bar(current f64, total f64, label string) &Simp
 	clamped_pct := math_clamp_f64(pct, 0.0, 100.0)
 	bar_width := 30
 	filled := int((clamped_pct / 100.0) * f64(bar_width))
-	
+
 	mut bar := ''
 	for i in 0 .. bar_width {
 		if i < filled {
@@ -759,7 +765,7 @@ pub fn (cli &SimpleCli) progress_bar(current f64, total f64, label string) &Simp
 			bar += '░'
 		}
 	}
-	
+
 	lbl := if label.len > 0 { ' ${label}' } else { '' }
 	print('\r  ${cli.cyan(bar)} ${clamped_pct:5.1f}%${lbl}')
 	os.flush()
@@ -816,7 +822,13 @@ pub fn (cli &SimpleCli) sparkline(values []f64) string {
 	mut res := strings.new_builder(values.len * 4)
 	for v in values {
 		idx := int(((v - min_v) / (max_v - min_v)) * f64(glyphs.len - 1))
-		clamped_idx := if idx < 0 { 0 } else if idx >= glyphs.len { glyphs.len - 1 } else { idx }
+		clamped_idx := if idx < 0 {
+			0
+		} else if idx >= glyphs.len {
+			glyphs.len - 1
+		} else {
+			idx
+		}
 		res.write_string(glyphs[clamped_idx])
 	}
 	return res.str()
@@ -839,7 +851,7 @@ pub fn (cli &SimpleCli) bar_chart(title string, data map[string]f64, max_width i
 		}
 	}
 	max_lbl_len = int_max(max_lbl_len, 8)
-	
+
 	if title.len > 0 {
 		println('\n${cli.bold(title)}')
 		cli.divider('─', max_lbl_len + w + 20)
@@ -848,12 +860,19 @@ pub fn (cli &SimpleCli) bar_chart(title string, data map[string]f64, max_width i
 	for k, v in data {
 		pct := if max_val > 0.0 { (v / max_val) * 100.0 } else { 0.0 }
 		bar_len := if max_val > 0.0 { int((v / max_val) * f64(w)) } else { 0 }
-		clamped_bar_len := if bar_len < 0 { 0 } else if bar_len > w { w } else { bar_len }
-		
+		clamped_bar_len := if bar_len < 0 {
+			0
+		} else if bar_len > w {
+			w
+		} else {
+			bar_len
+		}
+
 		bar_str := '█'.repeat(clamped_bar_len) + '░'.repeat(w - clamped_bar_len)
 		pad := ' '.repeat(int_max(0, max_lbl_len - k.len))
-		
-		println('  ${cli.bold(k)}${pad}  ${cli.cyan(bar_str)}  ${v:6.1f} ${cli.dim('(' + pct.str() + '%)')}')
+
+		println('  ${cli.bold(k)}${pad}  ${cli.cyan(bar_str)}  ${v:6.1f} ${cli.dim('(' + pct.str() +
+			'%)')}')
 	}
 	println('')
 	return cli
@@ -868,10 +887,16 @@ pub fn (cli &SimpleCli) gauge(title string, value f64, max f64, unit string) &Si
 	clamped_pct := math_clamp_f64(pct, 0.0, 100.0)
 	bar_w := 20
 	filled := int((clamped_pct / 100.0) * f64(bar_w))
-	clamped_filled := if filled < 0 { 0 } else if filled > bar_w { bar_w } else { filled }
-	
+	clamped_filled := if filled < 0 {
+		0
+	} else if filled > bar_w {
+		bar_w
+	} else {
+		filled
+	}
+
 	bar_str := '█'.repeat(clamped_filled) + '░'.repeat(bar_w - clamped_filled)
-	
+
 	mut colored_bar := cli.green(bar_str)
 	mut status_badge := cli.green('[OK]')
 	if clamped_pct >= 90.0 {
@@ -881,7 +906,7 @@ pub fn (cli &SimpleCli) gauge(title string, value f64, max f64, unit string) &Si
 		colored_bar = cli.yellow(bar_str)
 		status_badge = cli.yellow('[WARN]')
 	}
-	
+
 	u := if unit.len > 0 { ' ' + unit } else { '' }
 	println('  ${cli.bold(title)}: [${colored_bar}] ${value:5.1f}/${max:5.1f}${u} (${clamped_pct:5.1f}%) ${status_badge}')
 	return cli
@@ -913,16 +938,16 @@ fn (cli &SimpleCli) render_tree_children(children []TreeNode, prefix string) {
 pub fn (cli &SimpleCli) diff_text(old_text string, new_text string) string {
 	old_lines := old_text.split('\n')
 	new_lines := new_text.split('\n')
-	
+
 	mut b := strings.new_builder(1024)
 	mut additions := 0
 	mut deletions := 0
-	
+
 	max_lines := int_max(old_lines.len, new_lines.len)
 	for i in 0 .. max_lines {
 		line_num := (i + 1).str()
 		pad := ' '.repeat(int_max(0, 4 - line_num.len))
-		
+
 		if i < old_lines.len && i < new_lines.len {
 			if old_lines[i] == new_lines[i] {
 				b.write_string('  ${cli.dim(line_num + pad + ' |')}   ${old_lines[i]}\n')
@@ -940,7 +965,8 @@ pub fn (cli &SimpleCli) diff_text(old_text string, new_text string) string {
 			b.write_string('  ${cli.green(line_num + pad + ' +')} ${cli.green(new_lines[i])}\n')
 		}
 	}
-	summary := '  ${cli.dim('───')} ${cli.green('+' + additions.str() + ' additions')}, ${cli.red('-' + deletions.str() + ' deletions')} ${cli.dim('───')}\n'
+	summary := '  ${cli.dim('───')} ${cli.green('+' + additions.str() + ' additions')}, ${cli.red(
+		'-' + deletions.str() + ' deletions')} ${cli.dim('───')}\n'
 	b.write_string(summary)
 	return b.str()
 }
@@ -977,7 +1003,7 @@ pub fn (cli &SimpleCli) alert(kind AlertKind, title string, msg string) &SimpleC
 	mut icon := 'ℹ'
 	mut border_color_fn := cli.cyan
 	mut badge_text := 'NOTE'
-	
+
 	match kind {
 		.info {
 			icon = 'ℹ'
@@ -1010,7 +1036,7 @@ pub fn (cli &SimpleCli) alert(kind AlertKind, title string, msg string) &SimpleC
 			badge_text = 'NOTE'
 		}
 	}
-	
+
 	header := '${icon}  ${badge_text}: ${title}'
 	lines := msg.split('\n')
 	mut max_len := header.len + 2
@@ -1020,9 +1046,10 @@ pub fn (cli &SimpleCli) alert(kind AlertKind, title string, msg string) &SimpleC
 		}
 	}
 	max_len = int_max(max_len, 44)
-	
+
 	println(border_color_fn('┌' + '─'.repeat(max_len + 4) + '┐'))
-	println(border_color_fn('│ ') + cli.bold(header) + ' '.repeat(int_max(0, max_len - header.len + 2)) + border_color_fn(' │'))
+	println(border_color_fn('│ ') + cli.bold(header) + ' '.repeat(int_max(0, max_len -
+		header.len + 2)) + border_color_fn(' │'))
 	println(border_color_fn('├' + '─'.repeat(max_len + 4) + '┤'))
 	for l in lines {
 		pad := ' '.repeat(int_max(0, max_len - l.len + 2))
@@ -1055,6 +1082,7 @@ pub fn (cli &SimpleCli) task_item(title string, status TaskStatus, duration_ms i
 			println('  ${cli.yellow('↷')} ${title} ${cli.dim('[SKIPPED]')}')
 		}
 	}
+
 	return cli
 }
 
@@ -1084,7 +1112,7 @@ pub fn (cli &SimpleCli) table_to_markdown(headers []string, rows [][]string) str
 	}
 	mut b := strings.new_builder(512)
 	col_count := if headers.len > 0 { headers.len } else { rows[0].len }
-	
+
 	if headers.len > 0 {
 		b.write_string('| ' + headers.join(' | ') + ' |\n')
 		mut sep := []string{}
@@ -1126,7 +1154,7 @@ pub fn (cli &SimpleCli) json_highlight(json_str string) string {
 	}
 	mut res := strings.new_builder(json_str.len * 2)
 	mut i := 0
-	
+
 	for i < json_str.len {
 		ch := json_str[i]
 		if ch == `"` {
@@ -1137,9 +1165,10 @@ pub fn (cli &SimpleCli) json_highlight(json_str string) string {
 				}
 				j++
 			}
-			str_val := if j < json_str.len { json_str[i .. j + 1] } else { json_str[i..] }
+			str_val := if j < json_str.len { json_str[i..j + 1] } else { json_str[i..] }
 			mut k := j + 1
-			for k < json_str.len && (json_str[k] == ` ` || json_str[k] == `\t` || json_str[k] == `\n` || json_str[k] == `\r`) {
+			for k < json_str.len && (json_str[k] == ` ` || json_str[k] == `\t`
+				|| json_str[k] == `\n` || json_str[k] == `\r`) {
 				k++
 			}
 			if k < json_str.len && json_str[k] == `:` {
@@ -1155,7 +1184,9 @@ pub fn (cli &SimpleCli) json_highlight(json_str string) string {
 			res.write_string(cli.dim(ch.ascii_str()))
 		} else if (ch >= `0` && ch <= `9`) || ch == `-` {
 			mut j := i
-			for j < json_str.len && ((json_str[j] >= `0` && json_str[j] <= `9`) || json_str[j] == `.` || json_str[j] == `-` || json_str[j] == `e` || json_str[j] == `E`) {
+			for j < json_str.len && ((json_str[j] >= `0` && json_str[j] <= `9`)
+				|| json_str[j] == `.` || json_str[j] == `-` || json_str[j] == `e`
+				|| json_str[j] == `E`) {
 				j++
 			}
 			num_val := json_str[i..j]
@@ -1239,7 +1270,11 @@ pub fn (cli &SimpleCli) prompt_validated(question string, default_val string, va
 		if validator(ans) {
 			return ans
 		}
-		err_text := if error_msg.len > 0 { error_msg } else { 'Invalid input format, please try again.' }
+		err_text := if error_msg.len > 0 {
+			error_msg
+		} else {
+			'Invalid input format, please try again.'
+		}
 		println('  ${cli.red(err_text)}')
 	}
 	return default_val
@@ -1343,25 +1378,30 @@ pub fn (cli &SimpleCli) form(title string, fields []FormField) map[string]string
 	if cli.silent_mode || fields.len == 0 {
 		return results
 	}
-	println(cli.cyan('\n┌─ ' + cli.bold(title) + ' ' + '─'.repeat(int_max(0, 50 - title.len)) + '┐'))
+	println(cli.cyan('\n┌─ ' + cli.bold(title) + ' ' + '─'.repeat(int_max(0, 50 -
+		title.len)) + '┐'))
 	for field in fields {
 		req_hint := if field.required { cli.red('*') } else { '' }
-		def_hint := if field.default_val.len > 0 { ' ' + cli.dim('(' + field.default_val + ')') } else { '' }
-		
+		def_hint := if field.default_val.len > 0 {
+			' ' + cli.dim('(' + field.default_val + ')')
+		} else {
+			''
+		}
+
 		for {
 			print('  ${cli.cyan('?')} ${cli.bold(field.label)}${req_hint}${def_hint}: ')
 			os.flush()
-			
+
 			mut val := os.get_raw_line().trim_space()
 			if val.len == 0 && field.default_val.len > 0 {
 				val = field.default_val
 			}
-			
+
 			if field.required && val.len == 0 {
 				println('    ${cli.red('This field is required.')}')
 				continue
 			}
-			
+
 			results[field.key] = val
 			break
 		}
@@ -1379,11 +1419,11 @@ pub fn (cli &SimpleCli) fuzzy_select(question string, options []string) string {
 	print('  ${cli.dim('Search: ')}')
 	os.flush()
 	query := os.get_raw_line().trim_space().to_lower()
-	
+
 	if query.len == 0 {
 		return cli.select(question, options)
 	}
-	
+
 	// Filter matching options
 	mut matches := []string{}
 	for opt in options {
@@ -1415,7 +1455,7 @@ pub fn (cli &SimpleCli) prompt_path(question string, default_path string, mode P
 	for {
 		raw_path := cli.prompt(question, default_path)
 		resolved := resolve_user_path(raw_path)
-		
+
 		match mode {
 			.any {
 				return resolved
@@ -1447,14 +1487,14 @@ pub fn (cli &SimpleCli) prompt_path(question string, default_path string, mode P
 pub fn (cli &SimpleCli) new_pipeline(title string) &Pipeline {
 	return &Pipeline{
 		title: title
-		cli: cli
+		cli:   cli
 	}
 }
 
 // add_step registers a task stage in the pipeline.
 pub fn (mut p Pipeline) add_step(name string, step_fn fn () bool) &Pipeline {
 	p.steps << PipelineStep{
-		name: name
+		name:    name
 		step_fn: step_fn
 	}
 	return p
@@ -1470,27 +1510,29 @@ pub fn (mut p Pipeline) run() bool {
 		}
 		return true
 	}
-	
+
 	p.cli.banner(p.title, '${p.steps.len} Pipeline Steps')
 	mut all_ok := true
 	start_time := time.now()
-	
+
 	for i, step in p.steps {
 		p.cli.print('  ${p.cli.cyan('⏳')} [${i + 1}/${p.steps.len}] ${step.name}...')
 		os.flush()
 		step_start := time.now()
 		ok := step.step_fn()
 		step_dur := time.since(step_start).milliseconds()
-		
+
 		if ok {
-			print('\r  ${p.cli.green('✓')} [${i + 1}/${p.steps.len}] ${step.name} ${p.cli.dim('(' + step_dur.str() + ' ms)')}\n')
+			print('\r  ${p.cli.green('✓')} [${i + 1}/${p.steps.len}] ${step.name} ${p.cli.dim(
+				'(' + step_dur.str() + ' ms)')}\n')
 		} else {
-			print('\r  ${p.cli.red('✖')} [${i + 1}/${p.steps.len}] ${step.name} ${p.cli.red('[FAILED]')} ${p.cli.dim('(' + step_dur.str() + ' ms)')}\n')
+			print('\r  ${p.cli.red('✖')} [${i + 1}/${p.steps.len}] ${step.name} ${p.cli.red('[FAILED]')} ${p.cli.dim(
+				'(' + step_dur.str() + ' ms)')}\n')
 			all_ok = false
 			break
 		}
 	}
-	
+
 	total_dur := time.since(start_time).milliseconds()
 	p.cli.divider('─', 60)
 	if all_ok {
@@ -1687,4 +1729,3 @@ pub fn render_markdown(md_text string) {
 	cli := new('SimpleCli')
 	cli.render_markdown(md_text)
 }
-

@@ -116,7 +116,9 @@ fn test_stdlib_validators_and_url() {
 	assert !app.validate_numeric_range(5.0, 10.0, 100.0)
 
 	// URL parsing
-	url_obj := app.parse_url('https://api.example.com:8443/v1/users?query=admin#top') or { panic(err) }
+	url_obj := app.parse_url('https://api.example.com:8443/v1/users?query=admin#top') or {
+		panic(err)
+	}
 	assert url_obj.scheme == 'https'
 	assert url_obj.host == 'api.example.com'
 	assert url_obj.port == 8443

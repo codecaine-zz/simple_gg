@@ -8,7 +8,8 @@ fn main() {
 	win.set_theme('Nord')
 
 	win.add_heading('Interval Timers & Delayed Timeouts')
-	win.add_label('lbl_subtitle', 'Demonstrates recurring set_interval background updates, progress animation, clock polling, and set_timeout delays.')
+	win.add_label('lbl_subtitle',
+		'Demonstrates recurring set_interval background updates, progress animation, clock polling, and set_timeout delays.')
 
 	// 1. Live Digital Clock Section
 	win.begin_group('1. Live Clock & Polling')

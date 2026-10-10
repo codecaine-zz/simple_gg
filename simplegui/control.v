@@ -39,21 +39,21 @@ pub mut:
 	title             string // Header text displayed at the top of the group box
 	border            bool = true // Whether to draw an outer border around the group container
 	border_width      f32  = 1.0  // Border line thickness in pixels
-	border_color      string      // Custom hex color string for the border line (e.g. '#3b82f6')
-	corner_radius     f32 = 12.0  // Corner roundness radius in pixels
-	bg_color          string      // Background fill color string
-	padding           int = 12    // Inner spacing padding in pixels around child elements
-	shadow            bool        // Whether to render a subtle drop-shadow effect
+	border_color      string // Custom hex color string for the border line (e.g. '#3b82f6')
+	corner_radius     f32 = 12.0 // Corner roundness radius in pixels
+	bg_color          string // Background fill color string
+	padding           int = 12 // Inner spacing padding in pixels around child elements
+	shadow            bool // Whether to render a subtle drop-shadow effect
 	show_caption      bool = true // Whether to render the title caption header
-	caption_color     string      // Color of the title text header
+	caption_color     string // Color of the title text header
 	caption_alignment string = 'left' // Header alignment: 'left', 'center', or 'right'
 }
 
 // ToolbarItem represents an interactive action button displayed within a horizontal Toolbar control.
 pub struct ToolbarItem {
 pub mut:
-	icon     string            // Icon representation or symbol (e.g. '[Folder]', '[Save]', '[Settings]')
-	tooltip  string            // Tooltip hint text displayed when hovering over the toolbar item
+	icon     string // Icon representation or symbol (e.g. '[Folder]', '[Save]', '[Settings]')
+	tooltip  string // Tooltip hint text displayed when hovering over the toolbar item
 	on_click VoidEventCallback = unsafe { nil } // Callback function executed when clicked
 }
 
@@ -82,34 +82,34 @@ pub mut:
 // CommandItem represents a selectable command entry in the Spotlight / Command Palette launcher (Ctrl+K / Cmd+K).
 pub struct CommandItem {
 pub mut:
-	id         string            // Unique identifier for the command action
-	title      string            // Human-readable command title shown in the palette search list
-	category   string            // Category grouping header (e.g. 'Navigation', 'Settings', 'Actions')
-	shortcut   string            // Keyboard shortcut hint string (e.g. 'Ctrl+Shift+P')
-	icon_path  string            // Custom icon asset path
+	id         string // Unique identifier for the command action
+	title      string // Human-readable command title shown in the palette search list
+	category   string // Category grouping header (e.g. 'Navigation', 'Settings', 'Actions')
+	shortcut   string // Keyboard shortcut hint string (e.g. 'Ctrl+Shift+P')
+	icon_path  string // Custom icon asset path
 	on_execute VoidEventCallback = unsafe { nil } // Callback executed when selected
 }
 
 // ContextMenuItem represents an individual action item in a popup Right-Click Context Menu.
 pub struct ContextMenuItem {
 pub mut:
-	id        string            // Unique item identifier
-	title     string            // Display label text
-	icon      string            // Icon or emoji displayed next to the text label
-	icon_path string            // Custom image icon asset path
-	shortcut  string            // Keyboard shortcut indicator
+	id        string // Unique item identifier
+	title     string // Display label text
+	icon      string // Icon or emoji displayed next to the text label
+	icon_path string // Custom image icon asset path
+	shortcut  string // Keyboard shortcut indicator
 	on_select VoidEventCallback = unsafe { nil } // Callback function triggered upon clicking the menu item
 }
 
 // MenuItem represents an individual action or entry in a window Menu Bar dropdown menu.
 pub struct MenuItem {
 pub mut:
-	id           string            // Unique identifier
-	title        string            // Display text label (e.g. 'Open...', 'Save As')
-	shortcut     string            // Keyboard shortcut hint (e.g. 'Ctrl+O', 'Cmd+S')
-	icon         string            // Optional icon/emoji
-	is_separator bool              // Whether this item is a divider line
-	disabled     bool              // Whether this item is disabled/grayed out
+	id           string // Unique identifier
+	title        string // Display text label (e.g. 'Open...', 'Save As')
+	shortcut     string // Keyboard shortcut hint (e.g. 'Ctrl+O', 'Cmd+S')
+	icon         string // Optional icon/emoji
+	is_separator bool   // Whether this item is a divider line
+	disabled     bool   // Whether this item is disabled/grayed out
 	on_select    VoidEventCallback = unsafe { nil } // Callback invoked upon clicking this item
 }
 
@@ -123,11 +123,11 @@ pub mut:
 // SidebarItem represents an individual navigation destination in a Collapsible Sidebar or Nav Rail.
 pub struct SidebarItem {
 pub mut:
-	id        string            // Unique item identifier
-	title     string            // Navigation label text
-	icon      string            // Vector icon glyph name or emoji
-	badge     string            // Optional pill badge text (e.g. '5', 'NEW')
-	is_active bool              // Whether item is the currently selected active view
+	id        string // Unique item identifier
+	title     string // Navigation label text
+	icon      string // Vector icon glyph name or emoji
+	badge     string // Optional pill badge text (e.g. '5', 'NEW')
+	is_active bool   // Whether item is the currently selected active view
 	on_click  VoidEventCallback = unsafe { nil } // Click callback
 }
 
@@ -151,13 +151,13 @@ pub mut:
 // DrawerItem represents an interactive menu option or section header in a slide-over Drawer panel.
 pub struct DrawerItem {
 pub mut:
-	id        string            // Unique identifier
-	title     string            // Primary item label
-	subtitle  string            // Optional secondary description text
-	icon      string            // Vector icon glyph name (e.g. 'search', 'gear', 'database', 'bell')
-	badge     string            // Optional badge text (e.g. '12', 'PRO')
-	is_active bool              // Active state highlight
-	is_header bool              // Section header divider
+	id        string // Unique identifier
+	title     string // Primary item label
+	subtitle  string // Optional secondary description text
+	icon      string // Vector icon glyph name (e.g. 'search', 'gear', 'database', 'bell')
+	badge     string // Optional badge text (e.g. '12', 'PRO')
+	is_active bool   // Active state highlight
+	is_header bool   // Section header divider
 	on_click  VoidEventCallback = unsafe { nil } // Click callback handler
 }
 
@@ -167,22 +167,22 @@ pub mut:
 @[heap]
 pub struct Control {
 pub mut:
-	name           string   // Unique ID/name of the control (used to reference it in window lookup maps)
-	kind           string   // Control type identifier (e.g. 'button', 'label', 'textbox', 'slider', 'table')
-	title          string   // Main text label or display title
-	text_value     string   // Text input value or current text content
-	bool_value     bool     // Boolean state value (e.g. checked state for CheckBox/RadioButton/Switch)
-	int_value      int      // Integer numerical value (e.g. active tab index, rating value, list index)
-	f64_value      f64      // Floating point value (e.g. slider position, progress percentage 0..100)
-	items          []string // Options list for DropDown, ListBox, MultiSelect, RadioGroup, Tabs
-	items_selected []string // Selected items list for multi-select ListBoxes or Tag Inputs
-	f64_list       []f64    // List of numeric values (used for Sparkline graphs, Line Charts, Bar Charts)
-	headers        []string // Column headers list (used for Data Tables)
-	rows           [][]string // 2D matrix of string cells (used for Data Table rows)
-	tree_nodes     []TreeNode // Hierarchical tree nodes (used for TreeView controls)
+	name           string            // Unique ID/name of the control (used to reference it in window lookup maps)
+	kind           string            // Control type identifier (e.g. 'button', 'label', 'textbox', 'slider', 'table')
+	title          string            // Main text label or display title
+	text_value     string            // Text input value or current text content
+	bool_value     bool              // Boolean state value (e.g. checked state for CheckBox/RadioButton/Switch)
+	int_value      int               // Integer numerical value (e.g. active tab index, rating value, list index)
+	f64_value      f64               // Floating point value (e.g. slider position, progress percentage 0..100)
+	items          []string          // Options list for DropDown, ListBox, MultiSelect, RadioGroup, Tabs
+	items_selected []string          // Selected items list for multi-select ListBoxes or Tag Inputs
+	f64_list       []f64             // List of numeric values (used for Sparkline graphs, Line Charts, Bar Charts)
+	headers        []string          // Column headers list (used for Data Tables)
+	rows           [][]string        // 2D matrix of string cells (used for Data Table rows)
+	tree_nodes     []TreeNode        // Hierarchical tree nodes (used for TreeView controls)
 	props          map[string]string // Generic key-value property bag for extended custom settings
-	placeholder    string   // Placeholder hint text displayed in empty text inputs
-	min_val        f64      // Minimum allowed numeric value (for Sliders, Number Inputs, Range Sliders)
+	placeholder    string            // Placeholder hint text displayed in empty text inputs
+	min_val        f64               // Minimum allowed numeric value (for Sliders, Number Inputs, Range Sliders)
 	max_val        f64 = 100.0 // Maximum allowed numeric value (default 100.0)
 	step           f64 = 1.0   // Step increment value for sliders or spinners
 	// Geometry (Calculated screen position and bounding box size in pixels)
@@ -195,30 +195,30 @@ pub mut:
 	expand_fill    bool   // If true, control automatically expands to fill available width/height
 	container_name string // Name of parent container box/card/tab if nested inside one
 	// Visual styling overrides
-	bg_color      string // Custom background color override in hex format ('#ffffff' or '#1e293b')
-	font_color    string // Custom text label color override in hex format
-	accent_color  string // Primary accent tint color for active/highlight states
-	tooltip       string // Tooltip explanation text displayed on hover
-	custom_cursor string // Custom cursor type name (e.g. 'pointer', 'ibeam', 'hand', 'crosshair')
+	bg_color      string      // Custom background color override in hex format ('#ffffff' or '#1e293b')
+	font_color    string      // Custom text label color override in hex format
+	accent_color  string      // Primary accent tint color for active/highlight states
+	tooltip       string      // Tooltip explanation text displayed on hover
+	custom_cursor string      // Custom cursor type name (e.g. 'pointer', 'ibeam', 'hand', 'crosshair')
 	group_cfg     GroupConfig // Container box configuration (if control is a Group Box container)
 	// Interactive control states
 	visible         bool = true // Whether the control is visible and rendered on screen
-	disabled        bool        // If true, control is grayed out and ignores user interactions
-	is_focused      bool        // Whether this control currently has keyboard input focus
-	is_hovered      bool        // Whether mouse pointer is currently positioned over this control
-	is_pressed      bool        // Whether mouse button is currently held down over this control
-	scroll_offset_y f32         // Vertical scroll offset (for scrollable containers, lists, or text areas)
-	caret_pos       int         // Text cursor position index (for text input editing)
-	sel_start       int = -1    // Selection start index (-1 if no text selection)
-	sel_end         int = -1    // Selection end index (-1 if no text selection)
-	undo_stack      []string    // Text history stack for Cmd+Z / Ctrl+Z undo operations
-	redo_stack      []string    // Text history stack for Cmd+Shift+Z / Ctrl+Y redo operations
-	validation_err  string      // Validation error message (if text validation failed)
-	selected_row    int = -1    // Selected row index (for Data Tables or List views)
-	variant         string      // Visual style variant (e.g. 'primary', 'secondary', 'danger', 'ghost')
-	is_expanded     bool        // Expansion state (for Accordions, Collapsibles, and Tree Nodes)
+	disabled        bool // If true, control is grayed out and ignores user interactions
+	is_focused      bool // Whether this control currently has keyboard input focus
+	is_hovered      bool // Whether mouse pointer is currently positioned over this control
+	is_pressed      bool // Whether mouse button is currently held down over this control
+	scroll_offset_y f32  // Vertical scroll offset (for scrollable containers, lists, or text areas)
+	caret_pos       int  // Text cursor position index (for text input editing)
+	sel_start       int = -1 // Selection start index (-1 if no text selection)
+	sel_end         int = -1 // Selection end index (-1 if no text selection)
+	undo_stack      []string // Text history stack for Cmd+Z / Ctrl+Z undo operations
+	redo_stack      []string // Text history stack for Cmd+Shift+Z / Ctrl+Y redo operations
+	validation_err  string   // Validation error message (if text validation failed)
+	selected_row    int = -1 // Selected row index (for Data Tables or List views)
+	variant         string // Visual style variant (e.g. 'primary', 'secondary', 'danger', 'ghost')
+	is_expanded     bool   // Expansion state (for Accordions, Collapsibles, and Tree Nodes)
 	// Data Table sorting state
-	sort_col int  = -1 // Currently sorted column index (-1 means unsorted)
+	sort_col int  = -1   // Currently sorted column index (-1 means unsorted)
 	sort_asc bool = true // Sort direction: true = ascending (A-Z, 0-9), false = descending
 	// Detailed Geometry & Spacing (Inner padding and outer margin in pixels)
 	padding_top    f32 // Inner padding spacing at top edge
@@ -237,12 +237,12 @@ pub mut:
 	font_name    string // Font family name
 	text_align   string // Horizontal text alignment ('left', 'center', 'right')
 	// Border & Opacity
-	border_width  f32        // Thickness of outer stroke border line in pixels
-	border_color  string     // Color hex string for outer stroke border
-	corner_radius f32 = 6.0  // Corner rounding radius in pixels
-	opacity       f64 = 1.0  // Visual opacity opacity level (1.0 = fully opaque, 0.0 = transparent)
+	border_width  f32    // Thickness of outer stroke border line in pixels
+	border_color  string // Color hex string for outer stroke border
+	corner_radius f32 = 6.0 // Corner rounding radius in pixels
+	opacity       f64 = 1.0 // Visual opacity opacity level (1.0 = fully opaque, 0.0 = transparent)
 	// Advanced RAD (Rapid Application Development) Controls State
-	range_min       f64      // Lower bound value for Range Slider
+	range_min       f64 // Lower bound value for Range Slider
 	range_max       f64 = 100.0 // Upper bound value for Range Slider
 	is_dragging_min bool     // Dragging indicator state for Range Slider min thumb handle
 	is_dragging_max bool     // Dragging indicator state for Range Slider max thumb handle
@@ -250,41 +250,41 @@ pub mut:
 	code_lang       string   // Syntax highlighting language name (for Code Editor control)
 	split_ratio     f32 = 0.5 // Split pane divider ratio (0.0 to 1.0) for Splitter containers
 	property_items  []PropertyGridItem // Active item list for Property Grid controls
-	total_pages     int = 1  // Total number of pages (for Pagination control)
-	current_page    int = 1  // Active current page number (for Pagination control)
-	last_click_time i64      // Timestamp of last click (used for double-click detection)
+	total_pages     int = 1 // Total number of pages (for Pagination control)
+	current_page    int = 1 // Active current page number (for Pagination control)
+	last_click_time i64            // Timestamp of last click (used for double-click detection)
 	tab_badges      map[int]string // Optional notification badges on tab titles (map of tab_index -> badge text)
 	tab_icons       map[int]string // Optional icon image paths on tab titles (map of tab_index -> icon path)
-	icon_path       string   // Custom icon asset path (for buttons, input fields, status bars, etc.)
-	search_query    string   // Active search filtering text query (for Search inputs/tables)
-	is_skeleton     bool     // Loading placeholder state (renders animated skeleton gray boxes)
+	icon_path       string         // Custom icon asset path (for buttons, input fields, status bars, etc.)
+	search_query    string         // Active search filtering text query (for Search inputs/tables)
+	is_skeleton     bool           // Loading placeholder state (renders animated skeleton gray boxes)
 	// Modern UI & UX Enhancements State
-	icon_vector       string             // Vector icon glyph name (e.g. 'search', 'gear', 'check', 'close')
-	is_collapsed      bool               // Collapse state for Sidebars or panels
-	sidebar_items     []SidebarItem      // Items list for Sidebar or NavRail
-	cal_year          int = 2026         // Year for Month Calendar
-	cal_month         int = 8            // Month (1-12) for Month Calendar
-	cal_selected_day  int = 1            // Selected day of month (1-31)
-	cal_events        []CalendarEvent    // Marked events for Month Calendar
-	heatmap_data      [][]int            // 2D intensity matrix (7 days x N weeks) for Activity Heatmap
-	heatmap_levels    []string           // Color hex scale levels for Heatmap
-	tree_table_nodes  []TreeTableRow     // Nested rows for Tree Table
-	mask_pattern      string             // Mask formatting template (e.g. '(###) ###-####')
-	is_editing        bool               // Active edit mode flag for Inline Editable Label
-	show_clear        bool = true        // Show (x) clear button on search/input fields
-	show_pwd_toggle   bool = true        // Show [Show/Hide] toggle eye button on password fields
-	pwd_revealed      bool               // Plain text reveal state for password fields
-	markdown_content  string             // Raw markdown document string for Markdown Viewer
-	elevation         int                // Soft drop shadow elevation level (0..4)
+	icon_vector      string        // Vector icon glyph name (e.g. 'search', 'gear', 'check', 'close')
+	is_collapsed     bool          // Collapse state for Sidebars or panels
+	sidebar_items    []SidebarItem // Items list for Sidebar or NavRail
+	cal_year         int = 2026 // Year for Month Calendar
+	cal_month        int = 8    // Month (1-12) for Month Calendar
+	cal_selected_day int = 1    // Selected day of month (1-31)
+	cal_events       []CalendarEvent // Marked events for Month Calendar
+	heatmap_data     [][]int         // 2D intensity matrix (7 days x N weeks) for Activity Heatmap
+	heatmap_levels   []string        // Color hex scale levels for Heatmap
+	tree_table_nodes []TreeTableRow  // Nested rows for Tree Table
+	mask_pattern     string          // Mask formatting template (e.g. '(###) ###-####')
+	is_editing       bool            // Active edit mode flag for Inline Editable Label
+	show_clear       bool = true // Show (x) clear button on search/input fields
+	show_pwd_toggle  bool = true // Show [Show/Hide] toggle eye button on password fields
+	pwd_revealed     bool   // Plain text reveal state for password fields
+	markdown_content string // Raw markdown document string for Markdown Viewer
+	elevation        int    // Soft drop shadow elevation level (0..4)
 	// Event Callback Handlers
 	on_click       VoidEventCallback   = unsafe { nil } // Triggered on single left click
 	on_change      VoidEventCallback   = unsafe { nil } // Triggered when value/text changes
 	on_change_str  StringEventCallback = unsafe { nil } // Triggered when value/text changes (with string payload)
 	on_enter       VoidEventCallback   = unsafe { nil } // Triggered when Enter key pressed in input field
-	on_row_click   VoidEventCallback = unsafe { nil } // Triggered when row clicked in Data Table
-	on_hover       VoidEventCallback = unsafe { nil } // Triggered when mouse enters hover boundary
-	on_dblclick    VoidEventCallback = unsafe { nil } // Triggered on double click
-	on_right_click VoidEventCallback = unsafe { nil } // Triggered on right mouse click
+	on_row_click   VoidEventCallback   = unsafe { nil } // Triggered when row clicked in Data Table
+	on_hover       VoidEventCallback   = unsafe { nil } // Triggered when mouse enters hover boundary
+	on_dblclick    VoidEventCallback   = unsafe { nil } // Triggered on double click
+	on_right_click VoidEventCallback   = unsafe { nil } // Triggered on right mouse click
 }
 
 // -----------------------------------------------------------------------------
@@ -509,7 +509,8 @@ pub fn (c &Control) set_font_type(font_type string) &Control {
 	unsafe {
 		mut ptr := &Control(c)
 		ptr.font_type = font_type
-		ptr.font_name = if font_type.to_lower().contains('mono') || font_type.to_lower().contains('code') {
+		ptr.font_name = if font_type.to_lower().contains('mono')
+			|| font_type.to_lower().contains('code') {
 			'mono'
 		} else if font_type.to_lower().contains('serif') {
 			'serif'
@@ -908,4 +909,3 @@ pub fn (c &Control) set_markdown_content(md string) &Control {
 	}
 	return c
 }
-

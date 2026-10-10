@@ -47,10 +47,10 @@ fn main() {
 	}
 
 	app.print_kv({
-		'Target URL':   target_url,
-		'HTTP Method':  method,
-		'Total Count':  '${total_reqs} requests',
-		'Concurrency':  '${concurrency} worker threads',
+		'Target URL':  target_url
+		'HTTP Method': method
+		'Total Count': '${total_reqs} requests'
+		'Concurrency': '${concurrency} worker threads'
 	})
 
 	app.step(1, 'Executing high-concurrency benchmark run')
@@ -75,14 +75,15 @@ fn main() {
 					'HEAD' { http.Method.head }
 					else { http.Method.get }
 				}
+
 				mut req := http.new_request(req_method, url, payload)
 				resp := req.do() or {
 					elapsed := f64(time.since(t0).microseconds()) / 1000.0
 					res_list << RequestResult{
 						duration_ms: elapsed
 						status_code: 0
-						is_success: false
-						error_msg: err.str()
+						is_success:  false
+						error_msg:   err.str()
 					}
 					continue
 				}
@@ -90,8 +91,8 @@ fn main() {
 				res_list << RequestResult{
 					duration_ms: elapsed
 					status_code: resp.status_code
-					is_success: resp.status_code >= 200 && resp.status_code < 400
-					error_msg: ''
+					is_success:  resp.status_code >= 200 && resp.status_code < 400
+					error_msg:   ''
 				}
 			}
 			return res_list
@@ -106,7 +107,11 @@ fn main() {
 	}
 
 	total_duration_sec := f64(time.since(start_bench).milliseconds()) / 1000.0
-	throughput_rps := if total_duration_sec > 0 { f64(all_results.len) / total_duration_sec } else { 0.0 }
+	throughput_rps := if total_duration_sec > 0 {
+		f64(all_results.len) / total_duration_sec
+	} else {
+		0.0
+	}
 
 	app.step(2, 'Computing Statistical Metrics & Latency Distribution')
 
@@ -138,15 +143,19 @@ fn main() {
 	max_lat := app.stats_max(latencies)
 
 	app.print_kv({
-		'Total Duration': '${total_duration_sec:.2f} seconds',
-		'Throughput':     '${throughput_rps:.1f} req/sec',
-		'Success / Fail': '${app.green(successes.str())} success / ${if failures > 0 { app.red(failures.str()) } else { '0' }} errors',
-		'Fastest (Min)':  '${min_lat:.2f} ms',
-		'Slowest (Max)':  '${max_lat:.2f} ms',
-		'Average (Mean)': '${mean_lat:.2f} ms',
-		'Median (p50)':   '${median_lat:.2f} ms',
-		'Std Deviation':  '±${std_dev_lat:.2f} ms',
-		'Root Mean Sq':   '${rms_lat:.2f} ms',
+		'Total Duration': '${total_duration_sec:.2f} seconds'
+		'Throughput':     '${throughput_rps:.1f} req/sec'
+		'Success / Fail': '${app.green(successes.str())} success / ${if failures > 0 {
+			app.red(failures.str())
+		} else {
+			'0'
+		}} errors'
+		'Fastest (Min)':  '${min_lat:.2f} ms'
+		'Slowest (Max)':  '${max_lat:.2f} ms'
+		'Average (Mean)': '${mean_lat:.2f} ms'
+		'Median (p50)':   '${median_lat:.2f} ms'
+		'Std Deviation':  '±${std_dev_lat:.2f} ms'
+		'Root Mean Sq':   '${rms_lat:.2f} ms'
 	})
 
 	app.step(3, 'HTTP Status Code Distribution Breakdown')

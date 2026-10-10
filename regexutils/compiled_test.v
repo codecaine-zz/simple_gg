@@ -1,8 +1,8 @@
 module regexutils
 
 fn test_escape_matches_literally() {
-	for s in ['a.b', '(x)', '1+1=2', '[q]', 'cost: $5.00', 'a|b', '^start', 'x{2}', '*?', r'back\slash',
-		'a-b', 'path/to/file', 'email@host.com'] {
+	for s in ['a.b', '(x)', '1+1=2', '[q]', 'cost: $5.00', 'a|b', '^start', 'x{2}', '*?',
+		r'back\slash', 'a-b', 'path/to/file', 'email@host.com'] {
 		p := escape(s)
 		assert is_valid_pattern(p), 'escape produced invalid pattern for ${s}: ${p}'
 		assert is_match(p, s), '${p} should match ${s}'

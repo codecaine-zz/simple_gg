@@ -435,7 +435,8 @@ pub fn convex_hull(points []Vec2) []Vec2 {
 	})
 	mut hull := []Vec2{}
 	for p in pts {
-		for hull.len >= 2 && hull[hull.len - 1].sub(hull[hull.len - 2]).cross(p.sub(hull[hull.len - 2])) <= 0 {
+		for hull.len >= 2
+			&& hull[hull.len - 1].sub(hull[hull.len - 2]).cross(p.sub(hull[hull.len - 2])) <= 0 {
 			hull.delete_last()
 		}
 		hull << p
@@ -461,6 +462,7 @@ pub fn haversine_km(lat1 f64, lon1 f64, lat2 f64, lon2 f64) f64 {
 	p2 := deg_to_rad(lat2)
 	dp := deg_to_rad(lat2 - lat1)
 	dl := deg_to_rad(lon2 - lon1)
-	a := math.sin(dp / 2) * math.sin(dp / 2) + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) * math.sin(dl / 2)
+	a := math.sin(dp / 2) * math.sin(dp / 2) +
+		math.cos(p1) * math.cos(p2) * math.sin(dl / 2) * math.sin(dl / 2)
 	return 2 * earth_radius_km * math.asin(math.sqrt(math.min(1.0, a)))
 }

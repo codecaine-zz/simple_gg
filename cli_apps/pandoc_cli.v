@@ -7,8 +7,10 @@ fn main() {
 	app.set_description('Pandoc Universal Document Converter CLI')
 
 	app.add_flag_string('input', 'i', '', 'Input document file path (e.g. doc.md, page.html)')
-	app.add_flag_string('output', 'o', '', 'Output document file path (e.g. doc.pdf, doc.docx, page.html)')
-	app.add_flag_string('from', 'f', 'markdown', 'Source markup format (markdown, html, docx, rst, latex)')
+	app.add_flag_string('output', 'o', '',
+		'Output document file path (e.g. doc.pdf, doc.docx, page.html)')
+	app.add_flag_string('from', 'f', 'markdown',
+		'Source markup format (markdown, html, docx, rst, latex)')
 	app.add_flag_string('to', 't', 'html', 'Target markup format (html, pdf, docx, epub, latex)')
 	app.add_flag_bool('interactive', 'x', false, 'Launch interactive document converter')
 
@@ -59,7 +61,8 @@ fn main() {
 fn run_interactive(mut app simplecli.SimpleCli, has_pandoc bool) {
 	app.panel('Pandoc Document Wizard', 'Convert between Markdown, HTML, PDF, Docx, and LaTeX.')
 	doc := app.prompt('Enter input document path', 'README.md')
-	target_fmt := app.select('Target Output Format:', ['HTML (.html)', 'Docx (.docx)', 'PDF (.pdf)', 'EPUB (.epub)'])
+	target_fmt := app.select('Target Output Format:', ['HTML (.html)', 'Docx (.docx)', 'PDF (.pdf)',
+		'EPUB (.epub)'])
 	out_file := match target_fmt {
 		'Docx (.docx)' { 'document.docx' }
 		'PDF (.pdf)' { 'document.pdf' }

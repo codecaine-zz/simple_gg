@@ -61,15 +61,16 @@ fn run_numbat(expr string) (bool, string) {
 fn main() {
 	println('Starting SimpleGUI - Numbat Studio Pro (Scientific & Dimensional Analysis)...')
 
-	mut win := simplegui.new_simple_window('Numbat Studio Pro -- Scientific & Dimensional Analysis', 1160, 910)
+	mut win := simplegui.new_simple_window('Numbat Studio Pro -- Scientific & Dimensional Analysis',
+		1160, 910)
 	win.set_fullscreen(true)
 	win.restore_saved_theme()
 	win.set_spacing(6)
 	win.set_padding(14)
 
 	mut state := &AppState{
-		history: []NumbatHistoryItem{}
-		active_tab: 'Physical Calculator'
+		history:     []NumbatHistoryItem{}
+		active_tab:  'Physical Calculator'
 		last_result: '0'
 	}
 
@@ -94,7 +95,7 @@ fn main() {
 		'Fundamental Constants',
 		'Dimensional Unit Guide',
 		'Physics & Engineering Recipes',
-		'Calculation History'
+		'Calculation History',
 	])
 
 	// -------------------------------------------------------------
@@ -162,7 +163,8 @@ fn main() {
 	win.end_row()
 
 	// Live Detailed Result Box
-	win.add_textarea('txt_calc_details', 'Enter a physical expression above with optional conversion (e.g. 100 kW * 2 hours -> kWh or 80 kg * (120 km/h)^2 * 0.5 -> kJ).\n')
+	win.add_textarea('txt_calc_details',
+		'Enter a physical expression above with optional conversion (e.g. 100 kW * 2 hours -> kWh or 80 kg * (120 km/h)^2 * 0.5 -> kJ).\n')
 	win.set_control_height('txt_calc_details', 260)
 	win.set_control_font_name('txt_calc_details', 'Menlo')
 	win.set_control_font_size('txt_calc_details', 13)
@@ -173,8 +175,10 @@ fn main() {
 	// Tab 2: Multi-Line Physics IDE
 	// -------------------------------------------------------------
 	win.begin_group_box('pane_ide', 'Multi-Line Physics & Engineering Derivation IDE')
-	win.add_label('lbl_ide_hdr', 'Script (define variables with let, perform derivations, convert to target units):')
-	win.add_textarea('txt_ide_script', '# Orbital Mechanics Demo: Low Earth Orbit\nlet G = 6.67430e-11 N * m^2 / kg^2\nlet M_earth = 5.972e24 kg\nlet R_earth = 6371 km\nlet altitude = 400 km\nlet r = R_earth + altitude\nlet v_orbit = sqrt(G * M_earth / r) -> km/s\nlet period = 2 * pi * r / v_orbit -> minutes\n\n# Kinetic Energy of 1000kg Satellite\nlet m_sat = 1000 kg\nlet E_kin = 0.5 * m_sat * v_orbit^2 -> GJ\n\nperiod')
+	win.add_label('lbl_ide_hdr',
+		'Script (define variables with let, perform derivations, convert to target units):')
+	win.add_textarea('txt_ide_script',
+		'# Orbital Mechanics Demo: Low Earth Orbit\nlet G = 6.67430e-11 N * m^2 / kg^2\nlet M_earth = 5.972e24 kg\nlet R_earth = 6371 km\nlet altitude = 400 km\nlet r = R_earth + altitude\nlet v_orbit = sqrt(G * M_earth / r) -> km/s\nlet period = 2 * pi * r / v_orbit -> minutes\n\n# Kinetic Energy of 1000kg Satellite\nlet m_sat = 1000 kg\nlet E_kin = 0.5 * m_sat * v_orbit^2 -> GJ\n\nperiod')
 	win.set_control_height('txt_ide_script', 240)
 	win.set_control_font_name('txt_ide_script', 'Menlo')
 	win.set_control_font_size('txt_ide_script', 13)
@@ -211,7 +215,8 @@ fn main() {
 	win.add_button('btn_c_mu0', 'mu_0 (Permeability)')
 	win.end_row()
 
-	win.add_textarea('txt_constants_output', 'Click any physical constant above to inspect its exact value, physical dimension, and SI units.\n')
+	win.add_textarea('txt_constants_output',
+		'Click any physical constant above to inspect its exact value, physical dimension, and SI units.\n')
 	win.set_control_height('txt_constants_output', 380)
 	win.set_control_font_name('txt_constants_output', 'Menlo')
 	win.set_control_font_size('txt_constants_output', 13)
@@ -229,7 +234,8 @@ fn main() {
 	win.add_button('btn_g_data', 'Digital Storage')
 	win.end_row()
 
-	win.add_textarea('txt_units_guide_output', 'Explore supported units and dimensional representations in Numbat.\n')
+	win.add_textarea('txt_units_guide_output',
+		'Explore supported units and dimensional representations in Numbat.\n')
 	win.set_control_height('txt_units_guide_output', 400)
 	win.set_control_font_name('txt_units_guide_output', 'Menlo')
 	win.set_control_font_size('txt_units_guide_output', 13)
@@ -253,7 +259,8 @@ fn main() {
 	win.add_button('btn_pr_stefan', 'Stefan-Boltzmann Radiation')
 	win.end_row()
 
-	win.add_textarea('txt_recipes_output', 'Click any real-world scientific recipe above to evaluate and explore.\n')
+	win.add_textarea('txt_recipes_output',
+		'Click any real-world scientific recipe above to evaluate and explore.\n')
 	win.set_control_height('txt_recipes_output', 380)
 	win.set_control_font_name('txt_recipes_output', 'Menlo')
 	win.set_control_font_size('txt_recipes_output', 13)
@@ -269,7 +276,8 @@ fn main() {
 	win.add_button('btn_export_history', 'Export Ledger to Text...')
 	win.end_row()
 
-	win.add_textarea('txt_history_ledger', 'Session physical calculation history will be recorded here.\n')
+	win.add_textarea('txt_history_ledger',
+		'Session physical calculation history will be recorded here.\n')
 	win.set_control_height('txt_history_ledger', 400)
 	win.set_control_font_name('txt_history_ledger', 'Menlo')
 	win.set_control_font_size('txt_history_ledger', 13)
@@ -286,7 +294,8 @@ fn main() {
 	// Status Bar Footer
 	// -------------------------------------------------------------
 	win.begin_row('row_footer')
-	win.add_label('lbl_status_bar', 'Ready. Powered by numbat (Statically-Typed Physical Analysis).')
+	win.add_label('lbl_status_bar',
+		'Ready. Powered by numbat (Statically-Typed Physical Analysis).')
 	win.end_row()
 
 	// -------------------------------------------------------------
@@ -324,10 +333,10 @@ fn main() {
 
 			// Record history item
 			item := NumbatHistoryItem{
-				timestamp: time.now().format_ss()
+				timestamp:  time.now().format_ss()
 				expression: clean
-				result: res
-				mode: mode_label
+				result:     res
+				mode:       mode_label
 			}
 			state.history << item
 			update_history_view(mut w)
@@ -399,27 +408,67 @@ fn main() {
 	})
 
 	// Unit Keypad Buttons
-	win.on_click('btn_u_arrow', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', w.get('txt_calc_input') + ' -> ') })
-	win.on_click('btn_u_kmh', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', w.get('txt_calc_input') + ' km/h') })
-	win.on_click('btn_u_mph', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', w.get('txt_calc_input') + ' mph') })
-	win.on_click('btn_u_mps', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', w.get('txt_calc_input') + ' m/s') })
-	win.on_click('btn_u_kj', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', w.get('txt_calc_input') + ' kJ') })
-	win.on_click('btn_u_kwh', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', w.get('txt_calc_input') + ' kWh') })
-	win.on_click('btn_u_watts', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', w.get('txt_calc_input') + ' W') })
-	win.on_click('btn_u_hp', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', w.get('txt_calc_input') + ' hp') })
-	win.on_click('btn_u_celsius', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', w.get('txt_calc_input') + 'deg C') })
-	win.on_click('btn_u_fahrenheit', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', w.get('txt_calc_input') + 'deg F') })
+	win.on_click('btn_u_arrow', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', w.get('txt_calc_input') + ' -> ')
+	})
+	win.on_click('btn_u_kmh', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', w.get('txt_calc_input') + ' km/h')
+	})
+	win.on_click('btn_u_mph', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', w.get('txt_calc_input') + ' mph')
+	})
+	win.on_click('btn_u_mps', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', w.get('txt_calc_input') + ' m/s')
+	})
+	win.on_click('btn_u_kj', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', w.get('txt_calc_input') + ' kJ')
+	})
+	win.on_click('btn_u_kwh', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', w.get('txt_calc_input') + ' kWh')
+	})
+	win.on_click('btn_u_watts', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', w.get('txt_calc_input') + ' W')
+	})
+	win.on_click('btn_u_hp', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', w.get('txt_calc_input') + ' hp')
+	})
+	win.on_click('btn_u_celsius', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', w.get('txt_calc_input') + 'deg C')
+	})
+	win.on_click('btn_u_fahrenheit', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', w.get('txt_calc_input') + 'deg F')
+	})
 
-	win.on_click('btn_u_newtons', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', w.get('txt_calc_input') + ' N') })
-	win.on_click('btn_u_pascals', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', w.get('txt_calc_input') + ' Pa') })
-	win.on_click('btn_u_psi', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', w.get('txt_calc_input') + ' psi') })
-	win.on_click('btn_u_bar', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', w.get('txt_calc_input') + ' bar') })
-	win.on_click('btn_u_atm', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', w.get('txt_calc_input') + ' atm') })
-	win.on_click('btn_u_coulomb', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', w.get('txt_calc_input') + ' C') })
-	win.on_click('btn_u_volts', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', w.get('txt_calc_input') + ' V') })
-	win.on_click('btn_u_ohms', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', w.get('txt_calc_input') + ' ohm') })
-	win.on_click('btn_u_ev', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', w.get('txt_calc_input') + ' eV') })
-	win.on_click('btn_u_ly', fn (mut w simplegui.SimpleWindow) { w.set('txt_calc_input', w.get('txt_calc_input') + ' ly') })
+	win.on_click('btn_u_newtons', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', w.get('txt_calc_input') + ' N')
+	})
+	win.on_click('btn_u_pascals', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', w.get('txt_calc_input') + ' Pa')
+	})
+	win.on_click('btn_u_psi', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', w.get('txt_calc_input') + ' psi')
+	})
+	win.on_click('btn_u_bar', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', w.get('txt_calc_input') + ' bar')
+	})
+	win.on_click('btn_u_atm', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', w.get('txt_calc_input') + ' atm')
+	})
+	win.on_click('btn_u_coulomb', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', w.get('txt_calc_input') + ' C')
+	})
+	win.on_click('btn_u_volts', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', w.get('txt_calc_input') + ' V')
+	})
+	win.on_click('btn_u_ohms', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', w.get('txt_calc_input') + ' ohm')
+	})
+	win.on_click('btn_u_ev', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', w.get('txt_calc_input') + ' eV')
+	})
+	win.on_click('btn_u_ly', fn (mut w simplegui.SimpleWindow) {
+		w.set('txt_calc_input', w.get('txt_calc_input') + ' ly')
+	})
 
 	// -------------------------------------------------------------
 	// Tab 2: Multi-Line Physics IDE
@@ -456,7 +505,9 @@ fn main() {
 	// -------------------------------------------------------------
 	win.on_click('btn_c_speed_light', fn [eval_expr_fn] (mut w simplegui.SimpleWindow) {
 		res := eval_expr_fn(mut w, 'c -> km/s', 'Speed of Light')
-		w.set('txt_constants_output', ' Speed of Light in Vacuum (c):\n\n' + res + '\nExact SI Definition: 299,792,458 m/s')
+		w.set('txt_constants_output',
+
+			' Speed of Light in Vacuum (c):\n\n' + res + '\nExact SI Definition: 299,792,458 m/s')
 	})
 
 	win.on_click('btn_c_grav', fn [eval_expr_fn] (mut w simplegui.SimpleWindow) {
@@ -581,7 +632,9 @@ fn main() {
 	// -------------------------------------------------------------
 	win.on_click('btn_pr_rel_energy', fn [eval_expr_fn] (mut w simplegui.SimpleWindow) {
 		res := eval_expr_fn(mut w, '1 g * c^2 -> kWh', 'Relativistic Energy')
-		w.set('txt_recipes_output', ' Relativistic Mass-Energy (1 gram of matter converted to energy):\n\n' + res)
+		w.set('txt_recipes_output',
+
+			' Relativistic Mass-Energy (1 gram of matter converted to energy):\n\n' + res)
 	})
 
 	win.on_click('btn_pr_ke', fn [eval_expr_fn] (mut w simplegui.SimpleWindow) {
@@ -596,7 +649,8 @@ fn main() {
 
 	win.on_click('btn_pr_photon', fn [eval_expr_fn] (mut w simplegui.SimpleWindow) {
 		res := eval_expr_fn(mut w, 'planck_constant * (c / 550 nm) -> eV', 'Green Photon Energy')
-		w.set('txt_recipes_output', ' Energy of Green Light Photon (wavelength = 550 nm):\n\n' + res)
+		w.set('txt_recipes_output',
+			' Energy of Green Light Photon (wavelength = 550 nm):\n\n' + res)
 	})
 
 	win.on_click('btn_pr_grav_pe', fn [eval_expr_fn] (mut w simplegui.SimpleWindow) {
@@ -605,17 +659,20 @@ fn main() {
 	})
 
 	win.on_click('btn_pr_sound', fn [eval_expr_fn] (mut w simplegui.SimpleWindow) {
-		res := eval_expr_fn(mut w, '331.3 m/s * sqrt((20  deg C -> K) / 273.15 K) -> km/h', 'Speed of Sound')
+		res := eval_expr_fn(mut w, '331.3 m/s * sqrt((20  deg C -> K) / 273.15 K) -> km/h',
+			'Speed of Sound')
 		w.set('txt_recipes_output', ' Speed of Sound in Dry Air at 20 deg C:\n\n' + res)
 	})
 
 	win.on_click('btn_pr_ideal_gas', fn [eval_expr_fn] (mut w simplegui.SimpleWindow) {
-		res := eval_expr_fn(mut w, '1 mol * (8.314 J / (mol * K)) * (20  deg C -> K) / (1 atm) -> liters', 'Ideal Gas Law')
+		res := eval_expr_fn(mut w,
+			'1 mol * (8.314 J / (mol * K)) * (20  deg C -> K) / (1 atm) -> liters', 'Ideal Gas Law')
 		w.set('txt_recipes_output', ' Molar Volume of Ideal Gas at 20 deg C & 1 atm:\n\n' + res)
 	})
 
 	win.on_click('btn_pr_stefan', fn [eval_expr_fn] (mut w simplegui.SimpleWindow) {
-		res := eval_expr_fn(mut w, '5.670374e-8 W / (m^2 * K^4) * (5778 K)^4 -> MW / m^2', 'Stefan-Boltzmann')
+		res := eval_expr_fn(mut w, '5.670374e-8 W / (m^2 * K^4) * (5778 K)^4 -> MW / m^2',
+			'Stefan-Boltzmann')
 		w.set('txt_recipes_output', ' Sun Surface Blackbody Emittance (T = 5778 K):\n\n' + res)
 	})
 

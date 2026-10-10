@@ -37,11 +37,12 @@ fn main() {
 	})
 
 	whois_path := get_whois_bin()
-	win.add_label('lbl_engine_info', 'WHOIS: ${whois_path}  |  DNS/HTTP: Native Engine  |  Mode: Async OSINT Intelligence')
+	win.add_label('lbl_engine_info',
+		'WHOIS: ${whois_path}  |  DNS/HTTP: Native Engine  |  Mode: Async OSINT Intelligence')
 
 	// Scope & Target Bar
 	win.begin_group_box('grp_recon_target', 'Target Domain, Host or Autonomous System (ASN)')
-	
+
 	win.begin_row('row_target_input')
 	win.add_label('lbl_target', 'Target Domain / IP:')
 	win.add_input('txt_target', 'github.com')
@@ -54,7 +55,7 @@ fn main() {
 		'3. Certificate Transparency Search (crt.sh)',
 		'4. Security Headers & Server Fingerprint',
 		'5. Robots.txt & Sitemap Discovery',
-		'6. Public Email & Metadata Footprint'
+		'6. Public Email & Metadata Footprint',
 	], '1. Full WHOIS Domain & Registrar Lookup')
 	win.set_control_width('dd_recon_mode', 310)
 	win.end_row()
@@ -89,7 +90,8 @@ fn main() {
 	win.end_row()
 
 	win.append_console('recon_console', ' Recon Studio Pro Initialized.\n', 1)
-	win.append_console('recon_console', ' Ready to gather public OSINT, registrar data, and security headers.\n', 4)
+	win.append_console('recon_console',
+		' Ready to gather public OSINT, registrar data, and security headers.\n', 4)
 
 	// -------------------------------------------------------------
 	// Event Handlers
@@ -104,7 +106,8 @@ fn main() {
 		}
 
 		whois_bin := get_whois_bin()
-		w.append_console('recon_console', ' Starting OSINT Module [${module_choice}] for: ${target}...\n', 1)
+		w.append_console('recon_console',
+			' Starting OSINT Module [${module_choice}] for: ${target}...\n', 1)
 		w.set_status('Gathering OSINT intelligence for ${target}...')
 
 		go fn [mut w, whois_bin, target, module_choice] () {
@@ -131,7 +134,11 @@ fn main() {
 			} else if module_choice.starts_with('5.') || module_choice.contains('Robots') {
 				url := if target.starts_with('http') { target } else { 'https://' + target }
 				res := os.execute('curl -sS --max-time 10 "${url}/robots.txt" 2>&1')
-				output_str = if res.output.trim_space() != '' { res.output.trim_space() } else { 'No robots.txt found or unreachable.' }
+				output_str = if res.output.trim_space() != '' {
+					res.output.trim_space()
+				} else {
+					'No robots.txt found or unreachable.'
+				}
 			} else {
 				res := simplegui.exec_safe(whois_bin, [target])
 				output_str = res.output.trim_space()
@@ -142,16 +149,28 @@ fn main() {
 
 			w.run_on_main_thread(fn [output_str, elapsed_ms, target, module_choice, is_err] (mut win_main simplegui.SimpleWindow) {
 				if is_err {
-					err_msg := if output_str != '' { output_str } else { 'Target host unreachable or query returned no data.' }
-					win_main.set('txt_recon_output', '// [RECON QUERY ERROR]\n// Target: ${target}\n// Module: ${module_choice}\n\n${err_msg}\n')
-					win_main.append_console('recon_console', ' OSINT query error for ${target} in ${elapsed_ms} ms:\n' + err_msg + '\n', 3)
-					win_main.set('lbl_stats', ' Stats: ERROR  |  Target: ${target}  |  Module: ${module_choice.split(" ")[0]}  |  Duration: ${elapsed_ms} ms')
+					err_msg := if output_str != '' {
+						output_str
+					} else {
+						'Target host unreachable or query returned no data.'
+					}
+					win_main.set('txt_recon_output',
+						'// [RECON QUERY ERROR]\n// Target: ${target}\n// Module: ${module_choice}\n\n${err_msg}\n')
+					win_main.append_console('recon_console',
+
+						' OSINT query error for ${target} in ${elapsed_ms} ms:\n' + err_msg + '\n',
+						3)
+					win_main.set('lbl_stats',
+						' Stats: ERROR  |  Target: ${target}  |  Module: ${module_choice.split(' ')[0]}  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('OSINT reconnaissance query failed.')
 					win_main.toast('Recon query error.')
 				} else {
 					win_main.set('txt_recon_output', output_str)
-					win_main.append_console('recon_console', ' Completed OSINT query for ${target} in ${elapsed_ms} ms (${output_str.len} bytes)\n', 4)
-					win_main.set('lbl_stats', ' Stats: SUCCESS  |  Target: ${target}  |  Module: ${module_choice.split(" ")[0]}  |  Duration: ${elapsed_ms} ms')
+					win_main.append_console('recon_console',
+						' Completed OSINT query for ${target} in ${elapsed_ms} ms (${output_str.len} bytes)\n',
+						4)
+					win_main.set('lbl_stats',
+						' Stats: SUCCESS  |  Target: ${target}  |  Module: ${module_choice.split(' ')[0]}  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('OSINT reconnaissance complete in ${elapsed_ms} ms.')
 					win_main.toast('Recon data gathered!')
 				}

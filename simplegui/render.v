@@ -24,21 +24,28 @@ import time
 // resolve_control_family_path determines the active font file path for rendering a control's text.
 // It checks explicit font_name paths, font_type category mapping, and window-level font_path fallback.
 fn resolve_control_family_path(ctrl &Control, win &SimpleWindow) string {
-	if ctrl.font_name.len > 0 && (os.exists(ctrl.font_name) || ctrl.font_name.ends_with('.ttf') || ctrl.font_name.ends_with('.otf') || ctrl.font_name.ends_with('.ttc')) {
+	if ctrl.font_name.len > 0 && (os.exists(ctrl.font_name) || ctrl.font_name.ends_with('.ttf')
+		|| ctrl.font_name.ends_with('.otf') || ctrl.font_name.ends_with('.ttc')) {
 		return ctrl.font_name
 	}
-	if ctrl.font_type.len > 0 && (os.exists(ctrl.font_type) || ctrl.font_type.ends_with('.ttf') || ctrl.font_type.ends_with('.otf') || ctrl.font_type.ends_with('.ttc')) {
+	if ctrl.font_type.len > 0 && (os.exists(ctrl.font_type) || ctrl.font_type.ends_with('.ttf')
+		|| ctrl.font_type.ends_with('.otf') || ctrl.font_type.ends_with('.ttc')) {
 		return ctrl.font_type
 	}
 	// Check category keyword in font_name or font_type
-	target_cat := if ctrl.font_name.len > 0 && ctrl.font_name != 'sans' { ctrl.font_name } else { ctrl.font_type }
+	target_cat := if ctrl.font_name.len > 0 && ctrl.font_name != 'sans' {
+		ctrl.font_name
+	} else {
+		ctrl.font_type
+	}
 	if target_cat.len > 0 {
 		resolved := resolve_font_path_by_category(target_cat)
 		if resolved.len > 0 && os.exists(resolved) {
 			return resolved
 		}
 	}
-	if win.font_path.len > 0 && (os.exists(win.font_path) || win.font_path.ends_with('.ttf') || win.font_path.ends_with('.otf') || win.font_path.ends_with('.ttc')) {
+	if win.font_path.len > 0 && (os.exists(win.font_path) || win.font_path.ends_with('.ttf')
+		|| win.font_path.ends_with('.otf') || win.font_path.ends_with('.ttc')) {
 		return win.font_path
 	}
 	return ''
@@ -82,10 +89,16 @@ pub fn (mut win SimpleWindow) render_ui() {
 		match ctrl.kind {
 			'label' {
 				txt_c := if ctrl.font_color.len > 0 { parse_hex_color(ctrl.font_color) } else { fg }
-				lbl_txt := clean_text(if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.title })
+				lbl_txt := clean_text(if ctrl.text_value.len > 0 {
+					ctrl.text_value
+				} else {
+					ctrl.title
+				})
 				lbl_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 15 }
-				mono_value := ctrl.font_name.to_lower() + '|' + ctrl.font_type.to_lower() + '|' + ctrl.font_subtype.to_lower()
-				is_mono := mono_value.contains('mono') || mono_value.contains('courier') || mono_value.contains('code')
+				mono_value := ctrl.font_name.to_lower() + '|' + ctrl.font_type.to_lower() + '|' +
+					ctrl.font_subtype.to_lower()
+				is_mono := mono_value.contains('mono') || mono_value.contains('courier')
+					|| mono_value.contains('code')
 				family_path := resolve_control_family_path(ctrl, win)
 				win.gg_ctx.draw_text2(
 					x:      int(ctrl.x)
@@ -100,10 +113,16 @@ pub fn (mut win SimpleWindow) render_ui() {
 			}
 			'heading' {
 				txt_c := if ctrl.font_color.len > 0 { parse_hex_color(ctrl.font_color) } else { fg }
-				hd_txt := clean_text(if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.title })
+				hd_txt := clean_text(if ctrl.text_value.len > 0 {
+					ctrl.text_value
+				} else {
+					ctrl.title
+				})
 				hd_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 22 }
-				mono_value := ctrl.font_name.to_lower() + '|' + ctrl.font_type.to_lower() + '|' + ctrl.font_subtype.to_lower()
-				is_mono := mono_value.contains('mono') || mono_value.contains('courier') || mono_value.contains('code')
+				mono_value := ctrl.font_name.to_lower() + '|' + ctrl.font_type.to_lower() + '|' +
+					ctrl.font_subtype.to_lower()
+				is_mono := mono_value.contains('mono') || mono_value.contains('courier')
+					|| mono_value.contains('code')
 				family_path := resolve_control_family_path(ctrl, win)
 				win.gg_ctx.draw_text2(
 					x:      int(ctrl.x)
@@ -115,14 +134,15 @@ pub fn (mut win SimpleWindow) render_ui() {
 					mono:   is_mono
 					family: family_path
 				)
-				win.gg_ctx.draw_line(ctrl.x, ctrl.y + 28, ctrl.x + ctrl.w, ctrl.y + 28,
-					border_c)
+				win.gg_ctx.draw_line(ctrl.x, ctrl.y + 28, ctrl.x + ctrl.w, ctrl.y + 28, border_c)
 			}
 			'link' {
 				link_txt := if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.title }
 				lnk_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 14 }
-				mono_value := ctrl.font_name.to_lower() + '|' + ctrl.font_type.to_lower() + '|' + ctrl.font_subtype.to_lower()
-				is_mono := mono_value.contains('mono') || mono_value.contains('courier') || mono_value.contains('code')
+				mono_value := ctrl.font_name.to_lower() + '|' + ctrl.font_type.to_lower() + '|' +
+					ctrl.font_subtype.to_lower()
+				is_mono := mono_value.contains('mono') || mono_value.contains('courier')
+					|| mono_value.contains('code')
 				family_path := resolve_control_family_path(ctrl, win)
 				win.gg_ctx.draw_text2(
 					x:      int(ctrl.x)
@@ -134,8 +154,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 					mono:   is_mono
 					family: family_path
 				)
-				win.gg_ctx.draw_line(ctrl.x, ctrl.y + 20, ctrl.x + f32(link_txt.len * 8),
-					ctrl.y + 20, accent)
+				win.gg_ctx.draw_line(ctrl.x, ctrl.y + 20, ctrl.x + f32(link_txt.len * 8), ctrl.y +
+					20, accent)
 			}
 			'button', 'action' {
 				mut btn_bg := if ctrl.bg_color.len > 0 {
@@ -149,15 +169,18 @@ pub fn (mut win SimpleWindow) render_ui() {
 					btn_bg = hover_c
 				}
 				if ctrl.is_pressed {
-					btn_bg = gg.rgb(u8(math.max(0, btn_bg.r - 30)), u8(math.max(0, btn_bg.g - 30)),
-						u8(math.max(0, btn_bg.b - 30)))
+					btn_bg = gg.rgb(u8(math.max(0, btn_bg.r - 30)), u8(math.max(0, btn_bg.g - 30)), u8(math.max(0,
+						btn_bg.b - 30)))
 				}
 
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					btn_bg)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, btn_bg)
 
 				has_btn_icon := ctrl.icon_path.len > 0
-				btn_icon_sz := if has_btn_icon { f32(math.min(ctrl.h - 10.0, 20.0)) } else { f32(0.0) }
+				btn_icon_sz := if has_btn_icon {
+					f32(math.min(ctrl.h - 10.0, 20.0))
+				} else {
+					f32(0.0)
+				}
 				if has_btn_icon {
 					icon_x := ctrl.x + 10.0
 					icon_y := ctrl.y + (ctrl.h - btn_icon_sz) / 2.0
@@ -172,7 +195,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 				}
 
 				btn_icon_offset := if has_btn_icon { btn_icon_sz + 8.0 } else { f32(0.0) }
-				max_chars := math.max(1, int((ctrl.w - 16.0 - btn_icon_offset) / (f32(btn_sz) * 0.55)))
+				max_chars := math.max(1,
+					int((ctrl.w - 16.0 - btn_icon_offset) / (f32(btn_sz) * 0.55)))
 				raw_title := clean_text(ctrl.title)
 				disp_title := if raw_title.len > max_chars && max_chars > 3 {
 					raw_title[0..max_chars - 3] + '...'
@@ -184,8 +208,10 @@ pub fn (mut win SimpleWindow) render_ui() {
 				text_x := int(ctrl.x + btn_icon_offset + (ctrl.w - btn_icon_offset - text_w) / 2.0)
 				text_y := int(ctrl.y + (ctrl.h - f32(btn_sz)) / 2.0)
 
-				mono_value := ctrl.font_name.to_lower() + '|' + ctrl.font_type.to_lower() + '|' + ctrl.font_subtype.to_lower()
-				is_mono := mono_value.contains('mono') || mono_value.contains('courier') || mono_value.contains('code')
+				mono_value := ctrl.font_name.to_lower() + '|' + ctrl.font_type.to_lower() + '|' +
+					ctrl.font_subtype.to_lower()
+				is_mono := mono_value.contains('mono') || mono_value.contains('courier')
+					|| mono_value.contains('code')
 				family_path := resolve_control_family_path(ctrl, win)
 				win.gg_ctx.draw_text2(
 					x:      math.max(int(ctrl.x + 8 + btn_icon_offset), text_x)
@@ -207,10 +233,12 @@ pub fn (mut win SimpleWindow) render_ui() {
 				if ctrl.is_hovered {
 					ib_bg = surface_hover
 				}
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					ib_bg)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					if ctrl.is_hovered { hover_c } else { border_c })
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, ib_bg)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, if ctrl.is_hovered {
+					hover_c
+				} else {
+					border_c
+				})
 
 				ib_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 15 }
 				icon_c := if ctrl.font_color.len > 0 {
@@ -221,8 +249,10 @@ pub fn (mut win SimpleWindow) render_ui() {
 					fg
 				}
 				txt_w := f32(ctrl.title.len) * (f32(ib_sz) * 0.55)
-				mono_value := ctrl.font_name.to_lower() + '|' + ctrl.font_type.to_lower() + '|' + ctrl.font_subtype.to_lower()
-				is_mono := mono_value.contains('mono') || mono_value.contains('courier') || mono_value.contains('code')
+				mono_value := ctrl.font_name.to_lower() + '|' + ctrl.font_type.to_lower() + '|' +
+					ctrl.font_subtype.to_lower()
+				is_mono := mono_value.contains('mono') || mono_value.contains('courier')
+					|| mono_value.contains('code')
 				family_path := resolve_control_family_path(ctrl, win)
 				win.gg_ctx.draw_text2(
 					x:      int(ctrl.x + (ctrl.w - txt_w) / 2.0)
@@ -235,27 +265,35 @@ pub fn (mut win SimpleWindow) render_ui() {
 					family: family_path
 				)
 			}
-			'input', 'password', 'search_field', 'pin_code', 'number', 'time_picker', 'date_picker' {
+			'input', 'password', 'search_field', 'pin_code', 'number', 'time_picker',
+			'date_picker' {
 				in_bg := if ctrl.is_hovered { surface_hover } else { surface }
-				b_c := if ctrl.is_focused { accent } else if ctrl.is_hovered { hover_c } else { border_c }
+				b_c := if ctrl.is_focused {
+					accent
+				} else if ctrl.is_hovered {
+					hover_c
+				} else {
+					border_c
+				}
 
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					in_bg)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					b_c)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, in_bg)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, b_c)
 
 				has_in_icon := ctrl.icon_path.len > 0
 				in_icon_sz := if has_in_icon { f32(math.min(ctrl.h - 12.0, 18.0)) } else { f32(0.0) }
 				if has_in_icon {
-					win.draw_image_fit(ctrl.icon_path, ctrl.x + 8.0, ctrl.y + (ctrl.h - in_icon_sz) / 2.0, in_icon_sz, in_icon_sz, '')
+					win.draw_image_fit(ctrl.icon_path, ctrl.x + 8.0, ctrl.y +
+						(ctrl.h - in_icon_sz) / 2.0, in_icon_sz, in_icon_sz, '')
 				}
 				in_offset_x := if has_in_icon { in_icon_sz + 8.0 } else { f32(0.0) }
 
 				if ctrl.kind == 'time_picker' {
-					draw_vector_clock_icon(win.gg_ctx, ctrl.x + ctrl.w - 18.0, ctrl.y + ctrl.h / 2.0, 5.0, fg)
+					draw_vector_clock_icon(win.gg_ctx, ctrl.x + ctrl.w - 18.0,
+						ctrl.y + ctrl.h / 2.0, 5.0, fg)
 				}
 				if ctrl.kind == 'date_picker' {
-					draw_vector_calendar_icon(win.gg_ctx, ctrl.x + ctrl.w - 24.0, ctrl.y + (ctrl.h - 14.0) / 2.0, fg)
+					draw_vector_calendar_icon(win.gg_ctx, ctrl.x + ctrl.w - 24.0, ctrl.y +
+						(ctrl.h - 14.0) / 2.0, fg)
 				}
 				if ctrl.kind == 'number' {
 					up_x := ctrl.x + ctrl.w - 18.0
@@ -288,7 +326,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 					fg
 				}
 
-				max_in_chars := math.max(1, int((ctrl.w - 24.0 - in_offset_x) / (f32(inp_sz) * 0.55)))
+				max_in_chars := math.max(1,
+					int((ctrl.w - 24.0 - in_offset_x) / (f32(inp_sz) * 0.55)))
 				mut start_idx := 0
 				if ctrl.caret_pos > max_in_chars {
 					start_idx = ctrl.caret_pos - max_in_chars
@@ -318,14 +357,19 @@ pub fn (mut win SimpleWindow) render_ui() {
 						sel_x2 := ctrl.x + 10.0 + in_offset_x + f32(win.gg_ctx.text_width(prefix_e))
 						sel_w := sel_x2 - sel_x1
 						if sel_w > 0 {
-							win.gg_ctx.draw_rect_filled(sel_x1, ctrl.y + 4.0, sel_w, ctrl.h - 8.0,
-								gg.Color{r: 59, g: 130, b: 246, a: 120})
+							win.gg_ctx.draw_rect_filled(sel_x1, ctrl.y + 4.0, sel_w, ctrl.h - 8.0, gg.Color{
+								r: 59
+								g: 130
+								b: 246
+								a: 120
+							})
 						}
 					}
 				}
 
 				family_path := resolve_control_family_path(ctrl, win)
-				is_mono := ctrl.font_name.len > 0 && (ctrl.font_name.to_lower().contains('mono') || ctrl.font_name.to_lower().contains('courier'))
+				is_mono := ctrl.font_name.len > 0 && (ctrl.font_name.to_lower().contains('mono')
+					|| ctrl.font_name.to_lower().contains('courier'))
 				win.gg_ctx.draw_text2(
 					x:      int(ctrl.x + 10 + in_offset_x)
 					y:      int(ctrl.y + (ctrl.h - f32(inp_sz)) / 2.0)
@@ -338,7 +382,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 				)
 
 				if ctrl.is_focused {
-					visible_caret_pos := math.max(0, math.min(clipped_txt.len, ctrl.caret_pos - start_idx))
+					visible_caret_pos := math.max(0, math.min(clipped_txt.len,
+						ctrl.caret_pos - start_idx))
 					prefix_txt := if visible_caret_pos <= clipped_txt.len {
 						clipped_txt[0..visible_caret_pos]
 					} else {
@@ -346,8 +391,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 					}
 					caret_offset_x := f32(win.gg_ctx.text_width(prefix_txt))
 					caret_x := ctrl.x + 10.0 + in_offset_x + caret_offset_x
-					win.gg_ctx.draw_line(caret_x, ctrl.y + 6, caret_x, ctrl.y + ctrl.h - 6,
-						accent)
+					win.gg_ctx.draw_line(caret_x, ctrl.y + 6, caret_x, ctrl.y + ctrl.h - 6, accent)
 				}
 
 				if ctrl.kind == 'number' {
@@ -358,11 +402,15 @@ pub fn (mut win SimpleWindow) render_ui() {
 			}
 			'textarea', 'console', 'code', 'markdown' {
 				ta_bg := if ctrl.is_hovered { surface_hover } else { surface }
-				ta_bc := if ctrl.is_focused { accent } else if ctrl.is_hovered { hover_c } else { border_c }
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					ta_bg)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					ta_bc)
+				ta_bc := if ctrl.is_focused {
+					accent
+				} else if ctrl.is_hovered {
+					hover_c
+				} else {
+					border_c
+				}
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, ta_bg)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, ta_bc)
 
 				lines := ctrl.text_value.split('\n')
 				mut line_y := ctrl.y + 8.0
@@ -391,13 +439,22 @@ pub fn (mut win SimpleWindow) render_ui() {
 								sel_w += 6.0
 							}
 							if sel_w > 0 {
-								win.gg_ctx.draw_rect_filled(sel_x1, curr_line_y, sel_w, line_h,
-									gg.Color{r: 59, g: 130, b: 246, a: 120})
+								win.gg_ctx.draw_rect_filled(sel_x1, curr_line_y, sel_w, line_h, gg.Color{
+									r: 59
+									g: 130
+									b: 246
+									a: 120
+								})
 							}
-						} else if vis_s == vis_e && vis_s == line.len && e_raw > line_end_idx && s_raw <= line_end_idx {
+						} else if vis_s == vis_e && vis_s == line.len && e_raw > line_end_idx
+							&& s_raw <= line_end_idx {
 							sel_x1 := ctrl.x + 10.0 + f32(win.gg_ctx.text_width(line))
-							win.gg_ctx.draw_rect_filled(sel_x1, curr_line_y, 6.0, line_h,
-								gg.Color{r: 59, g: 130, b: 246, a: 120})
+							win.gg_ctx.draw_rect_filled(sel_x1, curr_line_y, 6.0, line_h, gg.Color{
+								r: 59
+								g: 130
+								b: 246
+								a: 120
+							})
 						}
 						line_start_idx += line.len + 1
 					}
@@ -408,7 +465,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 					if line_y + line_h > ctrl.y + ctrl.h - 4.0 {
 						break
 					}
-					is_mono := ctrl.font_name.len > 0 && (ctrl.font_name.to_lower().contains('mono') || ctrl.font_name.to_lower().contains('courier'))
+					is_mono := ctrl.font_name.len > 0 && (ctrl.font_name.to_lower().contains('mono')
+						|| ctrl.font_name.to_lower().contains('courier'))
 					win.gg_ctx.draw_text2(
 						x:      int(ctrl.x + 10)
 						y:      int(line_y)
@@ -430,13 +488,14 @@ pub fn (mut win SimpleWindow) render_ui() {
 							break
 						}
 						line_end_idx := line_start_idx + line.len
-						if ctrl.caret_pos >= line_start_idx && (ctrl.caret_pos <= line_end_idx || i == lines.len - 1) {
+						if ctrl.caret_pos >= line_start_idx
+							&& (ctrl.caret_pos <= line_end_idx || i == lines.len - 1) {
 							col := math.max(0, math.min(line.len, ctrl.caret_pos - line_start_idx))
 							prefix_txt := line[0..col]
 							caret_offset_x := f32(win.gg_ctx.text_width(prefix_txt))
 							caret_x := ctrl.x + 10.0 + caret_offset_x
-							win.gg_ctx.draw_line(caret_x, curr_line_y + 1.0, caret_x, curr_line_y + line_h - 1.0,
-								accent)
+							win.gg_ctx.draw_line(caret_x, curr_line_y + 1.0, caret_x, curr_line_y +
+								line_h - 1.0, accent)
 							break
 						}
 						line_start_idx += line.len + 1
@@ -448,22 +507,29 @@ pub fn (mut win SimpleWindow) render_ui() {
 				box_y := ctrl.y + (ctrl.h - box_size) / 2.0
 
 				if ctrl.bool_value {
-					win.gg_ctx.draw_rounded_rect_filled(ctrl.x, box_y, box_size, box_size,
-						4.0, if ctrl.is_hovered { hover_c } else { accent })
+					win.gg_ctx.draw_rounded_rect_filled(ctrl.x, box_y, box_size, box_size, 4.0, if ctrl.is_hovered {
+						hover_c
+					} else {
+						accent
+					})
 					white_c := gg.Color{
 						r: 255
 						g: 255
 						b: 255
 					}
-					win.gg_ctx.draw_line(ctrl.x + 4, box_y + 10, ctrl.x + 8, box_y + 14,
-						white_c)
-					win.gg_ctx.draw_line(ctrl.x + 8, box_y + 14, ctrl.x + 15, box_y + 5,
-						white_c)
+					win.gg_ctx.draw_line(ctrl.x + 4, box_y + 10, ctrl.x + 8, box_y + 14, white_c)
+					win.gg_ctx.draw_line(ctrl.x + 8, box_y + 14, ctrl.x + 15, box_y + 5, white_c)
 				} else {
-					win.gg_ctx.draw_rounded_rect_filled(ctrl.x, box_y, box_size, box_size,
-						4.0, if ctrl.is_hovered { surface_hover } else { surface })
-					win.gg_ctx.draw_rounded_rect_empty(ctrl.x, box_y, box_size, box_size,
-						4.0, if ctrl.is_hovered { hover_c } else { border_c })
+					win.gg_ctx.draw_rounded_rect_filled(ctrl.x, box_y, box_size, box_size, 4.0, if ctrl.is_hovered {
+						surface_hover
+					} else {
+						surface
+					})
+					win.gg_ctx.draw_rounded_rect_empty(ctrl.x, box_y, box_size, box_size, 4.0, if ctrl.is_hovered {
+						hover_c
+					} else {
+						border_c
+					})
 				}
 
 				chk_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 14 }
@@ -493,15 +559,21 @@ pub fn (mut win SimpleWindow) render_ui() {
 				knob_y := sw_y + (sw_h - knob_s) / 2.0
 
 				if ctrl.bool_value {
-					win.gg_ctx.draw_rounded_rect_filled(ctrl.x, sw_y, sw_w, sw_h, 11.0,
-						if ctrl.is_hovered { hover_c } else { accent })
+					win.gg_ctx.draw_rounded_rect_filled(ctrl.x, sw_y, sw_w, sw_h, 11.0, if ctrl.is_hovered {
+						hover_c
+					} else {
+						accent
+					})
 					win.gg_ctx.draw_rounded_rect_filled(ctrl.x + sw_w - knob_s - 2.0, knob_y,
 						knob_s, knob_s, 9.0, white_c)
 				} else {
-					win.gg_ctx.draw_rounded_rect_filled(ctrl.x, sw_y, sw_w, sw_h, 11.0,
-						if ctrl.is_hovered { hover_c } else { border_c })
-					win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 2.0, knob_y,
-						knob_s, knob_s, 9.0, white_c)
+					win.gg_ctx.draw_rounded_rect_filled(ctrl.x, sw_y, sw_w, sw_h, 11.0, if ctrl.is_hovered {
+						hover_c
+					} else {
+						border_c
+					})
+					win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 2.0, knob_y, knob_s, knob_s, 9.0,
+						white_c)
 				}
 
 				sw_sz := if ctrl.font_size > 0 { ctrl.font_size } else { 14 }
@@ -520,33 +592,45 @@ pub fn (mut win SimpleWindow) render_ui() {
 			'slider' {
 				track_h := f32(6.0)
 				track_y := ctrl.y + (ctrl.h - track_h) / 2.0
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, track_y, ctrl.w, track_h,
-					3.0, if ctrl.is_hovered { surface_hover } else { border_c })
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, track_y, ctrl.w, track_h, 3.0, if ctrl.is_hovered {
+					surface_hover
+				} else {
+					border_c
+				})
 
 				pct := f32(ctrl.int_value) / 100.0
 				fill_w := ctrl.w * pct
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, track_y, fill_w, track_h,
-					3.0, if ctrl.is_hovered { hover_c } else { accent })
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, track_y, fill_w, track_h, 3.0, if ctrl.is_hovered {
+					hover_c
+				} else {
+					accent
+				})
 
 				thumb_w := if ctrl.is_hovered { f32(16.0) } else { f32(14.0) }
 				thumb_h := if ctrl.is_hovered { f32(16.0) } else { f32(14.0) }
 				thumb_x := ctrl.x + fill_w - thumb_w / 2.0
 				thumb_y := ctrl.y + (ctrl.h - thumb_h) / 2.0
-				win.gg_ctx.draw_rounded_rect_filled(thumb_x, thumb_y, thumb_w, thumb_h, 4.0, if ctrl.is_hovered { hover_c } else { accent })
+				win.gg_ctx.draw_rounded_rect_filled(thumb_x, thumb_y, thumb_w, thumb_h, 4.0, if ctrl.is_hovered {
+					hover_c
+				} else {
+					accent
+				})
 			}
 			'progress', 'gauge', 'radial_gauge', 'circular_progress' {
 				track_h := f32(10.0)
 				track_y := ctrl.y + (ctrl.h - track_h) / 2.0
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, track_y, ctrl.w, track_h,
-					5.0, border_c)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, track_y, ctrl.w, track_h, 5.0, border_c)
 
 				pct := math.max(0.0, math.min(1.0, f64(ctrl.int_value) / 100.0))
 				fill_w := ctrl.w * f32(pct)
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, track_y, fill_w, track_h,
-					5.0, accent)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, track_y, fill_w, track_h, 5.0, accent)
 			}
 			'spinner' {
-				sp_col := if ctrl.font_color.len > 0 { parse_hex_color(ctrl.font_color) } else { accent }
+				sp_col := if ctrl.font_color.len > 0 {
+					parse_hex_color(ctrl.font_color)
+				} else {
+					accent
+				}
 				cx := ctrl.x + ctrl.h / 2.0
 				cy := ctrl.y + ctrl.h / 2.0
 				rad := (ctrl.h / 2.0) - 2.0
@@ -607,11 +691,9 @@ pub fn (mut win SimpleWindow) render_ui() {
 				}
 
 				track_h2 := f32(8.0)
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, track_h2,
-					4.0, border_c)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, track_h2, 4.0, border_c)
 				fill_w2 := ctrl.w * f32(score) / 100.0
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, fill_w2, track_h2,
-					4.0, bar_c)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, fill_w2, track_h2, 4.0, bar_c)
 				win.gg_ctx.draw_text2(
 					x:     int(ctrl.x)
 					y:     int(ctrl.y + 12)
@@ -623,8 +705,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 			'dropdown' {
 				is_open := win.active_dropdown_name == ctrl.name
 				border_color := if is_open { accent } else { border_c }
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					surface)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
 					border_color)
 
@@ -642,7 +723,11 @@ pub fn (mut win SimpleWindow) render_ui() {
 					size:   14
 					family: family_path
 				)
-				draw_vector_chevron(win.gg_ctx, ctrl.x + ctrl.w - 18.0, ctrl.y + ctrl.h / 2.0, 5.0, if is_open { 'up' } else { 'down' }, if is_open { accent } else { fg })
+				draw_vector_chevron(win.gg_ctx, ctrl.x + ctrl.w - 18.0, ctrl.y + ctrl.h / 2.0, 5.0, if is_open {
+					'up'
+				} else {
+					'down'
+				}, if is_open { accent } else { fg })
 			}
 			'skeleton' {
 				ticks := time.ticks()
@@ -655,10 +740,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 			'menu_button' {
 				hdr_h := f32(34.0)
 				mb_bg := if ctrl.is_hovered { accent } else { surface }
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, hdr_h, 6.0,
-					mb_bg)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, hdr_h, 6.0,
-					border_c)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, hdr_h, 6.0, mb_bg)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, hdr_h, 6.0, border_c)
 
 				mb_label := if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.title }
 				mb_txt_c := if ctrl.is_hovered {
@@ -678,22 +761,26 @@ pub fn (mut win SimpleWindow) render_ui() {
 					size:  14
 				)
 
-				draw_vector_chevron(win.gg_ctx, ctrl.x + ctrl.w - 16.0, ctrl.y + hdr_h / 2.0, 5.0, if ctrl.is_expanded { 'up' } else { 'down' }, mb_txt_c)
+				draw_vector_chevron(win.gg_ctx, ctrl.x + ctrl.w - 16.0, ctrl.y + hdr_h / 2.0, 5.0, if ctrl.is_expanded {
+					'up'
+				} else {
+					'down'
+				}, mb_txt_c)
 
 				if ctrl.is_expanded && ctrl.items.len > 0 {
 					list_y := ctrl.y + hdr_h + 2.0
 					list_h := f32(ctrl.items.len) * 28.0
-					win.gg_ctx.draw_rounded_rect_filled(ctrl.x, list_y, ctrl.w, list_h,
-						6.0, surface)
-					win.gg_ctx.draw_rounded_rect_empty(ctrl.x, list_y, ctrl.w, list_h,
-						6.0, border_c)
+					win.gg_ctx.draw_rounded_rect_filled(ctrl.x, list_y, ctrl.w, list_h, 6.0,
+						surface)
+					win.gg_ctx.draw_rounded_rect_empty(ctrl.x, list_y, ctrl.w, list_h, 6.0,
+						border_c)
 
 					mut item_y := list_y
 					for item in ctrl.items {
 						is_sel := item == ctrl.text_value
 						if is_sel {
-							win.gg_ctx.draw_rect_filled(ctrl.x + 2, item_y + 1, ctrl.w - 4,
-								26.0, accent)
+							win.gg_ctx.draw_rect_filled(ctrl.x + 2, item_y + 1, ctrl.w - 4, 26.0,
+								accent)
 						}
 						item_c := if is_sel {
 							gg.Color{
@@ -716,10 +803,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 				}
 			}
 			'segmented', 'tab_pills', 'tabs', 'radio', 'filter_chips', 'mode_control' {
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					surface)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					border_c)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
 
 				if ctrl.items.len > 0 {
 					family_path := resolve_control_family_path(ctrl, win)
@@ -728,8 +813,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 						item_x := ctrl.x + f32(idx) * seg_w
 						is_sel := item == ctrl.text_value || idx == ctrl.int_value
 						if is_sel {
-							win.gg_ctx.draw_rounded_rect_filled(item_x + 2, ctrl.y + 2,
-								seg_w - 4, ctrl.h - 4, 4.0, accent)
+							win.gg_ctx.draw_rounded_rect_filled(item_x + 2, ctrl.y + 2, seg_w - 4,
+								ctrl.h - 4, 4.0, accent)
 						}
 						item_c := if is_sel {
 							gg.Color{
@@ -765,15 +850,28 @@ pub fn (mut win SimpleWindow) render_ui() {
 			}
 			'rating' {
 				stars := if ctrl.int_value > 0 { ctrl.int_value } else { 4 }
-				star_gold := gg.Color{ r: 255, g: 193, b: 7 }
-				star_border := if win.theme.is_dark { gg.Color{ r: 120, g: 120, b: 125 } } else { border_c }
+				star_gold := gg.Color{
+					r: 255
+					g: 193
+					b: 7
+				}
+				star_border := if win.theme.is_dark {
+					gg.Color{
+						r: 120
+						g: 120
+						b: 125
+					}
+				} else {
+					border_c
+				}
 				mut star_x := ctrl.x + 12.0
 				star_y := ctrl.y + 12.0
 				for s_idx in 1 .. 6 {
 					is_filled := s_idx <= stars
 					fill_c := if is_filled { star_gold } else { bg }
 					stroke_c := if is_filled { star_gold } else { star_border }
-					draw_vector_star(win.gg_ctx, star_x, star_y, 8.5, 3.6, is_filled, fill_c, stroke_c)
+					draw_vector_star(win.gg_ctx, star_x, star_y, 8.5, 3.6, is_filled, fill_c,
+						stroke_c)
 					star_x += 24.0
 				}
 			}
@@ -783,17 +881,13 @@ pub fn (mut win SimpleWindow) render_ui() {
 				} else {
 					'#007aff'
 				})
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					swatch_c)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					border_c)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, swatch_c)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
 			}
 			'color_picker' {
 				cp_b_c := if ctrl.is_focused { accent } else { border_c }
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					surface)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					cp_b_c)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, cp_b_c)
 
 				swatch_w := f32(24.0)
 				swatch_h := f32(ctrl.h - 10.0)
@@ -815,10 +909,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 				)
 			}
 			'list_box' {
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					surface)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					border_c)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
 
 				mut item_y := ctrl.y + 4.0
 				for idx, item in ctrl.items {
@@ -827,8 +919,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 					}
 					is_sel := item == ctrl.text_value || idx == ctrl.int_value
 					if is_sel {
-						win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 3, item_y, ctrl.w - 6, 22.0, 4.0,
-							accent)
+						win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 3, item_y, ctrl.w - 6, 22.0,
+							4.0, accent)
 					}
 					item_c := if is_sel {
 						gg.Color{
@@ -851,10 +943,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 				}
 			}
 			'multi_list_box' {
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					surface)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					border_c)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
 
 				mut item_y := ctrl.y + 4.0
 				for _, item in ctrl.items {
@@ -863,8 +953,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 					}
 					is_sel := item in ctrl.items_selected
 					if is_sel {
-						win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 3, item_y, ctrl.w - 6, 22.0, 4.0,
-							accent)
+						win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 3, item_y, ctrl.w - 6, 22.0,
+							4.0, accent)
 					}
 					item_c := if is_sel {
 						gg.Color{
@@ -887,10 +977,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 				}
 			}
 			'checklist' {
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					surface)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					border_c)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
 
 				mut cl_y := ctrl.y + 6.0
 				for item in ctrl.items {
@@ -899,22 +987,20 @@ pub fn (mut win SimpleWindow) render_ui() {
 					}
 					is_checked := item in ctrl.items_selected
 					if is_checked {
-						win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 8, cl_y, 16.0, 16.0,
-							3.0, accent)
+						win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 8, cl_y, 16.0, 16.0, 3.0,
+							accent)
 						white_c := gg.Color{
 							r: 255
 							g: 255
 							b: 255
 						}
-						win.gg_ctx.draw_line(ctrl.x + 11, cl_y + 8, ctrl.x + 14, cl_y + 12,
-							white_c)
-						win.gg_ctx.draw_line(ctrl.x + 14, cl_y + 12, ctrl.x + 20, cl_y + 4,
-							white_c)
+						win.gg_ctx.draw_line(ctrl.x + 11, cl_y + 8, ctrl.x + 14, cl_y + 12, white_c)
+						win.gg_ctx.draw_line(ctrl.x + 14, cl_y + 12, ctrl.x + 20, cl_y + 4, white_c)
 					} else {
-						win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 8, cl_y, 16.0, 16.0,
-							3.0, surface)
-						win.gg_ctx.draw_rounded_rect_empty(ctrl.x + 8, cl_y, 16.0, 16.0,
-							3.0, border_c)
+						win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 8, cl_y, 16.0, 16.0, 3.0,
+							surface)
+						win.gg_ctx.draw_rounded_rect_empty(ctrl.x + 8, cl_y, 16.0, 16.0, 3.0,
+							border_c)
 					}
 					win.gg_ctx.draw_text2(
 						x:     int(ctrl.x + 32)
@@ -959,10 +1045,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 				}
 			}
 			'grid', 'table' {
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					surface)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					border_c)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
 
 				col_cnt := if ctrl.headers.len > 0 {
 					ctrl.headers.len
@@ -1036,15 +1120,15 @@ pub fn (mut win SimpleWindow) render_ui() {
 						is_sel := r_idx == ctrl.selected_row
 						is_row_hover := r_idx == hover_row_idx && !is_sel
 						if is_sel {
-							win.gg_ctx.draw_rect_filled(ctrl.x + 2, row_y + 1, ctrl.w - 4,
-								24.0, accent)
+							win.gg_ctx.draw_rect_filled(ctrl.x + 2, row_y + 1, ctrl.w - 4, 24.0,
+								accent)
 						} else if is_row_hover {
-							win.gg_ctx.draw_rect_filled(ctrl.x + 2, row_y + 1, ctrl.w - 4,
-								24.0, surface_hover)
+							win.gg_ctx.draw_rect_filled(ctrl.x + 2, row_y + 1, ctrl.w - 4, 24.0,
+								surface_hover)
 						} else if r_idx % 2 == 1 {
 							row_bg := mix_theme_color(surface, bg, 0.45)
-							win.gg_ctx.draw_rect_filled(ctrl.x + 2, row_y + 1, ctrl.w - 4,
-								24.0, row_bg)
+							win.gg_ctx.draw_rect_filled(ctrl.x + 2, row_y + 1, ctrl.w - 4, 24.0,
+								row_bg)
 						}
 
 						row_fg := if is_sel {
@@ -1087,8 +1171,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 				if content_h > body_h {
 					max_scroll := content_h - body_h
 					track_x := ctrl.x + ctrl.w - 6.0
-					win.gg_ctx.draw_rect_filled(track_x, ctrl.y + header_h, 4.0, body_h,
-						border_c)
+					win.gg_ctx.draw_rect_filled(track_x, ctrl.y + header_h, 4.0, body_h, border_c)
 					thumb_h := math.max(f32(20.0), body_h * (body_h / content_h))
 					thumb_y := ctrl.y + header_h +
 						(ctrl.scroll_offset_y / max_scroll) * (body_h - thumb_h)
@@ -1096,10 +1179,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 				}
 			}
 			'tree_view' {
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					surface)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					border_c)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
 
 				mut node_y := ctrl.y + 6.0
 				for node in ctrl.tree_nodes {
@@ -1147,10 +1228,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 				}
 			}
 			'tab_container_start' {
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					surface)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					border_c)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
 
 				if ctrl.items.len > 0 {
 					tab_w := ctrl.w / f32(ctrl.items.len)
@@ -1175,11 +1254,16 @@ pub fn (mut win SimpleWindow) render_ui() {
 						has_tab_icon := icon_p.len > 0
 						tab_icon_sz := f32(16.0)
 						text_w := f32(title.len * 7)
-						total_content_w := if has_tab_icon { text_w + tab_icon_sz + 6.0 } else { text_w }
+						total_content_w := if has_tab_icon {
+							text_w + tab_icon_sz + 6.0
+						} else {
+							text_w
+						}
 						mut start_x := tx + (tab_w - total_content_w) / 2.0
 
 						if has_tab_icon {
-							win.draw_image_fit(icon_p, start_x, ctrl.y + (ctrl.h - tab_icon_sz) / 2.0, tab_icon_sz, tab_icon_sz, '')
+							win.draw_image_fit(icon_p, start_x, ctrl.y +
+								(ctrl.h - tab_icon_sz) / 2.0, tab_icon_sz, tab_icon_sz, '')
 							start_x += tab_icon_sz + 6.0
 						}
 
@@ -1196,10 +1280,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 			'file_picker' {
 				input_w := ctrl.w - 84.0
 				fp_b_c := if ctrl.is_focused { accent } else { border_c }
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, input_w, ctrl.h, 6.0,
-					surface)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, input_w, ctrl.h, 6.0,
-					fp_b_c)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, input_w, ctrl.h, 6.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, input_w, ctrl.h, 6.0, fp_b_c)
 
 				raw_path := if ctrl.text_value.len > 0 { ctrl.text_value } else { 'Select file...' }
 				path_c := if ctrl.text_value.len > 0 {
@@ -1243,8 +1325,12 @@ pub fn (mut win SimpleWindow) render_ui() {
 						sel_x2 := ctrl.x + 10.0 + f32(win.gg_ctx.text_width(prefix_e))
 						sel_w := sel_x2 - sel_x1
 						if sel_w > 0 {
-							win.gg_ctx.draw_rect_filled(sel_x1, ctrl.y + 4.0, sel_w, ctrl.h - 8.0,
-								gg.Color{r: 59, g: 130, b: 246, a: 120})
+							win.gg_ctx.draw_rect_filled(sel_x1, ctrl.y + 4.0, sel_w, ctrl.h - 8.0, gg.Color{
+								r: 59
+								g: 130
+								b: 246
+								a: 120
+							})
 						}
 					}
 				}
@@ -1258,7 +1344,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 				)
 
 				if ctrl.is_focused {
-					visible_caret_pos := math.max(0, math.min(disp_path.len, ctrl.caret_pos - start_idx))
+					visible_caret_pos := math.max(0, math.min(disp_path.len,
+						ctrl.caret_pos - start_idx))
 					prefix_txt := if visible_caret_pos <= disp_path.len {
 						disp_path[0..visible_caret_pos]
 					} else {
@@ -1266,13 +1353,11 @@ pub fn (mut win SimpleWindow) render_ui() {
 					}
 					caret_offset_x := f32(win.gg_ctx.text_width(prefix_txt))
 					caret_x := ctrl.x + 10.0 + caret_offset_x
-					win.gg_ctx.draw_line(caret_x, ctrl.y + 6, caret_x, ctrl.y + ctrl.h - 6,
-						accent)
+					win.gg_ctx.draw_line(caret_x, ctrl.y + 6, caret_x, ctrl.y + ctrl.h - 6, accent)
 				}
 
 				btn_x := ctrl.x + ctrl.w - 78.0
-				win.gg_ctx.draw_rounded_rect_filled(btn_x, ctrl.y, 78.0, ctrl.h, 6.0,
-					accent)
+				win.gg_ctx.draw_rounded_rect_filled(btn_x, ctrl.y, 78.0, ctrl.h, 6.0, accent)
 				win.gg_ctx.draw_text2(
 					x:     int(btn_x + 12)
 					y:     int(ctrl.y + (ctrl.h - 16.0) / 2.0)
@@ -1287,13 +1372,10 @@ pub fn (mut win SimpleWindow) render_ui() {
 			}
 			'search_bar' {
 				sb_b_c := if ctrl.is_focused { accent } else { border_c }
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					surface)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					sb_b_c)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, sb_b_c)
 
 				draw_vector_search_icon(win.gg_ctx, ctrl.x + 14.0, ctrl.y + ctrl.h / 2.0, 4.5, fg)
-
 
 				s_txt := if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.placeholder }
 				s_color := if ctrl.text_value.len == 0 && ctrl.placeholder.len > 0 {
@@ -1337,8 +1419,12 @@ pub fn (mut win SimpleWindow) render_ui() {
 						sel_x2 := ctrl.x + 32.0 + f32(win.gg_ctx.text_width(prefix_e))
 						sel_w := sel_x2 - sel_x1
 						if sel_w > 0 {
-							win.gg_ctx.draw_rect_filled(sel_x1, ctrl.y + 4.0, sel_w, ctrl.h - 8.0,
-								gg.Color{r: 59, g: 130, b: 246, a: 120})
+							win.gg_ctx.draw_rect_filled(sel_x1, ctrl.y + 4.0, sel_w, ctrl.h - 8.0, gg.Color{
+								r: 59
+								g: 130
+								b: 246
+								a: 120
+							})
 						}
 					}
 				}
@@ -1352,7 +1438,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 				)
 
 				if ctrl.is_focused {
-					visible_caret_pos := math.max(0, math.min(disp_s.len, ctrl.caret_pos - start_idx))
+					visible_caret_pos := math.max(0, math.min(disp_s.len,
+						ctrl.caret_pos - start_idx))
 					prefix_txt := if visible_caret_pos <= disp_s.len {
 						disp_s[0..visible_caret_pos]
 					} else {
@@ -1360,8 +1447,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 					}
 					caret_offset_x := f32(win.gg_ctx.text_width(prefix_txt))
 					caret_x := ctrl.x + 32.0 + caret_offset_x
-					win.gg_ctx.draw_line(caret_x, ctrl.y + 6, caret_x, ctrl.y + ctrl.h - 6,
-						accent)
+					win.gg_ctx.draw_line(caret_x, ctrl.y + 6, caret_x, ctrl.y + ctrl.h - 6, accent)
 				}
 
 				if ctrl.text_value.len > 0 {
@@ -1382,9 +1468,9 @@ pub fn (mut win SimpleWindow) render_ui() {
 					'info' { parse_hex_color('#3b82f6') }
 					else { accent }
 				}
+
 				badge_w := f32(ctrl.title.len * 7 + 16)
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, badge_w, ctrl.h, 12.0,
-					badge_bg)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, badge_w, ctrl.h, 12.0, badge_bg)
 				win.gg_ctx.draw_text2(
 					x:     int(ctrl.x + 8)
 					y:     int(ctrl.y + (ctrl.h - 14.0) / 2.0)
@@ -1412,7 +1498,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 						)
 						bx += f32(item.len * 7 + 6)
 						if !is_last {
-							draw_vector_chevron(win.gg_ctx, bx + 6.0, ctrl.y + 11.0, 4.0, 'right', border_c)
+							draw_vector_chevron(win.gg_ctx, bx + 6.0, ctrl.y + 11.0, 4.0, 'right',
+								border_c)
 							bx += 14.0
 						}
 					}
@@ -1433,7 +1520,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 						is_done := idx <= active_idx
 						circle_c := if is_done { accent } else { border_c }
 
-						win.gg_ctx.draw_rounded_rect_filled(cx - 10.0, line_y - 10.0, 20.0, 20.0, 4.0, circle_c)
+						win.gg_ctx.draw_rounded_rect_filled(cx - 10.0, line_y - 10.0, 20.0, 20.0,
+							4.0, circle_c)
 						num_str := '${idx + 1}'
 						win.gg_ctx.draw_text2(
 							x:     int(cx - 3)
@@ -1459,12 +1547,14 @@ pub fn (mut win SimpleWindow) render_ui() {
 			}
 			'accordion' {
 				hdr_h := f32(32.0)
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, hdr_h, 6.0,
-					surface)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, hdr_h, 6.0,
-					border_c)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, hdr_h, 6.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, hdr_h, 6.0, border_c)
 
-				draw_vector_chevron(win.gg_ctx, ctrl.x + 16.0, ctrl.y + hdr_h / 2.0, 5.0, if ctrl.is_expanded { 'down' } else { 'right' }, fg)
+				draw_vector_chevron(win.gg_ctx, ctrl.x + 16.0, ctrl.y + hdr_h / 2.0, 5.0, if ctrl.is_expanded {
+					'down'
+				} else {
+					'right'
+				}, fg)
 				win.gg_ctx.draw_text2(
 					x:     int(ctrl.x + 28)
 					y:     int(ctrl.y + 8)
@@ -1476,10 +1566,9 @@ pub fn (mut win SimpleWindow) render_ui() {
 				if ctrl.is_expanded {
 					body_y := ctrl.y + hdr_h + 4
 					body_h := ctrl.h - hdr_h - 4
-					win.gg_ctx.draw_rounded_rect_filled(ctrl.x, body_y, ctrl.w, body_h,
-						6.0, bg)
-					win.gg_ctx.draw_rounded_rect_empty(ctrl.x, body_y, ctrl.w, body_h,
-						6.0, border_c)
+					win.gg_ctx.draw_rounded_rect_filled(ctrl.x, body_y, ctrl.w, body_h, 6.0, bg)
+					win.gg_ctx.draw_rounded_rect_empty(ctrl.x, body_y, ctrl.w, body_h, 6.0,
+						border_c)
 					win.gg_ctx.draw_text2(
 						x:     int(ctrl.x + 12)
 						y:     int(body_y + 8)
@@ -1493,7 +1582,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 				circle_r := f32(18.0)
 				cy := ctrl.y + ctrl.h / 2.0
 				cx := ctrl.x + circle_r
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, cy - circle_r, circle_r * 2.0, circle_r * 2.0, 6.0, accent)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, cy - circle_r, circle_r * 2.0,
+					circle_r * 2.0, 6.0, accent)
 				win.gg_ctx.draw_text2(
 					x:     int(cx - 6)
 					y:     int(cy - 7)
@@ -1528,17 +1618,15 @@ pub fn (mut win SimpleWindow) render_ui() {
 						color: border_c
 						size:  12
 					)
-					win.gg_ctx.draw_line(ctrl.x + 24 + txt_w, mid_y, ctrl.x + ctrl.w,
-						mid_y, border_c)
+					win.gg_ctx.draw_line(ctrl.x + 24 + txt_w, mid_y, ctrl.x + ctrl.w, mid_y,
+						border_c)
 				} else {
 					win.gg_ctx.draw_line(ctrl.x, mid_y, ctrl.x + ctrl.w, mid_y, border_c)
 				}
 			}
 			'chart', 'sparkline', 'audio_waveform' {
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					surface)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0,
-					border_c)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
 
 				if ctrl.f64_list.len > 1 {
 					pts_cnt := ctrl.f64_list.len
@@ -1551,7 +1639,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 						if p_idx < pts_cnt - 1 {
 							v_next := ctrl.f64_list[p_idx + 1]
 							px_next := ctrl.x + f32(p_idx + 1) * step_x
-							py_next := ctrl.y + ctrl.h - f32((v_next / 100.0) * f64(ctrl.h - 16)) - 8
+							py_next := ctrl.y + ctrl.h - f32((v_next / 100.0) * f64(ctrl.h - 16)) -
+								8
 							win.gg_ctx.draw_line(px, py, px_next, py_next, accent)
 						}
 
@@ -1560,10 +1649,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 				}
 			}
 			'metric_card', 'card' {
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 10.0,
-					surface)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 10.0,
-					border_c)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 10.0, surface)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 10.0, border_c)
 
 				family_path := resolve_control_family_path(ctrl, win)
 				win.gg_ctx.draw_text2(
@@ -1586,8 +1673,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 				if ctrl.placeholder.len > 0 {
 					badge_w := f32(ctrl.placeholder.len * 7 + 12)
 					badge_x := ctrl.x + ctrl.w - badge_w - 10
-					win.gg_ctx.draw_rounded_rect_filled(badge_x, ctrl.y + 10, badge_w,
-						20.0, 4.0, accent)
+					win.gg_ctx.draw_rounded_rect_filled(badge_x, ctrl.y + 10, badge_w, 20.0, 4.0,
+						accent)
 					win.gg_ctx.draw_text2(
 						x:     int(badge_x + 6)
 						y:     int(ctrl.y + 12)
@@ -1624,11 +1711,10 @@ pub fn (mut win SimpleWindow) render_ui() {
 				)
 			}
 			'group_start' {
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0,
-					border_c)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, border_c)
 				if ctrl.title.len > 0 {
-					win.gg_ctx.draw_rect_filled(ctrl.x + 12, ctrl.y - 2, f32(ctrl.title.len * 8 + 8),
-						18.0, bg)
+					win.gg_ctx.draw_rect_filled(ctrl.x + 12, ctrl.y - 2,
+						f32(ctrl.title.len * 8 + 8), 18.0, bg)
 					win.gg_ctx.draw_text2(
 						x:     int(ctrl.x + 16)
 						y:     int(ctrl.y - 2)
@@ -1639,12 +1725,15 @@ pub fn (mut win SimpleWindow) render_ui() {
 				}
 			}
 			'separator' {
-				win.gg_ctx.draw_line(ctrl.x, ctrl.y + 1, ctrl.x + ctrl.w, ctrl.y + 1,
-					border_c)
+				win.gg_ctx.draw_line(ctrl.x, ctrl.y + 1, ctrl.x + ctrl.w, ctrl.y + 1, border_c)
 			}
 			'tag_input' {
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, if ctrl.is_focused { accent } else { border_c })
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, if ctrl.is_focused {
+					accent
+				} else {
+					border_c
+				})
 				mut cur_x := ctrl.x + 6.0
 				cur_y := ctrl.y + 5.0
 				for tag in ctrl.tags {
@@ -1653,95 +1742,214 @@ pub fn (mut win SimpleWindow) render_ui() {
 						break
 					}
 					win.gg_ctx.draw_rounded_rect_filled(cur_x, cur_y, tag_w, 24.0, 4.0, accent)
-					win.gg_ctx.draw_text2(x: int(cur_x + 6), y: int(cur_y + 4), text: tag, color: gg.Color{r: 255, g: 255, b: 255}, size: 12)
-					win.gg_ctx.draw_text2(x: int(cur_x + tag_w - 14), y: int(cur_y + 4), text: 'x', color: gg.Color{r: 255, g: 200, b: 200}, size: 12)
+					win.gg_ctx.draw_text2(
+						x:     int(cur_x + 6)
+						y:     int(cur_y + 4)
+						text:  tag
+						color: gg.Color{
+							r: 255
+							g: 255
+							b: 255
+						}
+						size:  12
+					)
+					win.gg_ctx.draw_text2(
+						x:     int(cur_x + tag_w - 14)
+						y:     int(cur_y + 4)
+						text:  'x'
+						color: gg.Color{
+							r: 255
+							g: 200
+							b: 200
+						}
+						size:  12
+					)
 					cur_x += tag_w + 6.0
 				}
 				if cur_x < ctrl.x + ctrl.w - 20.0 {
-					inp_txt := if ctrl.text_value.len > 0 { ctrl.text_value } else { if ctrl.tags.len == 0 { 'Add tag...' } else { '' } }
+					inp_txt := if ctrl.text_value.len > 0 {
+						ctrl.text_value
+					} else {
+						if ctrl.tags.len == 0 { 'Add tag...' } else { '' }
+					}
 					txt_color := if ctrl.text_value.len > 0 { fg } else { border_c }
-					win.gg_ctx.draw_text2(x: int(cur_x), y: int(cur_y + 4), text: inp_txt, color: txt_color, size: 12)
+					win.gg_ctx.draw_text2(
+						x:     int(cur_x)
+						y:     int(cur_y + 4)
+						text:  inp_txt
+						color: txt_color
+						size:  12
+					)
 				}
 			}
 			'range_slider' {
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y + 12.0, ctrl.w, 6.0, 3.0, surface)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y + 12.0, ctrl.w, 6.0, 3.0,
+					surface)
 				range_w := ctrl.max_val - ctrl.min_val
 				if range_w > 0 {
 					min_pct := f32((ctrl.range_min - ctrl.min_val) / range_w)
 					max_pct := f32((ctrl.range_max - ctrl.min_val) / range_w)
 					fill_x1 := ctrl.x + min_pct * ctrl.w
 					fill_x2 := ctrl.x + max_pct * ctrl.w
-					win.gg_ctx.draw_rounded_rect_filled(fill_x1, ctrl.y + 12.0, math.max(f32(4.0), fill_x2 - fill_x1), 6.0, 3.0, accent)
-					
-					win.gg_ctx.draw_rounded_rect_filled(fill_x1 - 7.0, ctrl.y + 5.0, 14.0, 20.0, 4.0, if ctrl.is_dragging_min { fg } else { accent })
-					win.gg_ctx.draw_rounded_rect_filled(fill_x2 - 7.0, ctrl.y + 5.0, 14.0, 20.0, 4.0, if ctrl.is_dragging_max { fg } else { accent })
+					win.gg_ctx.draw_rounded_rect_filled(fill_x1, ctrl.y + 12.0, math.max(f32(4.0),
+						fill_x2 - fill_x1), 6.0, 3.0, accent)
+
+					win.gg_ctx.draw_rounded_rect_filled(fill_x1 - 7.0, ctrl.y + 5.0, 14.0, 20.0,
+						4.0, if ctrl.is_dragging_min { fg } else { accent })
+					win.gg_ctx.draw_rounded_rect_filled(fill_x2 - 7.0, ctrl.y + 5.0, 14.0, 20.0,
+						4.0, if ctrl.is_dragging_max { fg } else { accent })
 				}
-				win.gg_ctx.draw_text2(x: int(ctrl.x), y: int(ctrl.y + 26.0), text: '${int(ctrl.range_min)} - ${int(ctrl.range_max)}', color: fg, size: 11)
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x)
+					y:     int(ctrl.y + 26.0)
+					text:  '${int(ctrl.range_min)} - ${int(ctrl.range_max)}'
+					color: fg
+					size:  11
+				)
 			}
 			'code_editor' {
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, gg.rgb(30, 32, 44))
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, gg.rgb(30,
+					32, 44))
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
 				win.gg_ctx.draw_rect_filled(ctrl.x, ctrl.y, 36.0, ctrl.h, gg.rgb(20, 22, 30))
-				win.gg_ctx.draw_line(ctrl.x + 36.0, ctrl.y, ctrl.x + 36.0, ctrl.y + ctrl.h, border_c)
+				win.gg_ctx.draw_line(ctrl.x + 36.0, ctrl.y, ctrl.x + 36.0, ctrl.y + ctrl.h,
+					border_c)
 
 				lines := ctrl.text_value.split('\n')
 				for i, line in lines {
-					if i * 18 > int(ctrl.h - 10) { break }
+					if i * 18 > int(ctrl.h - 10) { break
+					 }
 					line_y := ctrl.y + f32(i * 18 + 6)
-					win.gg_ctx.draw_text2(x: int(ctrl.x + 8), y: int(line_y), text: '${i + 1}', color: gg.rgb(100, 105, 125), size: 11)
-					
+					win.gg_ctx.draw_text2(
+						x:     int(ctrl.x + 8)
+						y:     int(line_y)
+						text:  '${i + 1}'
+						color: gg.rgb(100, 105, 125)
+						size:  11
+					)
+
 					words := line.split(' ')
 					mut word_x := ctrl.x + 44.0
 					for w in words {
-						w_color := if w in ['fn', 'mut', 'struct', 'return', 'if', 'else', 'pub', 'import', 'string', 'int', 'f64', 'bool', 'true', 'false', 'type'] {
+						w_color := if w in ['fn', 'mut', 'struct', 'return', 'if', 'else', 'pub',
+							'import', 'string', 'int', 'f64', 'bool', 'true', 'false', 'type'] {
 							gg.rgb(189, 147, 249)
 						} else {
 							gg.rgb(248, 248, 242)
 						}
-						win.gg_ctx.draw_text2(x: int(word_x), y: int(line_y), text: w + ' ', color: w_color, size: 12)
+						win.gg_ctx.draw_text2(
+							x:     int(word_x)
+							y:     int(line_y)
+							text:  w + ' '
+							color: w_color
+							size:  12
+						)
 						word_x += f32((w.len + 1) * 7)
 					}
 				}
 			}
 			'drop_zone' {
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, surface)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, if ctrl.is_hovered { accent } else { border_c })
-				
-				prompt := if ctrl.placeholder.len > 0 { ctrl.placeholder } else { 'Drag & Drop files here or Click to Browse' }
-				win.gg_ctx.draw_text2(x: int(ctrl.x + (ctrl.w - f32(prompt.len * 7)) / 2.0), y: int(ctrl.y + ctrl.h / 2.0 - 10.0), text: prompt, color: accent, size: 13)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, if ctrl.is_hovered {
+					accent
+				} else {
+					border_c
+				})
+
+				prompt := if ctrl.placeholder.len > 0 {
+					ctrl.placeholder
+				} else {
+					'Drag & Drop files here or Click to Browse'
+				}
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + (ctrl.w - f32(prompt.len * 7)) / 2.0)
+					y:     int(ctrl.y + ctrl.h / 2.0 - 10.0)
+					text:  prompt
+					color: accent
+					size:  13
+				)
 				if ctrl.items.len > 0 {
-					win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(ctrl.y + ctrl.h - 20.0), text: 'Files: ${ctrl.items.len} selected', color: fg, size: 11)
+					win.gg_ctx.draw_text2(
+						x:     int(ctrl.x + 10)
+						y:     int(ctrl.y + ctrl.h - 20.0)
+						text:  'Files: ${ctrl.items.len} selected'
+						color: fg
+						size:  11
+					)
 				}
 			}
 			'property_grid' {
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
-				
+
 				win.gg_ctx.draw_rect_filled(ctrl.x, ctrl.y, ctrl.w, 24.0, gg.rgb(45, 48, 60))
-				win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(ctrl.y + 4), text: 'Property', color: fg, size: 12)
-				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w / 2.0 + 10), y: int(ctrl.y + 4), text: 'Value', color: fg, size: 12)
-				win.gg_ctx.draw_line(ctrl.x + ctrl.w / 2.0, ctrl.y, ctrl.x + ctrl.w / 2.0, ctrl.y + ctrl.h, border_c)
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + 10)
+					y:     int(ctrl.y + 4)
+					text:  'Property'
+					color: fg
+					size:  12
+				)
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + ctrl.w / 2.0 + 10)
+					y:     int(ctrl.y + 4)
+					text:  'Value'
+					color: fg
+					size:  12
+				)
+				win.gg_ctx.draw_line(ctrl.x + ctrl.w / 2.0, ctrl.y, ctrl.x + ctrl.w / 2.0, ctrl.y +
+					ctrl.h, border_c)
 
 				for idx, item in ctrl.property_items {
 					row_y := ctrl.y + f32(idx * 28 + 28)
-					if row_y + 24 > ctrl.y + ctrl.h { break }
+					if row_y + 24 > ctrl.y + ctrl.h { break
+					 }
 					win.gg_ctx.draw_line(ctrl.x, row_y, ctrl.x + ctrl.w, row_y, border_c)
-					win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(row_y + 6), text: item.name, color: fg, size: 12)
+					win.gg_ctx.draw_text2(
+						x:     int(ctrl.x + 10)
+						y:     int(row_y + 6)
+						text:  item.name
+						color: fg
+						size:  12
+					)
 
 					val_x := ctrl.x + ctrl.w / 2.0 + 10.0
 					match item.kind {
 						'bool' {
 							b_txt := if item.val == 'true' { '[ON]' } else { '[OFF]' }
 							b_c := if item.val == 'true' { accent } else { border_c }
-							win.gg_ctx.draw_text2(x: int(val_x), y: int(row_y + 6), text: b_txt, color: b_c, size: 12)
+							win.gg_ctx.draw_text2(
+								x:     int(val_x)
+								y:     int(row_y + 6)
+								text:  b_txt
+								color: b_c
+								size:  12
+							)
 						}
 						'color' {
-							c_box := parse_hex_color(if item.val.len > 0 { item.val } else { '#3b82f6' })
-							win.gg_ctx.draw_rounded_rect_filled(val_x, row_y + 5.0, 16.0, 16.0, 3.0, c_box)
-							win.gg_ctx.draw_text2(x: int(val_x + 22), y: int(row_y + 6), text: item.val, color: fg, size: 12)
+							c_box := parse_hex_color(if item.val.len > 0 {
+								item.val
+							} else {
+								'#3b82f6'
+							})
+							win.gg_ctx.draw_rounded_rect_filled(val_x, row_y + 5.0, 16.0, 16.0,
+								3.0, c_box)
+							win.gg_ctx.draw_text2(
+								x:     int(val_x + 22)
+								y:     int(row_y + 6)
+								text:  item.val
+								color: fg
+								size:  12
+							)
 						}
 						else {
-							win.gg_ctx.draw_text2(x: int(val_x), y: int(row_y + 6), text: item.val, color: fg, size: 12)
+							win.gg_ctx.draw_text2(
+								x:     int(val_x)
+								y:     int(row_y + 6)
+								text:  item.val
+								color: fg
+								size:  12
+							)
 						}
 					}
 				}
@@ -1749,16 +1957,44 @@ pub fn (mut win SimpleWindow) render_ui() {
 			'pagination' {
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
-				
+
 				page_info := 'Page ${ctrl.current_page} of ${ctrl.total_pages}'
-				win.gg_ctx.draw_text2(x: int(ctrl.x + 12), y: int(ctrl.y + 9), text: page_info, color: fg, size: 13)
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + 12)
+					y:     int(ctrl.y + 9)
+					text:  page_info
+					color: fg
+					size:  13
+				)
 
 				btn_w := f32(40.0)
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 90, ctrl.y + 4, btn_w, 28.0, 4.0, accent)
-				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 82), y: int(ctrl.y + 9), text: '< Prev', color: gg.Color{r: 255, g: 255, b: 255}, size: 11)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 90, ctrl.y + 4, btn_w, 28.0,
+					4.0, accent)
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + ctrl.w - 82)
+					y:     int(ctrl.y + 9)
+					text:  '< Prev'
+					color: gg.Color{
+						r: 255
+						g: 255
+						b: 255
+					}
+					size:  11
+				)
 
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 44, ctrl.y + 4, btn_w, 28.0, 4.0, accent)
-				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 38), y: int(ctrl.y + 9), text: 'Next >', color: gg.Color{r: 255, g: 255, b: 255}, size: 11)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 44, ctrl.y + 4, btn_w, 28.0,
+					4.0, accent)
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + ctrl.w - 38)
+					y:     int(ctrl.y + 9)
+					text:  'Next >'
+					color: gg.Color{
+						r: 255
+						g: 255
+						b: 255
+					}
+					size:  11
+				)
 			}
 			'combobox' {
 				is_open := win.active_dropdown_name == ctrl.name
@@ -1766,8 +2002,18 @@ pub fn (mut win SimpleWindow) render_ui() {
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, 32.0, 6.0, surface)
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, 32.0, 6.0, border_color)
 				val_str := if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.placeholder }
-				win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(ctrl.y + 8), text: clean_text(val_str), color: fg, size: 12)
-				draw_vector_chevron(win.gg_ctx, ctrl.x + ctrl.w - 14.0, ctrl.y + 16.0, 4.5, if is_open { 'up' } else { 'down' }, if is_open { accent } else { fg })
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + 10)
+					y:     int(ctrl.y + 8)
+					text:  clean_text(val_str)
+					color: fg
+					size:  12
+				)
+				draw_vector_chevron(win.gg_ctx, ctrl.x + ctrl.w - 14.0, ctrl.y + 16.0, 4.5, if is_open {
+					'up'
+				} else {
+					'down'
+				}, if is_open { accent } else { fg })
 			}
 			'status_bar' {
 				bar_h := if ctrl.h > 0 { ctrl.h } else { 26.0 }
@@ -1779,20 +2025,38 @@ pub fn (mut win SimpleWindow) render_ui() {
 				sb_icon_sz := f32(16.0)
 				mut st_x := ctrl.x + 10.0
 				if has_sb_icon {
-					win.draw_image_fit(ctrl.icon_path, st_x, ctrl.y + (bar_h - sb_icon_sz) / 2.0, sb_icon_sz, sb_icon_sz, '')
+					win.draw_image_fit(ctrl.icon_path, st_x, ctrl.y + (bar_h - sb_icon_sz) / 2.0,
+						sb_icon_sz, sb_icon_sz, '')
 					st_x += sb_icon_sz + 6.0
 				}
 
-				win.gg_ctx.draw_text2(x: int(st_x), y: int(ctrl.y + 5), text: status_txt, color: fg, size: 11)
+				win.gg_ctx.draw_text2(
+					x:     int(st_x)
+					y:     int(ctrl.y + 5)
+					text:  status_txt
+					color: fg
+					size:  11
+				)
 				if ctrl.placeholder.len > 0 {
-					win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 90, ctrl.y + 3, 80.0, 20.0, 4.0, accent)
-					win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 82), y: int(ctrl.y + 5), text: ctrl.placeholder, color: gg.Color{r: 255, g: 255, b: 255}, size: 10)
+					win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 90, ctrl.y + 3, 80.0,
+						20.0, 4.0, accent)
+					win.gg_ctx.draw_text2(
+						x:     int(ctrl.x + ctrl.w - 82)
+						y:     int(ctrl.y + 5)
+						text:  ctrl.placeholder
+						color: gg.Color{
+							r: 255
+							g: 255
+							b: 255
+						}
+						size:  10
+					)
 				}
 			}
 			'step_slider' {
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
-				
+
 				track_y := ctrl.y + ctrl.h / 2.0
 				track_w := ctrl.w - 30.0
 				track_x := ctrl.x + 15.0
@@ -1807,55 +2071,112 @@ pub fn (mut win SimpleWindow) render_ui() {
 				pct := f32(ctrl.f64_value / 100.0)
 				knob_x := track_x + pct * track_w
 				win.gg_ctx.draw_line(track_x, track_y, knob_x, track_y, accent)
-				win.gg_ctx.draw_rounded_rect_filled(knob_x - 6.0, track_y - 6.0, 12.0, 12.0, 6.0, accent)
+				win.gg_ctx.draw_rounded_rect_filled(knob_x - 6.0, track_y - 6.0, 12.0, 12.0, 6.0,
+					accent)
 				val_txt := '${int(ctrl.f64_value)}%'
-				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 30), y: int(ctrl.y + 6), text: val_txt, color: fg, size: 10)
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + ctrl.w - 30)
+					y:     int(ctrl.y + 6)
+					text:  val_txt
+					color: fg
+					size:  10
+				)
 			}
 			'transfer_list' {
 				box_w := (ctrl.w - 60.0) / 2.0
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, box_w, ctrl.h, 6.0, surface)
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, box_w, ctrl.h, 6.0, border_c)
-				win.gg_ctx.draw_text2(x: int(ctrl.x + 8), y: int(ctrl.y + 6), text: 'Available (${ctrl.items.len})', color: accent, size: 11)
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + 8)
+					y:     int(ctrl.y + 6)
+					text:  'Available (${ctrl.items.len})'
+					color: accent
+					size:  11
+				)
 				win.gg_ctx.draw_line(ctrl.x, ctrl.y + 22, ctrl.x + box_w, ctrl.y + 22, border_c)
 				mut ly := ctrl.y + 26.0
 				for item in ctrl.items {
-					if ly + 22.0 > ctrl.y + ctrl.h { break }
-					win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(ly + 2), text: item, color: fg, size: 11)
+					if ly + 22.0 > ctrl.y + ctrl.h { break
+					 }
+					win.gg_ctx.draw_text2(
+						x:     int(ctrl.x + 10)
+						y:     int(ly + 2)
+						text:  item
+						color: fg
+						size:  11
+					)
 					ly += 24.0
 				}
 
 				btn_x := ctrl.x + box_w + 10.0
 				win.gg_ctx.draw_rounded_rect_filled(btn_x, ctrl.y + 10, 40.0, 28.0, 4.0, accent)
-				draw_vector_chevron(win.gg_ctx, btn_x + 20.0, ctrl.y + 24.0, 5.0, 'right', gg.Color{r: 255, g: 255, b: 255})
+				draw_vector_chevron(win.gg_ctx, btn_x + 20.0, ctrl.y + 24.0, 5.0, 'right', gg.Color{
+					r: 255
+					g: 255
+					b: 255
+				})
 
 				win.gg_ctx.draw_rounded_rect_filled(btn_x, ctrl.y + 44, 40.0, 28.0, 4.0, accent)
-				draw_vector_chevron(win.gg_ctx, btn_x + 20.0, ctrl.y + 58.0, 5.0, 'left', gg.Color{r: 255, g: 255, b: 255})
+				draw_vector_chevron(win.gg_ctx, btn_x + 20.0, ctrl.y + 58.0, 5.0, 'left', gg.Color{
+					r: 255
+					g: 255
+					b: 255
+				})
 
 				win.gg_ctx.draw_rounded_rect_filled(btn_x, ctrl.y + 78, 40.0, 28.0, 4.0, accent)
-				draw_vector_chevron(win.gg_ctx, btn_x + 16.0, ctrl.y + 92.0, 5.0, 'right', gg.Color{r: 255, g: 255, b: 255})
-				draw_vector_chevron(win.gg_ctx, btn_x + 24.0, ctrl.y + 92.0, 5.0, 'right', gg.Color{r: 255, g: 255, b: 255})
+				draw_vector_chevron(win.gg_ctx, btn_x + 16.0, ctrl.y + 92.0, 5.0, 'right', gg.Color{
+					r: 255
+					g: 255
+					b: 255
+				})
+				draw_vector_chevron(win.gg_ctx, btn_x + 24.0, ctrl.y + 92.0, 5.0, 'right', gg.Color{
+					r: 255
+					g: 255
+					b: 255
+				})
 
 				rx := ctrl.x + box_w + 60.0
 				win.gg_ctx.draw_rounded_rect_filled(rx, ctrl.y, box_w, ctrl.h, 6.0, surface)
 				win.gg_ctx.draw_rounded_rect_empty(rx, ctrl.y, box_w, ctrl.h, 6.0, border_c)
-				win.gg_ctx.draw_text2(x: int(rx + 8), y: int(ctrl.y + 6), text: 'Selected (${ctrl.items_selected.len})', color: accent, size: 11)
+				win.gg_ctx.draw_text2(
+					x:     int(rx + 8)
+					y:     int(ctrl.y + 6)
+					text:  'Selected (${ctrl.items_selected.len})'
+					color: accent
+					size:  11
+				)
 				win.gg_ctx.draw_line(rx, ctrl.y + 22, rx + box_w, ctrl.y + 22, border_c)
 				mut ry := ctrl.y + 26.0
 				for item in ctrl.items_selected {
-					if ry + 22.0 > ctrl.y + ctrl.h { break }
-					win.gg_ctx.draw_text2(x: int(rx + 10), y: int(ry + 2), text: item, color: fg, size: 11)
+					if ry + 22.0 > ctrl.y + ctrl.h { break
+					 }
+					win.gg_ctx.draw_text2(
+						x:     int(rx + 10)
+						y:     int(ry + 2)
+						text:  item
+						color: fg
+						size:  11
+					)
 					ry += 24.0
 				}
 			}
 			'console_view' {
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, gg.rgb(20, 22, 30))
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, gg.rgb(20,
+					22, 30))
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
 				win.gg_ctx.draw_rect_filled(ctrl.x, ctrl.y, ctrl.w, 22.0, gg.rgb(32, 35, 48))
-				win.gg_ctx.draw_text2(x: int(ctrl.x + 8), y: int(ctrl.y + 4), text: 'Console Output Log', color: fg, size: 11)
-				
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + 8)
+					y:     int(ctrl.y + 4)
+					text:  'Console Output Log'
+					color: fg
+					size:  11
+				)
+
 				mut log_y := ctrl.y + 26.0
 				for idx, line in ctrl.items {
-					if log_y + 20.0 > ctrl.y + ctrl.h { break }
+					if log_y + 20.0 > ctrl.y + ctrl.h { break
+					 }
 					line_c := if line.contains('[ERR]') {
 						gg.rgb(248, 113, 113)
 					} else if line.contains('[WARN]') {
@@ -1865,34 +2186,81 @@ pub fn (mut win SimpleWindow) render_ui() {
 					} else {
 						gg.rgb(209, 213, 219)
 					}
-					win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(log_y), text: '${idx + 1:2d} | ${line}', color: line_c, size: 11)
+					win.gg_ctx.draw_text2(
+						x:     int(ctrl.x + 10)
+						y:     int(log_y)
+						text:  '${idx + 1:2d} | ${line}'
+						color: line_c
+						size:  11
+					)
 					log_y += 20.0
 				}
 			}
 			'super_stat_card' {
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, surface)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, if ctrl.is_hovered { accent } else { border_c })
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, if ctrl.is_hovered {
+					accent
+				} else {
+					border_c
+				})
 
 				// Title
 				max_title_chars := math.max(6, int((ctrl.w - 60.0) / 6.5))
-				disp_title := if ctrl.title.len > max_title_chars { ctrl.title[0..max_title_chars - 3] + '...' } else { ctrl.title }
-				win.gg_ctx.draw_text2(x: int(ctrl.x + 14), y: int(ctrl.y + 10), text: disp_title, color: gg.rgb(156, 163, 175), size: 12)
+				disp_title := if ctrl.title.len > max_title_chars {
+					ctrl.title[0..max_title_chars - 3] + '...'
+				} else {
+					ctrl.title
+				}
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + 14)
+					y:     int(ctrl.y + 10)
+					text:  disp_title
+					color: gg.rgb(156, 163, 175)
+					size:  12
+				)
 
 				// Value
 				val_c := if ctrl.font_color.len > 0 { parse_hex_color(ctrl.font_color) } else { fg }
-				win.gg_ctx.draw_text2(x: int(ctrl.x + 14), y: int(ctrl.y + 28), text: ctrl.text_value, color: val_c, size: 20, bold: true)
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + 14)
+					y:     int(ctrl.y + 28)
+					text:  ctrl.text_value
+					color: val_c
+					size:  20
+					bold:  true
+				)
 
 				// Delta Pill
 				if ctrl.placeholder.len > 0 {
-					delta_c := if ctrl.bool_value { gg.rgb(52, 211, 153) } else { gg.rgb(248, 113, 113) }
-					pill_bg := if ctrl.bool_value { gg.rgba(16, 185, 129, 35) } else { gg.rgba(239, 68, 68, 35) }
+					delta_c := if ctrl.bool_value {
+						gg.rgb(52, 211, 153)
+					} else {
+						gg.rgb(248, 113, 113)
+					}
+					pill_bg := if ctrl.bool_value {
+						gg.rgba(16, 185, 129, 35)
+					} else {
+						gg.rgba(239, 68, 68, 35)
+					}
 					prefix := if ctrl.bool_value { '[+] ' } else { '[-] ' }
 					max_chars := math.max(6, int((ctrl.w - 48.0) / 6.5))
 					raw_txt := prefix + ctrl.placeholder
-					pill_txt := if raw_txt.len > max_chars { raw_txt[..max_chars - 3] + '...' } else { raw_txt }
+					pill_txt := if raw_txt.len > max_chars {
+						raw_txt[..max_chars - 3] + '...'
+					} else {
+						raw_txt
+					}
 					pill_w := math.min(ctrl.w - 28.0, f32(pill_txt.len * 6 + 12))
-					win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 14, ctrl.y + 54, pill_w, 18.0, 4.0, pill_bg)
-					win.gg_ctx.draw_text2(x: int(ctrl.x + 20), y: int(ctrl.y + 56), text: pill_txt, color: delta_c, size: 10, bold: true)
+					win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 14, ctrl.y + 54, pill_w, 18.0,
+						4.0, pill_bg)
+					win.gg_ctx.draw_text2(
+						x:     int(ctrl.x + 20)
+						y:     int(ctrl.y + 56)
+						text:  pill_txt
+						color: delta_c
+						size:  10
+						bold:  true
+					)
 				}
 
 				// Mini Sparkline
@@ -1925,77 +2293,153 @@ pub fn (mut win SimpleWindow) render_ui() {
 				}
 			}
 			'code_studio' {
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, gg.rgb(18, 20, 28))
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, gg.rgb(18,
+					20, 28))
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, border_c)
 
 				// Header bar
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, 28.0, 8.0, gg.rgb(26, 29, 42))
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, 28.0, 8.0, gg.rgb(26,
+					29, 42))
 				win.gg_ctx.draw_rect_filled(ctrl.x, ctrl.y + 14.0, ctrl.w, 14.0, gg.rgb(26, 29, 42))
-				win.gg_ctx.draw_line(ctrl.x, ctrl.y + 28.0, ctrl.x + ctrl.w, ctrl.y + 28.0, border_c)
+				win.gg_ctx.draw_line(ctrl.x, ctrl.y + 28.0, ctrl.x + ctrl.w, ctrl.y + 28.0,
+					border_c)
 
 				// Window dots
-				win.gg_ctx.draw_circle_filled(ctrl.x + 12.0, ctrl.y + 14.0, 4.0, gg.rgb(239, 68, 68))
-				win.gg_ctx.draw_circle_filled(ctrl.x + 24.0, ctrl.y + 14.0, 4.0, gg.rgb(245, 158, 11))
-				win.gg_ctx.draw_circle_filled(ctrl.x + 36.0, ctrl.y + 14.0, 4.0, gg.rgb(16, 185, 129))
+				win.gg_ctx.draw_circle_filled(ctrl.x + 12.0, ctrl.y + 14.0, 4.0,
+					gg.rgb(239, 68, 68))
+				win.gg_ctx.draw_circle_filled(ctrl.x + 24.0, ctrl.y + 14.0, 4.0, gg.rgb(245, 158,
+					11))
+				win.gg_ctx.draw_circle_filled(ctrl.x + 36.0, ctrl.y + 14.0, 4.0, gg.rgb(16, 185,
+					129))
 
 				// Filename
-				win.gg_ctx.draw_text2(x: int(ctrl.x + 50), y: int(ctrl.y + 7), text: ctrl.title, color: gg.Color{r: 255, g: 255, b: 255}, size: 12, bold: true)
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + 50)
+					y:     int(ctrl.y + 7)
+					text:  ctrl.title
+					color: gg.Color{
+						r: 255
+						g: 255
+						b: 255
+					}
+					size:  12
+					bold:  true
+				)
 
 				// Language pill badge
-				lang_txt := if ctrl.code_lang.len > 0 { '[' + ctrl.code_lang.to_upper() + ']' } else { '[V]' }
+				lang_txt := if ctrl.code_lang.len > 0 {
+					'[' + ctrl.code_lang.to_upper() + ']'
+				} else {
+					'[V]'
+				}
 				lang_w := f32(lang_txt.len * 7 + 10)
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 126.0, ctrl.y + 5.0, lang_w, 18.0, 4.0, gg.rgb(40, 44, 62))
-				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 122.0), y: int(ctrl.y + 7), text: lang_txt, color: accent, size: 10, bold: true)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 126.0, ctrl.y + 5.0, lang_w,
+					18.0, 4.0, gg.rgb(40, 44, 62))
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + ctrl.w - 122.0)
+					y:     int(ctrl.y + 7)
+					text:  lang_txt
+					color: accent
+					size:  10
+					bold:  true
+				)
 
 				// Copy Button
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 60.0, ctrl.y + 5.0, 52.0, 18.0, 4.0, accent)
-				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 52.0), y: int(ctrl.y + 7), text: 'Copy', color: gg.Color{r: 255, g: 255, b: 255}, size: 11, bold: true)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 60.0, ctrl.y + 5.0, 52.0,
+					18.0, 4.0, accent)
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + ctrl.w - 52.0)
+					y:     int(ctrl.y + 7)
+					text:  'Copy'
+					color: gg.Color{
+						r: 255
+						g: 255
+						b: 255
+					}
+					size:  11
+					bold:  true
+				)
 
 				// Gutter
-				win.gg_ctx.draw_rect_filled(ctrl.x, ctrl.y + 28.0, 36.0, ctrl.h - 48.0, gg.rgb(14, 16, 23))
-				win.gg_ctx.draw_line(ctrl.x + 36.0, ctrl.y + 28.0, ctrl.x + 36.0, ctrl.y + ctrl.h - 20.0, border_c)
+				win.gg_ctx.draw_rect_filled(ctrl.x, ctrl.y + 28.0, 36.0, ctrl.h - 48.0, gg.rgb(14,
+					16, 23))
+				win.gg_ctx.draw_line(ctrl.x + 36.0, ctrl.y + 28.0, ctrl.x + 36.0, ctrl.y + ctrl.h -
+					20.0, border_c)
 
 				// Text Lines with Syntax Highlight
 				lines := ctrl.text_value.split('\n')
 				mut code_y := ctrl.y + 34.0
 				for idx, raw_line in lines {
-					if code_y + 18.0 > ctrl.y + ctrl.h - 20.0 { break }
+					if code_y + 18.0 > ctrl.y + ctrl.h - 20.0 { break
+					 }
 					// Gutter number
-					win.gg_ctx.draw_text2(x: int(ctrl.x + 8), y: int(code_y), text: '${idx + 1:2d}', color: gg.rgb(90, 95, 115), size: 11, mono: true)
+					win.gg_ctx.draw_text2(
+						x:     int(ctrl.x + 8)
+						y:     int(code_y)
+						text:  '${idx + 1:2d}'
+						color: gg.rgb(90, 95, 115)
+						size:  11
+						mono:  true
+					)
 
 					// Expand tabs into 4 spaces for crisp rendering
 					line := raw_line.replace('\t', '    ')
 					words := line.split(' ')
 					mut word_x := ctrl.x + 44.0
 					for w in words {
-						if word_x > ctrl.x + ctrl.w - 14.0 { break }
+						if word_x > ctrl.x + ctrl.w - 14.0 { break
+						 }
 						if w.len == 0 {
 							word_x += 6.5
 							continue
 						}
 						w_clean := w.trim_space()
-						w_c := if w_clean in ['fn', 'mut', 'pub', 'struct', 'return', 'if', 'else', 'for', 'match', 'import', 'module', 'type', 'const', 'true', 'false', 'nil', 'int', 'string', 'bool', 'f64', 'def', 'class', 'let', 'var', 'SELECT', 'FROM', 'WHERE'] {
+						w_c := if w_clean in ['fn', 'mut', 'pub', 'struct', 'return', 'if', 'else',
+							'for', 'match', 'import', 'module', 'type', 'const', 'true', 'false',
+							'nil', 'int', 'string', 'bool', 'f64', 'def', 'class', 'let', 'var',
+							'SELECT', 'FROM', 'WHERE'] {
 							gg.rgb(192, 132, 252) // purple
 						} else if w_clean.starts_with('//') || w_clean.starts_with('#') {
 							gg.rgb(100, 116, 139) // slate comment
-						} else if w_clean.starts_with('\'') || w_clean.starts_with('"') {
+						} else if w_clean.starts_with("'") || w_clean.starts_with('"') {
 							gg.rgb(74, 222, 128) // green string
 						} else if w_clean.len > 0 && w_clean[0].is_digit() {
 							gg.rgb(251, 146, 60) // orange number
 						} else {
 							gg.rgb(241, 245, 249) // light white
 						}
-						win.gg_ctx.draw_text2(x: int(word_x), y: int(code_y), text: w + ' ', color: w_c, size: 12, mono: true)
+						win.gg_ctx.draw_text2(
+							x:     int(word_x)
+							y:     int(code_y)
+							text:  w + ' '
+							color: w_c
+							size:  12
+							mono:  true
+						)
 						word_x += f32((w.len + 1) * 7)
 					}
 					code_y += 18.0
 				}
 
 				// Status footer bar
-				win.gg_ctx.draw_rect_filled(ctrl.x, ctrl.y + ctrl.h - 20.0, ctrl.w, 20.0, gg.rgb(22, 25, 36))
-				win.gg_ctx.draw_line(ctrl.x, ctrl.y + ctrl.h - 20.0, ctrl.x + ctrl.w, ctrl.y + ctrl.h - 20.0, border_c)
-				win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(ctrl.y + ctrl.h - 16.0), text: 'Ln ${lines.len}, Col 1', color: gg.rgb(148, 163, 184), size: 10)
-				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 140), y: int(ctrl.y + ctrl.h - 16.0), text: 'UTF-8 | Spaces: 4 | ${ctrl.code_lang.to_upper()}', color: gg.rgb(148, 163, 184), size: 10)
+				win.gg_ctx.draw_rect_filled(ctrl.x, ctrl.y + ctrl.h - 20.0, ctrl.w, 20.0, gg.rgb(22,
+					25, 36))
+				win.gg_ctx.draw_line(ctrl.x, ctrl.y + ctrl.h - 20.0, ctrl.x + ctrl.w, ctrl.y +
+					ctrl.h - 20.0, border_c)
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + 10)
+					y:     int(ctrl.y + ctrl.h - 16.0)
+					text:  'Ln ${lines.len}, Col 1'
+					color: gg.rgb(148, 163, 184)
+					size:  10
+				)
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + ctrl.w - 140)
+					y:     int(ctrl.y + ctrl.h - 16.0)
+					text:  'UTF-8 | Spaces: 4 | ${ctrl.code_lang.to_upper()}'
+					color: gg.rgb(148, 163, 184)
+					size:  10
+				)
 			}
 			'kanban_board' {
 				num_cols := math.max(1, ctrl.items.len)
@@ -2004,7 +2448,8 @@ pub fn (mut win SimpleWindow) render_ui() {
 
 				for c_idx, col_name in ctrl.items {
 					col_x := ctrl.x + f32(c_idx) * (col_w + gap)
-					win.gg_ctx.draw_rounded_rect_filled(col_x, ctrl.y, col_w, ctrl.h, 6.0, gg.rgb(24, 27, 38))
+					win.gg_ctx.draw_rounded_rect_filled(col_x, ctrl.y, col_w, ctrl.h, 6.0, gg.rgb(24,
+						27, 38))
 					win.gg_ctx.draw_rounded_rect_empty(col_x, ctrl.y, col_w, ctrl.h, 6.0, border_c)
 
 					// Top header accent line
@@ -2014,6 +2459,7 @@ pub fn (mut win SimpleWindow) render_ui() {
 						2 { gg.rgb(168, 85, 247) }
 						else { gg.rgb(16, 185, 129) }
 					}
+
 					win.gg_ctx.draw_rect_filled(col_x + 2, ctrl.y + 2, col_w - 4, 3.0, col_accent)
 
 					// Count matching cards
@@ -2027,24 +2473,57 @@ pub fn (mut win SimpleWindow) render_ui() {
 
 					// Header text & count badge
 					max_hdr_chars := math.max(3, int((col_w - 38.0) / 7.0))
-					disp_hdr := if col_name.len > max_hdr_chars { col_name[0..max_hdr_chars - 2] + '..' } else { col_name }
-					win.gg_ctx.draw_text2(x: int(col_x + 8), y: int(ctrl.y + 10), text: disp_hdr, color: fg, size: 11, bold: true)
-					win.gg_ctx.draw_rounded_rect_filled(col_x + col_w - 26, ctrl.y + 8, 20.0, 16.0, 4.0, gg.rgb(40, 44, 60))
-					win.gg_ctx.draw_text2(x: int(col_x + col_w - 21), y: int(ctrl.y + 10), text: '${card_list.len}', color: accent, size: 10, bold: true)
+					disp_hdr := if col_name.len > max_hdr_chars {
+						col_name[0..max_hdr_chars - 2] + '..'
+					} else {
+						col_name
+					}
+					win.gg_ctx.draw_text2(
+						x:     int(col_x + 8)
+						y:     int(ctrl.y + 10)
+						text:  disp_hdr
+						color: fg
+						size:  11
+						bold:  true
+					)
+					win.gg_ctx.draw_rounded_rect_filled(col_x + col_w - 26, ctrl.y + 8, 20.0, 16.0,
+						4.0, gg.rgb(40, 44, 60))
+					win.gg_ctx.draw_text2(
+						x:     int(col_x + col_w - 21)
+						y:     int(ctrl.y + 10)
+						text:  '${card_list.len}'
+						color: accent
+						size:  10
+						bold:  true
+					)
 
 					// Cards
 					mut card_y := ctrl.y + 32.0
 					for card in card_list {
-						if card_y + 44.0 > ctrl.y + ctrl.h { break }
-						win.gg_ctx.draw_rounded_rect_filled(col_x + 6, card_y, col_w - 12, 42.0, 4.0, surface)
-						win.gg_ctx.draw_rounded_rect_empty(col_x + 6, card_y, col_w - 12, 42.0, 4.0, border_c)
+						if card_y + 44.0 > ctrl.y + ctrl.h { break
+						 }
+						win.gg_ctx.draw_rounded_rect_filled(col_x + 6, card_y, col_w - 12, 42.0,
+							4.0, surface)
+						win.gg_ctx.draw_rounded_rect_empty(col_x + 6, card_y, col_w - 12, 42.0,
+							4.0, border_c)
 
 						// Render card details (support tag|priority|title or title)
 						c_parts := card.split('|')
 						card_title := if c_parts.len >= 3 { c_parts[2] } else { card }
 						max_title_chars := math.max(4, int((col_w - 20.0) / 6.5))
-						disp_title := if card_title.len > max_title_chars { card_title[0..max_title_chars - 3] + '...' } else { card_title }
-						win.gg_ctx.draw_text2(x: int(col_x + 10), y: int(card_y + 6), text: disp_title, color: fg, size: 10, bold: true)
+						disp_title := if card_title.len > max_title_chars {
+							card_title[0..max_title_chars - 3] + '...'
+						} else {
+							card_title
+						}
+						win.gg_ctx.draw_text2(
+							x:     int(col_x + 10)
+							y:     int(card_y + 6)
+							text:  disp_title
+							color: fg
+							size:  10
+							bold:  true
+						)
 
 						if c_parts.len >= 2 {
 							tag_name := c_parts[0]
@@ -2054,9 +2533,28 @@ pub fn (mut win SimpleWindow) render_ui() {
 								'MED' { gg.rgb(245, 158, 11) }
 								else { gg.rgb(59, 130, 246) }
 							}
-							win.gg_ctx.draw_rounded_rect_filled(col_x + 10, card_y + 24, 34.0, 14.0, 3.0, prio_c)
-							win.gg_ctx.draw_text2(x: int(col_x + 13), y: int(card_y + 25), text: prio, color: gg.Color{r: 255, g: 255, b: 255}, size: 9, bold: true)
-							win.gg_ctx.draw_text2(x: int(col_x + 50), y: int(card_y + 25), text: tag_name, color: gg.rgb(156, 163, 175), size: 9)
+
+							win.gg_ctx.draw_rounded_rect_filled(col_x + 10, card_y + 24, 34.0,
+								14.0, 3.0, prio_c)
+							win.gg_ctx.draw_text2(
+								x:     int(col_x + 13)
+								y:     int(card_y + 25)
+								text:  prio
+								color: gg.Color{
+									r: 255
+									g: 255
+									b: 255
+								}
+								size:  9
+								bold:  true
+							)
+							win.gg_ctx.draw_text2(
+								x:     int(col_x + 50)
+								y:     int(card_y + 25)
+								text:  tag_name
+								color: gg.rgb(156, 163, 175)
+								size:  9
+							)
 						}
 						card_y += 48.0
 					}
@@ -2067,16 +2565,26 @@ pub fn (mut win SimpleWindow) render_ui() {
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, border_c)
 
 				// Header
-				win.gg_ctx.draw_text2(x: int(ctrl.x + 14), y: int(ctrl.y + 10), text: 'Activity Timeline Feed', color: fg, size: 12, bold: true)
-				win.gg_ctx.draw_line(ctrl.x + 14, ctrl.y + 28.0, ctrl.x + ctrl.w - 14, ctrl.y + 28.0, border_c)
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + 14)
+					y:     int(ctrl.y + 10)
+					text:  'Activity Timeline Feed'
+					color: fg
+					size:  12
+					bold:  true
+				)
+				win.gg_ctx.draw_line(ctrl.x + 14, ctrl.y + 28.0, ctrl.x + ctrl.w - 14,
+					ctrl.y + 28.0, border_c)
 
 				// Vertical track line
 				track_x := ctrl.x + 24.0
-				win.gg_ctx.draw_line(track_x, ctrl.y + 36.0, track_x, ctrl.y + ctrl.h - 14.0, border_c)
+				win.gg_ctx.draw_line(track_x, ctrl.y + 36.0, track_x, ctrl.y + ctrl.h - 14.0,
+					border_c)
 
 				mut ev_y := ctrl.y + 36.0
 				for item in ctrl.items {
-					if ev_y + 28.0 > ctrl.y + ctrl.h { break }
+					if ev_y + 28.0 > ctrl.y + ctrl.h { break
+					 }
 					parts := item.split('|')
 					tag := if parts.len > 0 { parts[0] } else { 'INFO' }
 					time_ago := if parts.len > 1 { parts[1] } else { 'now' }
@@ -2093,11 +2601,28 @@ pub fn (mut win SimpleWindow) render_ui() {
 
 					// Truncate description so it never collides with time_ago badge
 					max_chars := math.max(4, int((ctrl.w - 110.0) / 6.5))
-					disp_desc := if desc.len > max_chars { desc[0..max_chars - 3] + '...' } else { desc }
-					win.gg_ctx.draw_text2(x: int(ctrl.x + 38), y: int(ev_y + 2), text: disp_desc, color: fg, size: 11, bold: true)
+					disp_desc := if desc.len > max_chars {
+						desc[0..max_chars - 3] + '...'
+					} else {
+						desc
+					}
+					win.gg_ctx.draw_text2(
+						x:     int(ctrl.x + 38)
+						y:     int(ev_y + 2)
+						text:  disp_desc
+						color: fg
+						size:  11
+						bold:  true
+					)
 
 					time_w := f32(time_ago.len * 6 + 10)
-					win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - time_w - 8.0), y: int(ev_y + 2), text: time_ago, color: gg.rgb(148, 163, 184), size: 10)
+					win.gg_ctx.draw_text2(
+						x:     int(ctrl.x + ctrl.w - time_w - 8.0)
+						y:     int(ev_y + 2)
+						text:  time_ago
+						color: gg.rgb(148, 163, 184)
+						size:  10
+					)
 
 					ev_y += 28.0
 				}
@@ -2126,46 +2651,97 @@ pub fn (mut win SimpleWindow) render_ui() {
 
 				// Center percentage
 				pct_txt := '${int(pct)}%'
-				win.gg_ctx.draw_text2(x: int(cx - f32(pct_txt.len * 5)), y: int(cy - 7), text: pct_txt, color: fg, size: 15, bold: true)
+				win.gg_ctx.draw_text2(
+					x:     int(cx - f32(pct_txt.len * 5))
+					y:     int(cy - 7)
+					text:  pct_txt
+					color: fg
+					size:  15
+					bold:  true
+				)
 
 				// Title & Caption
 				title_w := f32(ctrl.title.len * 6)
-				win.gg_ctx.draw_text2(x: int(cx - title_w / 2.0), y: int(ctrl.y + ctrl.h - 22), text: ctrl.title, color: fg, size: 11, bold: true)
+				win.gg_ctx.draw_text2(
+					x:     int(cx - title_w / 2.0)
+					y:     int(ctrl.y + ctrl.h - 22)
+					text:  ctrl.title
+					color: fg
+					size:  11
+					bold:  true
+				)
 			}
 			'super_terminal' {
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, gg.rgb(13, 16, 23))
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, gg.rgb(13,
+					16, 23))
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, border_c)
 
 				// Top tab bar
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, 26.0, 8.0, gg.rgb(22, 27, 38))
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, 26.0, 8.0, gg.rgb(22,
+					27, 38))
 				win.gg_ctx.draw_rect_filled(ctrl.x, ctrl.y + 14.0, ctrl.w, 12.0, gg.rgb(22, 27, 38))
-				win.gg_ctx.draw_line(ctrl.x, ctrl.y + 26.0, ctrl.x + ctrl.w, ctrl.y + 26.0, border_c)
+				win.gg_ctx.draw_line(ctrl.x, ctrl.y + 26.0, ctrl.x + ctrl.w, ctrl.y + 26.0,
+					border_c)
 
 				mut tab_x := ctrl.x + 8.0
 				for idx, tab_name in ctrl.items {
 					t_w := f32(tab_name.len * 7 + 18)
 					is_active := idx == ctrl.int_value
 					if is_active {
-						win.gg_ctx.draw_rounded_rect_filled(tab_x, ctrl.y + 4.0, t_w, 20.0, 4.0, gg.rgb(35, 41, 58))
-						win.gg_ctx.draw_line(tab_x + 4.0, ctrl.y + 24.0, tab_x + t_w - 4.0, ctrl.y + 24.0, accent)
+						win.gg_ctx.draw_rounded_rect_filled(tab_x, ctrl.y + 4.0, t_w, 20.0, 4.0, gg.rgb(35,
+							41, 58))
+						win.gg_ctx.draw_line(tab_x + 4.0, ctrl.y + 24.0, tab_x + t_w - 4.0,
+
+							ctrl.y + 24.0, accent)
 					}
-					tab_c := if is_active { gg.Color{r: 255, g: 255, b: 255} } else { gg.rgb(156, 163, 175) }
-					win.gg_ctx.draw_text2(x: int(tab_x + 8), y: int(ctrl.y + 6), text: tab_name, color: tab_c, size: 11, bold: is_active)
+					tab_c := if is_active {
+						gg.Color{
+							r: 255
+							g: 255
+							b: 255
+						}
+					} else {
+						gg.rgb(156, 163, 175)
+					}
+					win.gg_ctx.draw_text2(
+						x:     int(tab_x + 8)
+						y:     int(ctrl.y + 6)
+						text:  tab_name
+						color: tab_c
+						size:  11
+						bold:  is_active
+					)
 					tab_x += t_w + 6.0
 				}
 
 				// Running green pulse indicator dot
-				win.gg_ctx.draw_circle_filled(ctrl.x + ctrl.w - 120.0, ctrl.y + 13.0, 3.5, gg.rgb(52, 211, 153))
-				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 110.0), y: int(ctrl.y + 7), text: 'LIVE', color: gg.rgb(52, 211, 153), size: 10, bold: true)
+				win.gg_ctx.draw_circle_filled(ctrl.x + ctrl.w - 120.0, ctrl.y + 13.0, 3.5, gg.rgb(52,
+					211, 153))
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + ctrl.w - 110.0)
+					y:     int(ctrl.y + 7)
+					text:  'LIVE'
+					color: gg.rgb(52, 211, 153)
+					size:  10
+					bold:  true
+				)
 
 				// Clear button
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 60.0, ctrl.y + 4.0, 52.0, 18.0, 4.0, gg.rgb(40, 45, 62))
-				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 50.0), y: int(ctrl.y + 6), text: 'Clear', color: gg.rgb(200, 205, 220), size: 10)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 60.0, ctrl.y + 4.0, 52.0,
+					18.0, 4.0, gg.rgb(40, 45, 62))
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + ctrl.w - 50.0)
+					y:     int(ctrl.y + 6)
+					text:  'Clear'
+					color: gg.rgb(200, 205, 220)
+					size:  10
+				)
 
 				// Log outputs
 				mut log_y := ctrl.y + 32.0
 				for log_idx, line in ctrl.items_selected {
-					if log_y + 18.0 > ctrl.y + ctrl.h { break }
+					if log_y + 18.0 > ctrl.y + ctrl.h { break
+					 }
 					line_c := if line.contains('[ERR]') || line.contains('[ERROR]') {
 						gg.rgb(248, 113, 113)
 					} else if line.contains('[WARN]') {
@@ -2177,7 +2753,14 @@ pub fn (mut win SimpleWindow) render_ui() {
 					} else {
 						gg.rgb(226, 232, 240)
 					}
-					win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(log_y), text: '${log_idx + 1:2d} | ${line}', color: line_c, size: 11, mono: true)
+					win.gg_ctx.draw_text2(
+						x:     int(ctrl.x + 10)
+						y:     int(log_y)
+						text:  '${log_idx + 1:2d} | ${line}'
+						color: line_c
+						size:  11
+						mono:  true
+					)
 					log_y += 18.0
 				}
 			}
@@ -2186,11 +2769,23 @@ pub fn (mut win SimpleWindow) render_ui() {
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, border_c)
 
 				// Search filter bar
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 8.0, ctrl.y + 6.0, ctrl.w - 16.0, 22.0, 4.0, gg.rgb(24, 27, 38))
-				draw_vector_search_icon(win.gg_ctx, ctrl.x + 18.0, ctrl.y + 17.0, 3.5, gg.rgb(156, 163, 175))
-				search_txt := if ctrl.search_query.len > 0 { ctrl.search_query } else { 'Filter ${ctrl.rows.len} records...' }
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 8.0, ctrl.y + 6.0, ctrl.w - 16.0,
+					22.0, 4.0, gg.rgb(24, 27, 38))
+				draw_vector_search_icon(win.gg_ctx, ctrl.x + 18.0, ctrl.y + 17.0, 3.5, gg.rgb(156,
+					163, 175))
+				search_txt := if ctrl.search_query.len > 0 {
+					ctrl.search_query
+				} else {
+					'Filter ${ctrl.rows.len} records...'
+				}
 				search_c := if ctrl.search_query.len > 0 { fg } else { gg.rgb(148, 163, 184) }
-				win.gg_ctx.draw_text2(x: int(ctrl.x + 32), y: int(ctrl.y + 10), text: search_txt, color: search_c, size: 11)
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + 32)
+					y:     int(ctrl.y + 10)
+					text:  search_txt
+					color: search_c
+					size:  11
+				)
 
 				// Column Headers
 				hdr_y := ctrl.y + 32.0
@@ -2201,9 +2796,20 @@ pub fn (mut win SimpleWindow) render_ui() {
 				col_w := (ctrl.w - 16.0) / f32(num_cols)
 				for c_idx, hdr in ctrl.headers {
 					hx := ctrl.x + 8.0 + f32(c_idx) * col_w
-					sort_sym := if ctrl.sort_col == c_idx { if ctrl.sort_asc { ' ^' } else { ' v' } } else { '' }
+					sort_sym := if ctrl.sort_col == c_idx {
+						if ctrl.sort_asc { ' ^' } else { ' v' }
+					} else {
+						''
+					}
 					sort_c := if ctrl.sort_col == c_idx { accent } else { fg }
-					win.gg_ctx.draw_text2(x: int(hx), y: int(hdr_y + 5), text: hdr + sort_sym, color: sort_c, size: 11, bold: true)
+					win.gg_ctx.draw_text2(
+						x:     int(hx)
+						y:     int(hdr_y + 5)
+						text:  hdr + sort_sym
+						color: sort_c
+						size:  11
+						bold:  true
+					)
 				}
 
 				// Data Rows (Paginated 5 items)
@@ -2213,20 +2819,48 @@ pub fn (mut win SimpleWindow) render_ui() {
 				for r_i in start_idx .. math.min(ctrl.rows.len, start_idx + page_size) {
 					row := ctrl.rows[r_i]
 					is_sel := ctrl.selected_row == r_i
-					row_bg := if is_sel { gg.rgba(59, 130, 246, 50) } else if r_i % 2 == 1 { gg.rgba(255, 255, 255, 6) } else { surface }
+					row_bg := if is_sel {
+						gg.rgba(59, 130, 246, 50)
+					} else if r_i % 2 == 1 {
+						gg.rgba(255, 255, 255, 6)
+					} else {
+						surface
+					}
 					win.gg_ctx.draw_rect_filled(ctrl.x + 2, row_y, ctrl.w - 4, 24.0, row_bg)
 
 					for c_idx, cell in row {
 						cx := ctrl.x + 8.0 + f32(c_idx) * col_w
 						// Check status badge
 						if cell in ['Active', 'Done', 'Paid', 'Completed', 'Success'] {
-							win.gg_ctx.draw_rounded_rect_filled(cx, row_y + 3.0, 56.0, 18.0, 3.0, gg.rgba(16, 185, 129, 40))
-							win.gg_ctx.draw_text2(x: int(cx + 6), y: int(row_y + 5), text: cell, color: gg.rgb(52, 211, 153), size: 10, bold: true)
+							win.gg_ctx.draw_rounded_rect_filled(cx, row_y + 3.0, 56.0, 18.0, 3.0, gg.rgba(16,
+								185, 129, 40))
+							win.gg_ctx.draw_text2(
+								x:     int(cx + 6)
+								y:     int(row_y + 5)
+								text:  cell
+								color: gg.rgb(52, 211, 153)
+								size:  10
+								bold:  true
+							)
 						} else if cell in ['Pending', 'Warning', 'Review'] {
-							win.gg_ctx.draw_rounded_rect_filled(cx, row_y + 3.0, 56.0, 18.0, 3.0, gg.rgba(245, 158, 11, 40))
-							win.gg_ctx.draw_text2(x: int(cx + 6), y: int(row_y + 5), text: cell, color: gg.rgb(251, 191, 36), size: 10, bold: true)
+							win.gg_ctx.draw_rounded_rect_filled(cx, row_y + 3.0, 56.0, 18.0, 3.0, gg.rgba(245,
+								158, 11, 40))
+							win.gg_ctx.draw_text2(
+								x:     int(cx + 6)
+								y:     int(row_y + 5)
+								text:  cell
+								color: gg.rgb(251, 191, 36)
+								size:  10
+								bold:  true
+							)
 						} else {
-							win.gg_ctx.draw_text2(x: int(cx), y: int(row_y + 5), text: cell, color: fg, size: 11)
+							win.gg_ctx.draw_text2(
+								x:     int(cx)
+								y:     int(row_y + 5)
+								text:  cell
+								color: fg
+								size:  11
+							)
 						}
 					}
 					row_y += 26.0
@@ -2235,13 +2869,33 @@ pub fn (mut win SimpleWindow) render_ui() {
 				// Footer Pagination Bar
 				footer_y := ctrl.y + ctrl.h - 26.0
 				win.gg_ctx.draw_line(ctrl.x, footer_y, ctrl.x + ctrl.w, footer_y, border_c)
-				win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(footer_y + 6), text: 'Page ${ctrl.current_page} of ${ctrl.total_pages} (${ctrl.rows.len} items)', color: gg.rgb(156, 163, 175), size: 10)
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + 10)
+					y:     int(footer_y + 6)
+					text:  'Page ${ctrl.current_page} of ${ctrl.total_pages} (${ctrl.rows.len} items)'
+					color: gg.rgb(156, 163, 175)
+					size:  10
+				)
 
 				// Prev / Next buttons
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 115.0, footer_y + 3.0, 50.0, 20.0, 3.0, gg.rgb(35, 40, 55))
-				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 105.0), y: int(footer_y + 6), text: '< Prev', color: fg, size: 10)
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 60.0, footer_y + 3.0, 50.0, 20.0, 3.0, gg.rgb(35, 40, 55))
-				win.gg_ctx.draw_text2(x: int(ctrl.x + ctrl.w - 50.0), y: int(footer_y + 6), text: 'Next >', color: fg, size: 10)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 115.0, footer_y + 3.0, 50.0,
+					20.0, 3.0, gg.rgb(35, 40, 55))
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + ctrl.w - 105.0)
+					y:     int(footer_y + 6)
+					text:  '< Prev'
+					color: fg
+					size:  10
+				)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + ctrl.w - 60.0, footer_y + 3.0, 50.0,
+					20.0, 3.0, gg.rgb(35, 40, 55))
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + ctrl.w - 50.0)
+					y:     int(footer_y + 6)
+					text:  'Next >'
+					color: fg
+					size:  10
+				)
 			}
 			'wizard_stepper' {
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, surface)
@@ -2264,29 +2918,72 @@ pub fn (mut win SimpleWindow) render_ui() {
 						// Step node circle
 						if idx < ctrl.int_value {
 							win.gg_ctx.draw_circle_filled(cx, cy, 11.0, gg.rgb(52, 211, 153))
-							win.gg_ctx.draw_text2(x: int(cx - 4), y: int(cy - 6), text: 'v', color: gg.Color{r: 255, g: 255, b: 255}, size: 10, bold: true)
+							win.gg_ctx.draw_text2(
+								x:     int(cx - 4)
+								y:     int(cy - 6)
+								text:  'v'
+								color: gg.Color{
+									r: 255
+									g: 255
+									b: 255
+								}
+								size:  10
+								bold:  true
+							)
 						} else if idx == ctrl.int_value {
 							win.gg_ctx.draw_circle_filled(cx, cy, 12.0, accent)
-							win.gg_ctx.draw_text2(x: int(cx - 3), y: int(cy - 6), text: '${idx + 1}', color: gg.Color{r: 255, g: 255, b: 255}, size: 11, bold: true)
+							win.gg_ctx.draw_text2(
+								x:     int(cx - 3)
+								y:     int(cy - 6)
+								text:  '${idx + 1}'
+								color: gg.Color{
+									r: 255
+									g: 255
+									b: 255
+								}
+								size:  11
+								bold:  true
+							)
 						} else {
 							win.gg_ctx.draw_circle_empty(cx, cy, 10.0, border_c)
-							win.gg_ctx.draw_text2(x: int(cx - 3), y: int(cy - 6), text: '${idx + 1}', color: gg.rgb(156, 163, 175), size: 10)
+							win.gg_ctx.draw_text2(
+								x:     int(cx - 3)
+								y:     int(cy - 6)
+								text:  '${idx + 1}'
+								color: gg.rgb(156, 163, 175)
+								size:  10
+							)
 						}
 
 						// Step title label
 						step_txt_w := f32(step_title.len) * 5.5
 						step_c := if idx == ctrl.int_value { fg } else { gg.rgb(156, 163, 175) }
-						win.gg_ctx.draw_text2(x: int(cx - step_txt_w / 2.0), y: int(cy + 18), text: step_title, color: step_c, size: 10, bold: idx == ctrl.int_value)
+						win.gg_ctx.draw_text2(
+							x:     int(cx - step_txt_w / 2.0)
+							y:     int(cy + 18)
+							text:  step_title
+							color: step_c
+							size:  10
+							bold:  idx == ctrl.int_value
+						)
 					}
 				}
 			}
 			'floating_toolbar' {
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 20.0, gg.rgb(25, 29, 42))
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 20.0, gg.rgb(25,
+					29, 42))
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 20.0, border_c)
 
 				// Title with accent dot
 				win.gg_ctx.draw_circle_filled(ctrl.x + 16.0, ctrl.y + ctrl.h / 2.0, 4.0, accent)
-				win.gg_ctx.draw_text2(x: int(ctrl.x + 26), y: int(ctrl.y + (ctrl.h - 14.0) / 2.0), text: ctrl.title, color: fg, size: 12, bold: true)
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + 26)
+					y:     int(ctrl.y + (ctrl.h - 14.0) / 2.0)
+					text:  ctrl.title
+					color: fg
+					size:  12
+					bold:  true
+				)
 
 				// Action pills
 				mut ax := ctrl.x + f32(ctrl.title.len * 7 + 36)
@@ -2294,12 +2991,29 @@ pub fn (mut win SimpleWindow) render_ui() {
 					act_w := f32(act.len * 7 + 20)
 					is_sel := idx == ctrl.int_value
 					if is_sel {
-						win.gg_ctx.draw_rounded_rect_filled(ax, ctrl.y + 6.0, act_w, ctrl.h - 12.0, 14.0, accent)
+						win.gg_ctx.draw_rounded_rect_filled(ax, ctrl.y + 6.0, act_w, ctrl.h - 12.0,
+							14.0, accent)
 					} else {
-						win.gg_ctx.draw_rounded_rect_filled(ax, ctrl.y + 6.0, act_w, ctrl.h - 12.0, 14.0, gg.rgb(38, 43, 60))
+						win.gg_ctx.draw_rounded_rect_filled(ax, ctrl.y + 6.0, act_w, ctrl.h - 12.0,
+							14.0, gg.rgb(38, 43, 60))
 					}
-					act_c := if is_sel { gg.Color{r: 255, g: 255, b: 255} } else { fg }
-					win.gg_ctx.draw_text2(x: int(ax + 10), y: int(ctrl.y + 13), text: act, color: act_c, size: 11, bold: is_sel)
+					act_c := if is_sel {
+						gg.Color{
+							r: 255
+							g: 255
+							b: 255
+						}
+					} else {
+						fg
+					}
+					win.gg_ctx.draw_text2(
+						x:     int(ax + 10)
+						y:     int(ctrl.y + 13)
+						text:  act
+						color: act_c
+						size:  11
+						bold:  is_sel
+					)
 					ax += act_w + 8.0
 				}
 			}
@@ -2310,22 +3024,48 @@ pub fn (mut win SimpleWindow) render_ui() {
 				mut cx := ctrl.x + 8.0
 				for idx, tag in ctrl.tags {
 					t_w := f32(tag.len * 7 + 24)
-					if cx + t_w > ctrl.x + ctrl.w - 50.0 { break }
+					if cx + t_w > ctrl.x + ctrl.w - 50.0 { break
+					 }
 					chip_c := match idx % 4 {
 						0 { gg.rgb(59, 130, 246) }
 						1 { gg.rgb(16, 185, 129) }
 						2 { gg.rgb(168, 85, 247) }
 						else { gg.rgb(245, 158, 11) }
 					}
+
 					win.gg_ctx.draw_rounded_rect_filled(cx, ctrl.y + 8.0, t_w, 26.0, 13.0, chip_c)
-					win.gg_ctx.draw_text2(x: int(cx + 8), y: int(ctrl.y + 14), text: tag, color: gg.Color{r: 255, g: 255, b: 255}, size: 11, bold: true)
-					win.gg_ctx.draw_text2(x: int(cx + t_w - 14), y: int(ctrl.y + 14), text: 'x', color: gg.rgb(230, 230, 240), size: 11)
+					win.gg_ctx.draw_text2(
+						x:     int(cx + 8)
+						y:     int(ctrl.y + 14)
+						text:  tag
+						color: gg.Color{
+							r: 255
+							g: 255
+							b: 255
+						}
+						size:  11
+						bold:  true
+					)
+					win.gg_ctx.draw_text2(
+						x:     int(cx + t_w - 14)
+						y:     int(ctrl.y + 14)
+						text:  'x'
+						color: gg.rgb(230, 230, 240)
+						size:  11
+					)
 					cx += t_w + 8.0
 				}
 
 				// + Add tag button
 				win.gg_ctx.draw_rounded_rect_empty(cx, ctrl.y + 8.0, 52.0, 26.0, 13.0, accent)
-				win.gg_ctx.draw_text2(x: int(cx + 8), y: int(ctrl.y + 14), text: '+ Tag', color: accent, size: 11, bold: true)
+				win.gg_ctx.draw_text2(
+					x:     int(cx + 8)
+					y:     int(ctrl.y + 14)
+					text:  '+ Tag'
+					color: accent
+					size:  11
+					bold:  true
+				)
 			}
 			'score_card' {
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, surface)
@@ -2333,17 +3073,38 @@ pub fn (mut win SimpleWindow) render_ui() {
 
 				// Left Column: Score & Stars
 				score_txt := '${ctrl.f64_value:3.1f}'
-				win.gg_ctx.draw_text2(x: int(ctrl.x + 16), y: int(ctrl.y + 14), text: score_txt, color: fg, size: 24, bold: true)
-				win.gg_ctx.draw_text2(x: int(ctrl.x + 72), y: int(ctrl.y + 18), text: '/ 5.0', color: gg.rgb(156, 163, 175), size: 13)
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + 16)
+					y:     int(ctrl.y + 14)
+					text:  score_txt
+					color: fg
+					size:  24
+					bold:  true
+				)
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + 72)
+					y:     int(ctrl.y + 18)
+					text:  '/ 5.0'
+					color: gg.rgb(156, 163, 175)
+					size:  13
+				)
 
 				// Stars
 				for s in 0 .. 5 {
-					draw_vector_star(win.gg_ctx, ctrl.x + 22.0 + f32(s * 16), ctrl.y + 54.0, 6.0, 3.0, s < int(ctrl.f64_value), gg.rgb(245, 158, 11), gg.rgb(245, 158, 11))
+					draw_vector_star(win.gg_ctx, ctrl.x + 22.0 + f32(s * 16), ctrl.y + 54.0, 6.0,
+						3.0, s < int(ctrl.f64_value), gg.rgb(245, 158, 11), gg.rgb(245, 158, 11))
 				}
-				win.gg_ctx.draw_text2(x: int(ctrl.x + 16), y: int(ctrl.y + 72), text: '${ctrl.int_value} reviews', color: gg.rgb(156, 163, 175), size: 10)
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + 16)
+					y:     int(ctrl.y + 72)
+					text:  '${ctrl.int_value} reviews'
+					color: gg.rgb(156, 163, 175)
+					size:  10
+				)
 
 				// Divider
-				win.gg_ctx.draw_line(ctrl.x + 115.0, ctrl.y + 12.0, ctrl.x + 115.0, ctrl.y + ctrl.h - 12.0, border_c)
+				win.gg_ctx.draw_line(ctrl.x + 115.0, ctrl.y + 12.0, ctrl.x + 115.0, ctrl.y +
+					ctrl.h - 12.0, border_c)
 
 				// Right Column: Breakdown Bars
 				bar_x := ctrl.x + 145.0
@@ -2351,28 +3112,42 @@ pub fn (mut win SimpleWindow) render_ui() {
 				for b_i in 0 .. 5 {
 					by := ctrl.y + 12.0 + f32(b_i * 18)
 					star_num := 5 - b_i
-					win.gg_ctx.draw_text2(x: int(ctrl.x + 124), y: int(by + 1), text: '${star_num}*', color: gg.rgb(156, 163, 175), size: 10)
-					win.gg_ctx.draw_rounded_rect_filled(bar_x, by + 4.0, bar_w, 8.0, 4.0, gg.rgb(35, 40, 55))
+					win.gg_ctx.draw_text2(
+						x:     int(ctrl.x + 124)
+						y:     int(by + 1)
+						text:  '${star_num}*'
+						color: gg.rgb(156, 163, 175)
+						size:  10
+					)
+					win.gg_ctx.draw_rounded_rect_filled(bar_x, by + 4.0, bar_w, 8.0, 4.0, gg.rgb(35,
+						40, 55))
 					pct := if b_i < ctrl.f64_list.len { ctrl.f64_list[b_i] } else { 0.0 }
 					if pct > 0 {
 						fill_w := bar_w * f32(pct / 100.0)
-						win.gg_ctx.draw_rounded_rect_filled(bar_x, by + 4.0, math.max(f32(4.0), fill_w), 8.0, 4.0, accent)
+						win.gg_ctx.draw_rounded_rect_filled(bar_x, by + 4.0, math.max(f32(4.0),
+							fill_w), 8.0, 4.0, accent)
 					}
 				}
 			}
 			'image', 'image_box' {
-				win.draw_image_fit(ctrl.text_value, ctrl.x, ctrl.y, ctrl.w, ctrl.h, ctrl.placeholder)
+				win.draw_image_fit(ctrl.text_value, ctrl.x, ctrl.y, ctrl.w, ctrl.h,
+					ctrl.placeholder)
 				if ctrl.placeholder.len > 0 {
 					cap_h := f32(24.0)
 					cap_y := ctrl.y + ctrl.h - cap_h
-					win.gg_ctx.draw_rect_filled(ctrl.x, cap_y, ctrl.w, cap_h, gg.Color{ r: 15, g: 20, b: 30, a: 190 })
+					win.gg_ctx.draw_rect_filled(ctrl.x, cap_y, ctrl.w, cap_h, gg.Color{
+						r: 15
+						g: 20
+						b: 30
+						a: 190
+					})
 					win.gg_ctx.draw_text2(
-						x: int(ctrl.x + 8)
-						y: int(cap_y + 5)
-						text: clean_text(ctrl.placeholder)
+						x:     int(ctrl.x + 8)
+						y:     int(cap_y + 5)
+						text:  clean_text(ctrl.placeholder)
 						color: gg.rgb(240, 245, 255)
-						size: 11
-						bold: true
+						size:  11
+						bold:  true
 					)
 				}
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
@@ -2396,7 +3171,13 @@ pub fn (mut win SimpleWindow) render_ui() {
 				win.gg_ctx.draw_circle_filled(dot_x, dot_y, 5.0, dot_c)
 
 				// Action button geometry on right
-				btn_txt := if ctrl.variant.len > 0 { ctrl.variant } else if ctrl.items.len > 2 { ctrl.items[2] } else { '[Message]' }
+				btn_txt := if ctrl.variant.len > 0 {
+					ctrl.variant
+				} else if ctrl.items.len > 2 {
+					ctrl.items[2]
+				} else {
+					'[Message]'
+				}
 				btn_w := f32(96.0)
 				btn_h := f32(30.0)
 				btn_x := ctrl.x + ctrl.w - btn_w - 14.0
@@ -2408,27 +3189,31 @@ pub fn (mut win SimpleWindow) render_ui() {
 				max_name_w := btn_x - text_left - 8.0
 				disp_name := truncate_text_to_width(win, name_txt, max_name_w)
 				win.gg_ctx.draw_text2(
-					x: int(text_left)
-					y: int(ctrl.y + 14)
-					text: disp_name
+					x:     int(text_left)
+					y:     int(ctrl.y + 14)
+					text:  disp_name
 					color: fg
-					size: 15
-					bold: true
+					size:  15
+					bold:  true
 				)
 
 				handle_txt := clean_text(ctrl.placeholder)
 				if handle_txt.len > 0 {
 					win.gg_ctx.draw_text2(
-						x: int(text_left)
-						y: int(ctrl.y + 34)
-						text: handle_txt
+						x:     int(text_left)
+						y:     int(ctrl.y + 34)
+						text:  handle_txt
 						color: gg.rgb(148, 163, 184)
-						size: 12
+						size:  12
 					)
 				}
 
 				// Role badge
-				role_txt := if ctrl.items.len > 0 && ctrl.items[0].len > 0 { ctrl.items[0] } else { 'Member' }
+				role_txt := if ctrl.items.len > 0 && ctrl.items[0].len > 0 {
+					ctrl.items[0]
+				} else {
+					'Member'
+				}
 				handle_w := measure_text_width(win, handle_txt)
 				mut badge_x := text_left + handle_w + 10.0
 				if handle_txt.len == 0 {
@@ -2438,15 +3223,23 @@ pub fn (mut win SimpleWindow) render_ui() {
 				if max_role_w > 20.0 {
 					disp_role := truncate_text_to_width(win, role_txt, max_role_w - 14.0)
 					role_w := measure_text_width(win, disp_role) + 14.0
-					win.gg_ctx.draw_rounded_rect_filled(badge_x, ctrl.y + 32.0, role_w, 18.0, 4.0, if win.theme.is_dark { gg.rgb(30, 58, 138) } else { gg.rgb(219, 234, 254) })
-					role_c := if win.theme.is_dark { gg.rgb(147, 197, 253) } else { gg.rgb(29, 78, 216) }
+					win.gg_ctx.draw_rounded_rect_filled(badge_x, ctrl.y + 32.0, role_w, 18.0, 4.0, if win.theme.is_dark {
+						gg.rgb(30, 58, 138)
+					} else {
+						gg.rgb(219, 234, 254)
+					})
+					role_c := if win.theme.is_dark {
+						gg.rgb(147, 197, 253)
+					} else {
+						gg.rgb(29, 78, 216)
+					}
 					win.gg_ctx.draw_text2(
-						x: int(badge_x + 7)
-						y: int(ctrl.y + 35)
-						text: disp_role
+						x:     int(badge_x + 7)
+						y:     int(ctrl.y + 35)
+						text:  disp_role
 						color: role_c
-						size: 10
-						bold: true
+						size:  10
+						bold:  true
 					)
 				}
 
@@ -2455,27 +3248,36 @@ pub fn (mut win SimpleWindow) render_ui() {
 				if bio_txt.len > 0 {
 					max_bio_w := ctrl.w - 104.0
 					disp_bio := truncate_text_to_width(win, bio_txt, max_bio_w)
-					bio_c := if win.theme.is_dark { gg.rgb(203, 213, 225) } else { gg.rgb(71, 85, 105) }
+					bio_c := if win.theme.is_dark {
+						gg.rgb(203, 213, 225)
+					} else {
+						gg.rgb(71, 85, 105)
+					}
 					win.gg_ctx.draw_text2(
-						x: int(text_left)
-						y: int(ctrl.y + 58)
-						text: disp_bio
+						x:     int(text_left)
+						y:     int(ctrl.y + 58)
+						text:  disp_bio
 						color: bio_c
-						size: 11
+						size:  11
 					)
 				}
 
 				// Draw Action button
-				is_btn_hover := win.mouse_x >= btn_x && win.mouse_x <= btn_x + btn_w && win.mouse_y >= btn_y && win.mouse_y <= btn_y + btn_h
+				is_btn_hover := win.mouse_x >= btn_x && win.mouse_x <= btn_x + btn_w
+					&& win.mouse_y >= btn_y && win.mouse_y <= btn_y + btn_h
 				btn_bg := if is_btn_hover { hover_c } else { accent }
 				win.gg_ctx.draw_rounded_rect_filled(btn_x, btn_y, btn_w, btn_h, 6.0, btn_bg)
 				win.gg_ctx.draw_text2(
-					x: int(btn_x + 12)
-					y: int(btn_y + 8)
-					text: clean_text(btn_txt)
-					color: gg.Color{ r: 255, g: 255, b: 255 }
-					size: 11
-					bold: true
+					x:     int(btn_x + 12)
+					y:     int(btn_y + 8)
+					text:  clean_text(btn_txt)
+					color: gg.Color{
+						r: 255
+						g: 255
+						b: 255
+					}
+					size:  11
+					bold:  true
 				)
 			}
 			'product_card' {
@@ -2486,42 +3288,53 @@ pub fn (mut win SimpleWindow) render_ui() {
 				img_pad := f32(8.0)
 				img_w := ctrl.w - img_pad * 2.0
 				img_h := f32(130.0)
-				win.draw_image_fit(ctrl.text_value, ctrl.x + img_pad, ctrl.y + img_pad, img_w, img_h, ctrl.title)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x + img_pad, ctrl.y + img_pad, img_w, img_h, 6.0, border_c)
+				win.draw_image_fit(ctrl.text_value, ctrl.x + img_pad, ctrl.y + img_pad, img_w,
+					img_h, ctrl.title)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x + img_pad, ctrl.y + img_pad, img_w,
+					img_h, 6.0, border_c)
 
 				// Badge Tag Overlay (e.g. 'PRO' / 'BESTSELLER')
-				badge_str := if ctrl.items.len > 1 && ctrl.items[1].len > 0 { ctrl.items[1] } else { 'PRO' }
+				badge_str := if ctrl.items.len > 1 && ctrl.items[1].len > 0 {
+					ctrl.items[1]
+				} else {
+					'PRO'
+				}
 				badge_w := f32(badge_str.len * 7 + 16)
 				badge_x := ctrl.x + ctrl.w - img_pad - badge_w - 6.0
 				badge_y := ctrl.y + img_pad + 6.0
-				win.gg_ctx.draw_rounded_rect_filled(badge_x, badge_y, badge_w, 20.0, 4.0, gg.rgb(239, 68, 68))
+				win.gg_ctx.draw_rounded_rect_filled(badge_x, badge_y, badge_w, 20.0, 4.0, gg.rgb(239,
+					68, 68))
 				win.gg_ctx.draw_text2(
-					x: int(badge_x + 8)
-					y: int(badge_y + 4)
-					text: clean_text(badge_str)
-					color: gg.Color{ r: 255, g: 255, b: 255 }
-					size: 10
-					bold: true
+					x:     int(badge_x + 8)
+					y:     int(badge_y + 4)
+					text:  clean_text(badge_str)
+					color: gg.Color{
+						r: 255
+						g: 255
+						b: 255
+					}
+					size:  10
+					bold:  true
 				)
 
 				// Product Title
 				win.gg_ctx.draw_text2(
-					x: int(ctrl.x + 12)
-					y: int(ctrl.y + 146)
-					text: clean_text(ctrl.title)
+					x:     int(ctrl.x + 12)
+					y:     int(ctrl.y + 146)
+					text:  clean_text(ctrl.title)
 					color: fg
-					size: 14
-					bold: true
+					size:  14
+					bold:  true
 				)
 
 				// Description / subtitle
 				if ctrl.placeholder.len > 0 {
 					win.gg_ctx.draw_text2(
-						x: int(ctrl.x + 12)
-						y: int(ctrl.y + 168)
-						text: clean_text(ctrl.placeholder)
+						x:     int(ctrl.x + 12)
+						y:     int(ctrl.y + 168)
+						text:  clean_text(ctrl.placeholder)
 						color: gg.rgb(148, 163, 184)
-						size: 11
+						size:  11
 					)
 				}
 
@@ -2529,20 +3342,20 @@ pub fn (mut win SimpleWindow) render_ui() {
 				price_txt := if ctrl.items.len > 0 { ctrl.items[0] } else { '$49.00' }
 				rating_txt := if ctrl.items.len > 3 { ctrl.items[3] } else { '4.9 *' }
 				win.gg_ctx.draw_text2(
-					x: int(ctrl.x + 12)
-					y: int(ctrl.y + 204)
-					text: clean_text(price_txt)
+					x:     int(ctrl.x + 12)
+					y:     int(ctrl.y + 204)
+					text:  clean_text(price_txt)
 					color: accent
-					size: 16
-					bold: true
+					size:  16
+					bold:  true
 				)
 				win.gg_ctx.draw_text2(
-					x: int(ctrl.x + 12 + price_txt.len * 9 + 10)
-					y: int(ctrl.y + 208)
-					text: clean_text(rating_txt)
+					x:     int(ctrl.x + 12 + price_txt.len * 9 + 10)
+					y:     int(ctrl.y + 208)
+					text:  clean_text(rating_txt)
 					color: gg.rgb(234, 179, 8)
-					size: 11
-					bold: true
+					size:  11
+					bold:  true
 				)
 
 				// Action CTA Button
@@ -2551,16 +3364,21 @@ pub fn (mut win SimpleWindow) render_ui() {
 				btn_h := f32(28.0)
 				btn_x := ctrl.x + ctrl.w - btn_w - 12.0
 				btn_y := ctrl.y + 200.0
-				is_btn_hover := win.mouse_x >= btn_x && win.mouse_x <= btn_x + btn_w && win.mouse_y >= btn_y && win.mouse_y <= btn_y + btn_h
+				is_btn_hover := win.mouse_x >= btn_x && win.mouse_x <= btn_x + btn_w
+					&& win.mouse_y >= btn_y && win.mouse_y <= btn_y + btn_h
 				btn_bg := if is_btn_hover { hover_c } else { accent }
 				win.gg_ctx.draw_rounded_rect_filled(btn_x, btn_y, btn_w, btn_h, 6.0, btn_bg)
 				win.gg_ctx.draw_text2(
-					x: int(btn_x + 12)
-					y: int(btn_y + 7)
-					text: clean_text(btn_txt)
-					color: gg.Color{ r: 255, g: 255, b: 255 }
-					size: 11
-					bold: true
+					x:     int(btn_x + 12)
+					y:     int(btn_y + 7)
+					text:  clean_text(btn_txt)
+					color: gg.Color{
+						r: 255
+						g: 255
+						b: 255
+					}
+					size:  11
+					bold:  true
 				)
 			}
 			'image_gallery' {
@@ -2570,12 +3388,17 @@ pub fn (mut win SimpleWindow) render_ui() {
 				pad := f32(8.0)
 				main_w := ctrl.w - pad * 2.0
 				main_h := f32(190.0)
-				curr_idx := if ctrl.items.len > 0 { math.max(0, math.min(ctrl.items.len - 1, ctrl.int_value)) } else { 0 }
+				curr_idx := if ctrl.items.len > 0 {
+					math.max(0, math.min(ctrl.items.len - 1, ctrl.int_value))
+				} else {
+					0
+				}
 				curr_img := if curr_idx < ctrl.items.len { ctrl.items[curr_idx] } else { '' }
 
 				// Main Hero Preview Image
 				win.draw_image_fit(curr_img, ctrl.x + pad, ctrl.y + pad, main_w, main_h, '')
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x + pad, ctrl.y + pad, main_w, main_h, 6.0, border_c)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x + pad, ctrl.y + pad, main_w, main_h, 6.0,
+					border_c)
 
 				// Navigation Prev / Next overlay buttons
 				prev_btn_x := ctrl.x + pad + 8.0
@@ -2583,32 +3406,60 @@ pub fn (mut win SimpleWindow) render_ui() {
 				next_btn_x := ctrl.x + ctrl.w - pad - 40.0
 				next_btn_y := prev_btn_y
 
-				win.gg_ctx.draw_rounded_rect_filled(prev_btn_x, prev_btn_y, 32.0, 32.0, 6.0, gg.Color{ r: 20, g: 25, b: 35, a: 210 })
-				draw_vector_chevron(win.gg_ctx, prev_btn_x + 16.0, prev_btn_y + 16.0, 10.0, 'left', gg.Color{ r: 255, g: 255, b: 255 })
+				win.gg_ctx.draw_rounded_rect_filled(prev_btn_x, prev_btn_y, 32.0, 32.0, 6.0, gg.Color{
+					r: 20
+					g: 25
+					b: 35
+					a: 210
+				})
+				draw_vector_chevron(win.gg_ctx, prev_btn_x + 16.0, prev_btn_y + 16.0, 10.0, 'left', gg.Color{
+					r: 255
+					g: 255
+					b: 255
+				})
 
-				win.gg_ctx.draw_rounded_rect_filled(next_btn_x, next_btn_y, 32.0, 32.0, 6.0, gg.Color{ r: 20, g: 25, b: 35, a: 210 })
-				draw_vector_chevron(win.gg_ctx, next_btn_x + 16.0, next_btn_y + 16.0, 10.0, 'right', gg.Color{ r: 255, g: 255, b: 255 })
+				win.gg_ctx.draw_rounded_rect_filled(next_btn_x, next_btn_y, 32.0, 32.0, 6.0, gg.Color{
+					r: 20
+					g: 25
+					b: 35
+					a: 210
+				})
+				draw_vector_chevron(win.gg_ctx, next_btn_x + 16.0, next_btn_y + 16.0, 10.0,
+					'right', gg.Color{ r: 255, g: 255, b: 255 })
 
 				// Caption overlay banner
 				caption_h := f32(28.0)
 				caption_y := ctrl.y + pad + main_h - caption_h
-				win.gg_ctx.draw_rect_filled(ctrl.x + pad, caption_y, main_w, caption_h, gg.Color{ r: 15, g: 20, b: 30, a: 210 })
-				cap_str := if curr_idx < ctrl.items_selected.len { ctrl.items_selected[curr_idx] } else { 'Image ${curr_idx + 1}' }
+				win.gg_ctx.draw_rect_filled(ctrl.x + pad, caption_y, main_w, caption_h, gg.Color{
+					r: 15
+					g: 20
+					b: 30
+					a: 210
+				})
+				cap_str := if curr_idx < ctrl.items_selected.len {
+					ctrl.items_selected[curr_idx]
+				} else {
+					'Image ${curr_idx + 1}'
+				}
 				win.gg_ctx.draw_text2(
-					x: int(ctrl.x + pad + 10)
-					y: int(caption_y + 7)
-					text: clean_text(cap_str)
-					color: gg.Color{ r: 255, g: 255, b: 255 }
-					size: 11
-					bold: true
+					x:     int(ctrl.x + pad + 10)
+					y:     int(caption_y + 7)
+					text:  clean_text(cap_str)
+					color: gg.Color{
+						r: 255
+						g: 255
+						b: 255
+					}
+					size:  11
+					bold:  true
 				)
 				idx_str := '${curr_idx + 1} / ${ctrl.items.len}'
 				win.gg_ctx.draw_text2(
-					x: int(ctrl.x + ctrl.w - pad - 60)
-					y: int(caption_y + 7)
-					text: idx_str
+					x:     int(ctrl.x + ctrl.w - pad - 60)
+					y:     int(caption_y + 7)
+					text:  idx_str
 					color: gg.rgb(186, 230, 253)
-					size: 11
+					size:  11
 				)
 
 				// Bottom Thumbnail Strip (66x50 thumbs)
@@ -2622,10 +3473,13 @@ pub fn (mut win SimpleWindow) render_ui() {
 					}
 					win.draw_image_fit(ctrl.items[t_i], tx, thumb_strip_y, thumb_w, thumb_h, '')
 					if t_i == curr_idx {
-						win.gg_ctx.draw_rounded_rect_empty(tx, thumb_strip_y, thumb_w, thumb_h, 4.0, accent)
-						win.gg_ctx.draw_rounded_rect_empty(tx - 1.0, thumb_strip_y - 1.0, thumb_w + 2.0, thumb_h + 2.0, 4.0, accent)
+						win.gg_ctx.draw_rounded_rect_empty(tx, thumb_strip_y, thumb_w, thumb_h,
+							4.0, accent)
+						win.gg_ctx.draw_rounded_rect_empty(tx - 1.0, thumb_strip_y - 1.0, thumb_w +
+							2.0, thumb_h + 2.0, 4.0, accent)
 					} else {
-						win.gg_ctx.draw_rounded_rect_empty(tx, thumb_strip_y, thumb_w, thumb_h, 4.0, border_c)
+						win.gg_ctx.draw_rounded_rect_empty(tx, thumb_strip_y, thumb_w, thumb_h,
+							4.0, border_c)
 					}
 				}
 			}
@@ -2633,13 +3487,18 @@ pub fn (mut win SimpleWindow) render_ui() {
 				is_hov := ctrl.is_hovered
 				tile_bg := if is_hov { surface_hover } else { surface }
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, tile_bg)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, if is_hov { accent } else { border_c })
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, if is_hov {
+					accent
+				} else {
+					border_c
+				})
 
 				// Icon Box (48x48)
 				icon_sz := f32(48.0)
 				icon_y := ctrl.y + (ctrl.h - icon_sz) / 2.0
 				win.draw_image_fit(ctrl.text_value, ctrl.x + 12.0, icon_y, icon_sz, icon_sz, '')
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x + 12.0, icon_y, icon_sz, icon_sz, 6.0, border_c)
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x + 12.0, icon_y, icon_sz, icon_sz, 6.0,
+					border_c)
 
 				// Status Pill at Top-Right
 				stat_txt := if ctrl.items.len > 0 { ctrl.items[0] } else { 'ONLINE' }
@@ -2647,37 +3506,55 @@ pub fn (mut win SimpleWindow) render_ui() {
 				stat_x := ctrl.x + ctrl.w - stat_w - 10.0
 				stat_y := ctrl.y + 10.0
 				stat_bg := match stat_txt.to_upper() {
-					'ONLINE', 'READY' { if win.theme.is_dark { gg.rgb(6, 78, 59) } else { gg.rgb(209, 250, 229) } }
-					'DEPLOYING', 'BUSY' { if win.theme.is_dark { gg.rgb(120, 53, 15) } else { gg.rgb(254, 243, 199) } }
-					'ERROR', 'OFFLINE' { if win.theme.is_dark { gg.rgb(127, 29, 29) } else { gg.rgb(254, 226, 226) } }
-					else { if win.theme.is_dark { gg.rgb(30, 58, 138) } else { gg.rgb(219, 234, 254) } }
+					'ONLINE', 'READY' {
+						if win.theme.is_dark { gg.rgb(6, 78, 59) } else { gg.rgb(209, 250, 229) }
+					}
+					'DEPLOYING', 'BUSY' {
+						if win.theme.is_dark { gg.rgb(120, 53, 15) } else { gg.rgb(254, 243, 199) }
+					}
+					'ERROR', 'OFFLINE' {
+						if win.theme.is_dark { gg.rgb(127, 29, 29) } else { gg.rgb(254, 226, 226) }
+					}
+					else {
+						if win.theme.is_dark { gg.rgb(30, 58, 138) } else { gg.rgb(219, 234, 254) }
+					}
 				}
+
 				stat_fg := match stat_txt.to_upper() {
-					'ONLINE', 'READY' { if win.theme.is_dark { gg.rgb(110, 231, 183) } else { gg.rgb(5, 150, 105) } }
-					'DEPLOYING', 'BUSY' { if win.theme.is_dark { gg.rgb(252, 211, 77) } else { gg.rgb(217, 119, 6) } }
-					'ERROR', 'OFFLINE' { if win.theme.is_dark { gg.rgb(252, 165, 165) } else { gg.rgb(220, 38, 38) } }
-					else { if win.theme.is_dark { gg.rgb(147, 197, 253) } else { gg.rgb(37, 99, 235) } }
+					'ONLINE', 'READY' {
+						if win.theme.is_dark { gg.rgb(110, 231, 183) } else { gg.rgb(5, 150, 105) }
+					}
+					'DEPLOYING', 'BUSY' {
+						if win.theme.is_dark { gg.rgb(252, 211, 77) } else { gg.rgb(217, 119, 6) }
+					}
+					'ERROR', 'OFFLINE' {
+						if win.theme.is_dark { gg.rgb(252, 165, 165) } else { gg.rgb(220, 38, 38) }
+					}
+					else {
+						if win.theme.is_dark { gg.rgb(147, 197, 253) } else { gg.rgb(37, 99, 235) }
+					}
 				}
+
 				win.gg_ctx.draw_rounded_rect_filled(stat_x, stat_y, stat_w, 20.0, 4.0, stat_bg)
 				win.gg_ctx.draw_text2(
-					x: int(stat_x + 8)
-					y: int(stat_y + 4)
-					text: clean_text(stat_txt)
+					x:     int(stat_x + 8)
+					y:     int(stat_y + 4)
+					text:  clean_text(stat_txt)
 					color: stat_fg
-					size: 10
-					bold: true
+					size:  10
+					bold:  true
 				)
 
 				// Title (truncated so it never overlaps the status badge)
 				max_title_w := stat_x - (ctrl.x + 68.0) - 6.0
 				disp_title := truncate_text_to_width(win, ctrl.title, max_title_w)
 				win.gg_ctx.draw_text2(
-					x: int(ctrl.x + 68)
-					y: int(ctrl.y + 14)
-					text: disp_title
+					x:     int(ctrl.x + 68)
+					y:     int(ctrl.y + 14)
+					text:  disp_title
 					color: fg
-					size: 13
-					bold: true
+					size:  13
+					bold:  true
 				)
 
 				// Category / Subtitle (truncated to fit card width)
@@ -2685,11 +3562,11 @@ pub fn (mut win SimpleWindow) render_ui() {
 					max_sub_w := ctrl.w - 78.0
 					disp_sub := truncate_text_to_width(win, ctrl.placeholder, max_sub_w)
 					win.gg_ctx.draw_text2(
-						x: int(ctrl.x + 68)
-						y: int(ctrl.y + 38)
-						text: disp_sub
+						x:     int(ctrl.x + 68)
+						y:     int(ctrl.y + 38)
+						text:  disp_sub
 						color: gg.rgb(148, 163, 184)
-						size: 11
+						size:  11
 					)
 				}
 			}
@@ -2699,25 +3576,27 @@ pub fn (mut win SimpleWindow) render_ui() {
 
 				// Cover Art Image Box (72x72)
 				cov_sz := f32(72.0)
-				win.draw_image_fit(ctrl.text_value, ctrl.x + 14.0, ctrl.y + 16.0, cov_sz, cov_sz, '')
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x + 14.0, ctrl.y + 16.0, cov_sz, cov_sz, 6.0, border_c)
+				win.draw_image_fit(ctrl.text_value, ctrl.x + 14.0, ctrl.y + 16.0, cov_sz, cov_sz,
+					'')
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x + 14.0, ctrl.y + 16.0, cov_sz, cov_sz,
+					6.0, border_c)
 
 				// Track Title & Artist
 				track_left := ctrl.x + 98.0
 				win.gg_ctx.draw_text2(
-					x: int(track_left)
-					y: int(ctrl.y + 14)
-					text: clean_text(ctrl.title)
+					x:     int(track_left)
+					y:     int(ctrl.y + 14)
+					text:  clean_text(ctrl.title)
 					color: fg
-					size: 14
-					bold: true
+					size:  14
+					bold:  true
 				)
 				win.gg_ctx.draw_text2(
-					x: int(track_left)
-					y: int(ctrl.y + 32)
-					text: clean_text(ctrl.placeholder)
+					x:     int(track_left)
+					y:     int(ctrl.y + 32)
+					text:  clean_text(ctrl.placeholder)
 					color: gg.rgb(148, 163, 184)
-					size: 11
+					size:  11
 				)
 
 				// Progress Bar Track
@@ -2725,25 +3604,30 @@ pub fn (mut win SimpleWindow) render_ui() {
 				bar_y := ctrl.y + 54.0
 				bar_w := ctrl.w - 112.0
 				bar_h := f32(6.0)
-				win.gg_ctx.draw_rounded_rect_filled(bar_x, bar_y, bar_w, bar_h, 3.0, if win.theme.is_dark { gg.rgb(55, 65, 81) } else { gg.rgb(209, 213, 219) })
-				
+				win.gg_ctx.draw_rounded_rect_filled(bar_x, bar_y, bar_w, bar_h, 3.0, if win.theme.is_dark {
+					gg.rgb(55, 65, 81)
+				} else {
+					gg.rgb(209, 213, 219)
+				})
+
 				tot_sec := if ctrl.int_value > 0 { ctrl.int_value } else { 180 }
 				elapsed_sec := int(ctrl.min_val)
 				progress_pct := math.max(0.0, math.min(1.0, f64(elapsed_sec) / f64(tot_sec)))
 				elapsed_w := bar_w * f32(progress_pct)
 				if elapsed_w > 0 {
 					win.gg_ctx.draw_rounded_rect_filled(bar_x, bar_y, elapsed_w, bar_h, 3.0, accent)
-					win.gg_ctx.draw_circle_filled(bar_x + elapsed_w, bar_y + 3.0, 5.0, gg.rgb(255, 255, 255))
+					win.gg_ctx.draw_circle_filled(bar_x + elapsed_w, bar_y + 3.0, 5.0, gg.rgb(255,
+						255, 255))
 				}
 
 				// Timestamps
 				time_txt := '${elapsed_sec / 60:02d}:${elapsed_sec % 60:02d} / ${tot_sec / 60:02d}:${tot_sec % 60:02d}'
 				win.gg_ctx.draw_text2(
-					x: int(bar_x)
-					y: int(ctrl.y + 68)
-					text: time_txt
+					x:     int(bar_x)
+					y:     int(ctrl.y + 68)
+					text:  time_txt
 					color: gg.rgb(148, 163, 184)
-					size: 10
+					size:  10
 				)
 
 				// Play/Pause & Skip Buttons
@@ -2752,12 +3636,16 @@ pub fn (mut win SimpleWindow) render_ui() {
 				play_btn_y := ctrl.y + 66.0
 				win.gg_ctx.draw_rounded_rect_filled(play_btn_x, play_btn_y, 74.0, 24.0, 4.0, accent)
 				win.gg_ctx.draw_text2(
-					x: int(play_btn_x + 10)
-					y: int(play_btn_y + 5)
-					text: play_txt
-					color: gg.Color{ r: 255, g: 255, b: 255 }
-					size: 10
-					bold: true
+					x:     int(play_btn_x + 10)
+					y:     int(play_btn_y + 5)
+					text:  play_txt
+					color: gg.Color{
+						r: 255
+						g: 255
+						b: 255
+					}
+					size:  10
+					bold:  true
 				)
 			}
 			'hero_banner' {
@@ -2776,34 +3664,39 @@ pub fn (mut win SimpleWindow) render_ui() {
 				// Left Content
 				badge_str := if ctrl.items.len > 2 { ctrl.items[2] } else { 'FEATURED' }
 				badge_w := f32(badge_str.len * 7 + 14)
-				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 16.0, ctrl.y + 14.0, badge_w, 18.0, 4.0, accent)
+				win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 16.0, ctrl.y + 14.0, badge_w, 18.0,
+					4.0, accent)
 				win.gg_ctx.draw_text2(
-					x: int(ctrl.x + 23)
-					y: int(ctrl.y + 17)
-					text: clean_text(badge_str)
-					color: gg.Color{ r: 255, g: 255, b: 255 }
-					size: 10
-					bold: true
+					x:     int(ctrl.x + 23)
+					y:     int(ctrl.y + 17)
+					text:  clean_text(badge_str)
+					color: gg.Color{
+						r: 255
+						g: 255
+						b: 255
+					}
+					size:  10
+					bold:  true
 				)
 
 				// Title
 				win.gg_ctx.draw_text2(
-					x: int(ctrl.x + 16)
-					y: int(ctrl.y + 40)
-					text: clean_text(ctrl.title)
+					x:     int(ctrl.x + 16)
+					y:     int(ctrl.y + 40)
+					text:  clean_text(ctrl.title)
 					color: fg
-					size: 18
-					bold: true
+					size:  18
+					bold:  true
 				)
 
 				// Subtitle
 				if ctrl.placeholder.len > 0 {
 					win.gg_ctx.draw_text2(
-						x: int(ctrl.x + 16)
-						y: int(ctrl.y + 68)
-						text: clean_text(ctrl.placeholder)
+						x:     int(ctrl.x + 16)
+						y:     int(ctrl.y + 68)
+						text:  clean_text(ctrl.placeholder)
 						color: gg.rgb(148, 163, 184)
-						size: 12
+						size:  12
 					)
 				}
 
@@ -2815,28 +3708,36 @@ pub fn (mut win SimpleWindow) render_ui() {
 				btn1_y := ctrl.y + 112.0
 				win.gg_ctx.draw_rounded_rect_filled(btn1_x, btn1_y, 118.0, 32.0, 6.0, accent)
 				win.gg_ctx.draw_text2(
-					x: int(btn1_x + 12)
-					y: int(btn1_y + 8)
-					text: clean_text(cta1)
-					color: gg.Color{ r: 255, g: 255, b: 255 }
-					size: 11
-					bold: true
+					x:     int(btn1_x + 12)
+					y:     int(btn1_y + 8)
+					text:  clean_text(cta1)
+					color: gg.Color{
+						r: 255
+						g: 255
+						b: 255
+					}
+					size:  11
+					bold:  true
 				)
 
 				btn2_x := ctrl.x + 144.0
 				btn2_y := btn1_y
 				win.gg_ctx.draw_rounded_rect_empty(btn2_x, btn2_y, 118.0, 32.0, 6.0, border_c)
 				win.gg_ctx.draw_text2(
-					x: int(btn2_x + 12)
-					y: int(btn2_y + 8)
-					text: clean_text(cta2)
+					x:     int(btn2_x + 12)
+					y:     int(btn2_y + 8)
+					text:  clean_text(cta2)
 					color: fg
-					size: 11
-					bold: true
+					size:  11
+					bold:  true
 				)
 			}
 			'vector_icon' {
-				v_color := if ctrl.accent_color.len > 0 { parse_hex_color(ctrl.accent_color) } else { fg }
+				v_color := if ctrl.accent_color.len > 0 {
+					parse_hex_color(ctrl.accent_color)
+				} else {
+					fg
+				}
 				sz := math.min(ctrl.w, ctrl.h)
 				draw_vector_icon_glyph(win.gg_ctx, ctrl.icon_vector, ctrl.x, ctrl.y, sz, v_color)
 			}
@@ -2844,43 +3745,89 @@ pub fn (mut win SimpleWindow) render_ui() {
 				is_rail := ctrl.is_collapsed || ctrl.kind == 'nav_rail'
 				sb_w := if is_rail { f32(64.0) } else { f32(220.0) }
 				ctrl.w = sb_w
-				draw_elevation_shadow(win.gg_ctx, ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, 2, win.theme.is_dark)
+				draw_elevation_shadow(win.gg_ctx, ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, 2,
+					win.theme.is_dark)
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, surface)
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, border_c)
 
 				hdr_h := f32(40.0)
-				hdr_txt := if is_rail { '' } else { if ctrl.title.len > 0 { ctrl.title } else { 'Navigation' } }
+				hdr_txt := if is_rail {
+					''
+				} else {
+					if ctrl.title.len > 0 { ctrl.title } else { 'Navigation' }
+				}
 				if hdr_txt.len > 0 {
-					win.gg_ctx.draw_text2(x: int(ctrl.x + 14), y: int(ctrl.y + 12), text: hdr_txt, color: fg, size: 14, bold: true)
+					win.gg_ctx.draw_text2(
+						x:     int(ctrl.x + 14)
+						y:     int(ctrl.y + 12)
+						text:  hdr_txt
+						color: fg
+						size:  14
+						bold:  true
+					)
 				}
 				tgl_x := ctrl.x + ctrl.w - 30.0
 				tgl_y := ctrl.y + 12.0
-				draw_vector_icon_glyph(win.gg_ctx, if is_rail { 'chevron_right' } else { 'chevron_left' }, tgl_x, tgl_y, 16.0, border_c)
-				win.gg_ctx.draw_line(ctrl.x, ctrl.y + hdr_h, ctrl.x + ctrl.w, ctrl.y + hdr_h, border_c)
+				draw_vector_icon_glyph(win.gg_ctx, if is_rail {
+					'chevron_right'
+				} else {
+					'chevron_left'
+				}, tgl_x, tgl_y, 16.0, border_c)
+				win.gg_ctx.draw_line(ctrl.x, ctrl.y + hdr_h, ctrl.x + ctrl.w, ctrl.y + hdr_h,
+					border_c)
 
 				mut item_y := ctrl.y + hdr_h + 8.0
 				item_h := f32(36.0)
 				for item in ctrl.sidebar_items {
-					is_hov := win.mouse_x >= ctrl.x + 6.0 && win.mouse_x <= ctrl.x + ctrl.w - 6.0 && win.mouse_y >= item_y && win.mouse_y <= item_y + item_h
+					is_hov := win.mouse_x >= ctrl.x + 6.0 && win.mouse_x <= ctrl.x + ctrl.w - 6.0
+						&& win.mouse_y >= item_y && win.mouse_y <= item_y + item_h
 					if item.is_active {
-						win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 6.0, item_y, ctrl.w - 12.0, item_h, 6.0, accent)
-						win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 8.0, item_y + 6.0, 3.0, item_h - 12.0, 2.0, gg.rgb(255, 255, 255))
+						win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 6.0, item_y, ctrl.w - 12.0,
+							item_h, 6.0, accent)
+						win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 8.0, item_y + 6.0, 3.0,
+							item_h - 12.0, 2.0, gg.rgb(255, 255, 255))
 					} else if is_hov {
-						win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 6.0, item_y, ctrl.w - 12.0, item_h, 6.0, surface_hover)
+						win.gg_ctx.draw_rounded_rect_filled(ctrl.x + 6.0, item_y, ctrl.w - 12.0,
+							item_h, 6.0, surface_hover)
 					}
 
 					item_color := if item.is_active { gg.rgb(255, 255, 255) } else { fg }
 					icon_name := if item.icon.len > 0 { item.icon } else { 'star' }
 					icon_x := if is_rail { ctrl.x + (ctrl.w - 18.0) / 2.0 } else { ctrl.x + 16.0 }
-					draw_vector_icon_glyph(win.gg_ctx, icon_name, icon_x, item_y + 9.0, 18.0, item_color)
+					draw_vector_icon_glyph(win.gg_ctx, icon_name, icon_x, item_y + 9.0, 18.0,
+						item_color)
 
 					if !is_rail {
-						win.gg_ctx.draw_text2(x: int(ctrl.x + 44), y: int(item_y + 10), text: clean_text(item.title), color: item_color, size: 13, bold: item.is_active)
+						win.gg_ctx.draw_text2(
+							x:     int(ctrl.x + 44)
+							y:     int(item_y + 10)
+							text:  clean_text(item.title)
+							color: item_color
+							size:  13
+							bold:  item.is_active
+						)
 						if item.badge.len > 0 {
 							bdg_w := measure_text_width(win, item.badge) + 10.0
 							bdg_x := ctrl.x + ctrl.w - bdg_w - 14.0
-							win.gg_ctx.draw_rounded_rect_filled(bdg_x, item_y + 8.0, bdg_w, 20.0, 10.0, if item.is_active { gg.Color{r: 255, g: 255, b: 255, a: 80} } else { accent })
-							win.gg_ctx.draw_text2(x: int(bdg_x + 5), y: int(item_y + 11), text: item.badge, color: gg.rgb(255, 255, 255), size: 11, bold: true)
+							win.gg_ctx.draw_rounded_rect_filled(bdg_x, item_y + 8.0, bdg_w, 20.0,
+								10.0, if item.is_active {
+								gg.Color{
+									r: 255
+									g: 255
+									b: 255
+									a: 80
+								}
+							} else {
+								accent
+							})
+							win.gg_ctx.draw_text2(
+								x:     int(bdg_x + 5)
+								y:     int(item_y + 11)
+								text:  item.badge
+								color: gg.rgb(255, 255, 255)
+								size:  11
+								bold:  true
+							)
 						}
 					}
 					item_y += item_h + 4.0
@@ -2890,7 +3837,14 @@ pub fn (mut win SimpleWindow) render_ui() {
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, surface)
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, border_c)
 				if ctrl.title.len > 0 {
-					win.gg_ctx.draw_text2(x: int(ctrl.x + 12), y: int(ctrl.y + 10), text: clean_text(ctrl.title), color: fg, size: 13, bold: true)
+					win.gg_ctx.draw_text2(
+						x:     int(ctrl.x + 12)
+						y:     int(ctrl.y + 10)
+						text:  clean_text(ctrl.title)
+						color: fg
+						size:  13
+						bold:  true
+					)
 				}
 				chart_y := ctrl.y + 36.0
 				chart_h := ctrl.h - 48.0
@@ -2916,19 +3870,25 @@ pub fn (mut win SimpleWindow) render_ui() {
 					}
 					for seg := 0; seg < pts.len - 2; seg += 2 {
 						x1 := pts[seg]
-						y1 := pts[seg+1]
-						x2 := pts[seg+2]
-						y2 := pts[seg+3]
+						y1 := pts[seg + 1]
+						x2 := pts[seg + 2]
+						y2 := pts[seg + 3]
 						bottom_y := chart_y + chart_h
-						area_color := gg.Color{ r: accent.r, g: accent.g, b: accent.b, a: 45 }
+						area_color := gg.Color{
+							r: accent.r
+							g: accent.g
+							b: accent.b
+							a: 45
+						}
 						win.gg_ctx.draw_triangle_filled(x1, y1, x2, y2, x1, bottom_y, area_color)
-						win.gg_ctx.draw_triangle_filled(x2, y2, x2, bottom_y, x1, bottom_y, area_color)
+						win.gg_ctx.draw_triangle_filled(x2, y2, x2, bottom_y, x1, bottom_y,
+							area_color)
 						win.gg_ctx.draw_line(x1, y1, x2, y2, accent)
 						win.gg_ctx.draw_circle_filled(x1, y1, 3.0, accent)
 					}
 					if pts.len >= 2 {
-						last_x := pts[pts.len-2]
-						last_y := pts[pts.len-1]
+						last_x := pts[pts.len - 2]
+						last_y := pts[pts.len - 1]
 						win.gg_ctx.draw_circle_filled(last_x, last_y, 3.5, accent)
 					}
 				}
@@ -2937,7 +3897,14 @@ pub fn (mut win SimpleWindow) render_ui() {
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, surface)
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, border_c)
 				if ctrl.title.len > 0 {
-					win.gg_ctx.draw_text2(x: int(ctrl.x + 12), y: int(ctrl.y + 10), text: clean_text(ctrl.title), color: fg, size: 13, bold: true)
+					win.gg_ctx.draw_text2(
+						x:     int(ctrl.x + 12)
+						y:     int(ctrl.y + 10)
+						text:  clean_text(ctrl.title)
+						color: fg
+						size:  13
+						bold:  true
+					)
 				}
 				grid_x := ctrl.x + 36.0
 				grid_y := ctrl.y + 34.0
@@ -2948,9 +3915,21 @@ pub fn (mut win SimpleWindow) render_ui() {
 				day_indices := [1, 3, 5]
 				for d_i, d_lbl in day_labels {
 					ly := grid_y + f32(day_indices[d_i]) * (cell_sz + cell_gap) + 1.0
-					win.gg_ctx.draw_text2(x: int(ctrl.x + 14), y: int(ly), text: d_lbl, color: border_c, size: 10)
+					win.gg_ctx.draw_text2(
+						x:     int(ctrl.x + 14)
+						y:     int(ly)
+						text:  d_lbl
+						color: border_c
+						size:  10
+					)
 				}
-				levels := if ctrl.heatmap_levels.len >= 5 { ctrl.heatmap_levels } else { ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'] }
+				levels := if ctrl.heatmap_levels.len >= 5 { ctrl.heatmap_levels } else { [
+						'#161b22',
+						'#0e4429',
+						'#006d32',
+						'#26a641',
+						'#39d353',
+					] }
 				for w_i in 0 .. weeks_count {
 					for d_i in 0 .. 7 {
 						cx := grid_x + f32(w_i) * (cell_sz + cell_gap)
@@ -2959,7 +3938,17 @@ pub fn (mut win SimpleWindow) render_ui() {
 						if d_i < ctrl.heatmap_data.len && w_i < ctrl.heatmap_data[d_i].len {
 							val = ctrl.heatmap_data[d_i][w_i]
 						}
-						lvl_idx := if val <= 0 { 0 } else if val == 1 { 1 } else if val == 2 { 2 } else if val <= 4 { 3 } else { 4 }
+						lvl_idx := if val <= 0 {
+							0
+						} else if val == 1 {
+							1
+						} else if val == 2 {
+							2
+						} else if val <= 4 {
+							3
+						} else {
+							4
+						}
 						lvl_c := parse_hex_color(levels[lvl_idx])
 						win.gg_ctx.draw_rounded_rect_filled(cx, cy, cell_sz, cell_sz, 2.0, lvl_c)
 					}
@@ -2969,46 +3958,84 @@ pub fn (mut win SimpleWindow) render_ui() {
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, border_c)
 				hdr_h := f32(30.0)
-				win.gg_ctx.draw_rect_filled(ctrl.x, ctrl.y, ctrl.w, hdr_h, if win.theme.is_dark { gg.rgb(30, 32, 42) } else { gg.rgb(230, 235, 240) })
-				win.gg_ctx.draw_line(ctrl.x, ctrl.y + hdr_h, ctrl.x + ctrl.w, ctrl.y + hdr_h, border_c)
+				win.gg_ctx.draw_rect_filled(ctrl.x, ctrl.y, ctrl.w, hdr_h, if win.theme.is_dark {
+					gg.rgb(30, 32, 42)
+				} else {
+					gg.rgb(230, 235, 240)
+				})
+				win.gg_ctx.draw_line(ctrl.x, ctrl.y + hdr_h, ctrl.x + ctrl.w, ctrl.y + hdr_h,
+					border_c)
 				col_count := f32(math.max(1, ctrl.headers.len))
 				col_w := ctrl.w / col_count
 				for h_i, h_txt in ctrl.headers {
 					hx := ctrl.x + f32(h_i) * col_w + 10.0
-					win.gg_ctx.draw_text2(x: int(hx), y: int(ctrl.y + 7), text: clean_text(h_txt), color: fg, size: 12, bold: true)
+					win.gg_ctx.draw_text2(
+						x:     int(hx)
+						y:     int(ctrl.y + 7)
+						text:  clean_text(h_txt)
+						color: fg
+						size:  12
+						bold:  true
+					)
 				}
 				mut row_y := ctrl.y + hdr_h
 				row_h := f32(28.0)
 				for node in ctrl.tree_table_nodes {
-					if row_y + row_h > ctrl.y + ctrl.h { break }
-					is_hov := win.mouse_x >= ctrl.x && win.mouse_x <= ctrl.x + ctrl.w && win.mouse_y >= row_y && win.mouse_y <= row_y + row_h
+					if row_y + row_h > ctrl.y + ctrl.h { break
+					 }
+					is_hov := win.mouse_x >= ctrl.x && win.mouse_x <= ctrl.x + ctrl.w
+						&& win.mouse_y >= row_y && win.mouse_y <= row_y + row_h
 					if is_hov {
 						win.gg_ctx.draw_rect_filled(ctrl.x, row_y, ctrl.w, row_h, surface_hover)
 					}
 					arrow_x := ctrl.x + 8.0
 					arrow_y := row_y + 8.0
 					if node.children.len > 0 {
-						draw_vector_icon_glyph(win.gg_ctx, if node.is_expanded { 'chevron_down' } else { 'chevron_right' }, arrow_x, arrow_y, 12.0, border_c)
+						draw_vector_icon_glyph(win.gg_ctx, if node.is_expanded {
+							'chevron_down'
+						} else {
+							'chevron_right'
+						}, arrow_x, arrow_y, 12.0, border_c)
 					} else {
 						win.gg_ctx.draw_circle_filled(arrow_x + 6.0, arrow_y + 6.0, 2.0, border_c)
 					}
 					for v_i, val in node.values {
 						vx := if v_i == 0 { ctrl.x + 24.0 } else { ctrl.x + f32(v_i) * col_w + 8.0 }
-						win.gg_ctx.draw_text2(x: int(vx), y: int(row_y + 6), text: clean_text(val), color: fg, size: 12)
+						win.gg_ctx.draw_text2(
+							x:     int(vx)
+							y:     int(row_y + 6)
+							text:  clean_text(val)
+							color: fg
+							size:  12
+						)
 					}
-					win.gg_ctx.draw_line(ctrl.x, row_y + row_h, ctrl.x + ctrl.w, row_y + row_h, border_c)
+					win.gg_ctx.draw_line(ctrl.x, row_y + row_h, ctrl.x + ctrl.w, row_y + row_h,
+						border_c)
 					row_y += row_h
 					if node.is_expanded {
 						for child in node.children {
-							if row_y + row_h > ctrl.y + ctrl.h { break }
+							if row_y + row_h > ctrl.y + ctrl.h { break
+							 }
 							c_arrow_x := ctrl.x + 26.0
 							c_arrow_y := row_y + 8.0
-							win.gg_ctx.draw_circle_filled(c_arrow_x + 6.0, c_arrow_y + 6.0, 2.0, border_c)
+							win.gg_ctx.draw_circle_filled(c_arrow_x + 6.0, c_arrow_y + 6.0, 2.0,
+								border_c)
 							for cv_i, cval in child.values {
-								cvx := if cv_i == 0 { ctrl.x + 42.0 } else { ctrl.x + f32(cv_i) * col_w + 8.0 }
-								win.gg_ctx.draw_text2(x: int(cvx), y: int(row_y + 6), text: clean_text(cval), color: fg, size: 12)
+								cvx := if cv_i == 0 {
+									ctrl.x + 42.0
+								} else {
+									ctrl.x + f32(cv_i) * col_w + 8.0
+								}
+								win.gg_ctx.draw_text2(
+									x:     int(cvx)
+									y:     int(row_y + 6)
+									text:  clean_text(cval)
+									color: fg
+									size:  12
+								)
 							}
-							win.gg_ctx.draw_line(ctrl.x, row_y + row_h, ctrl.x + ctrl.w, row_y + row_h, border_c)
+							win.gg_ctx.draw_line(ctrl.x, row_y + row_h, ctrl.x + ctrl.w, row_y +
+								row_h, border_c)
 							row_y += row_h
 						}
 					}
@@ -3018,27 +4045,53 @@ pub fn (mut win SimpleWindow) render_ui() {
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, surface)
 				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 8.0, border_c)
 				hdr_h := f32(36.0)
-				month_names := ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-				m_idx := if ctrl.cal_month >= 1 && ctrl.cal_month <= 12 { ctrl.cal_month - 1 } else { 0 }
+				month_names := ['January', 'February', 'March', 'April', 'May', 'June', 'July',
+					'August', 'September', 'October', 'November', 'December']
+				m_idx := if ctrl.cal_month >= 1 && ctrl.cal_month <= 12 {
+					ctrl.cal_month - 1
+				} else {
+					0
+				}
 				m_name := '${month_names[m_idx]} ${ctrl.cal_year}'
-				win.gg_ctx.draw_text2(x: int(ctrl.x + 14), y: int(ctrl.y + 10), text: m_name, color: fg, size: 14, bold: true)
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + 14)
+					y:     int(ctrl.y + 10)
+					text:  m_name
+					color: fg
+					size:  14
+					bold:  true
+				)
 				prev_x := ctrl.x + ctrl.w - 56.0
 				next_x := ctrl.x + ctrl.w - 28.0
 				arr_y := ctrl.y + 10.0
 				draw_vector_icon_glyph(win.gg_ctx, 'chevron_left', prev_x, arr_y, 16.0, border_c)
 				draw_vector_icon_glyph(win.gg_ctx, 'chevron_right', next_x, arr_y, 16.0, border_c)
-				win.gg_ctx.draw_line(ctrl.x, ctrl.y + hdr_h, ctrl.x + ctrl.w, ctrl.y + hdr_h, border_c)
+				win.gg_ctx.draw_line(ctrl.x, ctrl.y + hdr_h, ctrl.x + ctrl.w, ctrl.y + hdr_h,
+					border_c)
 
 				weekdays := ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa']
 				day_w := (ctrl.w - 16.0) / 7.0
 				mut day_x := ctrl.x + 8.0
 				for wd in weekdays {
-					win.gg_ctx.draw_text2(x: int(day_x + (day_w - 14.0) / 2.0), y: int(ctrl.y + hdr_h + 6), text: wd, color: border_c, size: 11, bold: true)
+					win.gg_ctx.draw_text2(
+						x:     int(day_x + (day_w - 14.0) / 2.0)
+						y:     int(ctrl.y + hdr_h + 6)
+						text:  wd
+						color: border_c
+						size:  11
+						bold:  true
+					)
 					day_x += day_w
 				}
 				grid_top := ctrl.y + hdr_h + 24.0
 				cell_h := (ctrl.h - hdr_h - 32.0) / 6.0
-				days_in_m := if ctrl.cal_month in [1, 3, 5, 7, 8, 10, 12] { 31 } else if ctrl.cal_month == 2 { 28 } else { 30 }
+				days_in_m := if ctrl.cal_month in [1, 3, 5, 7, 8, 10, 12] {
+					31
+				} else if ctrl.cal_month == 2 {
+					28
+				} else {
+					30
+				}
 				start_offset := (ctrl.cal_month * 2 + ctrl.cal_year) % 7
 				for day := 1; day <= days_in_m; day++ {
 					slot := day - 1 + start_offset
@@ -3048,12 +4101,20 @@ pub fn (mut win SimpleWindow) render_ui() {
 					dy := grid_top + f32(row) * cell_h
 					is_selected := (day == ctrl.cal_selected_day)
 					if is_selected {
-						win.gg_ctx.draw_rounded_rect_filled(dx + 2.0, dy + 2.0, day_w - 4.0, cell_h - 4.0, 6.0, accent)
+						win.gg_ctx.draw_rounded_rect_filled(dx + 2.0, dy + 2.0, day_w - 4.0,
+							cell_h - 4.0, 6.0, accent)
 					}
 					txt_c := if is_selected { gg.rgb(255, 255, 255) } else { fg }
 					d_str := '${day}'
 					tw := measure_text_width(win, d_str)
-					win.gg_ctx.draw_text2(x: int(dx + (day_w - tw) / 2.0), y: int(dy + (cell_h - 12.0) / 2.0), text: d_str, color: txt_c, size: 12, bold: is_selected)
+					win.gg_ctx.draw_text2(
+						x:     int(dx + (day_w - tw) / 2.0)
+						y:     int(dy + (cell_h - 12.0) / 2.0)
+						text:  d_str
+						color: txt_c
+						size:  12
+						bold:  is_selected
+					)
 				}
 			}
 			'markdown_view' {
@@ -3062,31 +4123,68 @@ pub fn (mut win SimpleWindow) render_ui() {
 				lines := ctrl.markdown_content.split('\n')
 				mut my := ctrl.y + 10.0
 				for line in lines {
-					if my + 18.0 > ctrl.y + ctrl.h { break }
+					if my + 18.0 > ctrl.y + ctrl.h { break
+					 }
 					trimmed := line.trim_space()
 					if trimmed.starts_with('# ') {
 						h_txt := clean_text(trimmed[2..])
-						win.gg_ctx.draw_text2(x: int(ctrl.x + 12), y: int(my), text: h_txt, color: fg, size: 16, bold: true)
+						win.gg_ctx.draw_text2(
+							x:     int(ctrl.x + 12)
+							y:     int(my)
+							text:  h_txt
+							color: fg
+							size:  16
+							bold:  true
+						)
 						my += 22.0
 					} else if trimmed.starts_with('## ') {
 						h_txt := clean_text(trimmed[3..])
-						win.gg_ctx.draw_text2(x: int(ctrl.x + 12), y: int(my), text: h_txt, color: accent, size: 14, bold: true)
+						win.gg_ctx.draw_text2(
+							x:     int(ctrl.x + 12)
+							y:     int(my)
+							text:  h_txt
+							color: accent
+							size:  14
+							bold:  true
+						)
 						my += 20.0
 					} else if trimmed.starts_with('> ') {
 						q_txt := clean_text(trimmed[2..])
 						win.gg_ctx.draw_line(ctrl.x + 12, my, ctrl.x + 12, my + 16, accent)
-						win.gg_ctx.draw_text2(x: int(ctrl.x + 20), y: int(my), text: q_txt, color: border_c, size: 12)
+						win.gg_ctx.draw_text2(
+							x:     int(ctrl.x + 20)
+							y:     int(my)
+							text:  q_txt
+							color: border_c
+							size:  12
+						)
 						my += 18.0
 					} else if trimmed.starts_with('- ') || trimmed.starts_with('* ') {
 						b_txt := clean_text(trimmed[2..])
 						win.gg_ctx.draw_circle_filled(ctrl.x + 16, my + 6, 2.5, accent)
-						win.gg_ctx.draw_text2(x: int(ctrl.x + 24), y: int(my), text: b_txt, color: fg, size: 12)
+						win.gg_ctx.draw_text2(
+							x:     int(ctrl.x + 24)
+							y:     int(my)
+							text:  b_txt
+							color: fg
+							size:  12
+						)
 						my += 18.0
 					} else if trimmed.starts_with('```') {
-						win.gg_ctx.draw_rect_filled(ctrl.x + 12, my, ctrl.w - 24, 20.0, if win.theme.is_dark { gg.rgb(20, 22, 30) } else { gg.rgb(220, 225, 230) })
+						win.gg_ctx.draw_rect_filled(ctrl.x + 12, my, ctrl.w - 24, 20.0, if win.theme.is_dark {
+							gg.rgb(20, 22, 30)
+						} else {
+							gg.rgb(220, 225, 230)
+						})
 						my += 22.0
 					} else if trimmed.len > 0 {
-						win.gg_ctx.draw_text2(x: int(ctrl.x + 12), y: int(my), text: clean_text(trimmed), color: fg, size: 12)
+						win.gg_ctx.draw_text2(
+							x:     int(ctrl.x + 12)
+							y:     int(my)
+							text:  clean_text(trimmed)
+							color: fg
+							size:  12
+						)
 						my += 18.0
 					} else {
 						my += 8.0
@@ -3095,28 +4193,58 @@ pub fn (mut win SimpleWindow) render_ui() {
 			}
 			'masked_input' {
 				win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, surface)
-				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, if ctrl.is_focused { accent } else { border_c })
+				win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, if ctrl.is_focused {
+					accent
+				} else {
+					border_c
+				})
 				if ctrl.is_focused {
 					draw_focus_ring(win.gg_ctx, ctrl.x, ctrl.y, ctrl.w, ctrl.h, 6.0, accent)
 				}
-				disp_text := if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.mask_pattern }
+				disp_text := if ctrl.text_value.len > 0 {
+					ctrl.text_value
+				} else {
+					ctrl.mask_pattern
+				}
 				txt_color := if ctrl.text_value.len > 0 { fg } else { border_c }
-				win.gg_ctx.draw_text2(x: int(ctrl.x + 10), y: int(ctrl.y + 8), text: clean_text(disp_text), color: txt_color, size: 13)
+				win.gg_ctx.draw_text2(
+					x:     int(ctrl.x + 10)
+					y:     int(ctrl.y + 8)
+					text:  clean_text(disp_text)
+					color: txt_color
+					size:  13
+				)
 			}
 			'inline_label' {
 				if ctrl.is_editing {
-					win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 4.0, surface)
+					win.gg_ctx.draw_rounded_rect_filled(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 4.0,
+						surface)
 					win.gg_ctx.draw_rounded_rect_empty(ctrl.x, ctrl.y, ctrl.w, ctrl.h, 4.0, accent)
 					draw_focus_ring(win.gg_ctx, ctrl.x, ctrl.y, ctrl.w, ctrl.h, 4.0, accent)
-					win.gg_ctx.draw_text2(x: int(ctrl.x + 6), y: int(ctrl.y + 6), text: clean_text(ctrl.text_value), color: fg, size: 13)
+					win.gg_ctx.draw_text2(
+						x:     int(ctrl.x + 6)
+						y:     int(ctrl.y + 6)
+						text:  clean_text(ctrl.text_value)
+						color: fg
+						size:  13
+					)
 					chk_x := ctrl.x + ctrl.w - 36.0
-					draw_vector_icon_glyph(win.gg_ctx, 'check', chk_x, ctrl.y + 6.0, 14.0, parse_hex_color('#10b981'))
-					draw_vector_icon_glyph(win.gg_ctx, 'close', chk_x + 18.0, ctrl.y + 6.0, 14.0, parse_hex_color('#ef4444'))
+					draw_vector_icon_glyph(win.gg_ctx, 'check', chk_x, ctrl.y + 6.0, 14.0,
+						parse_hex_color('#10b981'))
+					draw_vector_icon_glyph(win.gg_ctx, 'close', chk_x + 18.0, ctrl.y + 6.0, 14.0,
+						parse_hex_color('#ef4444'))
 				} else {
 					lbl_txt := if ctrl.text_value.len > 0 { ctrl.text_value } else { ctrl.title }
-					win.gg_ctx.draw_text2(x: int(ctrl.x), y: int(ctrl.y + 6), text: clean_text(lbl_txt), color: fg, size: 13)
+					win.gg_ctx.draw_text2(
+						x:     int(ctrl.x)
+						y:     int(ctrl.y + 6)
+						text:  clean_text(lbl_txt)
+						color: fg
+						size:  13
+					)
 					tw := measure_text_width(win, lbl_txt)
-					draw_vector_icon_glyph(win.gg_ctx, 'gear', ctrl.x + tw + 8.0, ctrl.y + 8.0, 12.0, border_c)
+					draw_vector_icon_glyph(win.gg_ctx, 'gear', ctrl.x + tw + 8.0, ctrl.y + 8.0,
+						12.0, border_c)
 				}
 			}
 			else {}
@@ -3193,7 +4321,7 @@ fn (mut win SimpleWindow) render_toasts() {
 		t_w := f32(math.min(320, win.width - 40))
 		t_h := f32(56.0)
 		tx := f32(win.width) - t_w - 20.0
-		
+
 		t_color := match toast.variant {
 			'success' { parse_hex_color('#10b981') }
 			'warning' { parse_hex_color('#f59e0b') }
@@ -3210,16 +4338,37 @@ fn (mut win SimpleWindow) render_toasts() {
 
 		text_left := if has_icon {
 			icon_sz := f32(34.0)
-			win.gg_ctx.draw_rounded_rect_filled(tx + 10.0, ty + 11.0, icon_sz, icon_sz, 6.0, gg.rgba(t_color.r, t_color.g, t_color.b, 35))
+			win.gg_ctx.draw_rounded_rect_filled(tx + 10.0, ty + 11.0, icon_sz, icon_sz, 6.0, gg.rgba(t_color.r,
+				t_color.g, t_color.b, 35))
 			win.draw_image_fit(toast.icon_path, tx + 10.0, ty + 11.0, icon_sz, icon_sz, '')
 			tx + 52.0
 		} else {
 			tx + 16.0
 		}
 
-		win.gg_ctx.draw_text2(x: int(text_left), y: int(ty + 9), text: clean_text(toast.title), color: fg, size: 13, bold: true)
-		win.gg_ctx.draw_text2(x: int(text_left), y: int(ty + 29), text: clean_text(toast.message), color: muted_fg, size: 11)
-		win.gg_ctx.draw_text2(x: int(tx + t_w - 18), y: int(ty + 8), text: 'x', color: muted_fg, size: 12, bold: true)
+		win.gg_ctx.draw_text2(
+			x:     int(text_left)
+			y:     int(ty + 9)
+			text:  clean_text(toast.title)
+			color: fg
+			size:  13
+			bold:  true
+		)
+		win.gg_ctx.draw_text2(
+			x:     int(text_left)
+			y:     int(ty + 29)
+			text:  clean_text(toast.message)
+			color: muted_fg
+			size:  11
+		)
+		win.gg_ctx.draw_text2(
+			x:     int(tx + t_w - 18)
+			y:     int(ty + 8)
+			text:  'x'
+			color: muted_fg
+			size:  12
+			bold:  true
+		)
 
 		active_toasts << toast
 		ty += t_h + 10.0
@@ -3243,20 +4392,30 @@ fn (mut win SimpleWindow) render_command_palette() {
 	selected_fg := win.theme.button_text()
 
 	win.gg_ctx.draw_rounded_rect_filled(bx, by, box_w, box_h, 10.0, surface)
-	win.gg_ctx.draw_rounded_rect_empty(bx, by, box_w, box_h, 10.0, parse_hex_color(win.theme.accent_color))
+	win.gg_ctx.draw_rounded_rect_empty(bx, by, box_w, box_h, 10.0,
+		parse_hex_color(win.theme.accent_color))
 
-	win.gg_ctx.draw_text2(x: int(bx + 16), y: int(by + 16), text: 'Find: ${win.command_palette_query}_', color: fg, size: 15)
+	win.gg_ctx.draw_text2(
+		x:     int(bx + 16)
+		y:     int(by + 16)
+		text:  'Find: ${win.command_palette_query}_'
+		color: fg
+		size:  15
+	)
 	win.gg_ctx.draw_line(bx, by + 48, bx + box_w, by + 48, border_c)
 
 	mut item_y := by + 56.0
 	for idx, item in win.command_palette_items {
-		if win.command_palette_query.len > 0 && !item.title.to_lower().contains(win.command_palette_query.to_lower()) {
+		if win.command_palette_query.len > 0
+			&& !item.title.to_lower().contains(win.command_palette_query.to_lower()) {
 			continue
 		}
-		if item_y + 32.0 > by + box_h { break }
+		if item_y + 32.0 > by + box_h { break
+		 }
 
 		if idx == win.command_palette_sel {
-			win.gg_ctx.draw_rounded_rect_filled(bx + 8, item_y, box_w - 16, 28.0, 4.0, parse_hex_color(win.theme.accent_color))
+			win.gg_ctx.draw_rounded_rect_filled(bx + 8, item_y, box_w - 16, 28.0, 4.0,
+				parse_hex_color(win.theme.accent_color))
 		}
 
 		mut title_x := bx + 20.0
@@ -3266,9 +4425,21 @@ fn (mut win SimpleWindow) render_command_palette() {
 		}
 
 		item_fg := if idx == win.command_palette_sel { selected_fg } else { fg }
-		win.gg_ctx.draw_text2(x: int(title_x), y: int(item_y + 6), text: item.title, color: item_fg, size: 13)
+		win.gg_ctx.draw_text2(
+			x:     int(title_x)
+			y:     int(item_y + 6)
+			text:  item.title
+			color: item_fg
+			size:  13
+		)
 		if item.shortcut.len > 0 {
-			win.gg_ctx.draw_text2(x: int(bx + box_w - 80), y: int(item_y + 6), text: item.shortcut, color: muted_fg, size: 11)
+			win.gg_ctx.draw_text2(
+				x:     int(bx + box_w - 80)
+				y:     int(item_y + 6)
+				text:  item.shortcut
+				color: muted_fg
+				size:  11
+			)
 		}
 		item_y += 32.0
 	}
@@ -3284,7 +4455,8 @@ fn (mut win SimpleWindow) render_context_menu() {
 	muted_fg := win.theme.muted_text()
 
 	win.gg_ctx.draw_rounded_rect_filled(mx, my, menu_w, menu_h, 6.0, win.theme.surface())
-	win.gg_ctx.draw_rounded_rect_empty(mx, my, menu_w, menu_h, 6.0, parse_hex_color(win.theme.accent_color))
+	win.gg_ctx.draw_rounded_rect_empty(mx, my, menu_w, menu_h, 6.0,
+		parse_hex_color(win.theme.accent_color))
 
 	for idx, item in win.context_menu_items {
 		iy := my + f32(idx * 30 + 5)
@@ -3295,7 +4467,13 @@ fn (mut win SimpleWindow) render_context_menu() {
 		}
 		win.gg_ctx.draw_text2(x: int(text_x), y: int(iy + 6), text: item.title, color: fg, size: 13)
 		if item.shortcut.len > 0 {
-			win.gg_ctx.draw_text2(x: int(mx + menu_w - 60), y: int(iy + 6), text: item.shortcut, color: muted_fg, size: 11)
+			win.gg_ctx.draw_text2(
+				x:     int(mx + menu_w - 60)
+				y:     int(iy + 6)
+				text:  item.shortcut
+				color: muted_fg
+				size:  11
+			)
 		}
 	}
 }
@@ -3321,15 +4499,28 @@ fn (mut win SimpleWindow) render_dropdown_overlay() {
 	hover_bg := win.theme.hovered_surface()
 
 	// Multi-layer drop shadow for elevated floating card effect
-	shadow_1 := gg.Color{r: 0, g: 0, b: 0, a: if win.theme.is_dark { u8(80) } else { u8(40) }}
-	shadow_2 := gg.Color{r: 0, g: 0, b: 0, a: if win.theme.is_dark { u8(50) } else { u8(20) }}
-	win.gg_ctx.draw_rounded_rect_filled(layout.x + 2.0, layout.y + 3.0, layout.w, layout.h, 8.0, shadow_1)
-	win.gg_ctx.draw_rounded_rect_filled(layout.x + 4.0, layout.y + 6.0, layout.w, layout.h, 8.0, shadow_2)
+	shadow_1 := gg.Color{
+		r: 0
+		g: 0
+		b: 0
+		a: if win.theme.is_dark { u8(80) } else { u8(40) }
+	}
+	shadow_2 := gg.Color{
+		r: 0
+		g: 0
+		b: 0
+		a: if win.theme.is_dark { u8(50) } else { u8(20) }
+	}
+	win.gg_ctx.draw_rounded_rect_filled(layout.x + 2.0, layout.y + 3.0, layout.w, layout.h, 8.0,
+		shadow_1)
+	win.gg_ctx.draw_rounded_rect_filled(layout.x + 4.0, layout.y + 6.0, layout.w, layout.h, 8.0,
+		shadow_2)
 
 	// Elevated container background and border
 	win.gg_ctx.draw_rounded_rect_filled(layout.x, layout.y, layout.w, layout.h, 8.0, pop_bg)
 	win.gg_ctx.draw_rounded_rect_empty(layout.x, layout.y, layout.w, layout.h, 8.0, border_c)
-	win.gg_ctx.draw_rounded_rect_empty(layout.x + 0.5, layout.y + 0.5, layout.w - 1.0, layout.h - 1.0, 7.5, gg.Color{r: accent.r, g: accent.g, b: accent.b, a: 60})
+	win.gg_ctx.draw_rounded_rect_empty(layout.x + 0.5, layout.y + 0.5, layout.w - 1.0,
+		layout.h - 1.0, 7.5, gg.Color{ r: accent.r, g: accent.g, b: accent.b, a: 60 })
 
 	// Draw menu items
 	for i in 0 .. layout.max_visible {
@@ -3340,13 +4531,15 @@ fn (mut win SimpleWindow) render_dropdown_overlay() {
 		item := ctrl.items[idx]
 		item_y := layout.y + 4.0 + f32(i) * layout.item_h
 		is_sel := (item == ctrl.text_value)
-		is_hov := win.mouse_x >= layout.x + 4.0 && win.mouse_x <= layout.x + layout.w - 4.0 &&
-			win.mouse_y >= item_y && win.mouse_y < item_y + layout.item_h
+		is_hov := win.mouse_x >= layout.x + 4.0 && win.mouse_x <= layout.x + layout.w - 4.0
+			&& win.mouse_y >= item_y && win.mouse_y < item_y + layout.item_h
 
 		if is_sel {
-			win.gg_ctx.draw_rounded_rect_filled(layout.x + 4.0, item_y, layout.w - 8.0, layout.item_h - 2.0, 5.0, accent)
+			win.gg_ctx.draw_rounded_rect_filled(layout.x + 4.0, item_y, layout.w - 8.0,
+				layout.item_h - 2.0, 5.0, accent)
 		} else if is_hov {
-			win.gg_ctx.draw_rounded_rect_filled(layout.x + 4.0, item_y, layout.w - 8.0, layout.item_h - 2.0, 5.0, hover_bg)
+			win.gg_ctx.draw_rounded_rect_filled(layout.x + 4.0, item_y, layout.w - 8.0,
+				layout.item_h - 2.0, 5.0, hover_bg)
 		}
 
 		item_text_c := if is_sel { win.theme.button_text() } else { fg }
@@ -3366,11 +4559,18 @@ fn (mut win SimpleWindow) render_dropdown_overlay() {
 	if layout.max_scroll > 0 && layout.max_visible > 0 {
 		sb_w := f32(4.0)
 		sb_track_h := layout.h - 12.0
-		sb_thumb_h := f32(math.max(16.0, f64((f32(layout.max_visible) / f32(ctrl.items.len)) * sb_track_h)))
-		sb_thumb_y := f32(layout.y + 6.0 + (f32(layout.scroll_idx) / f32(layout.max_scroll)) * (sb_track_h - sb_thumb_h))
+		sb_thumb_h := f32(math.max(16.0,
+			f64((f32(layout.max_visible) / f32(ctrl.items.len)) * sb_track_h)))
+		sb_thumb_y := f32(layout.y + 6.0 +
+			(f32(layout.scroll_idx) / f32(layout.max_scroll)) * (sb_track_h - sb_thumb_h))
 		sb_x := layout.x + layout.w - sb_w - 4.0
 
-		win.gg_ctx.draw_rounded_rect_filled(sb_x, sb_thumb_y, sb_w, sb_thumb_h, 2.0, gg.Color{r: accent.r, g: accent.g, b: accent.b, a: 160})
+		win.gg_ctx.draw_rounded_rect_filled(sb_x, sb_thumb_y, sb_w, sb_thumb_h, 2.0, gg.Color{
+			r: accent.r
+			g: accent.g
+			b: accent.b
+			a: 160
+		})
 	}
 }
 
@@ -3397,7 +4597,8 @@ fn (mut win SimpleWindow) render_menu_bar() {
 
 	for idx, cat in win.menu_categories {
 		txt_w := f32(cat.title.len * 8 + 16)
-		is_cat_hover := win.mouse_x >= cur_x && win.mouse_x < cur_x + txt_w && win.mouse_y >= 0 && win.mouse_y <= bar_h
+		is_cat_hover := win.mouse_x >= cur_x && win.mouse_x < cur_x + txt_w && win.mouse_y >= 0
+			&& win.mouse_y <= bar_h
 		is_cat_active := win.active_menu_idx == idx
 
 		if is_cat_active {
@@ -3409,11 +4610,11 @@ fn (mut win SimpleWindow) render_menu_bar() {
 
 		cat_txt_c := if is_cat_active { win.theme.button_text() } else { fg }
 		win.gg_ctx.draw_text2(
-			x: int(cur_x + 8.0)
-			y: int((bar_h - 14.0) / 2.0)
-			text: cat.title
+			x:     int(cur_x + 8.0)
+			y:     int((bar_h - 14.0) / 2.0)
+			text:  cat.title
 			color: cat_txt_c
-			size: 13
+			size:  13
 		)
 
 		cur_x += txt_w + 4.0
@@ -3441,21 +4642,27 @@ fn (mut win SimpleWindow) render_menu_bar() {
 			popup_muted := win.theme.muted_text()
 
 			// Drop shadow
-			win.gg_ctx.draw_rounded_rect_filled(menu_x + 2.0, menu_y + 2.0, menu_w, total_menu_h, 6.0, gg.rgba(0, 0, 0, 40))
+			win.gg_ctx.draw_rounded_rect_filled(menu_x + 2.0, menu_y + 2.0, menu_w, total_menu_h,
+				6.0, gg.rgba(0, 0, 0, 40))
 			// Popup box
 			win.gg_ctx.draw_rounded_rect_filled(menu_x, menu_y, menu_w, total_menu_h, 6.0, popup_bg)
-			win.gg_ctx.draw_rounded_rect_empty(menu_x, menu_y, menu_w, total_menu_h, 6.0, popup_border)
+			win.gg_ctx.draw_rounded_rect_empty(menu_x, menu_y, menu_w, total_menu_h, 6.0,
+				popup_border)
 
 			mut item_y := menu_y + 4.0
 			for item in cat.items {
 				if item.is_separator {
-					win.gg_ctx.draw_line(menu_x + 8.0, item_y + 3.0, menu_x + menu_w - 8.0, item_y + 3.0, bar_border)
+					win.gg_ctx.draw_line(menu_x + 8.0, item_y + 3.0, menu_x + menu_w - 8.0,
+
+						item_y + 3.0, bar_border)
 					item_y += 7.0
 				} else {
-					is_item_hover := win.mouse_x >= menu_x && win.mouse_x <= menu_x + menu_w && win.mouse_y >= item_y && win.mouse_y < item_y + 26.0 && !item.disabled
+					is_item_hover := win.mouse_x >= menu_x && win.mouse_x <= menu_x + menu_w
+						&& win.mouse_y >= item_y && win.mouse_y < item_y + 26.0 && !item.disabled
 
 					if is_item_hover {
-						win.gg_ctx.draw_rounded_rect_filled(menu_x + 4.0, item_y, menu_w - 8.0, 24.0, 4.0, popup_hover)
+						win.gg_ctx.draw_rounded_rect_filled(menu_x + 4.0, item_y, menu_w - 8.0,
+							24.0, 4.0, popup_hover)
 					}
 
 					item_fg := if item.disabled {
@@ -3466,23 +4673,27 @@ fn (mut win SimpleWindow) render_menu_bar() {
 						fg
 					}
 
-					item_title := if item.icon.len > 0 { '${item.icon} ${item.title}' } else { item.title }
+					item_title := if item.icon.len > 0 {
+						'${item.icon} ${item.title}'
+					} else {
+						item.title
+					}
 					win.gg_ctx.draw_text2(
-						x: int(menu_x + 12.0)
-						y: int(item_y + 5.0)
-						text: item_title
+						x:     int(menu_x + 12.0)
+						y:     int(item_y + 5.0)
+						text:  item_title
 						color: item_fg
-						size: 13
+						size:  13
 					)
 
 					if item.shortcut.len > 0 {
 						sc_color := if is_item_hover { win.theme.button_text() } else { popup_muted }
 						win.gg_ctx.draw_text2(
-							x: int(menu_x + menu_w - 65.0)
-							y: int(item_y + 5.0)
-							text: item.shortcut
+							x:     int(menu_x + menu_w - 65.0)
+							y:     int(item_y + 5.0)
+							text:  item.shortcut
 							color: sc_color
-							size: 11
+							size:  11
 						)
 					}
 
@@ -3562,40 +4773,51 @@ fn (mut win SimpleWindow) render_modal() {
 	win.gg_ctx.draw_rounded_rect_empty(layout.bx, layout.by, layout.bw, layout.bh, 14.0, accent)
 
 	// Top accent strip
-	win.gg_ctx.draw_rounded_rect_filled(layout.bx + 20.0, layout.by, layout.bw - 40.0, 3.0, 1.5, accent)
+	win.gg_ctx.draw_rounded_rect_filled(layout.bx + 20.0, layout.by, layout.bw - 40.0, 3.0, 1.5,
+		accent)
 
 	// Close 'X' Button in Top-Right
 	is_close_hov := win.mouse_x >= layout.close_x && win.mouse_x <= layout.close_x + layout.close_sz
 		&& win.mouse_y >= layout.close_y && win.mouse_y <= layout.close_y + layout.close_sz
 	if is_close_hov {
-		win.gg_ctx.draw_rounded_rect_filled(layout.close_x - 3.0, layout.close_y - 3.0, layout.close_sz + 6.0, layout.close_sz + 6.0, 4.0, if win.theme.is_dark { gg.rgb(45, 48, 62) } else { gg.rgb(235, 238, 245) })
+		win.gg_ctx.draw_rounded_rect_filled(layout.close_x - 3.0, layout.close_y - 3.0,
+
+			layout.close_sz + 6.0, layout.close_sz + 6.0, 4.0, if win.theme.is_dark {
+			gg.rgb(45, 48, 62)
+		} else {
+			gg.rgb(235, 238, 245)
+		})
 	}
 	close_c := if is_close_hov { fg } else { muted_fg }
 	win.gg_ctx.draw_text2(
-		x: int(layout.close_x + 3)
-		y: int(layout.close_y)
-		text: 'x'
+		x:     int(layout.close_x + 3)
+		y:     int(layout.close_y)
+		text:  'x'
 		color: close_c
-		size: 14
-		bold: true
+		size:  14
+		bold:  true
 	)
 
 	// Left Image Icon (if present)
 	if layout.has_image {
-		win.gg_ctx.draw_rounded_rect_filled(layout.img_x - 3.0, layout.img_y - 3.0, layout.img_sz + 6.0, layout.img_sz + 6.0, 12.0, gg.rgba(accent.r, accent.g, accent.b, 40))
-		win.draw_image_fit(win.modal_image_path, layout.img_x, layout.img_y, layout.img_sz, layout.img_sz, '')
+		win.gg_ctx.draw_rounded_rect_filled(layout.img_x - 3.0, layout.img_y - 3.0, layout.img_sz +
+			6.0, layout.img_sz + 6.0, 12.0, gg.rgba(accent.r, accent.g, accent.b, 40))
+		win.draw_image_fit(win.modal_image_path, layout.img_x, layout.img_y, layout.img_sz,
+			layout.img_sz, '')
 	}
 
 	// Title & Divider
 	win.gg_ctx.draw_text2(
-		x: int(layout.content_x)
-		y: int(layout.by + 16)
-		text: clean_text(win.modal_title)
+		x:     int(layout.content_x)
+		y:     int(layout.by + 16)
+		text:  clean_text(win.modal_title)
 		color: fg
-		size: 16
-		bold: true
+		size:  16
+		bold:  true
 	)
-	win.gg_ctx.draw_line(layout.content_x, layout.by + 42, layout.bx + layout.bw - 20.0, layout.by + 42, border_c)
+	win.gg_ctx.draw_line(layout.content_x, layout.by + 42, layout.bx + layout.bw - 20.0,
+
+		layout.by + 42, border_c)
 
 	// Message lines
 	lines := wrap_text_to_width(win, win.modal_message, layout.content_w)
@@ -3608,39 +4830,43 @@ fn (mut win SimpleWindow) render_modal() {
 	// Optional Detail text callout
 	if win.modal_detail.len > 0 {
 		chip_bg := if win.theme.is_dark { gg.rgb(32, 35, 48) } else { gg.rgb(238, 242, 248) }
-		win.gg_ctx.draw_rounded_rect_filled(layout.content_x, layout.detail_y, layout.content_w, 24.0, 4.0, chip_bg)
-		win.gg_ctx.draw_rounded_rect_empty(layout.content_x, layout.detail_y, layout.content_w, 24.0, 4.0, border_c)
+		win.gg_ctx.draw_rounded_rect_filled(layout.content_x, layout.detail_y, layout.content_w,
+			24.0, 4.0, chip_bg)
+		win.gg_ctx.draw_rounded_rect_empty(layout.content_x, layout.detail_y, layout.content_w,
+			24.0, 4.0, border_c)
 		win.gg_ctx.draw_text2(
-			x: int(layout.content_x + 8)
-			y: int(layout.detail_y + 5)
-			text: clean_text(win.modal_detail)
+			x:     int(layout.content_x + 8)
+			y:     int(layout.detail_y + 5)
+			text:  clean_text(win.modal_detail)
 			color: muted_fg
-			size: 11
-			mono: true
+			size:  11
+			mono:  true
 		)
 	}
 
 	// Optional Input Mode Text Box
 	if win.modal_input_mode {
 		input_bg := if win.theme.is_dark { gg.rgb(18, 20, 28) } else { gg.rgb(248, 250, 252) }
-		win.gg_ctx.draw_rounded_rect_filled(layout.content_x, layout.input_y, layout.input_w, layout.input_h, 6.0, input_bg)
-		win.gg_ctx.draw_rounded_rect_empty(layout.content_x, layout.input_y, layout.input_w, layout.input_h, 6.0, accent)
+		win.gg_ctx.draw_rounded_rect_filled(layout.content_x, layout.input_y, layout.input_w,
+			layout.input_h, 6.0, input_bg)
+		win.gg_ctx.draw_rounded_rect_empty(layout.content_x, layout.input_y, layout.input_w,
+			layout.input_h, 6.0, accent)
 
 		if win.modal_input_val.len > 0 {
 			win.gg_ctx.draw_text2(
-				x: int(layout.content_x + 10)
-				y: int(layout.input_y + (layout.input_h - 14) / 2.0)
-				text: win.modal_input_val
+				x:     int(layout.content_x + 10)
+				y:     int(layout.input_y + (layout.input_h - 14) / 2.0)
+				text:  win.modal_input_val
 				color: fg
-				size: 14
+				size:  14
 			)
 		} else if win.modal_input_holder.len > 0 {
 			win.gg_ctx.draw_text2(
-				x: int(layout.content_x + 10)
-				y: int(layout.input_y + (layout.input_h - 14) / 2.0)
-				text: win.modal_input_holder
+				x:     int(layout.content_x + 10)
+				y:     int(layout.input_y + (layout.input_h - 14) / 2.0)
+				text:  win.modal_input_holder
 				color: muted_fg
-				size: 14
+				size:  14
 			)
 		}
 
@@ -3654,91 +4880,116 @@ fn (mut win SimpleWindow) render_modal() {
 			}
 			caret_offset := measure_text_width(win, sub)
 			cursor_x := layout.content_x + 10.0 + caret_offset
-			win.gg_ctx.draw_line(cursor_x, layout.input_y + 6.0, cursor_x, layout.input_y + layout.input_h - 6.0, accent)
+			win.gg_ctx.draw_line(cursor_x, layout.input_y + 6.0, cursor_x, layout.input_y +
+				layout.input_h - 6.0, accent)
 		}
 	}
 
 	// Optional Checkbox
 	if win.modal_checkbox_txt.len > 0 {
-		chk_bg := if win.modal_checkbox_val { accent } else { if win.theme.is_dark { gg.rgb(35, 38, 50) } else { gg.rgb(230, 234, 240) } }
-		win.gg_ctx.draw_rounded_rect_filled(layout.content_x, layout.check_y, 16.0, 16.0, 4.0, chk_bg)
-		win.gg_ctx.draw_rounded_rect_empty(layout.content_x, layout.check_y, 16.0, 16.0, 4.0, if win.modal_checkbox_val { accent } else { border_c })
+		chk_bg := if win.modal_checkbox_val {
+			accent
+		} else {
+			if win.theme.is_dark { gg.rgb(35, 38, 50) } else { gg.rgb(230, 234, 240) }
+		}
+		win.gg_ctx.draw_rounded_rect_filled(layout.content_x, layout.check_y, 16.0, 16.0, 4.0,
+			chk_bg)
+		win.gg_ctx.draw_rounded_rect_empty(layout.content_x, layout.check_y, 16.0, 16.0, 4.0, if win.modal_checkbox_val {
+			accent
+		} else {
+			border_c
+		})
 		if win.modal_checkbox_val {
 			win.gg_ctx.draw_text2(
-				x: int(layout.content_x + 3)
-				y: int(layout.check_y + 1)
-				text: 'v'
+				x:     int(layout.content_x + 3)
+				y:     int(layout.check_y + 1)
+				text:  'v'
 				color: gg.rgb(255, 255, 255)
-				size: 11
-				bold: true
+				size:  11
+				bold:  true
 			)
 		}
 		win.gg_ctx.draw_text2(
-			x: int(layout.content_x + 24)
-			y: int(layout.check_y + 1)
-			text: clean_text(win.modal_checkbox_txt)
+			x:     int(layout.content_x + 24)
+			y:     int(layout.check_y + 1)
+			text:  clean_text(win.modal_checkbox_txt)
 			color: fg
-			size: 12
+			size:  12
 		)
 	}
 
 	// Neutral Button (if present)
 	if win.modal_neutral_txt.len > 0 {
-		is_neu_hov := win.mouse_x >= layout.neutral_x && win.mouse_x <= layout.neutral_x + layout.neutral_w
-			&& win.mouse_y >= layout.btn_y && win.mouse_y <= layout.btn_y + layout.btn_h
-		neu_bg := if is_neu_hov { if win.theme.is_dark { gg.rgb(45, 48, 62) } else { gg.rgb(225, 230, 238) } } else { if win.theme.is_dark { gg.rgb(32, 35, 46) } else { gg.rgb(240, 243, 248) } }
-		win.gg_ctx.draw_rounded_rect_filled(layout.neutral_x, layout.btn_y, layout.neutral_w, layout.btn_h, 6.0, neu_bg)
-		win.gg_ctx.draw_rounded_rect_empty(layout.neutral_x, layout.btn_y, layout.neutral_w, layout.btn_h, 6.0, border_c)
+		is_neu_hov := win.mouse_x >= layout.neutral_x
+			&& win.mouse_x <= layout.neutral_x + layout.neutral_w && win.mouse_y >= layout.btn_y
+			&& win.mouse_y <= layout.btn_y + layout.btn_h
+		neu_bg := if is_neu_hov {
+			if win.theme.is_dark { gg.rgb(45, 48, 62) } else { gg.rgb(225, 230, 238) }
+		} else {
+			if win.theme.is_dark { gg.rgb(32, 35, 46) } else { gg.rgb(240, 243, 248) }
+		}
+		win.gg_ctx.draw_rounded_rect_filled(layout.neutral_x, layout.btn_y, layout.neutral_w,
+			layout.btn_h, 6.0, neu_bg)
+		win.gg_ctx.draw_rounded_rect_empty(layout.neutral_x, layout.btn_y, layout.neutral_w,
+			layout.btn_h, 6.0, border_c)
 		win.gg_ctx.draw_text2(
-			x: int(layout.neutral_x + (layout.neutral_w - f32(win.modal_neutral_txt.len * 7)) / 2.0)
-			y: int(layout.btn_y + 9)
-			text: clean_text(win.modal_neutral_txt)
+			x:     int(layout.neutral_x +
+				(layout.neutral_w - f32(win.modal_neutral_txt.len * 7)) / 2.0)
+			y:     int(layout.btn_y + 9)
+			text:  clean_text(win.modal_neutral_txt)
 			color: fg
-			size: 13
+			size:  13
 		)
 	}
 
 	// Cancel Button (if present)
 	if win.modal_cancel_txt.len > 0 {
-		is_can_hov := win.mouse_x >= layout.cancel_x && win.mouse_x <= layout.cancel_x + layout.cancel_w
-			&& win.mouse_y >= layout.btn_y && win.mouse_y <= layout.btn_y + layout.btn_h
-		can_bg := if is_can_hov { if win.theme.is_dark { gg.rgb(48, 52, 68) } else { gg.rgb(220, 225, 235) } } else { if win.theme.is_dark { gg.rgb(35, 38, 50) } else { gg.rgb(235, 238, 245) } }
-		win.gg_ctx.draw_rounded_rect_filled(layout.cancel_x, layout.btn_y, layout.cancel_w, layout.btn_h, 6.0, can_bg)
-		win.gg_ctx.draw_rounded_rect_empty(layout.cancel_x, layout.btn_y, layout.cancel_w, layout.btn_h, 6.0, border_c)
+		is_can_hov := win.mouse_x >= layout.cancel_x
+			&& win.mouse_x <= layout.cancel_x + layout.cancel_w && win.mouse_y >= layout.btn_y
+			&& win.mouse_y <= layout.btn_y + layout.btn_h
+		can_bg := if is_can_hov {
+			if win.theme.is_dark { gg.rgb(48, 52, 68) } else { gg.rgb(220, 225, 235) }
+		} else {
+			if win.theme.is_dark { gg.rgb(35, 38, 50) } else { gg.rgb(235, 238, 245) }
+		}
+		win.gg_ctx.draw_rounded_rect_filled(layout.cancel_x, layout.btn_y, layout.cancel_w,
+			layout.btn_h, 6.0, can_bg)
+		win.gg_ctx.draw_rounded_rect_empty(layout.cancel_x, layout.btn_y, layout.cancel_w,
+			layout.btn_h, 6.0, border_c)
 		win.gg_ctx.draw_text2(
-			x: int(layout.cancel_x + (layout.cancel_w - f32(win.modal_cancel_txt.len * 7)) / 2.0)
-			y: int(layout.btn_y + 9)
-			text: clean_text(win.modal_cancel_txt)
+			x:     int(layout.cancel_x + (layout.cancel_w - f32(win.modal_cancel_txt.len * 7)) / 2.0)
+			y:     int(layout.btn_y + 9)
+			text:  clean_text(win.modal_cancel_txt)
 			color: fg
-			size: 13
+			size:  13
 		)
 	}
 
 	// Confirm Button
-	is_cnf_hov := win.mouse_x >= layout.confirm_x && win.mouse_x <= layout.confirm_x + layout.confirm_w
-		&& win.mouse_y >= layout.btn_y && win.mouse_y <= layout.btn_y + layout.btn_h
+	is_cnf_hov := win.mouse_x >= layout.confirm_x
+		&& win.mouse_x <= layout.confirm_x + layout.confirm_w && win.mouse_y >= layout.btn_y
+		&& win.mouse_y <= layout.btn_y + layout.btn_h
 	confirm_bg := if win.modal_is_destructive {
 		if is_cnf_hov { gg.rgb(255, 75, 75) } else { gg.rgb(225, 45, 45) }
 	} else {
 		if is_cnf_hov {
-			gg.rgb(
-				u8(math.min(255, int(accent.r) + 25)),
-				u8(math.min(255, int(accent.g) + 25)),
-				u8(math.min(255, int(accent.b) + 25)),
-			)
+			gg.rgb(u8(math.min(255, int(accent.r) + 25)), u8(math.min(255, int(accent.g) + 25)), u8(math.min(255,
+
+				int(accent.b) + 25)))
 		} else {
 			accent
 		}
 	}
-	win.gg_ctx.draw_rounded_rect_filled(layout.confirm_x, layout.btn_y, layout.confirm_w, layout.btn_h, 6.0, confirm_bg)
+	win.gg_ctx.draw_rounded_rect_filled(layout.confirm_x, layout.btn_y, layout.confirm_w,
+		layout.btn_h, 6.0, confirm_bg)
 	confirm_txt := if win.modal_confirm_txt.len > 0 { win.modal_confirm_txt } else { 'OK' }
 	win.gg_ctx.draw_text2(
-		x: int(layout.confirm_x + (layout.confirm_w - f32(confirm_txt.len * 7)) / 2.0)
-		y: int(layout.btn_y + 9)
-		text: clean_text(confirm_txt)
+		x:     int(layout.confirm_x + (layout.confirm_w - f32(confirm_txt.len * 7)) / 2.0)
+		y:     int(layout.btn_y + 9)
+		text:  clean_text(confirm_txt)
 		color: gg.rgb(255, 255, 255)
-		size: 13
-		bold: true
+		size:  13
+		bold:  true
 	)
 }
 
@@ -3758,11 +5009,11 @@ fn (mut win SimpleWindow) render_tooltip() {
 				win.gg_ctx.draw_rounded_rect_filled(tx, ty, tip_w, tip_h, 6.0, tip_bg)
 				win.gg_ctx.draw_rounded_rect_empty(tx, ty, tip_w, tip_h, 6.0, border_c)
 				win.gg_ctx.draw_text2(
-					x: int(tx + 10)
-					y: int(ty + 5)
-					text: ctrl.tooltip
+					x:     int(tx + 10)
+					y:     int(ty + 5)
+					text:  ctrl.tooltip
 					color: gg.rgb(255, 255, 255)
-					size: 12
+					size:  12
 				)
 			}
 			break
@@ -3783,7 +5034,8 @@ fn draw_vector_star(gg_ctx &gg.Context, cx f32, cy f32, outer_r f32, inner_r f32
 	if is_filled {
 		for i in 0 .. 10 {
 			next_i := (i + 1) % 10
-			gg_ctx.draw_triangle_filled(cx, cy, pts_x[i], pts_y[i], pts_x[next_i], pts_y[next_i], fill_c)
+			gg_ctx.draw_triangle_filled(cx, cy, pts_x[i], pts_y[i], pts_x[next_i], pts_y[next_i],
+				fill_c)
 		}
 	}
 
@@ -3872,7 +5124,8 @@ fn clean_text(s string) string {
 	mut res := []rune{cap: runes.len}
 	for r in runes {
 		u := u32(r)
-		if (u >= 0x1F000 && u <= 0x1FAFF) || (u >= 0x2600 && u <= 0x27BF) || (u >= 0xFE00 && u <= 0xFE0F) {
+		if (u >= 0x1F000 && u <= 0x1FAFF) || (u >= 0x2600 && u <= 0x27BF)
+			|| (u >= 0xFE00 && u <= 0xFE0F) {
 			continue
 		}
 		if r == `★` || r == `☆` || r == `⭐` {
@@ -3989,7 +5242,6 @@ fn (mut win SimpleWindow) draw_image_fit(file_path string, x f32, y f32, w f32, 
 		}
 	}
 
-
 	// Fallback vector placeholder card if file is missing or loading
 	surface := win.theme.surface()
 	border_c := win.theme.border()
@@ -4002,8 +5254,10 @@ fn (mut win SimpleWindow) draw_image_fit(file_path string, x f32, y f32, w f32, 
 	if w >= 32.0 && h >= 32.0 {
 		win.gg_ctx.draw_rounded_rect_empty(cx - 14.0, cy - 10.0, 28.0, 20.0, 3.0, muted_fg)
 		win.gg_ctx.draw_circle_filled(cx - 6.0, cy - 4.0, 3.0, muted_fg)
-		win.gg_ctx.draw_triangle_filled(cx - 10.0, cy + 8.0, cx - 2.0, cy, cx + 4.0, cy + 8.0, muted_fg)
-		win.gg_ctx.draw_triangle_filled(cx + 1.0, cy + 8.0, cx + 6.0, cy + 3.0, cx + 11.0, cy + 8.0, muted_fg)
+		win.gg_ctx.draw_triangle_filled(cx - 10.0, cy + 8.0, cx - 2.0, cy, cx + 4.0, cy + 8.0,
+			muted_fg)
+		win.gg_ctx.draw_triangle_filled(cx + 1.0, cy + 8.0, cx + 6.0, cy + 3.0, cx + 11.0,
+			cy + 8.0, muted_fg)
 	}
 	if fallback_label.len > 0 && h >= 50.0 {
 		win.gg_ctx.draw_text2(
@@ -4033,6 +5287,7 @@ fn draw_elevation_shadow(gg_ctx &gg.Context, x f32, y f32, w f32, h f32, radius 
 			a: alpha
 		}
 		gg_ctx.draw_rounded_rect_filled(x - spread, y + offset, w + spread * 2.0, h + spread * 2.0,
+
 			radius + spread, shadow_color)
 	}
 }
@@ -4048,8 +5303,7 @@ fn draw_focus_ring(gg_ctx &gg.Context, x f32, y f32, w f32, h f32, radius f32, a
 		b: accent.b
 		a: 160
 	}
-	gg_ctx.draw_rounded_rect_empty(x - 2.0, y - 2.0, w + 4.0, h + 4.0, radius + 2.0,
-		ring_color)
+	gg_ctx.draw_rounded_rect_empty(x - 2.0, y - 2.0, w + 4.0, h + 4.0, radius + 2.0, ring_color)
 }
 
 // draw_vector_icon_glyph draws crisp procedural vector glyphs without image assets.
@@ -4067,8 +5321,7 @@ fn draw_vector_icon_glyph(gg_ctx &gg.Context, glyph string, x f32, y f32, sz f32
 			ccx := cx - r * 0.2
 			ccy := cy - r * 0.2
 			gg_ctx.draw_circle_empty(ccx, ccy, cr, color)
-			gg_ctx.draw_line(ccx + cr * 0.7, ccy + cr * 0.7, cx + r * 0.85, cy + r * 0.85,
-				color)
+			gg_ctx.draw_line(ccx + cr * 0.7, ccy + cr * 0.7, cx + r * 0.85, cy + r * 0.85, color)
 		}
 		'close', 'x' {
 			pad := sz * 0.25
@@ -4077,8 +5330,7 @@ fn draw_vector_icon_glyph(gg_ctx &gg.Context, glyph string, x f32, y f32, sz f32
 		}
 		'check' {
 			gg_ctx.draw_line(x + sz * 0.2, cy, cx - sz * 0.1, y + sz * 0.75, color)
-			gg_ctx.draw_line(cx - sz * 0.1, y + sz * 0.75, x + sz * 0.8, y + sz * 0.25,
-				color)
+			gg_ctx.draw_line(cx - sz * 0.1, y + sz * 0.75, x + sz * 0.8, y + sz * 0.25, color)
 		}
 		'gear', 'settings' {
 			gg_ctx.draw_circle_empty(cx, cy, r * 0.55, color)
@@ -4095,17 +5347,14 @@ fn draw_vector_icon_glyph(gg_ctx &gg.Context, glyph string, x f32, y f32, sz f32
 		'copy' {
 			w_box := sz * 0.55
 			h_box := sz * 0.6
-			gg_ctx.draw_rounded_rect_empty(x + sz * 0.1, y + sz * 0.1, w_box, h_box, 2.0,
-				color)
-			gg_ctx.draw_rounded_rect_filled(x + sz * 0.35, y + sz * 0.3, w_box, h_box,
-				2.0, gg.Color{
+			gg_ctx.draw_rounded_rect_empty(x + sz * 0.1, y + sz * 0.1, w_box, h_box, 2.0, color)
+			gg_ctx.draw_rounded_rect_filled(x + sz * 0.35, y + sz * 0.3, w_box, h_box, 2.0, gg.Color{
 				r: color.r
 				g: color.g
 				b: color.b
 				a: 60
 			})
-			gg_ctx.draw_rounded_rect_empty(x + sz * 0.35, y + sz * 0.3, w_box, h_box,
-				2.0, color)
+			gg_ctx.draw_rounded_rect_empty(x + sz * 0.35, y + sz * 0.3, w_box, h_box, 2.0, color)
 		}
 		'chevron_down', 'down' {
 			pad := sz * 0.3
@@ -4128,10 +5377,8 @@ fn draw_vector_icon_glyph(gg_ctx &gg.Context, glyph string, x f32, y f32, sz f32
 			gg_ctx.draw_line(cx - sz * 0.1, cy, cx + sz * 0.2, y + sz - pad, color)
 		}
 		'trash', 'delete' {
-			gg_ctx.draw_line(x + sz * 0.2, y + sz * 0.25, x + sz * 0.8, y + sz * 0.25,
-				color)
-			gg_ctx.draw_rect_empty(x + sz * 0.28, y + sz * 0.25, sz * 0.44, sz * 0.58,
-				color)
+			gg_ctx.draw_line(x + sz * 0.2, y + sz * 0.25, x + sz * 0.8, y + sz * 0.25, color)
+			gg_ctx.draw_rect_empty(x + sz * 0.28, y + sz * 0.25, sz * 0.44, sz * 0.58, color)
 			gg_ctx.draw_line(cx, y + sz * 0.35, cx, y + sz * 0.7, color)
 		}
 		'folder' {
@@ -4140,6 +5387,7 @@ fn draw_vector_icon_glyph(gg_ctx &gg.Context, glyph string, x f32, y f32, sz f32
 		'refresh' {
 			gg_ctx.draw_circle_empty(cx, cy, r * 0.65, color)
 			gg_ctx.draw_triangle_filled(cx + r * 0.5, cy - r * 0.7, cx + r * 0.9, cy - r * 0.2,
+
 				cx + r * 0.2, cy - r * 0.2, color)
 		}
 		'arrow_right' {
@@ -4159,8 +5407,8 @@ fn draw_vector_icon_glyph(gg_ctx &gg.Context, glyph string, x f32, y f32, sz f32
 		'heart' {
 			gg_ctx.draw_circle_filled(cx - r * 0.3, cy - r * 0.2, r * 0.35, color)
 			gg_ctx.draw_circle_filled(cx + r * 0.3, cy - r * 0.2, r * 0.35, color)
-			gg_ctx.draw_triangle_filled(cx - r * 0.65, cy - r * 0.1, cx + r * 0.65,
-				cy - r * 0.1, cx, cy + r * 0.8, color)
+			gg_ctx.draw_triangle_filled(cx - r * 0.65, cy - r * 0.1, cx + r * 0.65, cy - r * 0.1,
+				cx, cy + r * 0.8, color)
 		}
 		'eye' {
 			gg_ctx.draw_circle_empty(cx, cy, r * 0.65, color)
@@ -4169,12 +5417,11 @@ fn draw_vector_icon_glyph(gg_ctx &gg.Context, glyph string, x f32, y f32, sz f32
 		'eye_off' {
 			gg_ctx.draw_circle_empty(cx, cy, r * 0.65, color)
 			gg_ctx.draw_circle_filled(cx, cy, r * 0.3, color)
-			gg_ctx.draw_line(x + sz * 0.15, y + sz * 0.15, x + sz * 0.85, y + sz * 0.85,
-				color)
+			gg_ctx.draw_line(x + sz * 0.15, y + sz * 0.15, x + sz * 0.85, y + sz * 0.85, color)
 		}
 		'lock' {
-			gg_ctx.draw_rounded_rect_filled(x + sz * 0.2, cy - sz * 0.05, sz * 0.6,
-				sz * 0.5, 3.0, color)
+			gg_ctx.draw_rounded_rect_filled(x + sz * 0.2, cy - sz * 0.05, sz * 0.6, sz * 0.5, 3.0,
+				color)
 			gg_ctx.draw_circle_empty(cx, cy - sz * 0.15, sz * 0.22, color)
 		}
 		'cloud' {
@@ -4183,29 +5430,27 @@ fn draw_vector_icon_glyph(gg_ctx &gg.Context, glyph string, x f32, y f32, sz f32
 			gg_ctx.draw_circle_filled(cx, cy - r * 0.2, r * 0.45, color)
 		}
 		'database' {
-			gg_ctx.draw_rounded_rect_empty(x + sz * 0.2, y + sz * 0.15, sz * 0.6, sz * 0.22,
-				3.0, color)
-			gg_ctx.draw_rounded_rect_empty(x + sz * 0.2, y + sz * 0.42, sz * 0.6, sz * 0.22,
-				3.0, color)
-			gg_ctx.draw_rounded_rect_empty(x + sz * 0.2, y + sz * 0.69, sz * 0.6, sz * 0.22,
-				3.0, color)
+			gg_ctx.draw_rounded_rect_empty(x + sz * 0.2, y + sz * 0.15, sz * 0.6, sz * 0.22, 3.0,
+				color)
+			gg_ctx.draw_rounded_rect_empty(x + sz * 0.2, y + sz * 0.42, sz * 0.6, sz * 0.22, 3.0,
+				color)
+			gg_ctx.draw_rounded_rect_empty(x + sz * 0.2, y + sz * 0.69, sz * 0.6, sz * 0.22, 3.0,
+				color)
 		}
 		'bell' {
 			gg_ctx.draw_circle_filled(cx, cy - r * 0.1, r * 0.55, color)
-			gg_ctx.draw_rect_filled(x + sz * 0.2, cy + r * 0.2, sz * 0.6, sz * 0.15,
-				color)
+			gg_ctx.draw_rect_filled(x + sz * 0.2, cy + r * 0.2, sz * 0.6, sz * 0.15, color)
 			gg_ctx.draw_circle_filled(cx, cy + r * 0.55, r * 0.18, color)
 		}
 		'home' {
-			gg_ctx.draw_triangle_filled(cx, y + sz * 0.15, x + sz * 0.15, cy + sz * 0.1,
-				x + sz * 0.85, cy + sz * 0.1, color)
-			gg_ctx.draw_rect_filled(x + sz * 0.25, cy + sz * 0.05, sz * 0.5, sz * 0.45,
-				color)
+			gg_ctx.draw_triangle_filled(cx, y + sz * 0.15, x + sz * 0.15, cy + sz * 0.1, x +
+				sz * 0.85, cy + sz * 0.1, color)
+			gg_ctx.draw_rect_filled(x + sz * 0.25, cy + sz * 0.05, sz * 0.5, sz * 0.45, color)
 		}
 		'user' {
 			gg_ctx.draw_circle_filled(cx, cy - r * 0.3, r * 0.35, color)
-			gg_ctx.draw_rounded_rect_filled(x + sz * 0.2, cy + r * 0.15, sz * 0.6, sz * 0.35,
-				4.0, color)
+			gg_ctx.draw_rounded_rect_filled(x + sz * 0.2, cy + r * 0.15, sz * 0.6, sz * 0.35, 4.0,
+				color)
 		}
 		'plus', 'add' {
 			gg_ctx.draw_line(cx, y + sz * 0.2, cx, y + sz * 0.8, color)
@@ -4263,8 +5508,11 @@ fn (mut win SimpleWindow) render_drawer() {
 
 	draw_elevation_shadow(win.gg_ctx, dr_x, dr_y, dr_w, dr_h, 0.0, 4, win.theme.is_dark)
 	win.gg_ctx.draw_rect_filled(dr_x, dr_y, dr_w, dr_h, surface)
-	win.gg_ctx.draw_line(if win.drawer_side == 'left' { dr_x + dr_w } else { dr_x },
-		0, if win.drawer_side == 'left' { dr_x + dr_w } else { dr_x }, dr_h, border_c)
+	win.gg_ctx.draw_line(if win.drawer_side == 'left' { dr_x + dr_w } else { dr_x }, 0, if win.drawer_side == 'left' {
+		dr_x + dr_w
+	} else {
+		dr_x
+	}, dr_h, border_c)
 
 	// Drawer Header
 	hdr_h := f32(52.0)
@@ -4285,7 +5533,11 @@ fn (mut win SimpleWindow) render_drawer() {
 	if is_close_hov {
 		win.gg_ctx.draw_rounded_rect_filled(close_x - 4.0, close_y - 4.0, 24.0, 24.0, 4.0, hover_bg)
 	}
-	draw_vector_icon_glyph(win.gg_ctx, 'close', close_x, close_y, 16.0, if is_close_hov { accent } else { muted_fg })
+	draw_vector_icon_glyph(win.gg_ctx, 'close', close_x, close_y, 16.0, if is_close_hov {
+		accent
+	} else {
+		muted_fg
+	})
 	win.gg_ctx.draw_line(dr_x, hdr_h, dr_x + dr_w, hdr_h, border_c)
 
 	// Drawer Items Content
@@ -4323,9 +5575,16 @@ fn (mut win SimpleWindow) render_drawer() {
 
 		// Icon
 		icon_sz := f32(16.0)
-		icon_color := if item.is_active { accent } else if is_hov { fg } else { muted_fg }
+		icon_color := if item.is_active {
+			accent
+		} else if is_hov {
+			fg
+		} else {
+			muted_fg
+		}
 		if item.icon.len > 0 {
-			draw_vector_icon_glyph(win.gg_ctx, item.icon, item_pad_x + 12.0, item_y + (item_h - icon_sz) / 2.0, icon_sz, icon_color)
+			draw_vector_icon_glyph(win.gg_ctx, item.icon, item_pad_x + 12.0, item_y +
+				(item_h - icon_sz) / 2.0, icon_sz, icon_color)
 		}
 
 		// Title & Subtitle

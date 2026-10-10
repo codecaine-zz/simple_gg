@@ -75,7 +75,8 @@ fn test_vectors_and_geometry() {
 	assert c.x == 2 && c.y == 2
 	assert point_in_polygon(Vec2{1, 1}, square)
 	assert !point_in_polygon(Vec2{5, 1}, square)
-	cloud := [Vec2{0, 0}, Vec2{2, 2}, Vec2{4, 0}, Vec2{4, 4}, Vec2{0, 4}, Vec2{1, 3}, Vec2{2, 0}]
+	cloud := [Vec2{0, 0}, Vec2{2, 2}, Vec2{4, 0}, Vec2{4, 4},
+		Vec2{0, 4}, Vec2{1, 3}, Vec2{2, 0}]
 	hull := convex_hull(cloud)
 	assert hull.len == 4
 	assert polygon_area(hull) == 16

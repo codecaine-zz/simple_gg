@@ -28,7 +28,6 @@ fn main() {
 	mut wg := asyncutils.new_waitgroup()
 	wg.add(3)
 	for i in 1 .. 4 {
-
 		// Do work
 		spawn fn (id int, mut group asyncutils.WaitGroup) {
 			group.done()

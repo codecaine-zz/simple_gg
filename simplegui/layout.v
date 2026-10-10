@@ -30,10 +30,14 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 
 	win_w := f32(win.width)
 	win_h := f32(win.height)
-	pad := f32(win.padding)  // Edge padding around window canvas
-	sp := f32(win.spacing)   // Vertical gap spacing between controls
+	pad := f32(win.padding) // Edge padding around window canvas
+	sp := f32(win.spacing) // Vertical gap spacing between controls
 	content_w := win_w - pad * 2.0 // Available horizontal content width inside window edge padding
-	menubar_h := if win.menu_bar_visible && win.menu_categories.len > 0 { f32(28.0) } else { f32(0.0) }
+	menubar_h := if win.menu_bar_visible && win.menu_categories.len > 0 {
+		f32(28.0)
+	} else {
+		f32(0.0)
+	}
 	mut cur_y := pad + menubar_h // Vertical tracking cursor (starts below top window padding and menu bar)
 	mut i := 0
 
@@ -61,13 +65,26 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 				if row_indices.len > 0 {
 					for idx in row_indices {
 						if win.controls[idx].kind == 'heading' && win.controls[idx].w <= 200.0 {
-							hd_title := if win.controls[idx].text_value.len > 0 { win.controls[idx].text_value } else { win.controls[idx].title }
+							hd_title := if win.controls[idx].text_value.len > 0 {
+								win.controls[idx].text_value
+							} else {
+								win.controls[idx].title
+							}
 							win.controls[idx].w = f32(math.max(200.0, f32(hd_title.len * 14 + 32)))
 						} else if win.controls[idx].kind == 'label' && win.controls[idx].w == 200.0 {
-							lbl_title := if win.controls[idx].text_value.len > 0 { win.controls[idx].text_value } else { win.controls[idx].title }
+							lbl_title := if win.controls[idx].text_value.len > 0 {
+								win.controls[idx].text_value
+							} else {
+								win.controls[idx].title
+							}
 							win.controls[idx].w = f32(math.max(40.0, f32(lbl_title.len * 8 + 14)))
-						} else if win.controls[idx].kind in ['checkbox', 'toggle'] && win.controls[idx].w == 200.0 {
-							chk_title := if win.controls[idx].text_value.len > 0 { win.controls[idx].text_value } else { win.controls[idx].title }
+						} else if win.controls[idx].kind in ['checkbox', 'toggle']
+							&& win.controls[idx].w == 200.0 {
+							chk_title := if win.controls[idx].text_value.len > 0 {
+								win.controls[idx].text_value
+							} else {
+								win.controls[idx].title
+							}
 							win.controls[idx].w = f32(math.max(60.0, f32(chk_title.len * 8 + 36)))
 						}
 					}
@@ -83,7 +100,11 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 					}
 					gaps_w := (f32(row_indices.len) - 1.0) * sp
 					remaining_w := f32(math.max(10.0, content_w - fixed_w - gaps_w))
-					item_w := if auto_count > 0 { remaining_w / f32(auto_count) } else { remaining_w }
+					item_w := if auto_count > 0 {
+						remaining_w / f32(auto_count)
+					} else {
+						remaining_w
+					}
 					mut max_h := f32(0.0)
 
 					scale := if auto_count == 0 && (fixed_w + gaps_w) > content_w && fixed_w > 0 {
@@ -96,7 +117,8 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 					for idx in row_indices {
 						win.controls[idx].x = cur_x
 						win.controls[idx].y = cur_y
-						if win.controls[idx].expand_fill || win.controls[idx].w <= 0 || win.controls[idx].w >= content_w * 0.75 {
+						if win.controls[idx].expand_fill || win.controls[idx].w <= 0
+							|| win.controls[idx].w >= content_w * 0.75 {
 							win.controls[idx].w = item_w
 						} else if scale < 1.0 {
 							win.controls[idx].w = f32(math.max(20.0, win.controls[idx].w * scale))
@@ -111,7 +133,11 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 			}
 			'grid_start' {
 				cols := if win.controls[i].int_value > 0 { win.controls[i].int_value } else { 2 }
-				grid_sp := if win.controls[i].min_val > 0 { f32(win.controls[i].min_val) } else { sp }
+				grid_sp := if win.controls[i].min_val > 0 {
+					f32(win.controls[i].min_val)
+				} else {
+					sp
+				}
 
 				mut grid_indices := []int{}
 				i++
@@ -215,33 +241,58 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 								if row_indices.len > 0 {
 									inner_content_w := content_w - group_inner_pad * 2.0
 									for idx in row_indices {
-										if win.controls[idx].kind == 'heading' && win.controls[idx].w <= 200.0 {
-											hd_title := if win.controls[idx].text_value.len > 0 { win.controls[idx].text_value } else { win.controls[idx].title }
-											win.controls[idx].w = f32(math.max(200.0, f32(hd_title.len * 14 + 32)))
-										} else if win.controls[idx].kind == 'label' && win.controls[idx].w == 200.0 {
-											lbl_title := if win.controls[idx].text_value.len > 0 { win.controls[idx].text_value } else { win.controls[idx].title }
-											win.controls[idx].w = f32(math.max(40.0, f32(lbl_title.len * 8 + 14)))
-										} else if win.controls[idx].kind in ['checkbox', 'toggle'] && win.controls[idx].w == 200.0 {
-											chk_title := if win.controls[idx].text_value.len > 0 { win.controls[idx].text_value } else { win.controls[idx].title }
-											win.controls[idx].w = f32(math.max(60.0, f32(chk_title.len * 8 + 36)))
+										if win.controls[idx].kind == 'heading'
+											&& win.controls[idx].w <= 200.0 {
+											hd_title := if win.controls[idx].text_value.len > 0 {
+												win.controls[idx].text_value
+											} else {
+												win.controls[idx].title
+											}
+											win.controls[idx].w = f32(math.max(200.0, f32(
+												hd_title.len * 14 + 32)))
+										} else if win.controls[idx].kind == 'label'
+											&& win.controls[idx].w == 200.0 {
+											lbl_title := if win.controls[idx].text_value.len > 0 {
+												win.controls[idx].text_value
+											} else {
+												win.controls[idx].title
+											}
+											win.controls[idx].w = f32(math.max(40.0, f32(
+												lbl_title.len * 8 + 14)))
+										} else if win.controls[idx].kind in ['checkbox', 'toggle']
+											&& win.controls[idx].w == 200.0 {
+											chk_title := if win.controls[idx].text_value.len > 0 {
+												win.controls[idx].text_value
+											} else {
+												win.controls[idx].title
+											}
+											win.controls[idx].w = f32(math.max(60.0, f32(
+												chk_title.len * 8 + 36)))
 										}
 									}
 									mut fixed_w := f32(0.0)
 									mut auto_count := 0
 									for idx in row_indices {
 										r_w := win.controls[idx].w
-										if !win.controls[idx].expand_fill && r_w > 0 && r_w < inner_content_w * 0.75 {
+										if !win.controls[idx].expand_fill && r_w > 0
+											&& r_w < inner_content_w * 0.75 {
 											fixed_w += r_w
 										} else {
 											auto_count++
 										}
 									}
 									gaps_w := (f32(row_indices.len) - 1.0) * sp
-									remaining_w := f32(math.max(10.0, inner_content_w - fixed_w - gaps_w))
-									item_w := if auto_count > 0 { remaining_w / f32(auto_count) } else { remaining_w }
+									remaining_w := f32(math.max(10.0, inner_content_w - fixed_w -
+										gaps_w))
+									item_w := if auto_count > 0 {
+										remaining_w / f32(auto_count)
+									} else {
+										remaining_w
+									}
 									mut max_h := f32(0.0)
 
-									scale := if auto_count == 0 && (fixed_w + gaps_w) > inner_content_w && fixed_w > 0 {
+									scale := if auto_count == 0
+										&& (fixed_w + gaps_w) > inner_content_w && fixed_w > 0 {
 										f32(math.max(0.1, (inner_content_w - gaps_w) / fixed_w))
 									} else {
 										f32(1.0)
@@ -251,10 +302,12 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 									for idx in row_indices {
 										win.controls[idx].x = cur_x
 										win.controls[idx].y = inner_y
-										if win.controls[idx].expand_fill || win.controls[idx].w <= 0 || win.controls[idx].w >= inner_content_w * 0.75 {
+										if win.controls[idx].expand_fill || win.controls[idx].w <= 0
+											|| win.controls[idx].w >= inner_content_w * 0.75 {
 											win.controls[idx].w = item_w
 										} else if scale < 1.0 {
-											win.controls[idx].w = f32(math.max(20.0, win.controls[idx].w * scale))
+											win.controls[idx].w = f32(math.max(20.0,
+												win.controls[idx].w * scale))
 										}
 										if win.controls[idx].h > max_h {
 											max_h = win.controls[idx].h
@@ -265,8 +318,16 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 								}
 							}
 							'grid_start' {
-								cols := if win.controls[i].int_value > 0 { win.controls[i].int_value } else { 2 }
-								grid_sp := if win.controls[i].min_val > 0 { f32(win.controls[i].min_val) } else { sp }
+								cols := if win.controls[i].int_value > 0 {
+									win.controls[i].int_value
+								} else {
+									2
+								}
+								grid_sp := if win.controls[i].min_val > 0 {
+									f32(win.controls[i].min_val)
+								} else {
+									sp
+								}
 
 								mut grid_indices := []int{}
 								i++
@@ -289,7 +350,8 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 											inner_y += max_h_in_row + grid_sp
 											max_h_in_row = 0.0
 										}
-										win.controls[idx].x = pad + group_inner_pad + f32(col) * (col_w + grid_sp)
+										win.controls[idx].x = pad + group_inner_pad +
+											f32(col) * (col_w + grid_sp)
 										win.controls[idx].y = inner_y
 										win.controls[idx].w = col_w
 										if win.controls[idx].h > max_h_in_row {
@@ -300,13 +362,16 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 								}
 							}
 							else {
-								win.controls[i].x = pad + group_inner_pad + win.controls[i].margin_left
+								win.controls[i].x = pad + group_inner_pad +
+									win.controls[i].margin_left
 								win.controls[i].y = inner_y + win.controls[i].margin_top
-								avail_w := content_w - group_inner_pad * 2.0 - win.controls[i].margin_left - win.controls[i].margin_right
+								avail_w := content_w - group_inner_pad * 2.0 -
+									win.controls[i].margin_left - win.controls[i].margin_right
 								if win.controls[i].expand_fill || win.controls[i].w <= 0 {
 									win.controls[i].w = f32(math.max(10.0, avail_w))
 								}
-								inner_y += win.controls[i].margin_top + win.controls[i].h + win.controls[i].margin_bottom + sp
+								inner_y += win.controls[i].margin_top + win.controls[i].h +
+									win.controls[i].margin_bottom + sp
 							}
 						}
 					}
@@ -328,7 +393,8 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 
 				mut inner_idx := i + 1
 				mut in_active := false
-				for inner_idx < win.controls.len && win.controls[inner_idx].kind != 'tab_container_end' {
+				for inner_idx < win.controls.len
+					&& win.controls[inner_idx].kind != 'tab_container_end' {
 					if win.controls[inner_idx].kind == 'tab_page_start' {
 						in_active = (win.controls[inner_idx].int_value == active_tab)
 						win.controls[inner_idx].visible = false
@@ -342,7 +408,11 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 				}
 			}
 			'split_start' {
-				split_pct := if win.controls[i].int_value > 0 { f32(win.controls[i].int_value) / 100.0 } else { f32(0.5) }
+				split_pct := if win.controls[i].int_value > 0 {
+					f32(win.controls[i].int_value) / 100.0
+				} else {
+					f32(0.5)
+				}
 				left_w := (content_w - sp) * split_pct
 				right_w := (content_w - sp) * (1.0 - split_pct)
 
@@ -375,7 +445,11 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 				}
 			}
 			'flow_start' {
-				gap := if win.controls[i].int_value > 0 { f32(win.controls[i].int_value) } else { f32(8.0) }
+				gap := if win.controls[i].int_value > 0 {
+					f32(win.controls[i].int_value)
+				} else {
+					f32(8.0)
+				}
 				mut flow_indices := []int{}
 				i++
 				for i < win.controls.len && win.controls[i].kind != 'flow_end' {
@@ -391,7 +465,11 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 					for idx in flow_indices {
 						calc_w := f32(measure_text_width(win, win.controls[idx].title) + 48.0)
 						item_w := if calc_w > 80.0 { calc_w } else { f32(90.0) }
-						item_h := if win.controls[idx].h > 0 { win.controls[idx].h } else { f32(32.0) }
+						item_h := if win.controls[idx].h > 0 {
+							win.controls[idx].h
+						} else {
+							f32(32.0)
+						}
 						if line_x + item_w > pad + content_w && line_x > pad {
 							cur_y += line_max_h + gap
 							line_x = pad
@@ -410,8 +488,16 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 				}
 			}
 			'vstack_start' {
-				gap := if win.controls[i].int_value > 0 { f32(win.controls[i].int_value) } else { sp }
-				align := if win.controls[i].alignment.len > 0 { win.controls[i].alignment } else { 'left' }
+				gap := if win.controls[i].int_value > 0 {
+					f32(win.controls[i].int_value)
+				} else {
+					sp
+				}
+				align := if win.controls[i].alignment.len > 0 {
+					win.controls[i].alignment
+				} else {
+					'left'
+				}
 				mut v_indices := []int{}
 				i++
 				for i < win.controls.len && win.controls[i].kind != 'vstack_end' {
@@ -433,7 +519,11 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 				}
 			}
 			'hstack_start' {
-				gap := if win.controls[i].int_value > 0 { f32(win.controls[i].int_value) } else { sp }
+				gap := if win.controls[i].int_value > 0 {
+					f32(win.controls[i].int_value)
+				} else {
+					sp
+				}
 				mut h_indices := []int{}
 				i++
 				for i < win.controls.len && win.controls[i].kind != 'hstack_end' {
@@ -462,7 +552,8 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 					cur_y += max_h + sp
 				}
 			}
-			'row_end', 'grid_end', 'flex_end', 'group_end', 'tab_container_end', 'tab_page_start', 'tab_page_end', 'split_end', 'flow_end', 'vstack_end', 'hstack_end' {
+			'row_end', 'grid_end', 'flex_end', 'group_end', 'tab_container_end', 'tab_page_start',
+			'tab_page_end', 'split_end', 'flow_end', 'vstack_end', 'hstack_end' {
 				// End tags are processed in container blocks above, ignore loose end tags
 			}
 			'spacer' {
@@ -488,17 +579,20 @@ pub fn (mut win SimpleWindow) recalculate_layout() {
 				if win.controls[i].expand_fill || win.controls[i].w <= 0 {
 					win.controls[i].w = f32(math.max(10.0, avail_w))
 				} else if win.controls[i].alignment == 'center' {
-					win.controls[i].x = pad + win.controls[i].margin_left + (avail_w - win.controls[i].w) / 2.0
+					win.controls[i].x = pad + win.controls[i].margin_left +
+						(avail_w - win.controls[i].w) / 2.0
 				} else if win.controls[i].alignment == 'right' {
-					win.controls[i].x = pad + content_w - win.controls[i].margin_right - win.controls[i].w
+					win.controls[i].x = pad + content_w - win.controls[i].margin_right -
+						win.controls[i].w
 				}
 
-				cur_y += win.controls[i].margin_top + win.controls[i].h + win.controls[i].margin_bottom + sp
+				cur_y += win.controls[i].margin_top + win.controls[i].h +
+					win.controls[i].margin_bottom + sp
 			}
 		}
+
 		i++
 	}
 
 	_ = win_h
 }
-

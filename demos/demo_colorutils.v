@@ -33,12 +33,22 @@ fn main() {
 
 	// 3. WCAG Accessibility
 	println('\n3. WCAG Contrast & Accessibility:')
-	white := colorutils.RGB{ r: 255, g: 255, b: 255 }
-	black := colorutils.RGB{ r: 0, g: 0, b: 0 }
+	white := colorutils.RGB{
+		r: 255
+		g: 255
+		b: 255
+	}
+	black := colorutils.RGB{
+		r: 0
+		g: 0
+		b: 0
+	}
 	ratio_white := colorutils.contrast_ratio(c1, white)
 	ratio_black := colorutils.contrast_ratio(c1, black)
-	println('  Contrast against white: ${ratio_white:.2f}:1 (AA normal: ${colorutils.is_accessible(c1, white, 'AA')})')
-	println('  Contrast against black: ${ratio_black:.2f}:1 (AA normal: ${colorutils.is_accessible(c1, black, 'AA')})')
+	println('  Contrast against white: ${ratio_white:.2f}:1 (AA normal: ${colorutils.is_accessible(c1,
+		white, 'AA')})')
+	println('  Contrast against black: ${ratio_black:.2f}:1 (AA normal: ${colorutils.is_accessible(c1,
+		black, 'AA')})')
 
 	// 4. Truecolor Terminal Output
 	println('\n4. Truecolor ANSI Output:')

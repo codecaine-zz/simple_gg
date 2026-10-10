@@ -31,10 +31,18 @@ pub fn is_leap_year(year int) bool {
 pub fn days_in_month(year int, month int) int {
 	return match month {
 		2 {
-			if is_leap_year(year) { 29 } else { 28 }
+			if is_leap_year(year) {
+				29
+			} else {
+				28
+			}
 		}
-		4, 6, 9, 11 { 30 }
-		else { 31 }
+		4, 6, 9, 11 {
+			30
+		}
+		else {
+			31
+		}
 	}
 }
 
@@ -146,7 +154,11 @@ pub fn format_duration_long(d time.Duration, max_units int) string {
 	mut ns := if neg { -i64(d) } else { i64(d) }
 	if ns < i64(time.second) {
 		ms := ns / i64(time.millisecond)
-		return (if neg { '-' } else { '' }) + plural(ms, 'millisecond')
+		return (if neg {
+			'-'
+		} else {
+			''
+		}) + plural(ms, 'millisecond')
 	}
 	units := [i64(86400) * i64(time.second), i64(time.hour), i64(time.minute), i64(time.second)]
 	names := ['day', 'hour', 'minute', 'second']
@@ -159,7 +171,11 @@ pub fn format_duration_long(d time.Duration, max_units int) string {
 			parts << plural(v, names[i])
 		}
 	}
-	return (if neg { '-' } else { '' }) + parts.join(', ')
+	return (if neg {
+		'-'
+	} else {
+		''
+	}) + parts.join(', ')
 }
 
 fn plural(n i64, unit string) string {

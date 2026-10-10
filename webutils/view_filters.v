@@ -121,7 +121,9 @@ fn as_time(v json2.Any) ?time.Time {
 			v
 		}
 		string {
-			time.parse_rfc3339(v) or { time.parse(v) or { time.parse_iso8601(v) or { return none } } }
+			time.parse_rfc3339(v) or {
+				time.parse(v) or { time.parse_iso8601(v) or { return none } }
+			}
 		}
 		else {
 			secs := as_i64(v) or { return none }
@@ -179,19 +181,35 @@ fn call_builtin(name string, args []json2.Any) !json2.Any {
 		'first' {
 			return match a {
 				[]json2.Any {
-					if a.len > 0 { json2.Any(a[0]) } else { null }
+					if a.len > 0 {
+						json2.Any(a[0])
+					} else {
+						null
+					}
 				}
-				string { get_index(a, json2.Any(i64(0))) }
-				else { null }
+				string {
+					get_index(a, json2.Any(i64(0)))
+				}
+				else {
+					null
+				}
 			}
 		}
 		'last' {
 			return match a {
 				[]json2.Any {
-					if a.len > 0 { json2.Any(a[a.len - 1]) } else { null }
+					if a.len > 0 {
+						json2.Any(a[a.len - 1])
+					} else {
+						null
+					}
 				}
-				string { get_index(a, json2.Any(i64(-1))) }
-				else { null }
+				string {
+					get_index(a, json2.Any(i64(-1)))
+				}
+				else {
+					null
+				}
 			}
 		}
 		'reverse' {
@@ -283,7 +301,11 @@ fn call_builtin(name string, args []json2.Any) !json2.Any {
 		'abs' {
 			if is_intlike(a) {
 				v := as_i64(a) or { 0 }
-				return json2.Any(if v < 0 { -v } else { v })
+				return json2.Any(if v < 0 {
+					-v
+				} else {
+					v
+				})
 			}
 			return json2.Any(math.abs(as_num(a) or { 0.0 }))
 		}

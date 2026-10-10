@@ -22,10 +22,10 @@ struct ArchiveManifest {
 }
 
 struct ArchiveFile {
-	path      string
-	size      u64
-	checksum  string
-	content   string
+	path     string
+	size     u64
+	checksum string
+	content  string
 }
 
 fn main() {
@@ -115,21 +115,21 @@ fn run_backup(mut app simplecli.SimpleCli) {
 		b64_content := app.base64_encode(content)
 
 		archive_files << ArchiveFile{
-			path: f.replace(src_dir, '').trim_left('/')
-			size: meta.size_bytes
+			path:     f.replace(src_dir, '').trim_left('/')
+			size:     meta.size_bytes
 			checksum: sum
-			content: b64_content
+			content:  b64_content
 		}
 		total_bytes += meta.size_bytes
 		app.progress_bar(f64(i + 1), f64(file_paths.len), 'Archiving: ${os.file_name(f)}')
 	}
 
 	manifest := ArchiveManifest{
-		created_at: time.now().format_ss()
-		file_count: archive_files.len
+		created_at:  time.now().format_ss()
+		file_count:  archive_files.len
 		total_bytes: total_bytes
-		checksum: app.crypto_sha256('${archive_files.len}:${total_bytes}')
-		files: archive_files
+		checksum:    app.crypto_sha256('${archive_files.len}:${total_bytes}')
+		files:       archive_files
 	}
 
 	manifest_json := json2.encode(manifest)
@@ -143,16 +143,20 @@ fn run_backup(mut app simplecli.SimpleCli) {
 
 	app.write_file(dest_vault, encrypted)
 	vault_meta := app.get_file_metadata(dest_vault) or {
-		simplecli.FileMetadata{ size_bytes: 0, path: dest_vault, name: '' }
+		simplecli.FileMetadata{
+			size_bytes: 0
+			path:       dest_vault
+			name:       ''
+		}
 	}
 
 	app.step(4, 'Backup Complete')
 	app.print_kv({
-		'Destination Vault': dest_vault,
-		'Archived Files':    '${archive_files.len} files',
-		'Raw Payload Size':  '${f64(total_bytes) / 1024.0:.1f} KB',
-		'Encrypted Vault':   '${f64(vault_meta.size_bytes) / 1024.0:.1f} KB',
-		'Manifest Checksum': manifest.checksum,
+		'Destination Vault': dest_vault
+		'Archived Files':    '${archive_files.len} files'
+		'Raw Payload Size':  '${f64(total_bytes) / 1024.0:.1f} KB'
+		'Encrypted Vault':   '${f64(vault_meta.size_bytes) / 1024.0:.1f} KB'
+		'Manifest Checksum': manifest.checksum
 	})
 
 	app.success('Encrypted archive successfully created in ${app.elapsed_ms()} ms.')
@@ -236,7 +240,11 @@ fn run_verify(mut app simplecli.SimpleCli) {
 	for f in manifest.files {
 		raw := app.base64_decode(f.content)
 		current_sum := app.crypto_sha256(raw)
-		status := if current_sum == f.checksum { app.green('✓ VALID') } else { app.red('✗ CORRUPT') }
+		status := if current_sum == f.checksum {
+			app.green('✓ VALID')
+		} else {
+			app.red('✗ CORRUPT')
+		}
 		rows << [f.path, '${f.size} B', f.checksum[0..12] + '...', status]
 	}
 

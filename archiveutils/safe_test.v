@@ -93,7 +93,8 @@ fn test_zip_slip_blocked() {
 		os.rmdir_all(d) or {}
 	}
 	zp := os.join_path(d, 'evil.zip')
-	os.write_file_array(zp, raw_stored_zip([['ok.txt', 'fine'], ['../../escaped.txt', 'pwned']])) or { panic(err) }
+	os.write_file_array(zp, raw_stored_zip([['ok.txt', 'fine'],
+		['../../escaped.txt', 'pwned']])) or { panic(err) }
 	// The reader sees the hostile name verbatim.
 	names := list_entries(zp) or { panic(err) }.map(it.name)
 	assert '../../escaped.txt' in names

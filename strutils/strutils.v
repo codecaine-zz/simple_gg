@@ -176,7 +176,7 @@ pub fn pad_right(s string, width int, pad_char string) string {
 		return s
 	}
 	if (pad_char == ' ' || pad_char == '') && s.is_pure_ascii() {
-		return '${s:-(width)}'
+		return '${s:(-width)}'
 	}
 	needed := width - runes_len
 	fill := if pad_char.len > 0 { pad_char } else { ' ' }
@@ -431,6 +431,7 @@ pub fn ordinal(n int) string {
 		3 { 'rd' }
 		else { 'th' }
 	}
+
 	return '${n}${suffix}'
 }
 

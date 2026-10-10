@@ -12,7 +12,8 @@ fn main() {
 	win.begin_group('User Profile Form')
 	win.add_form_field('Full Name:', 'txt_name', 'Ada Lovelace')
 	win.add_form_field('Email Address:', 'txt_email', 'ada@lovelace.dev')
-	win.add_form_dropdown('System Role:', 'dd_role', ['Administrator', 'Security Engineer', 'Core Developer', 'Auditor'], 'Administrator')
+	win.add_form_dropdown('System Role:', 'dd_role', ['Administrator', 'Security Engineer',
+		'Core Developer', 'Auditor'], 'Administrator')
 	win.end_group()
 
 	win.begin_group('Batch & Form Operations')

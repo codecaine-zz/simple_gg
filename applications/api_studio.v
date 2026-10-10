@@ -54,11 +54,12 @@ fn main() {
 	})
 
 	curl_path := get_curl_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${curl_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Non-Blocking Worker')
+	win.add_label('lbl_engine_info',
+		'Engine: ${curl_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Non-Blocking Worker')
 
 	// Request URL & Method Bar
 	win.begin_group_box('grp_request_url', 'Target Endpoint & HTTP Method')
-	
+
 	win.begin_row('row_url_bar')
 	win.add_label('lbl_method', 'Method:')
 	win.add_dropdown('dd_http_method', [
@@ -68,7 +69,7 @@ fn main() {
 		'PATCH',
 		'DELETE',
 		'HEAD',
-		'OPTIONS'
+		'OPTIONS',
 	], 'GET')
 	win.set_control_width('dd_http_method', 110)
 
@@ -85,7 +86,7 @@ fn main() {
 		'5. GitHub Public API (User Info)',
 		'6. CoinGecko Crypto Ticker (BTC)',
 		'7. IPInfo Geolocation Query',
-		'8. Cat Facts Random API'
+		'8. Cat Facts Random API',
 	], '1. JSONPlaceholder GET Post')
 	win.set_control_width('dd_api_presets', 210)
 	win.end_row()
@@ -105,10 +106,12 @@ fn main() {
 
 	// Request Configuration: Headers & Body
 	win.begin_grid('grid_req_config', 2, 8)
-	win.add_form_textarea('Request Headers (Key: Value):', 'txt_headers', 'Accept: application/json\nContent-Type: application/json\nUser-Agent: SimpleGUI-API-Studio/1.0')
+	win.add_form_textarea('Request Headers (Key: Value):', 'txt_headers',
+		'Accept: application/json\nContent-Type: application/json\nUser-Agent: SimpleGUI-API-Studio/1.0')
 	win.set_control_height('txt_headers', 120)
 
-	win.add_form_textarea('Request Body (JSON / Text / Form):', 'txt_request_body', sample_request_body)
+	win.add_form_textarea('Request Body (JSON / Text / Form):', 'txt_request_body',
+		sample_request_body)
 	win.set_control_height('txt_request_body', 120)
 	win.end_grid()
 
@@ -168,7 +171,8 @@ fn main() {
 			w.set('txt_request_body', '')
 		} else if selected.starts_with('6.') {
 			w.set('dd_http_method', 'GET')
-			w.set('txt_url', 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd')
+			w.set('txt_url',
+				'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd')
 			w.set('txt_request_body', '')
 		} else if selected.starts_with('7.') {
 			w.set('dd_http_method', 'GET')
@@ -257,15 +261,25 @@ fn main() {
 
 				if res.exit_code == 0 {
 					win_main.set('txt_response_output', out)
-					win_main.append_console('api_console', ' Response received in ${elapsed_ms} ms (${out.len} bytes)\n', 4)
-					win_main.set('lbl_stats', ' Stats: SUCCESS  |  Status: ${status_code}  |  Latency: ${elapsed_ms} ms  |  Size: ${out.len} B')
+					win_main.append_console('api_console',
+						' Response received in ${elapsed_ms} ms (${out.len} bytes)\n', 4)
+					win_main.set('lbl_stats',
+						' Stats: SUCCESS  |  Status: ${status_code}  |  Latency: ${elapsed_ms} ms  |  Size: ${out.len} B')
 					win_main.set_status('Completed ${method} in ${elapsed_ms} ms.')
 					win_main.toast('Response received in ${elapsed_ms} ms!')
 				} else {
-					err_detail := if out != '' { out } else { 'Connection failed, timeout, or DNS resolution error (Exit code ${res.exit_code}).' }
-					win_main.set('txt_response_output', '// [HTTP REQUEST ERROR]\n// Exit Code: ${res.exit_code}\n// Target: ${target_url}\n// Method: ${method}\n// Error Details:\n${err_detail}\n')
-					win_main.append_console('api_console', ' Curl Error (Exit ${res.exit_code}):\n' + err_detail + '\n', 3)
-					win_main.set('lbl_stats', ' Stats: ERROR (Exit ${res.exit_code})  |  Latency: ${elapsed_ms} ms')
+					err_detail := if out != '' {
+						out
+					} else {
+						'Connection failed, timeout, or DNS resolution error (Exit code ${res.exit_code}).'
+					}
+					win_main.set('txt_response_output',
+						'// [HTTP REQUEST ERROR]\n// Exit Code: ${res.exit_code}\n// Target: ${target_url}\n// Method: ${method}\n// Error Details:\n${err_detail}\n')
+					win_main.append_console('api_console',
+
+						' Curl Error (Exit ${res.exit_code}):\n' + err_detail + '\n', 3)
+					win_main.set('lbl_stats',
+						' Stats: ERROR (Exit ${res.exit_code})  |  Latency: ${elapsed_ms} ms')
 					win_main.set_status('Request failed: ${err_detail.split_into_lines()[0]}')
 					win_main.toast('Request error (Exit ${res.exit_code})')
 				}

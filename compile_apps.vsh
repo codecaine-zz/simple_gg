@@ -46,34 +46,49 @@ struct TaskResult {
 fn get_app_maps() map[string]AppConfig {
 	mut m := map[string]AppConfig{}
 	m['api_studio.v'] = AppConfig{'API Studio', 'api_client.png', 'com.simplegui.apistudio'}
-	m['app_bundler_studio.v'] = AppConfig{'App Bundler Studio', 'package_manager.png', 'com.simplegui.appbundlerstudio'}
-	m['audiotag_studio.v'] = AppConfig{'Audio Tag Studio', 'audio_editor.png', 'com.simplegui.audiotagstudio'}
+	m['app_bundler_studio.v'] =
+		AppConfig{'App Bundler Studio', 'package_manager.png', 'com.simplegui.appbundlerstudio'}
+	m['audiotag_studio.v'] =
+		AppConfig{'Audio Tag Studio', 'audio_editor.png', 'com.simplegui.audiotagstudio'}
 	m['brew_studio.v'] = AppConfig{'Brew Studio', 'package_manager.png', 'com.simplegui.brewstudio'}
 	m['crypto_studio.v'] = AppConfig{'Crypto Studio', 'security.png', 'com.simplegui.cryptostudio'}
 	m['cut_studio.v'] = AppConfig{'Cut Studio', 'utility.png', 'com.simplegui.cutstudio'}
-	m['dataconvert_studio.v'] = AppConfig{'Data Convert Studio', 'csv_editor.png', 'com.simplegui.dataconvertstudio'}
+	m['dataconvert_studio.v'] =
+		AppConfig{'Data Convert Studio', 'csv_editor.png', 'com.simplegui.dataconvertstudio'}
 	m['disk_studio.v'] = AppConfig{'Disk Studio', 'disk_utility.png', 'com.simplegui.diskstudio'}
 	m['dns_studio.v'] = AppConfig{'DNS Studio', 'network_analyzer.png', 'com.simplegui.dnsstudio'}
-	m['docker_studio.v'] = AppConfig{'Docker Studio', 'docker_monitor.png', 'com.simplegui.dockerstudio'}
-	m['dot_studio.v'] = AppConfig{'Graphviz Studio', 'diagram_maker.png', 'com.simplegui.graphvizstudio'}
+	m['docker_studio.v'] =
+		AppConfig{'Docker Studio', 'docker_monitor.png', 'com.simplegui.dockerstudio'}
+	m['dot_studio.v'] =
+		AppConfig{'Graphviz Studio', 'diagram_maker.png', 'com.simplegui.graphvizstudio'}
 	m['exif_studio.v'] = AppConfig{'Exif Studio', 'image_viewer.png', 'com.simplegui.exifstudio'}
 	m['fd_studio.v'] = AppConfig{'FD Studio', 'file_manager.png', 'com.simplegui.fdstudio'}
-	m['ffmpeg_studio.v'] = AppConfig{'FFmpeg Studio', 'video_editor.png', 'com.simplegui.ffmpegstudio'}
+	m['ffmpeg_studio.v'] =
+		AppConfig{'FFmpeg Studio', 'video_editor.png', 'com.simplegui.ffmpegstudio'}
 	m['find_studio.v'] = AppConfig{'Find Studio', 'file_manager.png', 'com.simplegui.findstudio'}
 	m['gawk_studio.v'] = AppConfig{'GAWK Studio', 'snippet_manager.png', 'com.simplegui.gawkstudio'}
-	m['graph_studio.v'] = AppConfig{'Graph Studio', 'drawing_board.png', 'com.simplegui.graphstudio'}
-	m['ifconfig_studio.v'] = AppConfig{'IFConfig Studio', 'network_analyzer.png', 'com.simplegui.ifconfigstudio'}
-	m['imagemagick_studio.v'] = AppConfig{'ImageMagick Studio', 'image_optimizer.png', 'com.simplegui.imagemagickstudio'}
+	m['graph_studio.v'] =
+		AppConfig{'Graph Studio', 'drawing_board.png', 'com.simplegui.graphstudio'}
+	m['ifconfig_studio.v'] =
+		AppConfig{'IFConfig Studio', 'network_analyzer.png', 'com.simplegui.ifconfigstudio'}
+	m['imagemagick_studio.v'] =
+		AppConfig{'ImageMagick Studio', 'image_optimizer.png', 'com.simplegui.imagemagickstudio'}
 	m['jq_studio.v'] = AppConfig{'JQ Studio', 'dom_explorer.png', 'com.simplegui.jqstudio'}
-	m['kalker_studio.v'] = AppConfig{'Kalker Studio', 'calculator.png', 'com.simplegui.kalkerstudio'}
-	m['launchd_studio.v'] = AppConfig{'Launchd Studio', 'task_scheduler.png', 'com.simplegui.launchdstudio'}
-	m['media_studio_hub.v'] = AppConfig{'Media Studio Hub', 'media.png', 'com.simplegui.mediastudiohub'}
+	m['kalker_studio.v'] =
+		AppConfig{'Kalker Studio', 'calculator.png', 'com.simplegui.kalkerstudio'}
+	m['launchd_studio.v'] =
+		AppConfig{'Launchd Studio', 'task_scheduler.png', 'com.simplegui.launchdstudio'}
+	m['media_studio_hub.v'] =
+		AppConfig{'Media Studio Hub', 'media.png', 'com.simplegui.mediastudiohub'}
 	m['nmap_studio.v'] = AppConfig{'Nmap Studio', 'security.png', 'com.simplegui.nmapstudio'}
-	m['numbat_studio.v'] = AppConfig{'Numbat Studio', 'calculator.png', 'com.simplegui.numbatstudio'}
+	m['numbat_studio.v'] =
+		AppConfig{'Numbat Studio', 'calculator.png', 'com.simplegui.numbatstudio'}
 	m['ocr_studio.v'] = AppConfig{'OCR Studio', 'transcription.png', 'com.simplegui.ocrstudio'}
 	m['ouch_studio.v'] = AppConfig{'Ouch Studio', 'archive_manager.png', 'com.simplegui.ouchstudio'}
-	m['pandoc_studio.v'] = AppConfig{'Pandoc Studio', 'markdown_editor.png', 'com.simplegui.pandocstudio'}
-	m['programmer_calculator.v'] = AppConfig{'Programmer Calculator', 'calculator.png', 'com.simplegui.programmercalculator'}
+	m['pandoc_studio.v'] =
+		AppConfig{'Pandoc Studio', 'markdown_editor.png', 'com.simplegui.pandocstudio'}
+	m['programmer_calculator.v'] =
+		AppConfig{'Programmer Calculator', 'calculator.png', 'com.simplegui.programmercalculator'}
 	m['qalc_studio.v'] = AppConfig{'Qalc Studio', 'calculator.png', 'com.simplegui.qalcstudio'}
 	m['recon_studio.v'] = AppConfig{'Recon Studio', 'security.png', 'com.simplegui.reconstudio'}
 	m['regex_studio.v'] = AppConfig{'Regex Studio', 'regex_tester.png', 'com.simplegui.regexstudio'}
@@ -82,14 +97,20 @@ fn get_app_maps() map[string]AppConfig {
 	m['say_studio.v'] = AppConfig{'Say Studio', 'voice_recorder.png', 'com.simplegui.saystudio'}
 	m['sd_studio.v'] = AppConfig{'SD Studio', 'text_editor.png', 'com.simplegui.sdstudio'}
 	m['sed_studio.v'] = AppConfig{'Sed Studio', 'text_editor.png', 'com.simplegui.sedstudio'}
-	m['sqlite_studio.v'] = AppConfig{'SQLite Studio', 'database_admin.png', 'com.simplegui.sqlitestudio'}
-	m['statistics_studio.v'] = AppConfig{'Statistics Studio', 'spreadsheet.png', 'com.simplegui.statisticsstudio'}
-	m['subfinder_studio.v'] = AppConfig{'Subfinder Studio', 'network_analyzer.png', 'com.simplegui.subfinderstudio'}
-	m['task_manager.v'] = AppConfig{'Task Manager', 'system_monitor.png', 'com.simplegui.taskmanager'}
+	m['sqlite_studio.v'] =
+		AppConfig{'SQLite Studio', 'database_admin.png', 'com.simplegui.sqlitestudio'}
+	m['statistics_studio.v'] =
+		AppConfig{'Statistics Studio', 'spreadsheet.png', 'com.simplegui.statisticsstudio'}
+	m['subfinder_studio.v'] =
+		AppConfig{'Subfinder Studio', 'network_analyzer.png', 'com.simplegui.subfinderstudio'}
+	m['task_manager.v'] =
+		AppConfig{'Task Manager', 'system_monitor.png', 'com.simplegui.taskmanager'}
 	m['text_editor.v'] = AppConfig{'Text Editor', 'text_editor.png', 'com.simplegui.texteditor'}
 	m['tr_studio.v'] = AppConfig{'TR Studio', 'utility.png', 'com.simplegui.trstudio'}
-	m['wget2_studio.v'] = AppConfig{'Wget2 Studio', 'cloud_storage.png', 'com.simplegui.wget2studio'}
-	m['yt_dlp_studio.v'] = AppConfig{'YT-DLP Studio', 'screen_recorder.png', 'com.simplegui.ytdlpstudio'}
+	m['wget2_studio.v'] =
+		AppConfig{'Wget2 Studio', 'cloud_storage.png', 'com.simplegui.wget2studio'}
+	m['yt_dlp_studio.v'] =
+		AppConfig{'YT-DLP Studio', 'screen_recorder.png', 'com.simplegui.ytdlpstudio'}
 	return m
 }
 
@@ -266,7 +287,8 @@ fn compile_app(t Task, cached_icns_path string) TaskResult {
 			cmd += '-arch ${t.target_arch} '
 		}
 		is_linux_target := t.target_os == 'linux' || (t.target_os == '' && os.user_os() == 'linux')
-		if is_linux_target && os.getenv('WAYLAND_DISPLAY') != '' && !cmd.contains('-d sokol_wayland') {
+		if is_linux_target && os.getenv('WAYLAND_DISPLAY') != ''
+			&& !cmd.contains('-d sokol_wayland') {
 			cmd += '-d sokol_wayland '
 		}
 		if t.extra_flags.len > 0 {
@@ -280,28 +302,28 @@ fn compile_app(t Task, cached_icns_path string) TaskResult {
 		if res.exit_code == 0 && os.exists(out_c) {
 			sz := os.file_size(out_c)
 			return TaskResult{
-				index: t.index
-				total: t.total
-				app_id: t.app_id
+				index:        t.index
+				total:        t.total
+				app_id:       t.app_id
 				display_name: t.display_name
-				out_target: out_c
-				success: true
-				elapsed_ms: elapsed.milliseconds()
-				size_mb: f64(sz) / 1024.0 / 1024.0
-				err_msg: ''
+				out_target:   out_c
+				success:      true
+				elapsed_ms:   elapsed.milliseconds()
+				size_mb:      f64(sz) / 1024.0 / 1024.0
+				err_msg:      ''
 			}
 		}
 
 		return TaskResult{
-			index: t.index
-			total: t.total
-			app_id: t.app_id
+			index:        t.index
+			total:        t.total
+			app_id:       t.app_id
 			display_name: t.display_name
-			out_target: out_c
-			success: false
-			elapsed_ms: elapsed.milliseconds()
-			size_mb: 0.0
-			err_msg: res.output.trim_space()
+			out_target:   out_c
+			success:      false
+			elapsed_ms:   elapsed.milliseconds()
+			size_mb:      0.0
+			err_msg:      res.output.trim_space()
 		}
 	}
 
@@ -341,28 +363,28 @@ fn compile_app(t Task, cached_icns_path string) TaskResult {
 		if res.exit_code == 0 && os.exists(out_bin) {
 			sz := os.file_size(out_bin)
 			return TaskResult{
-				index: t.index
-				total: t.total
-				app_id: t.app_id
+				index:        t.index
+				total:        t.total
+				app_id:       t.app_id
 				display_name: t.display_name
-				out_target: out_bin
-				success: true
-				elapsed_ms: elapsed.milliseconds()
-				size_mb: f64(sz) / 1024.0 / 1024.0
-				err_msg: ''
+				out_target:   out_bin
+				success:      true
+				elapsed_ms:   elapsed.milliseconds()
+				size_mb:      f64(sz) / 1024.0 / 1024.0
+				err_msg:      ''
 			}
 		}
 
 		return TaskResult{
-			index: t.index
-			total: t.total
-			app_id: t.app_id
+			index:        t.index
+			total:        t.total
+			app_id:       t.app_id
 			display_name: t.display_name
-			out_target: out_bin
-			success: false
-			elapsed_ms: elapsed.milliseconds()
-			size_mb: 0.0
-			err_msg: res.output.trim_space()
+			out_target:   out_bin
+			success:      false
+			elapsed_ms:   elapsed.milliseconds()
+			size_mb:      0.0
+			err_msg:      res.output.trim_space()
 		}
 	}
 
@@ -378,15 +400,15 @@ fn compile_app(t Task, cached_icns_path string) TaskResult {
 
 	os.mkdir_all(macos_dir) or {
 		return TaskResult{
-			index: t.index
-			total: t.total
-			app_id: t.app_id
+			index:        t.index
+			total:        t.total
+			app_id:       t.app_id
 			display_name: t.display_name
-			out_target: app_bundle
-			success: false
-			elapsed_ms: 0
-			size_mb: 0.0
-			err_msg: 'Failed to create MacOS directory: ${err}'
+			out_target:   app_bundle
+			success:      false
+			elapsed_ms:   0
+			size_mb:      0.0
+			err_msg:      'Failed to create MacOS directory: ${err}'
 		}
 	}
 	os.mkdir_all(resources_dir) or {}
@@ -456,15 +478,15 @@ fn compile_app(t Task, cached_icns_path string) TaskResult {
 	if res.exit_code != 0 || !os.exists(target_bin) {
 		elapsed := time.since(t0)
 		return TaskResult{
-			index: t.index
-			total: t.total
-			app_id: t.app_id
+			index:        t.index
+			total:        t.total
+			app_id:       t.app_id
 			display_name: t.display_name
-			out_target: app_bundle
-			success: false
-			elapsed_ms: elapsed.milliseconds()
-			size_mb: 0.0
-			err_msg: res.output.trim_space()
+			out_target:   app_bundle
+			success:      false
+			elapsed_ms:   elapsed.milliseconds()
+			size_mb:      0.0
+			err_msg:      res.output.trim_space()
 		}
 	}
 
@@ -478,15 +500,15 @@ fn compile_app(t Task, cached_icns_path string) TaskResult {
 	sz := os.file_size(target_bin)
 
 	return TaskResult{
-		index: t.index
-		total: t.total
-		app_id: t.app_id
+		index:        t.index
+		total:        t.total
+		app_id:       t.app_id
 		display_name: t.display_name
-		out_target: app_bundle
-		success: true
-		elapsed_ms: elapsed.milliseconds()
-		size_mb: f64(sz) / 1024.0 / 1024.0
-		err_msg: ''
+		out_target:   app_bundle
+		success:      true
+		elapsed_ms:   elapsed.milliseconds()
+		size_mb:      f64(sz) / 1024.0 / 1024.0
+		err_msg:      ''
 	}
 }
 
@@ -643,7 +665,7 @@ fn main() {
 
 	cwd := os.getwd()
 	app_dir := os.join_path(cwd, 'applications')
-	
+
 	platform_folder := '${effective_os_tag}_${effective_arch}'
 	out_dir := if out_dir_arg.len > 0 {
 		if os.is_abs_path(out_dir_arg) { out_dir_arg } else { os.join_path(cwd, out_dir_arg) }
@@ -684,7 +706,7 @@ fn main() {
 
 	// Preflight Linux ARM64 cross-compiler check
 	if target_os == 'linux' && effective_arch == 'arm64' && os.user_os() != 'linux' && !c_only {
-		eprintln('\n❌ Notice: V\'s bundled sysroot for direct Linux cross-compilation on macOS supports `-arch x86_64` (amd64).')
+		eprintln("\n❌ Notice: V's bundled sysroot for direct Linux cross-compilation on macOS supports `-arch x86_64` (amd64).")
 		eprintln('To build for Linux ARM64 (Raspberry Pi, ARM servers, AWS Graviton):')
 		eprintln('1. Export standalone C source files (Recommended):')
 		eprintln('   ./compile_apps.vsh --linux --arm64 --c-only')
@@ -770,20 +792,20 @@ fn main() {
 		}
 
 		tasks << Task{
-			index: idx + 1
-			total: app_files.len
-			app_id: raw_id
-			src_path: os.join_path('applications', f)
-			out_dir: out_dir
+			index:        idx + 1
+			total:        app_files.len
+			app_id:       raw_id
+			src_path:     os.join_path('applications', f)
+			out_dir:      out_dir
 			display_name: config.display_name
-			icon_file: config.icon_file
-			bundle_id: config.bundle_id
-			is_prod: is_prod
-			bin_only: bin_only
-			c_only: c_only
-			target_os: target_os
-			target_arch: target_arch
-			extra_flags: extra_flags
+			icon_file:    config.icon_file
+			bundle_id:    config.bundle_id
+			is_prod:      is_prod
+			bin_only:     bin_only
+			c_only:       c_only
+			target_os:    target_os
+			target_arch:  target_arch
+			extra_flags:  extra_flags
 		}
 	}
 
@@ -828,7 +850,8 @@ fn main() {
 				if r.err_msg.len > 0 {
 					eprintln('        Error: ${r.err_msg}')
 				}
-				if r.err_msg.contains('EGL/egl.h') || r.err_msg.contains('X11') || r.err_msg.contains('mingw') {
+				if r.err_msg.contains('EGL/egl.h') || r.err_msg.contains('X11')
+					|| r.err_msg.contains('mingw') {
 					had_cross_egl_fail = true
 				}
 				fail_count++

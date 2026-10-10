@@ -11,35 +11,35 @@ import time
 
 struct SummaryStats {
 mut:
-	count       int
-	sum         f64
-	sum_sq      f64
-	mean        f64
-	geom_mean   f64
-	harm_mean   f64
+	count        int
+	sum          f64
+	sum_sq       f64
+	mean         f64
+	geom_mean    f64
+	harm_mean    f64
 	trimmed_mean f64
-	median      f64
-	min         f64
-	max         f64
-	range       f64
-	mid_range   f64
-	var_sample  f64
-	var_pop     f64
-	sd_sample   f64
-	sd_pop      f64
-	sem         f64
-	q1          f64
-	q2          f64
-	q3          f64
-	iqr         f64
-	skewness    f64
-	kurtosis    f64
-	cv_pct      f64
-	ci_95_low   f64
-	ci_95_high  f64
-	ci_99_low   f64
-	ci_99_high  f64
-	outliers    []f64
+	median       f64
+	min          f64
+	max          f64
+	range        f64
+	mid_range    f64
+	var_sample   f64
+	var_pop      f64
+	sd_sample    f64
+	sd_pop       f64
+	sem          f64
+	q1           f64
+	q2           f64
+	q3           f64
+	iqr          f64
+	skewness     f64
+	kurtosis     f64
+	cv_pct       f64
+	ci_95_low    f64
+	ci_95_high   f64
+	ci_99_low    f64
+	ci_99_high   f64
+	outliers     []f64
 }
 
 struct RegressionResult {
@@ -230,18 +230,18 @@ fn percentile(sorted []f64, p f64) f64 {
 fn approx_t_crit(df int, alpha f64) f64 {
 	if alpha == 0.05 {
 		if df >= 120 { return 1.960 }
-		if df >= 60  { return 2.000 }
-		if df >= 30  { return 2.042 }
-		if df >= 20  { return 2.086 }
-		if df >= 10  { return 2.228 }
-		if df >= 5   { return 2.571 }
+		if df >= 60 { return 2.000 }
+		if df >= 30 { return 2.042 }
+		if df >= 20 { return 2.086 }
+		if df >= 10 { return 2.228 }
+		if df >= 5 { return 2.571 }
 		return 2.776
 	} else {
 		if df >= 120 { return 2.576 }
-		if df >= 60  { return 2.660 }
-		if df >= 30  { return 2.750 }
-		if df >= 20  { return 2.845 }
-		if df >= 10  { return 3.169 }
+		if df >= 60 { return 2.660 }
+		if df >= 30 { return 2.750 }
+		if df >= 20 { return 2.845 }
+		if df >= 10 { return 3.169 }
 		return 3.707
 	}
 }
@@ -383,12 +383,12 @@ fn compute_regression(x_data []f64, y_data []f64) RegressionResult {
 
 fn generate_ascii_histogram(data []f64, bins_count int) string {
 	if data.len == 0 { return 'No data available to plot histogram.\n' }
-	
+
 	mut sorted := data.clone()
 	sorted.sort()
 	min_val := sorted[0]
 	max_val := sorted[sorted.len - 1]
-	
+
 	if min_val == max_val {
 		return 'All ${data.len} values are identical (${min_val:.2f}).\n'
 	}
@@ -426,7 +426,7 @@ fn generate_ascii_histogram(data []f64, bins_count int) string {
 			bar += '#'
 		}
 		if c > 0 && bar == '' { bar = '=' }
-		
+
 		pct := (f64(c) / f64(data.len)) * 100.0
 		lines << '[${b_low:8.2f} - ${b_high:8.2f}] | ${c:4} | ${bar:-36} (${pct:5.1f}%)'
 	}
@@ -474,8 +474,20 @@ fn format_stats_report(name string, s SummaryStats) string {
 	lines << '   * Total Range (Max - Min): ${s.range:14.4f}'
 	lines << '------------------------------------------------------------------------'
 	lines << ' DISTRIBUTION SHAPE & NORMALITY'
-	lines << '   * Skewness (Fisher-Pears): ${s.skewness:14.4f}' + if s.skewness > 0.5 { ' (Right/Pos Skewed)' } else if s.skewness < -0.5 { ' (Left/Neg Skewed)' } else { ' (Approx Symmetric)' }
-	lines << '   * Excess Kurtosis (Tail) : ${s.kurtosis:14.4f}' + if s.kurtosis > 0.5 { ' (Leptokurtic / Heavy-tailed)' } else if s.kurtosis < -0.5 { ' (Platykurtic / Light-tailed)' } else { ' (Mesokurtic / Normal)' }
+	lines << '   * Skewness (Fisher-Pears): ${s.skewness:14.4f}' + if s.skewness > 0.5 {
+		' (Right/Pos Skewed)'
+	} else if s.skewness < -0.5 {
+		' (Left/Neg Skewed)'
+	} else {
+		' (Approx Symmetric)'
+	}
+	lines << '   * Excess Kurtosis (Tail) : ${s.kurtosis:14.4f}' + if s.kurtosis > 0.5 {
+		' (Leptokurtic / Heavy-tailed)'
+	} else if s.kurtosis < -0.5 {
+		' (Platykurtic / Light-tailed)'
+	} else {
+		' (Mesokurtic / Normal)'
+	}
 	lines << '------------------------------------------------------------------------'
 	lines << ' CONFIDENCE INTERVALS (FOR POPULATION MEAN )'
 	lines << '   * 95% Confidence Interval: [${s.ci_95_low:.4f}    ${s.ci_95_high:.4f}]'
@@ -484,7 +496,9 @@ fn format_stats_report(name string, s SummaryStats) string {
 	lines << ' OUTLIER ANALYSIS (Tukey 1.5x IQR Rule)'
 	if s.outliers.len > 0 {
 		mut out_strs := []string{}
-		for o in s.outliers { out_strs << '${o:.2f}' }
+		for o in s.outliers {
+			out_strs << '${o:.2f}'
+		}
 		lines << '   * Outlier Points Count   : ${s.outliers.len}'
 		lines << '   * Detected Outliers      : ' + out_strs.join(', ')
 	} else {
@@ -501,18 +515,19 @@ fn format_stats_report(name string, s SummaryStats) string {
 fn main() {
 	println('Starting SimpleGUI - Statistics Studio Pro (Data Science & Inference Engine)...')
 
-	mut win := simplegui.new_simple_window('Statistics Studio Pro -- Advanced Data Science & Inference Engine', 1180, 920)
+	mut win := simplegui.new_simple_window('Statistics Studio Pro -- Advanced Data Science & Inference Engine',
+		1180, 920)
 	win.set_fullscreen(true)
 	win.restore_saved_theme()
 	win.set_spacing(6)
 	win.set_padding(14)
 
 	mut state := &AppState{
-		raw_data_a: []f64{}
-		raw_data_b: []f64{}
-		stats_a: SummaryStats{}
-		stats_b: SummaryStats{}
-		active_tab: 'Descriptive Stats'
+		raw_data_a:     []f64{}
+		raw_data_b:     []f64{}
+		stats_a:        SummaryStats{}
+		stats_b:        SummaryStats{}
+		active_tab:     'Descriptive Stats'
 		history_ledger: []string{}
 	}
 
@@ -540,7 +555,7 @@ fn main() {
 		'Probability Distributions',
 		'Data Cleansing & Transform',
 		'Benchmark Datasets',
-		'Analysis Ledger'
+		'Analysis Ledger',
 	])
 
 	// -------------------------------------------------------------
@@ -561,8 +576,10 @@ fn main() {
 	// -------------------------------------------------------------
 	win.begin_group_box('pane_desc', 'Descriptive Statistics & Frequency Distribution (Sample A)')
 
-	win.add_label('lbl_raw_prompt', 'Input Data Sample A (comma, space, or newline separated numbers):')
-	win.add_textarea('txt_data_a', '45.2, 56.1, 48.9, 62.3, 51.7, 59.4, 63.8, 47.5, 54.2, 58.6, 60.1, 52.8, 55.4, 68.9, 49.3, 57.2, 53.6, 61.5, 56.8, 50.4')
+	win.add_label('lbl_raw_prompt',
+		'Input Data Sample A (comma, space, or newline separated numbers):')
+	win.add_textarea('txt_data_a',
+		'45.2, 56.1, 48.9, 62.3, 51.7, 59.4, 63.8, 47.5, 54.2, 58.6, 60.1, 52.8, 55.4, 68.9, 49.3, 57.2, 53.6, 61.5, 56.8, 50.4')
 	win.set_control_height('txt_data_a', 60)
 	win.set_control_font_name('txt_data_a', 'Menlo')
 	win.set_control_font_size('txt_data_a', 13)
@@ -573,7 +590,8 @@ fn main() {
 	win.add_button('btn_copy_stats_report', 'Copy Report')
 	win.end_row()
 
-	win.add_textarea('txt_desc_report', 'Click "COMPUTE STATISTICAL PROFILE" above to generate summary metrics and histogram.\n')
+	win.add_textarea('txt_desc_report',
+		'Click "COMPUTE STATISTICAL PROFILE" above to generate summary metrics and histogram.\n')
 	win.set_control_height('txt_desc_report', 260)
 	win.set_control_font_name('txt_desc_report', 'Menlo')
 	win.set_control_font_size('txt_desc_report', 12)
@@ -582,10 +600,12 @@ fn main() {
 	// -------------------------------------------------------------
 	// Tab 2: Two-Sample Hypothesis Testing
 	// -------------------------------------------------------------
-	win.begin_group_box('pane_hypothesis', 'Two-Sample Hypothesis Testing (Student\'s T-Test, Welch\'s Test, Paired Comparison)')
+	win.begin_group_box('pane_hypothesis',
+		"Two-Sample Hypothesis Testing (Student's T-Test, Welch's Test, Paired Comparison)")
 
 	win.add_label('lbl_ha', 'Sample A Dataset (comma or newline separated):')
-	win.add_textarea('txt_hypo_a', '102.3, 105.1, 99.8, 108.4, 103.2, 106.7, 101.5, 104.9, 107.2, 103.8')
+	win.add_textarea('txt_hypo_a',
+		'102.3, 105.1, 99.8, 108.4, 103.2, 106.7, 101.5, 104.9, 107.2, 103.8')
 	win.set_control_height('txt_hypo_a', 50)
 	win.set_control_font_name('txt_hypo_a', 'Menlo')
 
@@ -600,7 +620,8 @@ fn main() {
 	win.add_button('btn_test_anova', 'One-Way ANOVA F-Test')
 	win.end_row()
 
-	win.add_textarea('txt_hypo_report', 'Two-sample hypothesis test results, t-statistic, degrees of freedom, and p-value inference will appear here.\n')
+	win.add_textarea('txt_hypo_report',
+		'Two-sample hypothesis test results, t-statistic, degrees of freedom, and p-value inference will appear here.\n')
 	win.set_control_height('txt_hypo_report', 240)
 	win.set_control_font_name('txt_hypo_report', 'Menlo')
 	win.set_control_font_size('txt_hypo_report', 12)
@@ -609,7 +630,8 @@ fn main() {
 	// -------------------------------------------------------------
 	// Tab 3: Linear Regression & Correlation
 	// -------------------------------------------------------------
-	win.begin_group_box('pane_regression', 'Ordinary Least Squares (OLS) Linear Regression & Pearson Correlation')
+	win.begin_group_box('pane_regression',
+		'Ordinary Least Squares (OLS) Linear Regression & Pearson Correlation')
 
 	win.add_label('lbl_rx', 'Independent Variable X (comma or newline separated):')
 	win.add_textarea('txt_reg_x', '1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0')
@@ -629,7 +651,8 @@ fn main() {
 	win.add_button('btn_predict_y', 'Predict Y')
 	win.end_row()
 
-	win.add_textarea('txt_reg_report', 'Regression equation (y = mx + c), Pearson r, R, covariance, standard error of estimate, and residuals will appear here.\n')
+	win.add_textarea('txt_reg_report',
+		'Regression equation (y = mx + c), Pearson r, R, covariance, standard error of estimate, and residuals will appear here.\n')
 	win.set_control_height('txt_reg_report', 240)
 	win.set_control_font_name('txt_reg_report', 'Menlo')
 	win.set_control_font_size('txt_reg_report', 12)
@@ -638,16 +661,17 @@ fn main() {
 	// -------------------------------------------------------------
 	// Tab 4: Probability Distributions
 	// -------------------------------------------------------------
-	win.begin_group_box('pane_dist', 'Probability Distributions, Z-Scores & Cumulative Probabilities')
+	win.begin_group_box('pane_dist',
+		'Probability Distributions, Z-Scores & Cumulative Probabilities')
 
 	win.begin_row('row_dist_type')
 	win.add_label('lbl_dist_kind', 'Distribution Model:')
 	win.add_dropdown('dd_dist_model', [
 		'Standard Normal Distribution N(0, 1)',
 		'Normal Distribution N(, )',
-		'Student\'s t-Distribution',
+		"Student's t-Distribution",
 		'Binomial Distribution B(n, p)',
-		'Poisson Distribution Pois()'
+		'Poisson Distribution Pois()',
 	], 'Standard Normal Distribution N(0, 1)')
 	win.set_control_width('dd_dist_model', 300)
 
@@ -666,7 +690,8 @@ fn main() {
 	win.add_button('btn_calc_dist', 'Compute Probability')
 	win.end_row()
 
-	win.add_textarea('txt_dist_report', 'Probability density PDF, Cumulative CDF P(X <= x), tail probabilities, and critical bounds will be computed here.\n')
+	win.add_textarea('txt_dist_report',
+		'Probability density PDF, Cumulative CDF P(X <= x), tail probabilities, and critical bounds will be computed here.\n')
 	win.set_control_height('txt_dist_report', 260)
 	win.set_control_font_name('txt_dist_report', 'Menlo')
 	win.set_control_font_size('txt_dist_report', 12)
@@ -697,7 +722,7 @@ fn main() {
 	win.begin_group_box('pane_bench', 'Real-World Benchmark Datasets & Synthetic Experiments')
 
 	win.begin_row('row_bench_btns_1')
-	win.add_button('btn_ds_iris', 'Fisher\'s Iris Sepal Length (N=50)')
+	win.add_button('btn_ds_iris', "Fisher's Iris Sepal Length (N=50)")
 	win.add_button('btn_ds_exam', 'Student Exam Scores (Bimodal N=30)')
 	win.add_button('btn_ds_stock', 'Stock Daily Returns (Fat-tailed N=40)')
 	win.end_row()
@@ -708,7 +733,8 @@ fn main() {
 	win.add_button('btn_ds_skewed', 'House Prices (Right-Skewed N=30)')
 	win.end_row()
 
-	win.add_textarea('txt_bench_info', 'Click any benchmark dataset above to load real-world data into Sample A (and Sample B) and automatically evaluate.\n')
+	win.add_textarea('txt_bench_info',
+		'Click any benchmark dataset above to load real-world data into Sample A (and Sample B) and automatically evaluate.\n')
 	win.set_control_height('txt_bench_info', 240)
 	win.set_control_font_name('txt_bench_info', 'Menlo')
 	win.set_control_font_size('txt_bench_info', 12)
@@ -725,7 +751,8 @@ fn main() {
 	win.add_button('btn_export_ledger', 'Export Ledger to Text...')
 	win.end_row()
 
-	win.add_textarea('txt_ledger', 'All statistical profiling runs and hypothesis tests will be recorded in this timestamped ledger.\n')
+	win.add_textarea('txt_ledger',
+		'All statistical profiling runs and hypothesis tests will be recorded in this timestamped ledger.\n')
 	win.set_control_height('txt_ledger', 260)
 	win.set_control_font_name('txt_ledger', 'Menlo')
 	win.set_control_font_size('txt_ledger', 12)
@@ -769,7 +796,8 @@ fn main() {
 		raw_txt := w.get('txt_data_a')
 		nums := parse_numbers(raw_txt)
 		if nums.len == 0 {
-			w.set('txt_desc_report', '=== [INPUT DATA MISSING] ===\n\nPlease enter numeric observations separated by commas, spaces, or newlines.\nExample:\n  12.4, 15.2, 14.8, 19.5, 21.0, 18.3, 16.9')
+			w.set('txt_desc_report',
+				'=== [INPUT DATA MISSING] ===\n\nPlease enter numeric observations separated by commas, spaces, or newlines.\nExample:\n  12.4, 15.2, 14.8, 19.5, 21.0, 18.3, 16.9')
 			w.alert('No Data', 'Please enter numeric observations for Sample A.')
 			w.toast('Please enter numeric data')
 			return
@@ -789,9 +817,11 @@ fn main() {
 		hist := generate_ascii_histogram(nums, 10)
 		full_output := report + '\n' + hist
 		w.set('txt_desc_report', full_output)
-		w.set('lbl_status_bar', ' Processed ${s.count} data points. Mean = ${s.mean:.3f}, SD = ${s.sd_sample:.3f}')
+		w.set('lbl_status_bar',
+			' Processed ${s.count} data points. Mean = ${s.mean:.3f}, SD = ${s.sd_sample:.3f}')
 
-		append_ledger(mut w, 'Sample A Profile (N=${s.count})', 'Mean: ${s.mean:.4f}, Median: ${s.median:.4f}, SD: ${s.sd_sample:.4f}, IQR: ${s.iqr:.4f}')
+		append_ledger(mut w, 'Sample A Profile (N=${s.count})',
+			'Mean: ${s.mean:.4f}, Median: ${s.median:.4f}, SD: ${s.sd_sample:.4f}, IQR: ${s.iqr:.4f}')
 	}
 
 	// -------------------------------------------------------------
@@ -845,7 +875,8 @@ fn main() {
 		a := parse_numbers(w.get('txt_hypo_a'))
 		b := parse_numbers(w.get('txt_hypo_b'))
 		if a.len == 0 || b.len == 0 {
-			w.set('txt_hypo_report', '=== [INPUT DATA MISSING] ===\n\nPlease enter numbers for both Sample A and Sample B.')
+			w.set('txt_hypo_report',
+				'=== [INPUT DATA MISSING] ===\n\nPlease enter numbers for both Sample A and Sample B.')
 			w.alert('Input Missing', 'Please enter numbers for both Sample A and Sample B.')
 			w.toast('Sample A and B required')
 			return
@@ -856,7 +887,7 @@ fn main() {
 
 		mut out := []string{}
 		out << '========================================================================'
-		out << ' TWO-SAMPLE WELCH\'S T-TEST (INDEPENDENT SAMPLES, UNEQUAL VARIANCE)'
+		out << " TWO-SAMPLE WELCH'S T-TEST (INDEPENDENT SAMPLES, UNEQUAL VARIANCE)"
 		out << '========================================================================'
 		out << ' SAMPLE SUMMARIES:'
 		out << '   * Sample A : N = ${st_a.count}, Mean = ${st_a.mean:.4f}, SD = ${st_a.sd_sample:.4f}, SEM = ${st_a.sem:.4f}'
@@ -873,17 +904,21 @@ fn main() {
 		out << '========================================================================\n'
 
 		w.set('txt_hypo_report', out.join('\n'))
-		w.set('lbl_status_bar', ' Welch t-test: t = ${res.t_stat:.3f}, df = ${res.df:.1f}, p ~ ${res.p_approx:.4f}')
-		append_ledger(mut w, 'Independent T-Test', 't = ${res.t_stat:.4f}, p = ${res.p_approx:.4f}, ${res.conclusion}')
-		w.toast('Executed Welch\'s T-Test!')
+		w.set('lbl_status_bar',
+			' Welch t-test: t = ${res.t_stat:.3f}, df = ${res.df:.1f}, p ~ ${res.p_approx:.4f}')
+		append_ledger(mut w, 'Independent T-Test',
+			't = ${res.t_stat:.4f}, p = ${res.p_approx:.4f}, ${res.conclusion}')
+		w.toast("Executed Welch's T-Test!")
 	})
 
 	win.on_click('btn_test_paired', fn [append_ledger] (mut w simplegui.SimpleWindow) {
 		a := parse_numbers(w.get('txt_hypo_a'))
 		b := parse_numbers(w.get('txt_hypo_b'))
 		if a.len != b.len || a.len == 0 {
-			w.set('txt_hypo_report', '=== [DIMENSION MISMATCH ERROR] ===\n\nPaired t-test requires exactly equal number of observations in Sample A and Sample B.\nCurrently: Sample A has ${a.len} items, Sample B has ${b.len} items.')
-			w.alert('Dimension Mismatch', 'Paired t-test requires exactly equal number of observations in Sample A and Sample B (A=${a.len}, B=${b.len}).')
+			w.set('txt_hypo_report',
+				'=== [DIMENSION MISMATCH ERROR] ===\n\nPaired t-test requires exactly equal number of observations in Sample A and Sample B.\nCurrently: Sample A has ${a.len} items, Sample B has ${b.len} items.')
+			w.alert('Dimension Mismatch',
+				'Paired t-test requires exactly equal number of observations in Sample A and Sample B (A=${a.len}, B=${b.len}).')
 			w.toast('Paired test requires equal sample sizes')
 			return
 		}
@@ -906,8 +941,10 @@ fn main() {
 		out << '========================================================================\n'
 
 		w.set('txt_hypo_report', out.join('\n'))
-		w.set('lbl_status_bar', ' Paired t-test: t = ${res.t_stat:.3f}, df = ${res.df:.0f}, p ~ ${res.p_approx:.4f}')
-		append_ledger(mut w, 'Paired T-Test', 't = ${res.t_stat:.4f}, p = ${res.p_approx:.4f}, ${res.conclusion}')
+		w.set('lbl_status_bar',
+			' Paired t-test: t = ${res.t_stat:.3f}, df = ${res.df:.0f}, p ~ ${res.p_approx:.4f}')
+		append_ledger(mut w, 'Paired T-Test',
+			't = ${res.t_stat:.4f}, p = ${res.p_approx:.4f}, ${res.conclusion}')
 		w.toast('Executed Paired T-Test!')
 	})
 
@@ -925,10 +962,15 @@ fn main() {
 		grand_n := f64(a.len + b.len)
 		grand_mean := (st_a.sum + st_b.sum) / grand_n
 
-		ss_between := f64(a.len) * math.pow(st_a.mean - grand_mean, 2.0) + f64(b.len) * math.pow(st_b.mean - grand_mean, 2.0)
+		ss_between := f64(a.len) * math.pow(st_a.mean - grand_mean, 2.0) +
+			f64(b.len) * math.pow(st_b.mean - grand_mean, 2.0)
 		mut ss_within := 0.0
-		for x in a { ss_within += math.pow(x - st_a.mean, 2.0) }
-		for x in b { ss_within += math.pow(x - st_b.mean, 2.0) }
+		for x in a {
+			ss_within += math.pow(x - st_a.mean, 2.0)
+		}
+		for x in b {
+			ss_within += math.pow(x - st_b.mean, 2.0)
+		}
 
 		df_between := 1.0
 		df_within := grand_n - 2.0
@@ -948,8 +990,10 @@ fn main() {
 		out << '========================================================================\n'
 
 		w.set('txt_hypo_report', out.join('\n'))
-		w.set('lbl_status_bar', ' ANOVA: F = ${f_stat:.4f}, df = (${df_between:.0f}, ${df_within:.0f})')
-		append_ledger(mut w, 'One-Way ANOVA', 'F = ${f_stat:.4f}, df = (${df_between:.0f}, ${df_within:.0f})')
+		w.set('lbl_status_bar',
+			' ANOVA: F = ${f_stat:.4f}, df = (${df_between:.0f}, ${df_within:.0f})')
+		append_ledger(mut w, 'One-Way ANOVA',
+			'F = ${f_stat:.4f}, df = (${df_between:.0f}, ${df_within:.0f})')
 		w.toast('Computed One-Way ANOVA!')
 	})
 
@@ -960,8 +1004,10 @@ fn main() {
 		x := parse_numbers(w.get('txt_reg_x'))
 		y := parse_numbers(w.get('txt_reg_y'))
 		if x.len != y.len || x.len < 2 {
-			w.set('txt_reg_report', '=== [REGRESSION DIMENSION ERROR] ===\n\nX and Y must contain the same number of data points (at least 2).\nCurrently: X has ${x.len} points, Y has ${y.len} points.')
-			w.alert('Dimension Error', 'X and Y must contain the same number of data points (at least 2).')
+			w.set('txt_reg_report',
+				'=== [REGRESSION DIMENSION ERROR] ===\n\nX and Y must contain the same number of data points (at least 2).\nCurrently: X has ${x.len} points, Y has ${y.len} points.')
+			w.alert('Dimension Error',
+				'X and Y must contain the same number of data points (at least 2).')
 			w.toast('X and Y point counts must match')
 			return
 		}
@@ -976,7 +1022,13 @@ fn main() {
 		out << 'Y = ${reg.slope:.4f}  X ${sign_str}${math.abs(reg.intercept):.4f}'
 		out << '------------------------------------------------------------------------'
 		out << ' CORRELATION & FIT QUALITY:'
-		out << '   * Pearson Correlation (r) : ${reg.r:10.4f}' + if math.abs(reg.r) > 0.9 { ' (Very Strong Linear Fit)' } else if math.abs(reg.r) > 0.7 { ' (Strong Linear Fit)' } else { ' (Moderate/Weak)' }
+		out << '   * Pearson Correlation (r) : ${reg.r:10.4f}' + if math.abs(reg.r) > 0.9 {
+			' (Very Strong Linear Fit)'
+		} else if math.abs(reg.r) > 0.7 {
+			' (Strong Linear Fit)'
+		} else {
+			' (Moderate/Weak)'
+		}
 		out << '   * Determination (R)      : ${reg.r_squared:10.4f} (${(reg.r_squared * 100.0):.1f}% variance explained)'
 		out << '   * Covariance Cov(X,Y)     : ${reg.covar:10.4f}'
 		out << '   * Std Error of Est. (Se)  : ${reg.std_err_est:10.4f}'
@@ -996,8 +1048,10 @@ fn main() {
 		out << '========================================================================\n'
 
 		w.set('txt_reg_report', out.join('\n'))
-		w.set('lbl_status_bar', ' Regression: Y = ${reg.slope:.3f}X + ${reg.intercept:.3f}, r = ${reg.r:.4f}, R = ${reg.r_squared:.4f}')
-		append_ledger(mut w, 'Linear Regression', 'Y = ${reg.slope:.4f}X + ${reg.intercept:.4f}, r = ${reg.r:.4f}, R = ${reg.r_squared:.4f}')
+		w.set('lbl_status_bar',
+			' Regression: Y = ${reg.slope:.3f}X + ${reg.intercept:.3f}, r = ${reg.r:.4f}, R = ${reg.r_squared:.4f}')
+		append_ledger(mut w, 'Linear Regression',
+			'Y = ${reg.slope:.4f}X + ${reg.intercept:.4f}, r = ${reg.r:.4f}, R = ${reg.r_squared:.4f}')
 		w.toast('Fitted OLS Linear Model!')
 	})
 
@@ -1013,7 +1067,8 @@ fn main() {
 		pred_y := reg.slope * pred_x + reg.intercept
 		w.toast('Predicted  = ${pred_y:.4f} for X = ${pred_x}')
 		cur := w.get('txt_reg_report')
-		w.set('txt_reg_report', cur + '\n PREDICTION: For X = ${pred_x}, Predicted  = ${pred_y:.4f}\n')
+		w.set('txt_reg_report', cur +
+			'\n PREDICTION: For X = ${pred_x}, Predicted  = ${pred_y:.4f}\n')
 	})
 
 	// -------------------------------------------------------------
@@ -1055,7 +1110,8 @@ fn main() {
 			mut pmf := 0.0
 			if k >= 0 && k <= n_trials {
 				log_comb := log_factorial(n_trials) - log_factorial(k) - log_factorial(n_trials - k)
-				pmf = math.exp(log_comb + f64(k) * math.log(p_prob) + f64(n_trials - k) * math.log(1.0 - p_prob))
+				pmf = math.exp(log_comb + f64(k) * math.log(p_prob) + f64(n_trials -
+					k) * math.log(1.0 - p_prob))
 			}
 			exp_val := f64(n_trials) * p_prob
 			var_val := f64(n_trials) * p_prob * (1.0 - p_prob)
@@ -1097,7 +1153,8 @@ fn main() {
 		out << '========================================================================\n'
 
 		w.set('txt_dist_report', out.join('\n'))
-		append_ledger(mut w, 'Distribution Evaluation: ' + model, 'Evaluated probability for x = ${x_val}')
+		append_ledger(mut w, 'Distribution Evaluation: ' + model,
+			'Evaluated probability for x = ${x_val}')
 		w.toast('Computed probability metrics!')
 	})
 
@@ -1113,7 +1170,9 @@ fn main() {
 			z := if st.sd_sample > 0 { (x - st.mean) / st.sd_sample } else { 0.0 }
 			transformed << '${z:.4f}'
 		}
-		w.set('txt_clean_output', ' Z-SCORE NORMALIZED DATA (Mean=0, SD=1):\n\n' + transformed.join(', '))
+		w.set('txt_clean_output',
+
+			' Z-SCORE NORMALIZED DATA (Mean=0, SD=1):\n\n' + transformed.join(', '))
 		w.toast('Transformed to Z-Scores!')
 	})
 
@@ -1153,7 +1212,8 @@ fn main() {
 				filtered << '${x:.2f}'
 			}
 		}
-		w.set('txt_clean_output', ' OUTLIER-CLEANSED DATASET (Filtered ${st.outliers.len} outliers):\n\n' + filtered.join(', '))
+		w.set('txt_clean_output',
+			' OUTLIER-CLEANSED DATASET (Filtered ${st.outliers.len} outliers):\n\n' + filtered.join(', '))
 		w.toast('Filtered ${st.outliers.len} outliers!')
 	})
 
@@ -1161,8 +1221,12 @@ fn main() {
 		mut data := parse_numbers(w.get('txt_data_a'))
 		data.sort()
 		mut out_strs := []string{}
-		for x in data { out_strs << '${x:.2f}' }
-		w.set('txt_clean_output', ' SORTED ASCENDING DATASET (N=${data.len}):\n\n' + out_strs.join(', '))
+		for x in data {
+			out_strs << '${x:.2f}'
+		}
+		w.set('txt_clean_output',
+
+			' SORTED ASCENDING DATASET (N=${data.len}):\n\n' + out_strs.join(', '))
 		w.toast('Sorted data ascending!')
 	})
 
@@ -1172,7 +1236,8 @@ fn main() {
 	win.on_click('btn_ds_iris', fn [run_sample_a_analysis] (mut w simplegui.SimpleWindow) {
 		iris_data := '5.1, 4.9, 4.7, 4.6, 5.0, 5.4, 4.6, 5.0, 4.4, 4.9, 5.4, 4.8, 4.8, 4.3, 5.8, 5.7, 5.4, 5.1, 5.7, 5.1, 5.4, 5.1, 4.6, 5.1, 4.8, 5.0, 5.0, 5.2, 5.2, 4.7, 4.8, 5.4, 5.2, 5.5, 4.9, 5.0, 5.5, 4.9, 4.4, 5.1, 5.0, 4.5, 4.4, 5.0, 5.1, 4.8, 5.1, 4.6, 5.3, 5.0'
 		w.set('txt_data_a', iris_data)
-		w.set('txt_bench_info', ' Loaded Fisher\'s Iris Setosa Sepal Length (cm):\n50 botanical observations measured by Ronald Fisher in 1936.')
+		w.set('txt_bench_info',
+			" Loaded Fisher's Iris Setosa Sepal Length (cm):\n50 botanical observations measured by Ronald Fisher in 1936.")
 		run_sample_a_analysis(mut w)
 		w.toast('Loaded Iris Dataset!')
 	})
@@ -1180,7 +1245,8 @@ fn main() {
 	win.on_click('btn_ds_exam', fn [run_sample_a_analysis] (mut w simplegui.SimpleWindow) {
 		exam_data := '88.5, 92.0, 78.5, 85.0, 94.5, 89.0, 72.0, 96.0, 84.5, 90.0, 45.0, 52.0, 48.5, 55.0, 50.0, 91.5, 87.0, 93.5, 76.0, 88.0, 49.0, 53.5, 51.0, 95.0, 89.5, 82.0, 77.5, 90.5, 86.0, 92.5'
 		w.set('txt_data_a', exam_data)
-		w.set('txt_bench_info', ' Loaded Student Exam Scores (Bimodal Distribution):\n30 test scores demonstrating two distinct student clusters.')
+		w.set('txt_bench_info',
+			' Loaded Student Exam Scores (Bimodal Distribution):\n30 test scores demonstrating two distinct student clusters.')
 		run_sample_a_analysis(mut w)
 		w.toast('Loaded Exam Scores!')
 	})
@@ -1188,7 +1254,8 @@ fn main() {
 	win.on_click('btn_ds_stock', fn [run_sample_a_analysis] (mut w simplegui.SimpleWindow) {
 		stock_data := '0.012, -0.008, 0.025, 0.004, -0.015, 0.009, -0.032, 0.018, 0.005, -0.002, 0.014, -0.011, 0.048, -0.021, 0.007, -0.005, 0.019, -0.003, 0.008, -0.014, 0.022, -0.009, 0.031, -0.018, 0.006, -0.045, 0.015, -0.007, 0.011, -0.013, 0.028, -0.016, 0.009, -0.004, 0.017, -0.025, 0.062, -0.019, 0.008, -0.012'
 		w.set('txt_data_a', stock_data)
-		w.set('txt_bench_info', ' Loaded S&P 500 Daily Returns (Fat-tailed / Leptokurtic):\n40 trading days of equity returns exhibiting high kurtosis and volatility jumps.')
+		w.set('txt_bench_info',
+			' Loaded S&P 500 Daily Returns (Fat-tailed / Leptokurtic):\n40 trading days of equity returns exhibiting high kurtosis and volatility jumps.')
 		run_sample_a_analysis(mut w)
 		w.toast('Loaded Stock Returns Dataset!')
 	})
@@ -1198,14 +1265,16 @@ fn main() {
 		post_trial := '128.5, 125.0, 131.2, 134.0, 124.5, 132.8, 136.0, 126.4, 129.5, 133.0, 127.8, 129.0, 135.2, 123.0, 130.5, 135.0, 126.0, 131.4, 132.0, 125.2, 128.0, 132.5, 134.8, 124.0, 129.0'
 		w.set('txt_hypo_a', pre_trial)
 		w.set('txt_hypo_b', post_trial)
-		w.set('txt_bench_info', ' Loaded Hypertension Clinical Drug Trial (Pre vs Post):\n25 paired blood pressure readings demonstrating significant clinical reduction.')
+		w.set('txt_bench_info',
+			' Loaded Hypertension Clinical Drug Trial (Pre vs Post):\n25 paired blood pressure readings demonstrating significant clinical reduction.')
 		w.toast('Loaded Drug Trial Dataset into Hypothesis Testing!')
 	})
 
 	win.on_click('btn_ds_heights', fn [run_sample_a_analysis] (mut w simplegui.SimpleWindow) {
 		heights := '172.5, 168.0, 175.2, 180.1, 165.4, 178.9, 182.0, 169.5, 174.0, 177.3, 171.0, 173.8, 179.4, 166.8, 176.2, 181.5, 170.2, 175.0, 178.0, 169.0, 173.5, 177.0, 180.5, 167.5, 174.8, 172.0, 176.5, 179.0, 171.5, 175.8, 183.2, 164.0, 178.5, 174.2, 170.8'
 		w.set('txt_data_a', heights)
-		w.set('txt_bench_info', ' Loaded Adult Heights Dataset (Normal Distribution N=35):\nGaussian bell curve sample with mean ~174.5 cm and standard deviation ~4.8 cm.')
+		w.set('txt_bench_info',
+			' Loaded Adult Heights Dataset (Normal Distribution N=35):\nGaussian bell curve sample with mean ~174.5 cm and standard deviation ~4.8 cm.')
 		run_sample_a_analysis(mut w)
 		w.toast('Loaded Heights Dataset!')
 	})
@@ -1213,7 +1282,8 @@ fn main() {
 	win.on_click('btn_ds_skewed', fn [run_sample_a_analysis] (mut w simplegui.SimpleWindow) {
 		houses := '240.0, 260.0, 275.0, 290.0, 310.0, 325.0, 340.0, 350.0, 365.0, 380.0, 395.0, 410.0, 425.0, 450.0, 475.0, 500.0, 525.0, 550.0, 600.0, 650.0, 700.0, 750.0, 850.0, 950.0, 1100.0, 1250.0, 1500.0, 1800.0, 2200.0, 2800.0'
 		w.set('txt_data_a', houses)
-		w.set('txt_bench_info', ' Loaded Real Estate Home Prices (in thousands $, Highly Right-Skewed):\n30 housing valuations demonstrating substantial positive skewness and long tail.')
+		w.set('txt_bench_info',
+			' Loaded Real Estate Home Prices (in thousands $, Highly Right-Skewed):\n30 housing valuations demonstrating substantial positive skewness and long tail.')
 		run_sample_a_analysis(mut w)
 		w.toast('Loaded Home Prices Dataset!')
 	})

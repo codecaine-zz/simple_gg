@@ -120,7 +120,8 @@ pub fn verify_jwt_with(token string, secret string, opts VerifyOptions) !JWTClai
 	if claims.iat > 0 && claims.iat > now + leeway {
 		return error('token issued in the future (iat: ${claims.iat}, now: ${now})')
 	}
-	if opts.max_age_seconds > 0 && (claims.iat == 0 || now - claims.iat > opts.max_age_seconds + leeway) {
+	if opts.max_age_seconds > 0
+		&& (claims.iat == 0 || now - claims.iat > opts.max_age_seconds + leeway) {
 		return error('token exceeds max age of ${opts.max_age_seconds}s')
 	}
 	if opts.issuer != '' && claims.iss != opts.issuer {

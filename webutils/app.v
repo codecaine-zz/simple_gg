@@ -67,7 +67,7 @@ pub struct AppConfig {
 pub:
 	views_dir        string = 'views' // template directory
 	view_ext         string = '.html' // template extension
-	view_cache       bool   = true  // cache compiled templates (false = live reload while developing)
+	view_cache       bool   = true    // cache compiled templates (false = live reload while developing)
 	secret           string // HMAC key for signed cookies, sessions and CSRF; random per process when empty
 	max_body_bytes   int  = 1024 * 1024 // larger request bodies get 413
 	security_headers bool = true        // helmet-style headers on every response
@@ -301,7 +301,11 @@ fn join_prefix(prefix string, pattern string) string {
 	if pattern == '' || pattern == '/' {
 		return prefix
 	}
-	return prefix + if pattern.starts_with('/') { pattern } else { '/' + pattern }
+	return prefix + if pattern.starts_with('/') {
+		pattern
+	} else {
+		'/' + pattern
+	}
 }
 
 fn prefix_matches(prefix string, path string) bool {
@@ -461,9 +465,7 @@ pub fn (mut app App) handle(req http.Request) http.Response {
 		}
 	}
 	c.chain = chain
-	c.next() or {
-		app.error_handler(mut c, err)
-	}
+	c.next() or { app.error_handler(mut c, err) }
 	return c.to_response()
 }
 

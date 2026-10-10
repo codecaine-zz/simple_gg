@@ -4,7 +4,8 @@ import simplegui
 
 fn main() {
 	// 1. Create modern desktop window (Width: 1080px, Height: 780px)
-	mut win := simplegui.new_simple_window('Modern UI Suite & Ergonomic Enhancements - SimpleGUI', 1080, 780)
+	mut win := simplegui.new_simple_window('Modern UI Suite & Ergonomic Enhancements - SimpleGUI',
+		1080, 780)
 	win.set_fullscreen(true)
 	win.set_theme('Executive Slate')
 
@@ -32,19 +33,45 @@ fn main() {
 	// ---------------------------------------------------------
 	win.begin_tab_page('tab_analytics', 0)
 	win.begin_row('analytics_top_row')
-	
+
 	// Navigation Rail preview
 	nav_items := [
-		simplegui.SidebarItem{ id: 'dash', title: 'Dashboard', icon: 'home', is_active: true },
-		simplegui.SidebarItem{ id: 'data', title: 'Cluster', icon: 'database', badge: '12' },
-		simplegui.SidebarItem{ id: 'docs', title: 'Docs', icon: 'folder' },
-		simplegui.SidebarItem{ id: 'settings', title: 'Config', icon: 'gear' },
+		simplegui.SidebarItem{
+			id:        'dash'
+			title:     'Dashboard'
+			icon:      'home'
+			is_active: true
+		},
+		simplegui.SidebarItem{
+			id:    'data'
+			title: 'Cluster'
+			icon:  'database'
+			badge: '12'
+		},
+		simplegui.SidebarItem{
+			id:    'docs'
+			title: 'Docs'
+			icon:  'folder'
+		},
+		simplegui.SidebarItem{
+			id:    'settings'
+			title: 'Config'
+			icon:  'gear'
+		},
 	]
 	win.add_nav_rail('app_rail', nav_items)
 
 	// Gradient Spline Area Chart
+
 	win.add_area_chart('spline_revenue', 'Monthly ARR Growth ($k)', [
-		12.5, 18.0, 24.5, 42.0, 38.0, 65.0, 84.0, 96.5,
+		12.5,
+		18.0,
+		24.5,
+		42.0,
+		38.0,
+		65.0,
+		84.0,
+		96.5,
 	]).set_elevation(2)
 	win.control('spline_revenue').set_width(940)
 	win.end_row()
@@ -57,7 +84,9 @@ fn main() {
 	matrix[3][10] = 5
 	matrix[4][15] = 4
 	matrix[5][20] = 3
-	win.add_activity_heatmap('gh_heatmap', 'Developer Contribution Matrix (Last 26 Weeks)', 26, matrix).set_elevation(2)
+
+	win.add_activity_heatmap('gh_heatmap', 'Developer Contribution Matrix (Last 26 Weeks)', 26,
+		matrix).set_elevation(2)
 
 	win.add_subheading('Auto-Wrapping Flow Layout (Responsive Chip Cloud)')
 	win.begin_flow_layout('flow_tags', 8)
@@ -88,22 +117,23 @@ fn main() {
 	headers := ['Name', 'Size', 'Type']
 	tree_nodes := [
 		simplegui.TreeTableRow{
-			id: 'src'
-			values: ['src/', '--', 'Folder']
+			id:          'src'
+			values:      ['src/', '--', 'Folder']
 			is_expanded: true
-			children: [
-				simplegui.TreeTableRow{ id: 'main', values: ['main.v', '4.2 KB', 'V Source'] },
-				simplegui.TreeTableRow{ id: 'render', values: ['render.v', '125.1 KB', 'V Source'] },
-				simplegui.TreeTableRow{ id: 'events', values: ['events.v', '54.3 KB', 'V Source'] },
-			]
+			children:    [simplegui.TreeTableRow{
+				id:     'main'
+				values: ['main.v', '4.2 KB', 'V Source']
+			}, simplegui.TreeTableRow{ id: 'render', values: ['render.v', '125.1 KB', 'V Source'] },
+				simplegui.TreeTableRow{ id: 'events', values: ['events.v', '54.3 KB', 'V Source'] }]
 		},
 		simplegui.TreeTableRow{
-			id: 'assets'
-			values: ['assets/', '--', 'Folder']
+			id:          'assets'
+			values:      ['assets/', '--', 'Folder']
 			is_expanded: false
-			children: [
-				simplegui.TreeTableRow{ id: 'logo', values: ['logo.png', '48.0 KB', 'Image'] },
-			]
+			children:    [simplegui.TreeTableRow{
+				id:     'logo'
+				values: ['logo.png', '48.0 KB', 'Image']
+			}]
 		},
 	]
 	win.add_tree_table('tree_grid', headers, tree_nodes).set_elevation(2)
@@ -118,7 +148,7 @@ fn main() {
 	// ---------------------------------------------------------
 	win.begin_tab_page('tab_form_md', 2)
 	win.add_subheading('Form Ergonomics & Masked Inputs')
-	
+
 	win.begin_row('form_row_1')
 	win.add_label('lbl_ph', 'Phone Number Mask:')
 	win.control('lbl_ph').set_width(200)
@@ -154,71 +184,76 @@ fn main() {
 		win.show_drawer('Workspace Services & Quick Actions', 380, 'right', fn (mut w simplegui.SimpleWindow) {
 			w.add_drawer_section('Cloud Infrastructure')
 			w.add_drawer_item(simplegui.DrawerItem{
-				id: 'dr_cluster'
-				title: 'Database Clusters'
-				subtitle: '3 Active nodes running v16.2'
-				icon: 'database'
-				badge: 'PRO'
+				id:        'dr_cluster'
+				title:     'Database Clusters'
+				subtitle:  '3 Active nodes running v16.2'
+				icon:      'database'
+				badge:     'PRO'
 				is_active: true
-				on_click: fn (mut win simplegui.SimpleWindow) {
-					win.push_toast('Database Cluster', 'Switched to primary database cluster node.', 'info', 2000)
+				on_click:  fn (mut win simplegui.SimpleWindow) {
+					win.push_toast('Database Cluster',
+						'Switched to primary database cluster node.', 'info', 2000)
 				}
 			})
 			w.add_drawer_item(simplegui.DrawerItem{
-				id: 'dr_deploy'
-				title: 'Cloud Deployments'
+				id:       'dr_deploy'
+				title:    'Cloud Deployments'
 				subtitle: 'us-east-1 & eu-central-1 regions'
-				icon: 'cloud'
-				badge: 'LIVE'
+				icon:     'cloud'
+				badge:    'LIVE'
 				on_click: fn (mut win simplegui.SimpleWindow) {
-					win.push_toast('Cloud Deployments', 'Syncing regional deployment status.', 'info', 2000)
+					win.push_toast('Cloud Deployments', 'Syncing regional deployment status.',
+						'info', 2000)
 				}
 			})
 			w.add_drawer_item(simplegui.DrawerItem{
-				id: 'dr_sec'
-				title: 'Security & Access Keys'
+				id:       'dr_sec'
+				title:    'Security & Access Keys'
 				subtitle: '2FA enforced, rotating certs'
-				icon: 'lock'
+				icon:     'lock'
 				on_click: fn (mut win simplegui.SimpleWindow) {
-					win.push_toast('Security Keys', 'Rotating temporary API session tokens.', 'warning', 2000)
+					win.push_toast('Security Keys', 'Rotating temporary API session tokens.',
+						'warning', 2000)
 				}
 			})
 
 			w.add_drawer_section('Workspace Tools')
 			w.add_drawer_item(simplegui.DrawerItem{
-				id: 'dr_repos'
-				title: 'Repository Activity Log'
+				id:       'dr_repos'
+				title:    'Repository Activity Log'
 				subtitle: 'Latest commits & branch merges'
-				icon: 'folder'
-				badge: '24'
+				icon:     'folder'
+				badge:    '24'
 				on_click: fn (mut win simplegui.SimpleWindow) {
-					win.push_toast('Repository Log', 'Loaded 24 commit entries for simple_gg.', 'info', 2000)
+					win.push_toast('Repository Log', 'Loaded 24 commit entries for simple_gg.',
+						'info', 2000)
 				}
 			})
 			w.add_drawer_item(simplegui.DrawerItem{
-				id: 'dr_bell'
-				title: 'Telemetry Notifications'
+				id:       'dr_bell'
+				title:    'Telemetry Notifications'
 				subtitle: 'Real-time health alerts enabled'
-				icon: 'bell'
-				badge: 'NEW'
+				icon:     'bell'
+				badge:    'NEW'
 				on_click: fn (mut win simplegui.SimpleWindow) {
 					win.push_toast('Notifications', 'All telemetry streams healthy.', 'info', 2000)
 				}
 			})
 			w.add_drawer_item(simplegui.DrawerItem{
-				id: 'dr_diag'
-				title: 'System Diagnostics & Profiling'
+				id:       'dr_diag'
+				title:    'System Diagnostics & Profiling'
 				subtitle: 'Memory profiling & 60 FPS graphics'
-				icon: 'gear'
+				icon:     'gear'
 				on_click: fn (mut win simplegui.SimpleWindow) {
-					win.push_toast('Diagnostics', 'Memory usage nominal: 14.2 MB allocated.', 'info', 2000)
+					win.push_toast('Diagnostics', 'Memory usage nominal: 14.2 MB allocated.',
+						'info', 2000)
 				}
 			})
 			w.add_drawer_item(simplegui.DrawerItem{
-				id: 'dr_user'
-				title: 'User Profile & Identity'
+				id:       'dr_user'
+				title:    'User Profile & Identity'
 				subtitle: 'developer@workspace.dev'
-				icon: 'user'
+				icon:     'user'
 				on_click: fn (mut win simplegui.SimpleWindow) {
 					win.push_toast('User Account', 'Logged in as developer.', 'info', 2000)
 				}

@@ -12,7 +12,11 @@ fn test_hdr_color_creation() {
 }
 
 fn test_hdr_color_from_rgb() {
-	rgb := RGB{r: 255, g: 128, b: 0}
+	rgb := RGB{
+		r: 255
+		g: 128
+		b: 0
+	}
 	hdr := hdr_color_from_rgb(rgb, 2.0)
 	assert hdr.is_hdr()
 	assert math.abs(hdr.r - 2.0) < 0.01
@@ -27,7 +31,11 @@ fn test_hdr_color_from_rgb() {
 }
 
 fn test_hdr_color_from_exposure() {
-	rgb := RGB{r: 100, g: 200, b: 50}
+	rgb := RGB{
+		r: 100
+		g: 200
+		b: 50
+	}
 	hdr := hdr_color_from_exposure(rgb, 1.0) // 1 stop = 2x
 	assert hdr.is_hdr()
 	assert math.abs(hdr.headroom - 2.0) < 0.01
@@ -40,7 +48,11 @@ fn test_hdr_color_from_exposure() {
 }
 
 fn test_applying_content_headroom() {
-	rgb := RGB{r: 255, g: 255, b: 255}
+	rgb := RGB{
+		r: 255
+		g: 255
+		b: 255
+	}
 	hdr := hdr_color_from_rgb(rgb, 1.5)
 	scaled := hdr.applying_content_headroom(3.0)
 	assert math.abs(scaled.r - 3.0) < 0.01

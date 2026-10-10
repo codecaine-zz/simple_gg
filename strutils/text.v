@@ -303,11 +303,12 @@ pub fn count_words(s string) int {
 }
 
 fn rune_width(r rune) int {
-	if r == 0 || (r < 0x20) || (r >= 0x7f && r < 0xa0) {
+	if r == 0 || r < 0x20 || (r >= 0x7f && r < 0xa0) {
 		return 0
 	}
-	if (r >= 0x0300 && r <= 0x036f) || (r >= 0x200b && r <= 0x200f) || (r >= 0x20d0 && r <= 0x20ff)
-		|| (r >= 0xfe00 && r <= 0xfe0f) || r == 0x200d {
+	if (r >= 0x0300 && r <= 0x036f) || (r >= 0x200b && r <= 0x200f)
+		|| (r >= 0x20d0 && r <= 0x20ff) || (r >= 0xfe00 && r <= 0xfe0f)
+		|| r == 0x200d {
 		return 0
 	}
 	if (r >= 0x1100 && r <= 0x115f) || (r >= 0x2e80 && r <= 0xa4cf && r != 0x303f)

@@ -7,7 +7,8 @@ fn main() {
 	app.set_description('Network Port Scanner & Service Prober CLI')
 
 	app.add_flag_string('host', 'h', '127.0.0.1', 'Target hostname or IP address')
-	app.add_flag_string('ports', 'p', '21,22,80,443,3306,5432,6379,8080', 'Comma-separated port list or range (e.g. 80,443 or 8000-8010)')
+	app.add_flag_string('ports', 'p', '21,22,80,443,3306,5432,6379,8080',
+		'Comma-separated port list or range (e.g. 80,443 or 8000-8010)')
 	app.add_flag_int('timeout', 't', 800, 'Connection timeout per port in milliseconds')
 	app.add_flag_bool('interactive', 'x', false, 'Launch interactive network scanner')
 

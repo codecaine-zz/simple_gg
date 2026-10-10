@@ -92,14 +92,16 @@ fn test_transformations() {
 	xs, ys := unzip(zip([1, 2], ['a', 'b']))
 	assert xs == [1, 2] && ys == ['a', 'b']
 	assert interleave([1, 3, 5, 7], [2, 4]) == [1, 2, 3, 4, 5, 7]
-	assert transpose([[1, 2, 3], [4, 5, 6]]) == [[1, 4], [2, 5], [3, 6]]
+	assert transpose([[1, 2, 3], [4, 5, 6]]) == [[1, 4], [2, 5],
+		[3, 6]]
 	assert range_int(0, 10, 3) == [0, 3, 6, 9]
 	assert range_int(5, 0, -2) == [5, 3, 1]
 	assert range_int(0, 5, 0) == []int{}
 }
 
 fn test_ordering() {
-	emps := [Emp{'a', 'x', 30}, Emp{'b', 'y', 25}, Emp{'c', 'z', 30}, Emp{'d', 'w', 25}]
+	emps := [Emp{'a', 'x', 30}, Emp{'b', 'y', 25}, Emp{'c', 'z', 30},
+		Emp{'d', 'w', 25}]
 	sorted := sorted_by(emps, fn (e Emp) int {
 		return e.age
 	})
@@ -121,10 +123,11 @@ fn test_ordering() {
 
 fn test_combinatorics() {
 	assert cartesian_product([1, 2], ['a']).len == 2
-	assert combinations([1, 2, 3, 4], 2) == [[1, 2], [1, 3], [1, 4], [2, 3], [2, 4], [3, 4]]
+	assert combinations([1, 2, 3, 4], 2) == [[1, 2], [1, 3], [1, 4],
+		[2, 3], [2, 4], [3, 4]]
 	assert combinations([1, 2], 3) == [][]int{}
 	assert combinations([1, 2], 0) == [[]int{}]
-	assert permutations([1, 2, 3]) == [[1, 2, 3], [1, 3, 2], [2, 1, 3], [2, 3, 1], [3, 1, 2],
-		[3, 2, 1]]
+	assert permutations([1, 2, 3]) == [[1, 2, 3], [1, 3, 2], [2, 1, 3],
+		[2, 3, 1], [3, 1, 2], [3, 2, 1]]
 	assert permutations([1, 2, 3, 4]).len == 24
 }

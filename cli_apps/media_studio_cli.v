@@ -21,17 +21,38 @@ fn main() {
 
 	app.info('Installed media engines:')
 	app.print_kv({
-		'FFmpeg': if app.command_exists('ffmpeg') { app.green('Available') } else { app.dim('Missing') },
-		'ImageMagick': if app.command_exists('magick') || app.command_exists('convert') { app.green('Available') } else { app.dim('Missing') },
-		'yt-dlp': if app.command_exists('yt-dlp') { app.green('Available') } else { app.dim('Missing') },
-		'Tesseract OCR': if app.command_exists('tesseract') { app.green('Available') } else { app.dim('Missing') },
-		'Speech (say)': if app.command_exists('say') { app.green('Available') } else { app.dim('Missing') },
+		'FFmpeg':        if app.command_exists('ffmpeg') {
+			app.green('Available')
+		} else {
+			app.dim('Missing')
+		}
+		'ImageMagick':   if app.command_exists('magick') || app.command_exists('convert') {
+			app.green('Available')
+		} else {
+			app.dim('Missing')
+		}
+		'yt-dlp':        if app.command_exists('yt-dlp') {
+			app.green('Available')
+		} else {
+			app.dim('Missing')
+		}
+		'Tesseract OCR': if app.command_exists('tesseract') {
+			app.green('Available')
+		} else {
+			app.dim('Missing')
+		}
+		'Speech (say)':  if app.command_exists('say') {
+			app.green('Available')
+		} else {
+			app.dim('Missing')
+		}
 	})
 	app.println(app.dim('Tip: Run with -x for the interactive master media workstation.'))
 }
 
 fn run_interactive(mut app simplecli.SimpleCli) {
-	app.panel('Media Studio Operations Hub', 'Unified launcher for audio, video, graphics, and text processing.')
+	app.panel('Media Studio Operations Hub',
+		'Unified launcher for audio, video, graphics, and text processing.')
 	choice := app.select('Select Media Subsystem:', [
 		'Audio Extraction (FFmpeg)',
 		'Image Resizing / Thumbnail (ImageMagick)',

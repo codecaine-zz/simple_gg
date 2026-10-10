@@ -118,7 +118,8 @@ pub fn exec_sql_param(mut db sqlite.DB, query string, param string) ! {
 
 // Checks if a table exists in the database.
 pub fn table_exists(mut db sqlite.DB, table_name string) !bool {
-	rows := db.exec_param("SELECT name FROM sqlite_master WHERE type='table' AND name=?", table_name) or { return err }
+	rows := db.exec_param("SELECT name FROM sqlite_master WHERE type='table' AND name=?",
+		table_name) or { return err }
 	return rows.len > 0
 }
 

@@ -360,7 +360,8 @@ pub fn (c &Context) accepts(types ...string) string {
 					q = kv[1].f64()
 				}
 			}
-			ok := mt == full || mt == '*/*' || (mt.ends_with('/*') && full.starts_with(mt[..mt.len - 1]))
+			ok := mt == full || mt == '*/*'
+				|| (mt.ends_with('/*') && full.starts_with(mt[..mt.len - 1]))
 			if ok && q > best_q {
 				best_q = q
 				best = t
@@ -624,8 +625,8 @@ fn valid_cookie_name(n string) bool {
 		return false
 	}
 	for ch in n {
-		if ch <= 0x20 || ch >= 0x7f || ch in [`(`, `)`, `<`, `>`, `@`, `,`, `;`, `:`, `\\`, `"`,
-			`/`, `[`, `]`, `?`, `=`, `{`, `}`] {
+		if ch <= 0x20 || ch >= 0x7f
+			|| ch in [`(`, `)`, `<`, `>`, `@`, `,`, `;`, `:`, `\\`, `"`, `/`, `[`, `]`, `?`, `=`, `{`, `}`] {
 			return false
 		}
 	}
@@ -659,6 +660,7 @@ pub fn (mut c Context) set_cookie(name string, value string, opts CookieOptions)
 		.strict { '; SameSite=Strict' }
 		.no_restriction { '; SameSite=None' }
 	}
+
 	if opts.secure || opts.same_site == .no_restriction || c.secure() {
 		s += '; Secure'
 	}

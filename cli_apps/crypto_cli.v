@@ -87,20 +87,18 @@ fn main() {
 }
 
 fn run_interactive(mut app simplecli.SimpleCli) {
-	app.panel('Crypto Studio REPL', 'Supported algorithms: MD5, SHA-1, SHA-256, SHA-512, BCrypt, AES-256.')
+	app.panel('Crypto Studio REPL',
+		'Supported algorithms: MD5, SHA-1, SHA-256, SHA-512, BCrypt, AES-256.')
 	text := app.prompt('Enter plaintext to process', 'MasterPassword123!')
 	h_md5 := app.crypto_md5(text)
 	h_sha256 := app.crypto_sha256(text)
 	h_sha512 := app.crypto_sha512(text)
 	h_bcrypt := app.crypto_bcrypt_hash(text) or { 'Failed' }
 
-	app.table(
-		['Algorithm', 'Hash / Digest'],
-		[
-			['MD5', h_md5],
-			['SHA-256', h_sha256],
-			['SHA-512', h_sha512[0..32] + '...'],
-			['BCrypt', h_bcrypt],
-		]
-	)
+	app.table(['Algorithm', 'Hash / Digest'], [
+		['MD5', h_md5],
+		['SHA-256', h_sha256],
+		['SHA-512', h_sha512[0..32] + '...'],
+		['BCrypt', h_bcrypt],
+	])
 }

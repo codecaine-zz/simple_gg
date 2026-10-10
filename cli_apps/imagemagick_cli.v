@@ -79,7 +79,8 @@ fn main() {
 }
 
 fn run_interactive(mut app simplecli.SimpleCli, magick_cmd string) {
-	app.panel('ImageMagick Operations Wizard', 'Resize, compress, convert formats, or apply image filters.')
+	app.panel('ImageMagick Operations Wizard',
+		'Resize, compress, convert formats, or apply image filters.')
 	input := app.prompt('Enter input image path', 'photo.png')
 	choice := app.select('Select Action:', [
 		'Convert to WebP (Optimized Web Format)',
@@ -96,7 +97,8 @@ fn run_interactive(mut app simplecli.SimpleCli, magick_cmd string) {
 		}
 		'Generate 256x256 Thumbnail' {
 			out := 'thumb_256.png'
-			app.exec_safe(magick_cmd, [input, '-resize', '256x256^', '-gravity', 'center', '-extent', '256x256', out])
+			app.exec_safe(magick_cmd, [input, '-resize', '256x256^', '-gravity', 'center', '-extent',
+				'256x256', out])
 			app.success('Created thumbnail ${out}')
 		}
 		'Convert to Grayscale JPEG (Quality 90)' {

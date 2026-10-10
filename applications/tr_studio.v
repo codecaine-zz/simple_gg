@@ -36,94 +36,94 @@ struct TrRecipe {
 fn get_all_tr_recipes() []TrRecipe {
 	return [
 		TrRecipe{
-			title: ' UPPERCASE Everything ([:lower:] -> [:upper:])'
-			mode: 'translate'
-			str1: '[:lower:]'
-			str2: '[:upper:]'
-			complement: false
+			title:       ' UPPERCASE Everything ([:lower:] -> [:upper:])'
+			mode:        'translate'
+			str1:        '[:lower:]'
+			str2:        '[:upper:]'
+			complement:  false
 			sample_data: 'the quick brown fox jumps over the lazy dog.\nsimplegui high performance macos desktop engine.'
-			desc: 'Converts all lowercase letters to uppercase.'
+			desc:        'Converts all lowercase letters to uppercase.'
 		},
 		TrRecipe{
-			title: ' lowercase Everything ([:upper:] -> [:lower:])'
-			mode: 'translate'
-			str1: '[:upper:]'
-			str2: '[:lower:]'
-			complement: false
+			title:       ' lowercase Everything ([:upper:] -> [:lower:])'
+			mode:        'translate'
+			str1:        '[:upper:]'
+			str2:        '[:lower:]'
+			complement:  false
 			sample_data: 'SYSTEM DIAGNOSTICS: MEMORY UTILIZATION AT 34.2%\nALL 18 THEME PALETTES CALIBRATED.'
-			desc: 'Converts all uppercase letters to lowercase.'
+			desc:        'Converts all uppercase letters to lowercase.'
 		},
 		TrRecipe{
-			title: ' Strip Windows CRLF Line Endings (-d \\r)'
-			mode: 'delete'
-			str1: r'\r'
-			str2: ''
-			complement: false
-			sample_data: "Line 1 with Windows CRLF\r\nLine 2 with Windows CRLF\r\nLine 3 with Windows CRLF\r\n"
-			desc: 'Removes carriage returns (\\r) converting Windows files cleanly to Unix.'
+			title:       ' Strip Windows CRLF Line Endings (-d \\r)'
+			mode:        'delete'
+			str1:        r'\r'
+			str2:        ''
+			complement:  false
+			sample_data: 'Line 1 with Windows CRLF\r\nLine 2 with Windows CRLF\r\nLine 3 with Windows CRLF\r\n'
+			desc:        'Removes carriage returns (\\r) converting Windows files cleanly to Unix.'
 		},
 		TrRecipe{
-			title: ' Squeeze Multiple Spaces into Single Space (-s " ")'
-			mode: 'squeeze'
-			str1: ' '
-			str2: ''
-			complement: false
+			title:       ' Squeeze Multiple Spaces into Single Space (-s " ")'
+			mode:        'squeeze'
+			str1:        ' '
+			str2:        ''
+			complement:  false
 			sample_data: 'Column1     Column2          Column3    Column4\nUser       Admin            Active     192.168.1.1'
-			desc: 'Collapses redundant consecutive spaces into a single space.'
+			desc:        'Collapses redundant consecutive spaces into a single space.'
 		},
 		TrRecipe{
-			title: ' Squeeze Multiple Blank Lines (-s \\n)'
-			mode: 'squeeze'
-			str1: r'\n'
-			str2: ''
-			complement: false
-			sample_data: "Paragraph 1: Introduction\n\n\n\n\nParagraph 2: Implementation\n\n\n\n\nParagraph 3: Conclusion"
-			desc: 'Collapses multiple consecutive newlines down to single line breaks.'
+			title:       ' Squeeze Multiple Blank Lines (-s \\n)'
+			mode:        'squeeze'
+			str1:        r'\n'
+			str2:        ''
+			complement:  false
+			sample_data: 'Paragraph 1: Introduction\n\n\n\n\nParagraph 2: Implementation\n\n\n\n\nParagraph 3: Conclusion'
+			desc:        'Collapses multiple consecutive newlines down to single line breaks.'
 		},
 		TrRecipe{
-			title: ' Convert Newlines to Comma Separator (\\n -> ,)'
-			mode: 'translate'
-			str1: r'\n'
-			str2: ','
-			complement: false
-			sample_data: "apple\nbanana\ncherry\ndate\nelderberry\nfig\ngrape"
-			desc: 'Converts vertical list items into a single comma-separated row.'
+			title:       ' Convert Newlines to Comma Separator (\\n -> ,)'
+			mode:        'translate'
+			str1:        r'\n'
+			str2:        ','
+			complement:  false
+			sample_data: 'apple\nbanana\ncherry\ndate\nelderberry\nfig\ngrape'
+			desc:        'Converts vertical list items into a single comma-separated row.'
 		},
 		TrRecipe{
-			title: ' Convert Spaces to Newlines (Word Per Line)'
-			mode: 'translate'
-			str1: ' '
-			str2: r'\n'
-			complement: false
+			title:       ' Convert Spaces to Newlines (Word Per Line)'
+			mode:        'translate'
+			str1:        ' '
+			str2:        r'\n'
+			complement:  false
 			sample_data: 'SimpleGUI provides fast intuitive native macOS controls in V language'
-			desc: 'Splits space-delimited text into one word per line.'
+			desc:        'Splits space-delimited text into one word per line.'
 		},
 		TrRecipe{
-			title: ' Strip All Non-Printable Characters (-cd [:print:]\\n)'
-			mode: 'delete'
-			str1: r'[:print:]\n'
-			str2: ''
-			complement: true
-			sample_data: "Clean standard line\x01\x02\x03 with binary noise\x00 and control codes\x1b"
-			desc: 'Deletes all non-printable/corrupted bytes, keeping only printable ASCII and newlines.'
+			title:       ' Strip All Non-Printable Characters (-cd [:print:]\\n)'
+			mode:        'delete'
+			str1:        r'[:print:]\n'
+			str2:        ''
+			complement:  true
+			sample_data: 'Clean standard line\x01\x02\x03 with binary noise\x00 and control codes\x1b'
+			desc:        'Deletes all non-printable/corrupted bytes, keeping only printable ASCII and newlines.'
 		},
 		TrRecipe{
-			title: ' Extract Only Digits / Numbers (-cd [:digit:]\\n)'
-			mode: 'delete'
-			str1: r'[:digit:]\n'
-			str2: ''
-			complement: true
-			sample_data: "Invoice #INV-2026-98124 | Amount: $18,450.00 USD\nOrder Reference: PO-88741-B | Tracking ID: 940011189956"
-			desc: 'Deletes all letters and punctuation, extracting only numeric digits.'
+			title:       ' Extract Only Digits / Numbers (-cd [:digit:]\\n)'
+			mode:        'delete'
+			str1:        r'[:digit:]\n'
+			str2:        ''
+			complement:  true
+			sample_data: 'Invoice #INV-2026-98124 | Amount: $18,450.00 USD\nOrder Reference: PO-88741-B | Tracking ID: 940011189956'
+			desc:        'Deletes all letters and punctuation, extracting only numeric digits.'
 		},
 		TrRecipe{
-			title: ' Classic ROT13 Cipher Translation'
-			mode: 'translate'
-			str1: 'A-Za-z'
-			str2: 'N-ZA-Mn-za-m'
-			complement: false
+			title:       ' Classic ROT13 Cipher Translation'
+			mode:        'translate'
+			str1:        'A-Za-z'
+			str2:        'N-ZA-Mn-za-m'
+			complement:  false
 			sample_data: 'SimpleGUI is super fast and lightweight!'
-			desc: 'Applies the 13-character Caesar rotation cipher (ROT13).'
+			desc:        'Applies the 13-character Caesar rotation cipher (ROT13).'
 		},
 	]
 }
@@ -153,7 +153,8 @@ fn main() {
 	})
 
 	tr_path := get_tr_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${tr_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Stream Worker (Zero UI Freezes)')
+	win.add_label('lbl_engine_info',
+		'Engine: ${tr_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Stream Worker (Zero UI Freezes)')
 
 	all_recipes := get_all_tr_recipes()
 
@@ -161,14 +162,14 @@ fn main() {
 	// Transformation Parameters & Mode
 	// -------------------------------------------------------------
 	win.begin_group_box('grp_params', 'Translation Mode & Character Set Mapping')
-	
+
 	win.begin_row('row_mode')
 	win.add_label('lbl_op_mode', 'Operation Mode:')
 	win.add_dropdown('dd_op_mode', [
 		'Translate (Set1 -> Set2)',
 		'Delete Characters (-d Set1)',
 		'Squeeze Repeats (-s Set1)',
-		'Delete & Squeeze (-ds Set1 Set2)'
+		'Delete & Squeeze (-ds Set1 Set2)',
 	], 'Translate (Set1 -> Set2)')
 	win.set_control_width('dd_op_mode', 220)
 
@@ -189,7 +190,7 @@ fn main() {
 	// Recipes Bar & File Input
 	// -------------------------------------------------------------
 	win.begin_group_box('grp_recipes_files', 'Quick Cleansing Recipes & Disk File Source')
-	
+
 	mut recipe_titles := ['-- Select a Fast Cleansing Recipe --']
 	for r in all_recipes {
 		recipe_titles << r.title
@@ -317,17 +318,28 @@ fn main() {
 				if res.exit_code == 0 {
 					out_str := res.output
 					win_main.set('txt_output_stream', out_str)
-					
-					char_count := out_str.len
-					line_count := if out_str.trim_space() != '' { out_str.trim_space().split_into_lines().len } else { 0 }
 
-					win_main.set('lbl_stats', ' Stats: SUCCESS  |  Chars: ${char_count}  |  Lines: ${line_count}  |  Duration: ${elapsed_ms} ms')
+					char_count := out_str.len
+					line_count := if out_str.trim_space() != '' {
+						out_str.trim_space().split_into_lines().len
+					} else {
+						0
+					}
+
+					win_main.set('lbl_stats',
+						' Stats: SUCCESS  |  Chars: ${char_count}  |  Lines: ${line_count}  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Stream translated successfully (${char_count} chars in ${elapsed_ms} ms).')
 					win_main.toast('Translated ${char_count} chars in ${elapsed_ms} ms!')
 				} else {
-					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'tr command failed (Exit code ${res.exit_code}). Check character set parameters.' }
-					win_main.set('txt_output_stream', '// [TR TRANSLATION ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
-					win_main.set('lbl_stats', ' Stats: ERROR (Exit code ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
+					err_msg := if res.output.trim_space() != '' {
+						res.output.trim_space()
+					} else {
+						'tr command failed (Exit code ${res.exit_code}). Check character set parameters.'
+					}
+					win_main.set('txt_output_stream',
+						'// [TR TRANSLATION ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+					win_main.set('lbl_stats',
+						' Stats: ERROR (Exit code ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('TR command returned an error.')
 					win_main.toast('TR translation error!')
 				}

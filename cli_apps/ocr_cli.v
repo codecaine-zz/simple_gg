@@ -7,7 +7,8 @@ fn main() {
 	app.set_description('Tesseract Optical Character Recognition (OCR) CLI')
 
 	app.add_flag_string('input', 'i', '', 'Input image file path for text recognition')
-	app.add_flag_string('lang', 'l', 'eng', 'OCR recognition language (e.g. eng, spa, fra, deu, chi_sim)')
+	app.add_flag_string('lang', 'l', 'eng',
+		'OCR recognition language (e.g. eng, spa, fra, deu, chi_sim)')
 	app.add_flag_string('output', 'o', '', 'Output text file path (optional)')
 	app.add_flag_bool('interactive', 'x', false, 'Launch interactive OCR wizard')
 
@@ -60,7 +61,8 @@ fn main() {
 }
 
 fn run_interactive(mut app simplecli.SimpleCli) {
-	app.panel('OCR Interactive Wizard', 'Extract printed or handwritten text from document screenshots.')
+	app.panel('OCR Interactive Wizard',
+		'Extract printed or handwritten text from document screenshots.')
 	img := app.prompt('Enter image path', 'scan.png')
 	lang := app.prompt('Enter language code', 'eng')
 	out, code := app.exec_safe('tesseract', [img, 'stdout', '-l', lang])

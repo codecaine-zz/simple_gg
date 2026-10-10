@@ -46,17 +46,20 @@ fn run_probe_audio(mut w simplegui.SimpleWindow, audio_path string) {
 	}
 
 	ffprobe_bin := get_ffprobe_bin()
-	w.append_console('audio_console', ' Probing audio stream for: ${os.file_name(audio_path)}...\n', 1)
+	w.append_console('audio_console',
+		' Probing audio stream for: ${os.file_name(audio_path)}...\n', 1)
 	w.set_status('Extracting audio metadata...')
 
 	go fn [mut w, ffprobe_bin, audio_path] () {
 		t0 := time.ticks()
 		res := simplegui.exec_safe(ffprobe_bin, [
-			'-v', 'quiet',
-			'-print_format', 'json',
+			'-v',
+			'quiet',
+			'-print_format',
+			'json',
 			'-show_format',
 			'-show_streams',
-			audio_path
+			audio_path,
 		])
 		elapsed_ms := time.ticks() - t0
 
@@ -65,15 +68,24 @@ fn run_probe_audio(mut w simplegui.SimpleWindow, audio_path string) {
 
 			if res.exit_code == 0 {
 				win_main.set('txt_stream_info', out)
-				win_main.append_console('audio_console', ' Audio stream probed in ${elapsed_ms} ms.\n', 4)
-				win_main.set('lbl_stats', ' Stats: SUCCESS  |  File: ${os.file_name(audio_path)}  |  Duration: ${elapsed_ms} ms')
+				win_main.append_console('audio_console',
+					' Audio stream probed in ${elapsed_ms} ms.\n', 4)
+				win_main.set('lbl_stats',
+					' Stats: SUCCESS  |  File: ${os.file_name(audio_path)}  |  Duration: ${elapsed_ms} ms')
 				win_main.set_status('Audio metadata loaded.')
 				win_main.toast('Loaded ' + os.file_name(audio_path))
 			} else {
-				err_msg := if out != '' { out } else { 'Failed to probe audio stream or format unsupported.' }
-				win_main.set('txt_stream_info', '// [AUDIO PROBE ERROR]\n// File: ${audio_path}\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
-				win_main.append_console('audio_console', ' Error probing audio stream:\n' + err_msg + '\n', 3)
-				win_main.set('lbl_stats', ' Stats: ERROR (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
+				err_msg := if out != '' {
+					out
+				} else {
+					'Failed to probe audio stream or format unsupported.'
+				}
+				win_main.set('txt_stream_info',
+					'// [AUDIO PROBE ERROR]\n// File: ${audio_path}\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+				win_main.append_console('audio_console', ' Error probing audio stream:\n' +
+					err_msg + '\n', 3)
+				win_main.set('lbl_stats',
+					' Stats: ERROR (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
 				win_main.set_status('Error probing audio file.')
 				win_main.toast('Failed to load audio metadata.')
 			}
@@ -106,11 +118,12 @@ fn main() {
 	})
 
 	ff_path := get_ffmpeg_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${ff_path} (FFmpeg & macOS CoreAudio)  |  Platform: ${simplegui.get_platform_label()}')
+	win.add_label('lbl_engine_info',
+		'Engine: ${ff_path} (FFmpeg & macOS CoreAudio)  |  Platform: ${simplegui.get_platform_label()}')
 
 	// File Selection Bar
 	win.begin_group_box('grp_file_scope', 'Target Audio File (MP3, FLAC, M4A, AAC, WAV, OGG, AIFF)')
-	
+
 	win.begin_row('row_file_bar')
 	win.add_label('lbl_audio_file', 'Audio File:')
 	win.add_input('txt_audio_path', '')
@@ -126,7 +139,7 @@ fn main() {
 
 	// Tag Fields Editor
 	win.begin_group_box('grp_tags_editor', 'Audio Tag & Metadata Fields')
-	
+
 	win.begin_row('row_tags_1')
 	win.add_label('lbl_title', 'Track Title:')
 	win.add_input('txt_title', '')
@@ -156,7 +169,7 @@ fn main() {
 		'Soundtrack / OST',
 		'Podcast',
 		'Audiobook',
-		'Other / Custom'
+		'Other / Custom',
 	], 'Electronic')
 	win.set_control_width('dd_genre', 180)
 
@@ -196,11 +209,13 @@ fn main() {
 
 	// Status Row
 	win.begin_row('row_stats')
-	win.add_label('lbl_stats', 'Stats: Ready  |  Bitrate: None  |  Sample Rate: None  |  Channels: None')
+	win.add_label('lbl_stats',
+		'Stats: Ready  |  Bitrate: None  |  Sample Rate: None  |  Channels: None')
 	win.end_row()
 
 	win.append_console('audio_console', ' Audio Tag & Lossless Studio Pro Initialized.\n', 1)
-	win.append_console('audio_console', ' Ready to inspect and edit ID3v2, Vorbis, and MP4 tags.\n', 4)
+	win.append_console('audio_console',
+		' Ready to inspect and edit ID3v2, Vorbis, and MP4 tags.\n', 4)
 
 	// -------------------------------------------------------------
 	// Event Handlers
@@ -314,11 +329,13 @@ fn main() {
 					os.cp(tmp_out, path) or {}
 					os.rm(tmp_out) or {}
 
-					win_main.append_console('audio_console', ' Audio tags written successfully!\n', 4)
+					win_main.append_console('audio_console', ' Audio tags written successfully!\n',
+						4)
 					win_main.toast('Tags updated!')
 					run_probe_audio(mut win_main, path)
 				} else {
-					win_main.append_console('audio_console', ' Error writing tags: ' + res.output + '\n', 3)
+					win_main.append_console('audio_console', ' Error writing tags: ' + res.output +
+						'\n', 3)
 					win_main.set_status('Failed to write tags.')
 					win_main.toast('Failed to write tags.')
 				}
@@ -341,7 +358,8 @@ fn main() {
 				save_file += '.jpg'
 			}
 			ffmpeg_bin := get_ffmpeg_bin()
-			res := simplegui.exec_safe(ffmpeg_bin, ['-y', '-i', path, '-an', '-vcodec', 'copy', save_file])
+			res := simplegui.exec_safe(ffmpeg_bin, ['-y', '-i', path, '-an', '-vcodec', 'copy',
+				save_file])
 			if res.exit_code == 0 && os.exists(save_file) {
 				w.toast('Cover art extracted to ' + os.file_name(save_file))
 				w.append_console('audio_console', ' Album cover art saved: ${save_file}\n', 4)
@@ -367,7 +385,8 @@ fn main() {
 		w.set_status('Clearing tags...')
 
 		go fn [mut w, ffmpeg_bin, tmp_out, path] () {
-			res := simplegui.exec_safe(ffmpeg_bin, ['-y', '-i', path, '-map_metadata', '-1', '-codec', 'copy', tmp_out])
+			res := simplegui.exec_safe(ffmpeg_bin, ['-y', '-i', path, '-map_metadata', '-1', '-codec',
+				'copy', tmp_out])
 			w.run_on_main_thread(fn [res, tmp_out, path] (mut win_main simplegui.SimpleWindow) {
 				if res.exit_code == 0 && os.exists(tmp_out) {
 					os.rm(path) or {}
@@ -378,7 +397,8 @@ fn main() {
 					win_main.toast('Metadata removed!')
 					run_probe_audio(mut win_main, path)
 				} else {
-					win_main.append_console('audio_console', ' Error removing tags: ' + res.output + '\n', 3)
+					win_main.append_console('audio_console', ' Error removing tags: ' + res.output +
+						'\n', 3)
 					win_main.set_status('Failed to remove tags.')
 					win_main.toast('Failed to remove tags.')
 				}

@@ -48,21 +48,26 @@ fn get_all_processes() []ProcessItem {
 			state := tokens[4]
 			user := tokens[5]
 			raw_cmd := tokens[6..].join(' ')
-			clean_cmd := raw_cmd.replace(os.home_dir(), '/Users/developer').replace('codecaine', 'developer')
-			display_user := if user == 'codecaine' || user == os.user_os() { 'developer' } else { user }
-			
+			clean_cmd := raw_cmd.replace(os.home_dir(), '/Users/developer').replace('codecaine',
+				'developer')
+			display_user := if user == 'codecaine' || user == os.user_os() {
+				'developer'
+			} else {
+				user
+			}
+
 			// Extract clean short executable name
 			raw_bin := tokens[6]
 			comm := os.file_name(raw_bin)
 
 			items << ProcessItem{
-				pid: pid
-				cpu_pct: cpu
-				mem_pct: mem
-				rss_kb: rss
-				state: state
-				user: display_user
-				comm: if comm != '' { comm } else { raw_bin }
+				pid:      pid
+				cpu_pct:  cpu
+				mem_pct:  mem
+				rss_kb:   rss
+				state:    state
+				user:     display_user
+				comm:     if comm != '' { comm } else { raw_bin }
 				full_cmd: clean_cmd
 			}
 		}
@@ -82,7 +87,8 @@ fn format_rss_mb(rss_kb u64) string {
 fn main() {
 	println('Starting SimpleGUI - Task Manager Pro (macOS Process & Hardware Monitor)...')
 
-	mut win := simplegui.new_simple_window('Task Manager Pro -- macOS Process & Hardware Monitor', 1140, 920)
+	mut win := simplegui.new_simple_window('Task Manager Pro -- macOS Process & Hardware Monitor',
+		1140, 920)
 	win.set_fullscreen(true)
 	win.restore_saved_theme()
 	win.set_spacing(8)
@@ -119,16 +125,18 @@ fn main() {
 			format_rss_mb(p.rss_kb),
 			p.state,
 			p.user,
-			p.full_cmd
+			p.full_cmd,
 		]
 	}
 
 	win.begin_row('row_sys_cards')
 	win.add_metric_card('card_cpu', 'CPU Cores', '${cores} Cores (${arch})', cpu_model, 'Hardware')
 	win.add_metric_card('card_ram', 'Total Memory', mem_info, 'Apple Unified Memory', 'RAM')
-	win.add_metric_card('card_tasks', 'Active Tasks', '${initial_procs.len} Running', 'System Procs', 'Tasks')
+	win.add_metric_card('card_tasks', 'Active Tasks', '${initial_procs.len} Running',
+		'System Procs', 'Tasks')
 	l1, l5, l15 := win.get_load_average()
-	win.add_metric_card('card_load', 'Load Average', '${l1:.2f}, ${l5:.2f}, ${l15:.2f}', '1m, 5m, 15m', 'Vitals')
+	win.add_metric_card('card_load', 'Load Average', '${l1:.2f}, ${l5:.2f}, ${l15:.2f}',
+		'1m, 5m, 15m', 'Vitals')
 	win.end_row()
 	win.end_group_box()
 
@@ -149,7 +157,7 @@ fn main() {
 		'High CPU (> 2.0%)',
 		'High Memory (> 100 MB)',
 		'My User Processes',
-		'System Daemons (root)'
+		'System Daemons (root)',
 	], 'All Processes')
 	win.set_control_width('dd_filter', 180)
 
@@ -158,7 +166,7 @@ fn main() {
 		'CPU % (Highest First)',
 		'Memory (Highest First)',
 		'PID (Ascending)',
-		'Process Name (A-Z)'
+		'Process Name (A-Z)',
 	], 'CPU % (Highest First)')
 	win.set_control_width('dd_sort', 180)
 
@@ -196,7 +204,8 @@ fn main() {
 	// Inspection & Details Console
 	// -------------------------------------------------------------
 	win.begin_group_box('grp_details', 'Selected Process Diagnostic Details & Open Sockets')
-	win.add_textarea('txt_details', 'Select any process above to view diagnostic details, open ports, and command paths.\n')
+	win.add_textarea('txt_details',
+		'Select any process above to view diagnostic details, open ports, and command paths.\n')
 	win.set_control_height('txt_details', 130)
 	win.end_group_box()
 
@@ -218,7 +227,8 @@ fn main() {
 		for p in procs {
 			// Search filter
 			if search_query != '' {
-				if !p.comm.to_lower().contains(search_query) && !p.pid.contains(search_query) && !p.full_cmd.to_lower().contains(search_query) {
+				if !p.comm.to_lower().contains(search_query) && !p.pid.contains(search_query)
+					&& !p.full_cmd.to_lower().contains(search_query) {
 					continue
 				}
 			}
@@ -272,7 +282,7 @@ fn main() {
 				format_rss_mb(p.rss_kb),
 				p.state,
 				p.user,
-				p.full_cmd
+				p.full_cmd,
 			]
 		}
 
@@ -280,11 +290,14 @@ fn main() {
 
 		// Update telemetry cards
 		l1, l5, l15 := win.get_load_average()
-		win.set_stat_card('card_tasks', ' Active Tasks', '${filtered.len} / ${procs.len} Total', '${total_cpu:.1f}% Total CPU', true)
-		win.set_stat_card('card_load', ' Load Average', '${l1:.2f}, ${l5:.2f}, ${l15:.2f}', '1m, 5m, 15m Load', true)
+		win.set_stat_card('card_tasks', ' Active Tasks', '${filtered.len} / ${procs.len} Total',
+			'${total_cpu:.1f}% Total CPU', true)
+		win.set_stat_card('card_load', ' Load Average', '${l1:.2f}, ${l5:.2f}, ${l15:.2f}',
+			'1m, 5m, 15m Load', true)
 
 		now := time.now().format_ss()
-		win.set('lbl_status', ' Status: Live  |  Processes Listed: ${filtered.len} (${procs.len} Total)  |  Last Refreshed: ${now}')
+		win.set('lbl_status',
+			' Status: Live  |  Processes Listed: ${filtered.len} (${procs.len} Total)  |  Last Refreshed: ${now}')
 	}
 
 	// -------------------------------------------------------------
@@ -340,11 +353,14 @@ fn main() {
 			return
 		}
 		if pid == '1' || pid == '0' {
-			w.alert('Protected Process', 'Cannot terminate critical macOS root system process (PID ${pid}).')
+			w.alert('Protected Process',
+				'Cannot terminate critical macOS root system process (PID ${pid}).')
 			return
 		}
 
-		if w.confirm('Force Kill Process', 'Are you sure you want to forcibly terminate "${name}" (PID ${pid}) with SIGKILL (-9)?') {
+		if w.confirm('Force Kill Process',
+			'Are you sure you want to forcibly terminate "${name}" (PID ${pid}) with SIGKILL (-9)?')
+		{
 			res := simplegui.exec_safe('kill', ['-9', pid])
 			if res.exit_code == 0 {
 				w.toast('Forcibly killed ${name} (PID ${pid}).')
@@ -427,14 +443,18 @@ fn main() {
 
 		go fn [mut w, pid, name, path] () {
 			res := simplegui.exec_safe('lsof', ['-nP', '-p', pid])
-			
+
 			mut details_text := ' Process: ${name} (PID: ${pid})\n'
 			details_text += ' Executable: ${path}\n'
 			details_text += '-----------------------------------------------------------------------------\n'
 			if res.exit_code == 0 && res.output.trim_space() != '' {
 				details_text += ' Open Network Sockets & File Descriptors:\n' + res.output
 			} else {
-				err_info := if res.output.trim_space() != '' { res.output.trim_space() } else { 'No open sockets or restricted access (requires elevated privileges).' }
+				err_info := if res.output.trim_space() != '' {
+					res.output.trim_space()
+				} else {
+					'No open sockets or restricted access (requires elevated privileges).'
+				}
 				details_text += '[LSOF DIAGNOSTIC]\n' + err_info
 			}
 

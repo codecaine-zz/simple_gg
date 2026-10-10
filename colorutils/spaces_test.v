@@ -18,7 +18,8 @@ fn test_hsl_roundtrip_all_greys_and_samples() {
 }
 
 fn test_hsv_cmyk() {
-	for c in [RGB{255, 0, 0}, RGB{12, 200, 99}, RGB{0, 0, 0}, RGB{255, 255, 255}] {
+	for c in [RGB{255, 0, 0}, RGB{12, 200, 99}, RGB{0, 0, 0},
+		RGB{255, 255, 255}] {
 		assert hsv_to_rgb(rgb_to_hsv(c)) == c
 		assert cmyk_to_rgb(rgb_to_cmyk(c)) == c
 	}

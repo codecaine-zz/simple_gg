@@ -42,7 +42,7 @@ fn test_multiline_text_index_calculation() {
 	mut ctrl := Control{
 		name:       'ta'
 		kind:       'textarea'
-		text_value: "ABC\nDEF"
+		text_value: 'ABC\nDEF'
 		x:          10
 		y:          10
 		w:          200

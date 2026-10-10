@@ -4,7 +4,8 @@ import simplegui
 
 fn main() {
 	// Create window (Width: 740px, Height: 540px)
-	mut win := simplegui.new_simple_window('Extended OS System Calls & Resource Monitoring', 740, 540)
+	mut win :=
+		simplegui.new_simple_window('Extended OS System Calls & Resource Monitoring', 740, 540)
 	win.set_theme('Apple Dark')
 
 	win.add_heading('Extended OS System Calls & Hardware Subsystem')
@@ -21,7 +22,8 @@ fn main() {
 			mem_pres := win.get_memory_pressure()
 			uptime := win.get_uptime_seconds()
 
-			win.set_text('lbl_cpu_val', 'CPU Usage: ${cpu_pct:.1f}% | Load Avg: ${l1:.2f}, ${l5:.2f}, ${l15:.2f}')
+			win.set_text('lbl_cpu_val',
+				'CPU Usage: ${cpu_pct:.1f}% | Load Avg: ${l1:.2f}, ${l5:.2f}, ${l15:.2f}')
 			win.set_text('lbl_mem_val', 'Memory Pressure: ${mem_pres} | Uptime: ${uptime}s')
 			win.push_toast('Metrics Polled', 'CPU: ${cpu_pct:.1f}%, Mem: ${mem_pres}', 'info', 2500)
 		})

@@ -31,7 +31,7 @@ fn main() {
 
 	if app.get_flag_bool('large') {
 		app.info('Scanning top 10 largest entries in "${target_path}"...')
-		out, _ := app.exec("du -sh ${target_path}/* 2>/dev/null | sort -hr | head -n 10")
+		out, _ := app.exec('du -sh ${target_path}/* 2>/dev/null | sort -hr | head -n 10')
 		println(out)
 		return
 	}
@@ -47,11 +47,11 @@ fn main() {
 	free_gb := f64(stats.free_bytes) / (1024.0 * 1024.0 * 1024.0)
 
 	app.print_kv({
-		'Target Path': target_path,
-		'Total Capacity': '${total_gb:.2f} GB',
-		'Used Space': '${used_gb:.2f} GB',
-		'Free Space': '${free_gb:.2f} GB',
-		'Utilization': '${stats.percent:.1f} %',
+		'Target Path':    target_path
+		'Total Capacity': '${total_gb:.2f} GB'
+		'Used Space':     '${used_gb:.2f} GB'
+		'Free Space':     '${free_gb:.2f} GB'
+		'Utilization':    '${stats.percent:.1f} %'
 	})
 
 	app.progress_bar(used_gb, total_gb, 'Disk Utilization (${target_path})')
@@ -72,10 +72,10 @@ fn run_interactive(mut app simplecli.SimpleCli) {
 			total_gb := f64(stats.total_bytes) / (1024.0 * 1024.0 * 1024.0)
 			free_gb := f64(stats.free_bytes) / (1024.0 * 1024.0 * 1024.0)
 			app.print_kv({
-				'Path': '~',
-				'Total': '${total_gb:.2f} GB',
-				'Free': '${free_gb:.2f} GB',
-				'Used': '${stats.percent:.1f} %',
+				'Path':  '~'
+				'Total': '${total_gb:.2f} GB'
+				'Free':  '${free_gb:.2f} GB'
+				'Used':  '${stats.percent:.1f} %'
 			})
 		}
 		'Mounted Filesystems (df -h)' {
@@ -83,7 +83,7 @@ fn run_interactive(mut app simplecli.SimpleCli) {
 			println(out)
 		}
 		'Top 10 Largest Items in Home' {
-			out, _ := app.exec("du -sh ~/* 2>/dev/null | sort -hr | head -n 10")
+			out, _ := app.exec('du -sh ~/* 2>/dev/null | sort -hr | head -n 10')
 			println(out)
 		}
 		else {
@@ -91,10 +91,10 @@ fn run_interactive(mut app simplecli.SimpleCli) {
 			total_gb := f64(stats.total_bytes) / (1024.0 * 1024.0 * 1024.0)
 			free_gb := f64(stats.free_bytes) / (1024.0 * 1024.0 * 1024.0)
 			app.print_kv({
-				'Path': '/',
-				'Total': '${total_gb:.2f} GB',
-				'Free': '${free_gb:.2f} GB',
-				'Used': '${stats.percent:.1f} %',
+				'Path':  '/'
+				'Total': '${total_gb:.2f} GB'
+				'Free':  '${free_gb:.2f} GB'
+				'Used':  '${stats.percent:.1f} %'
 			})
 		}
 	}

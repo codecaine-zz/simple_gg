@@ -3006,7 +3006,6 @@ pub fn (win &SimpleWindow) is_valid_time_str(time_str string) bool {
 	return is_valid_time_str(time_str)
 }
 
-
 // ==========================================
 // 49. JSON Formatting & Validation Utilities (Chapter 13: json)
 // ==========================================

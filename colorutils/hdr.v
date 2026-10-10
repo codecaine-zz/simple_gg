@@ -18,10 +18,10 @@ pub:
 // new_hdr_color creates an HDRColor with direct extended float values.
 pub fn new_hdr_color(r f64, g f64, b f64, a f64) HDRColor {
 	return HDRColor{
-		r: r
-		g: g
-		b: b
-		a: math.max(0.0, math.min(1.0, a))
+		r:        r
+		g:        g
+		b:        b
+		a:        math.max(0.0, math.min(1.0, a))
 		headroom: math.max(1.0, math.max(r, math.max(g, b)))
 		exposure: 0.0
 	}
@@ -35,10 +35,10 @@ pub fn hdr_color_from_rgb(c RGB, headroom f64) HDRColor {
 	g := (f64(c.g) / 255.0) * hr
 	b := (f64(c.b) / 255.0) * hr
 	return HDRColor{
-		r: r
-		g: g
-		b: b
-		a: 1.0
+		r:        r
+		g:        g
+		b:        b
+		a:        1.0
 		headroom: hr
 		exposure: math.log2(hr)
 	}
@@ -52,10 +52,10 @@ pub fn hdr_color_from_exposure(c RGB, exposure_stops f64) HDRColor {
 	g := (f64(c.g) / 255.0) * mult
 	b := (f64(c.b) / 255.0) * mult
 	return HDRColor{
-		r: r
-		g: g
-		b: b
-		a: 1.0
+		r:        r
+		g:        g
+		b:        b
+		a:        1.0
 		headroom: math.max(1.0, mult)
 		exposure: exposure_stops
 	}
@@ -74,10 +74,10 @@ pub fn (c HDRColor) applying_content_headroom(headroom f64) HDRColor {
 	target_headroom := math.max(1.0, headroom)
 	ratio := target_headroom / math.max(1.0, c.headroom)
 	return HDRColor{
-		r: c.r * ratio
-		g: c.g * ratio
-		b: c.b * ratio
-		a: c.a
+		r:        c.r * ratio
+		g:        c.g * ratio
+		b:        c.b * ratio
+		a:        c.a
 		headroom: target_headroom
 		exposure: math.log2(target_headroom)
 	}

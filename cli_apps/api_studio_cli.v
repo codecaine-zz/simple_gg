@@ -7,9 +7,11 @@ fn main() {
 	app.set_description('Interactive REST API Client & Request Builder CLI')
 
 	app.add_flag_string('url', 'u', 'https://httpbin.org/get', 'Target REST API endpoint URL')
-	app.add_flag_string('method', 'm', 'GET', 'HTTP Request Method (GET, POST, PUT, DELETE, PATCH, HEAD)')
+	app.add_flag_string('method', 'm', 'GET',
+		'HTTP Request Method (GET, POST, PUT, DELETE, PATCH, HEAD)')
 	app.add_flag_string('body', 'b', '', 'Request payload / JSON body string')
-	app.add_flag_string('header', 'H', '', 'Custom HTTP header (e.g. "Authorization: Bearer token")')
+	app.add_flag_string('header', 'H', '',
+		'Custom HTTP header (e.g. "Authorization: Bearer token")')
 	app.add_flag_bool('interactive', 'x', false, 'Launch interactive REST API studio REPL')
 
 	app.parse_cli() or { return }
@@ -45,9 +47,9 @@ fn send_api_request(mut app simplecli.SimpleCli, method string, url string, body
 	}
 
 	app.print_kv({
-		'Status': status_color,
-		'Latency': '${elapsed} ms',
-		'Body Size': '${res.body.len} bytes',
+		'Status':    status_color
+		'Latency':   '${elapsed} ms'
+		'Body Size': '${res.body.len} bytes'
 	})
 
 	app.panel('Response Body', res.body)

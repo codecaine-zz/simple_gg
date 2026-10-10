@@ -392,12 +392,14 @@ fn test_delete_all_structs() {
 fn test_query_maps_params_and_query_one_map_params() {
 	mut db := open_db(':memory:') or { panic(err) }
 	exec_sql(mut db, 'CREATE TABLE employees (name TEXT, dept TEXT, salary INT);') or { panic(err) }
-	exec_sql(mut db, "INSERT INTO employees VALUES ('Alice','Eng',90),('Bob','Eng',80),('Carol','HR',70);") or {
+	exec_sql(mut db,
+		"INSERT INTO employees VALUES ('Alice','Eng',90),('Bob','Eng',80),('Carol','HR',70);") or {
 		panic(err)
 	}
 
 	// query_maps_params — filter by department
-	rows := query_maps_params(mut db, 'SELECT name, salary FROM employees WHERE dept = ? ORDER BY salary DESC', [
+	rows := query_maps_params(mut db,
+		'SELECT name, salary FROM employees WHERE dept = ? ORDER BY salary DESC', [
 		'Eng',
 	]) or { panic(err) }
 	assert rows.len == 2
@@ -669,7 +671,8 @@ fn test_drop_columns_rollback_on_bad_column() {
 
 fn test_get_table_schema() {
 	mut db := open_db(':memory:') or { panic(err) }
-	exec_sql(mut db, 'CREATE TABLE orders (id INTEGER PRIMARY KEY, user TEXT NOT NULL, amount REAL);') or {
+	exec_sql(mut db,
+		'CREATE TABLE orders (id INTEGER PRIMARY KEY, user TEXT NOT NULL, amount REAL);') or {
 		panic(err)
 	}
 
@@ -706,7 +709,8 @@ fn test_sanitize_sql_type_validation() {
 
 	// Semicolon injection must be rejected
 	sanitize_sql_type('TEXT; DROP TABLE users;--') or {
-		assert err.msg().contains('semicolon') || err.msg().contains('comment') || err.msg().contains('disallowed')
+		assert err.msg().contains('semicolon') || err.msg().contains('comment')
+			|| err.msg().contains('disallowed')
 	}
 }
 
@@ -724,15 +728,9 @@ fn test_sqlite_security_and_injection_defense() {
 
 	// 2. SQL Type Defense
 	assert sanitize_sql_type("VARCHAR(100) DEFAULT 'unknown'") or { panic(err) } == "VARCHAR(100) DEFAULT 'unknown'"
-	sanitize_sql_type('TEXT -- comment') or {
-		assert err.msg().contains('comment')
-	}
-	sanitize_sql_type('VARCHAR(50') or {
-		assert err.msg().contains('parentheses')
-	}
-	sanitize_sql_type("TEXT DEFAULT 'unclosed") or {
-		assert err.msg().contains('single quotes')
-	}
+	sanitize_sql_type('TEXT -- comment') or { assert err.msg().contains('comment') }
+	sanitize_sql_type('VARCHAR(50') or { assert err.msg().contains('parentheses') }
+	sanitize_sql_type("TEXT DEFAULT 'unclosed") or { assert err.msg().contains('single quotes') }
 
 	// 3. String Escaping Helper
 	assert escape_string("O'Connor") == "O''Connor"
@@ -743,7 +741,9 @@ fn test_sqlite_security_and_injection_defense() {
 	defer { close_db(mut db) or {} }
 
 	// 5. exec_sql_params & Parameterized CRUD against injection payloads
-	exec_sql(mut db, 'CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT, bio TEXT);') or { panic(err) }
+	exec_sql(mut db, 'CREATE TABLE users (id INTEGER PRIMARY KEY, username TEXT, bio TEXT);') or {
+		panic(err)
+	}
 
 	injection_payload := "admin' OR '1'='1'; DROP TABLE users; --"
 	row_id := insert_row(mut db, 'users', {
@@ -775,9 +775,7 @@ fn test_sqlite_security_and_injection_defense() {
 	assert remaining == 0
 
 	// 6. Path null-byte rejection
-	open_db('test\x00bad.db') or {
-		assert err.msg().contains('null byte')
-	}
+	open_db('test\x00bad.db') or { assert err.msg().contains('null byte') }
 }
 
 fn test_transaction_and_insert_many() {

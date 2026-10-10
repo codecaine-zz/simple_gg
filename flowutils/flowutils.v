@@ -261,7 +261,8 @@ pub fn new_debouncer(interval time.Duration) Debouncer {
 // can_trigger returns true and records the timestamp if enough time has elapsed since the last trigger.
 pub fn (mut d Debouncer) can_trigger() bool {
 	now := time.now()
-	if d.last_trigger.unix_nano() == 0 || now.unix_nano() - d.last_trigger.unix_nano() >= d.interval.nanoseconds() {
+	if d.last_trigger.unix_nano() == 0
+		|| now.unix_nano() - d.last_trigger.unix_nano() >= d.interval.nanoseconds() {
 		d.last_trigger = now
 		return true
 	}

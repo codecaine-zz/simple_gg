@@ -128,6 +128,7 @@ fn lex_expr(src string) ![]ETok {
 						`0` { sb.write_u8(0) }
 						else { sb.write_u8(src[i]) }
 					}
+
 					i++
 					continue
 				}
@@ -466,6 +467,7 @@ fn (mut p EParser) parse_primary() !Expr {
 				}
 				else {}
 			}
+
 			if p.is_op('(') {
 				args := p.parse_args()!
 				return Expr{
@@ -534,42 +536,100 @@ fn is_intlike(v json2.Any) bool {
 
 fn as_num(v json2.Any) ?f64 {
 	return match v {
-		f64 { v }
-		f32 { f64(v) }
-		i64 { f64(v) }
-		int { f64(v) }
-		i32 { f64(v) }
-		i16 { f64(v) }
-		i8 { f64(v) }
-		u64 { f64(v) }
-		u32 { f64(v) }
-		u16 { f64(v) }
-		u8 { f64(v) }
-		bool {
-			if v { 1.0 } else { 0.0 }
+		f64 {
+			v
 		}
-		else { none }
+		f32 {
+			f64(v)
+		}
+		i64 {
+			f64(v)
+		}
+		int {
+			f64(v)
+		}
+		i32 {
+			f64(v)
+		}
+		i16 {
+			f64(v)
+		}
+		i8 {
+			f64(v)
+		}
+		u64 {
+			f64(v)
+		}
+		u32 {
+			f64(v)
+		}
+		u16 {
+			f64(v)
+		}
+		u8 {
+			f64(v)
+		}
+		bool {
+			if v {
+				1.0
+			} else {
+				0.0
+			}
+		}
+		else {
+			none
+		}
 	}
 }
 
 fn as_i64(v json2.Any) ?i64 {
 	return match v {
-		i64 { v }
-		int { i64(v) }
-		i32 { i64(v) }
-		i16 { i64(v) }
-		i8 { i64(v) }
-		u64 { i64(v) }
-		u32 { i64(v) }
-		u16 { i64(v) }
-		u8 { i64(v) }
-		f64 { i64(v) }
-		f32 { i64(v) }
-		string { v.trim_space().i64() }
-		bool {
-			if v { i64(1) } else { i64(0) }
+		i64 {
+			v
 		}
-		else { none }
+		int {
+			i64(v)
+		}
+		i32 {
+			i64(v)
+		}
+		i16 {
+			i64(v)
+		}
+		i8 {
+			i64(v)
+		}
+		u64 {
+			i64(v)
+		}
+		u32 {
+			i64(v)
+		}
+		u16 {
+			i64(v)
+		}
+		u8 {
+			i64(v)
+		}
+		f64 {
+			i64(v)
+		}
+		f32 {
+			i64(v)
+		}
+		string {
+			v.trim_space().i64()
+		}
+		bool {
+			if v {
+				i64(1)
+			} else {
+				i64(0)
+			}
+		}
+		else {
+			none
+		}
 	}
 }
 
@@ -756,6 +816,7 @@ fn get_member(obj json2.Any, name string) json2.Any {
 		}
 		else {}
 	}
+
 	return null
 }
 

@@ -293,12 +293,20 @@ fn (fp FlagParser) find_short(short string) ?FlagDef {
 fn check_flag_value(flag FlagDef, val string) ! {
 	ok := match flag.kind {
 		'int' {
-			val.len > 0 && val.trim_left('+-').len > 0 && val.trim_left('+-').bytes().all(it.is_digit())
+			val.len > 0 && val.trim_left('+-').len > 0
+				&& val.trim_left('+-').bytes().all(it.is_digit())
 		}
-		'float' { val.len > 0 && (val.f64() != 0.0 || val.trim_left('+-').trim('0.') == '') }
-		'bool' { val.to_lower() in ['true', 'false', '1', '0', 'yes', 'no', 'on', 'off'] }
-		else { true }
+		'float' {
+			val.len > 0 && (val.f64() != 0.0 || val.trim_left('+-').trim('0.') == '')
+		}
+		'bool' {
+			val.to_lower() in ['true', 'false', '1', '0', 'yes', 'no', 'on', 'off']
+		}
+		else {
+			true
+		}
 	}
+
 	if !ok {
 		return error('invalid value for --${flag.name}: "${val}" (expected ${flag.kind})')
 	}

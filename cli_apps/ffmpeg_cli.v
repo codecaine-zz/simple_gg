@@ -80,7 +80,8 @@ fn main() {
 }
 
 fn run_interactive(mut app simplecli.SimpleCli) {
-	app.panel('FFmpeg Transcoder Wizard', 'Quickly convert media formats, resize video, or extract audio tracks.')
+	app.panel('FFmpeg Transcoder Wizard',
+		'Quickly convert media formats, resize video, or extract audio tracks.')
 	input := app.prompt('Enter input media path', 'sample.mov')
 	choice := app.select('Select Action:', [
 		'Convert to Web MP4 (H.264 / AAC)',
@@ -97,7 +98,8 @@ fn run_interactive(mut app simplecli.SimpleCli) {
 		}
 		'Compress & Scale to 720p' {
 			out := 'scaled_720p.mp4'
-			app.exec_safe('ffmpeg', ['-y', '-i', input, '-vf', 'scale=1280:720', '-c:v', 'libx264', '-crf', '23', out])
+			app.exec_safe('ffmpeg', ['-y', '-i', input, '-vf', 'scale=1280:720', '-c:v', 'libx264',
+				'-crf', '23', out])
 			app.success('Rendered 720p to ${out}')
 		}
 		'Inspect Streams Metadata (ffprobe)' {

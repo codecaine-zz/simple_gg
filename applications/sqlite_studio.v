@@ -59,11 +59,12 @@ fn main() {
 	})
 
 	sqlite_path := get_sqlite_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${sqlite_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker')
+	win.add_label('lbl_engine_info',
+		'Engine: ${sqlite_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker')
 
 	// Database File Selection & Schema Browser
 	win.begin_group_box('grp_db_config', 'Database Connection & Schema Explorer')
-	
+
 	win.begin_row('row_db_file')
 	win.add_label('lbl_db_path', 'Database File:')
 	win.add_input('txt_db_path', ':memory:')
@@ -79,7 +80,7 @@ fn main() {
 
 	// SQL Query Editor & Presets
 	win.begin_group_box('grp_sql_editor', 'SQL Query Scratchpad & Recipes')
-	
+
 	win.begin_row('row_sql_presets')
 	win.add_label('lbl_presets', 'SQL Templates:')
 	win.add_dropdown('dd_sql_presets', [
@@ -90,7 +91,7 @@ fn main() {
 		'5. Insert New Product Record (INSERT INTO)',
 		'6. Create Indexed Transactions Table (CREATE TABLE & INDEX)',
 		'7. Count Total Records Across Tables',
-		'8. Vacuum & Optimize Database (VACUUM; PRAGMA optimize;)'
+		'8. Vacuum & Optimize Database (VACUUM; PRAGMA optimize;)',
 	], '1. Product Inventory Report (JOIN & Computed Value)')
 	win.set_control_width('dd_sql_presets', 380)
 
@@ -100,7 +101,7 @@ fn main() {
 		'JSON Format (-json)',
 		'CSV Format (-csv)',
 		'Markdown Table (-markdown)',
-		'Line Mode (-line)'
+		'Line Mode (-line)',
 	], 'Table Grid (-box / -column)')
 	win.set_control_width('dd_out_mode', 220)
 	win.end_row()
@@ -136,7 +137,8 @@ fn main() {
 	win.end_row()
 
 	win.append_console('sqlite_console', ' SQLite Studio Pro Initialized.\n', 1)
-	win.append_console('sqlite_console', ' Ready to run queries against SQLite / In-Memory databases.\n', 4)
+	win.append_console('sqlite_console',
+		' Ready to run queries against SQLite / In-Memory databases.\n', 4)
 
 	// Demo Database Initializer Script
 	demo_db_path := os.join_path(os.temp_dir(), 'simplegui_demo_store.sqlite')
@@ -206,21 +208,26 @@ fn main() {
 		if selected.starts_with('1.') {
 			w.set('txt_sql_query', sample_sql_query)
 		} else if selected.starts_with('2.') {
-			w.set('txt_sql_query', 'SELECT c.name AS category, COUNT(p.id) AS product_count, AVG(p.price) AS avg_price FROM categories c LEFT JOIN products p ON c.id = p.category_id GROUP BY c.name;')
+			w.set('txt_sql_query',
+				'SELECT c.name AS category, COUNT(p.id) AS product_count, AVG(p.price) AS avg_price FROM categories c LEFT JOIN products p ON c.id = p.category_id GROUP BY c.name;')
 		} else if selected.starts_with('3.') {
-			w.set('txt_sql_query', 'SELECT name, price, stock_quantity FROM products ORDER BY price DESC LIMIT 5;')
+			w.set('txt_sql_query',
+				'SELECT name, price, stock_quantity FROM products ORDER BY price DESC LIMIT 5;')
 		} else if selected.starts_with('4.') {
 			w.set('txt_sql_query', 'EXPLAIN QUERY PLAN\n' + sample_sql_query)
 		} else if selected.starts_with('5.') {
-			w.set('txt_sql_query', 'INSERT INTO products (category_id, name, price, stock_quantity) VALUES (1, "Mac mini M2", 599.00, 20);')
+			w.set('txt_sql_query',
+				'INSERT INTO products (category_id, name, price, stock_quantity) VALUES (1, "Mac mini M2", 599.00, 20);')
 		} else if selected.starts_with('6.') {
-			w.set('txt_sql_query', 'CREATE TABLE IF NOT EXISTS audit_logs (id INTEGER PRIMARY KEY, action TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP);\nCREATE INDEX IF NOT EXISTS idx_audit_time ON audit_logs(timestamp);')
+			w.set('txt_sql_query',
+				'CREATE TABLE IF NOT EXISTS audit_logs (id INTEGER PRIMARY KEY, action TEXT, timestamp DATETIME DEFAULT CURRENT_TIMESTAMP);\nCREATE INDEX IF NOT EXISTS idx_audit_time ON audit_logs(timestamp);')
 		} else if selected.starts_with('7.') {
-			w.set('txt_sql_query', 'SELECT "categories" AS table_name, count(*) AS total_rows FROM categories\nUNION ALL\nSELECT "products", count(*) FROM products;')
+			w.set('txt_sql_query',
+				'SELECT "categories" AS table_name, count(*) AS total_rows FROM categories\nUNION ALL\nSELECT "products", count(*) FROM products;')
 		} else if selected.starts_with('8.') {
 			w.set('txt_sql_query', 'VACUUM;\nPRAGMA optimize;')
 		}
-		w.toast('Loaded SQL template: ${selected.split("(")[0]}')
+		w.toast('Loaded SQL template: ${selected.split('(')[0]}')
 	})
 
 	// Execute Query Worker
@@ -237,10 +244,15 @@ fn main() {
 		out_mode_raw := w.get('dd_out_mode')
 
 		mut mode_flag := '-box'
-		if out_mode_raw.contains('-json') { mode_flag = '-json' }
-		else if out_mode_raw.contains('-csv') { mode_flag = '-csv' }
-		else if out_mode_raw.contains('-markdown') { mode_flag = '-markdown' }
-		else if out_mode_raw.contains('-line') { mode_flag = '-line' }
+		if out_mode_raw.contains('-json') {
+			mode_flag = '-json'
+		} else if out_mode_raw.contains('-csv') {
+			mode_flag = '-csv'
+		} else if out_mode_raw.contains('-markdown') {
+			mode_flag = '-markdown'
+		} else if out_mode_raw.contains('-line') {
+			mode_flag = '-line'
+		}
 
 		target_db := if db_path == '' || db_path == ':memory:' { ':memory:' } else { db_path }
 
@@ -260,7 +272,8 @@ fn main() {
 		raw_args << target_db
 		raw_args << query_str
 
-		w.append_console('sqlite_console', ' Executing SQL (${mode_flag}) against ${target_db}...\n', 1)
+		w.append_console('sqlite_console',
+			' Executing SQL (${mode_flag}) against ${target_db}...\n', 1)
 		w.set_status('Running SQL query...')
 
 		go fn [mut w, sqlite_bin, raw_args, target_db] () {
@@ -270,19 +283,29 @@ fn main() {
 
 			w.run_on_main_thread(fn [res, elapsed_ms, target_db] (mut win_main simplegui.SimpleWindow) {
 				out := res.output.trim_space()
-				
+
 				if res.exit_code == 0 {
 					win_main.set('txt_results_view', out)
 					lines_cnt := if out != '' { out.split_into_lines().len } else { 0 }
-					win_main.append_console('sqlite_console', ' SQL query executed successfully in ${elapsed_ms} ms (${out.len} bytes)\n', 4)
-					win_main.set('lbl_stats', ' Stats: SUCCESS  |  DB: ${os.file_name(target_db)}  |  Output: ${lines_cnt} lines  |  Duration: ${elapsed_ms} ms')
+					win_main.append_console('sqlite_console',
+						' SQL query executed successfully in ${elapsed_ms} ms (${out.len} bytes)\n',
+						4)
+					win_main.set('lbl_stats',
+						' Stats: SUCCESS  |  DB: ${os.file_name(target_db)}  |  Output: ${lines_cnt} lines  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Query finished in ${elapsed_ms} ms.')
 					win_main.toast('Query executed in ${elapsed_ms} ms!')
 				} else {
-					err_msg := if out != '' { out } else { 'Unknown SQLite execution error (Exit code ${res.exit_code})' }
-					win_main.set('txt_results_view', '-- [SQLITE EXECUTION ERROR]\n-- Database: ${target_db}\n-- Exit Code: ${res.exit_code}\n\n${err_msg}\n')
-					win_main.append_console('sqlite_console', ' SQLite Error:\n' + err_msg + '\n', 3)
-					win_main.set('lbl_stats', ' Stats: ERROR (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
+					err_msg := if out != '' {
+						out
+					} else {
+						'Unknown SQLite execution error (Exit code ${res.exit_code})'
+					}
+					win_main.set('txt_results_view',
+						'-- [SQLITE EXECUTION ERROR]\n-- Database: ${target_db}\n-- Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+					win_main.append_console('sqlite_console', ' SQLite Error:\n' + err_msg + '\n',
+						3)
+					win_main.set('lbl_stats',
+						' Stats: ERROR (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Query execution failed: ${err_msg.split_into_lines()[0]}')
 					win_main.toast('SQL error encountered.')
 				}
@@ -299,7 +322,8 @@ fn main() {
 
 	// List Tables
 	win.on_click('btn_list_tables', fn (mut w simplegui.SimpleWindow) {
-		w.set('txt_sql_query', 'SELECT name, type, sql FROM sqlite_master WHERE type IN ("table", "view") AND name NOT LIKE "sqlite_%";')
+		w.set('txt_sql_query',
+			'SELECT name, type, sql FROM sqlite_master WHERE type IN ("table", "view") AND name NOT LIKE "sqlite_%";')
 		w.set('dd_out_mode', 'Table Grid (-box / -column)')
 		w.toast('List tables query loaded.')
 	})
@@ -329,7 +353,7 @@ fn main() {
 			if !save_file.ends_with('.csv') { save_file += '.csv' }
 			sqlite_bin := get_sqlite_bin()
 			target_db := if db_path == '' || db_path == ':memory:' { ':memory:' } else { db_path }
-			
+
 			res := simplegui.exec_safe(sqlite_bin, ['-csv', '-header', target_db, query_str])
 			if res.exit_code != 0 {
 				err := res.output.trim_space()
@@ -360,7 +384,7 @@ fn main() {
 			if !save_file.ends_with('.json') { save_file += '.json' }
 			sqlite_bin := get_sqlite_bin()
 			target_db := if db_path == '' || db_path == ':memory:' { ':memory:' } else { db_path }
-			
+
 			res := simplegui.exec_safe(sqlite_bin, ['-json', target_db, query_str])
 			if res.exit_code != 0 {
 				err := res.output.trim_space()

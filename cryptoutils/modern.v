@@ -94,7 +94,8 @@ pub fn hotp(secret []u8, counter u64, digits int) !string {
 	}
 	digest := hmac.new(secret, msg, sha1.sum, sha1.block_size)
 	offset := int(digest[digest.len - 1] & 0x0f)
-	code := ((u32(digest[offset]) & 0x7f) << 24) | (u32(digest[offset + 1]) << 16) | (u32(digest[offset + 2]) << 8) | u32(digest[offset + 3])
+	code := ((u32(digest[offset]) & 0x7f) << 24) | (u32(digest[offset + 1]) << 16) | (u32(digest[
+		offset + 2]) << 8) | u32(digest[offset + 3])
 	mut mod := u64(1)
 	for _ in 0 .. digits {
 		mod *= 10
@@ -149,12 +150,8 @@ pub fn totp_uri(issuer string, account string, secret_b32 string) string {
 fn url_escape(s string) string {
 	mut out := []u8{}
 	for c in s.bytes() {
-		if (c >= `A` && c <= `Z`) || (c >= `a` && c <= `z`) || (c >= `0` && c <= `9`) || c in [
-			`-`,
-			`_`,
-			`.`,
-			`~`,
-		] {
+		if (c >= `A` && c <= `Z`) || (c >= `a` && c <= `z`) || (c >= `0` && c <= `9`)
+			|| c in [`-`, `_`, `.`, `~`] {
 			out << c
 		} else {
 			out << `%`

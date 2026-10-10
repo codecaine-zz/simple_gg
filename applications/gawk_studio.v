@@ -35,354 +35,347 @@ fn get_all_one_liners() []OneLiner {
 	return [
 		// 1. Column & Field Operations
 		OneLiner{
-			title: 'Print Column 1 and Last Column ($1, $NF)'
+			title:    'Print Column 1 and Last Column ($1, $NF)'
 			category: 'Columns & Fields'
-			fs: ', (Comma - CSV)'
-			script: '{ print $1, $NF }'
-			desc: 'Prints the very first field and the last dynamic field on each record.'
+			fs:       ', (Comma - CSV)'
+			script:   '{ print $1, $NF }'
+			desc:     'Prints the very first field and the last dynamic field on each record.'
 		},
 		OneLiner{
-			title: 'Print 2nd to Last Column ($(NF-1))'
+			title:    'Print 2nd to Last Column ($(NF-1))'
 			category: 'Columns & Fields'
-			fs: ', (Comma - CSV)'
-			script: 'NF >= 2 { print $(NF-1) }'
-			desc: 'Extracts the penultimate field before the end of the record.'
+			fs:       ', (Comma - CSV)'
+			script:   'NF >= 2 { print $(NF-1) }'
+			desc:     'Extracts the penultimate field before the end of the record.'
 		},
 		OneLiner{
-			title: 'Swap Column 1 and Column 2 ($1 <-> $2)'
+			title:    'Swap Column 1 and Column 2 ($1 <-> $2)'
 			category: 'Columns & Fields'
-			fs: ', (Comma - CSV)'
-			script: 'BEGIN { FS=","; OFS="," }\n{\n    t = $1; $1 = $2; $2 = t; print\n}'
-			desc: 'Swaps the positions of the first and second columns.'
+			fs:       ', (Comma - CSV)'
+			script:   'BEGIN { FS=","; OFS="," }\n{\n    t = $1; $1 = $2; $2 = t; print\n}'
+			desc:     'Swaps the positions of the first and second columns.'
 		},
 		OneLiner{
-			title: 'Delete First Column ($1 = "")'
+			title:    'Delete First Column ($1 = "")'
 			category: 'Columns & Fields'
-			fs: ', (Comma - CSV)'
-			script: '{\n    $1 = ""; sub("^[[:space:],]+", ""); print\n}'
-			desc: 'Removes the first column from all rows.'
+			fs:       ', (Comma - CSV)'
+			script:   '{\n    $1 = ""; sub("^[[:space:],]+", ""); print\n}'
+			desc:     'Removes the first column from all rows.'
 		},
 		OneLiner{
-			title: 'Delete Last Column (NF--)'
+			title:    'Delete Last Column (NF--)'
 			category: 'Columns & Fields'
-			fs: ', (Comma - CSV)'
-			script: '{\n    NF--; print\n}'
-			desc: 'Decrements total field count to discard the last column.'
+			fs:       ', (Comma - CSV)'
+			script:   '{\n    NF--; print\n}'
+			desc:     'Decrements total field count to discard the last column.'
 		},
 		OneLiner{
-			title: 'Print Fields in Reverse Order'
+			title:    'Print Fields in Reverse Order'
 			category: 'Columns & Fields'
-			fs: '[[:space:]]+ (Whitespace / Columns)'
-			script: '{\n    for (i=NF; i>0; i--) printf "%s%s", $i, (i>1 ? OFS : ORS)\n}'
-			desc: 'Loops backwards from NF to 1, outputting columns in inverted sequence.'
+			fs:       '[[:space:]]+ (Whitespace / Columns)'
+			script:   '{\n    for (i=NF; i>0; i--) printf "%s%s", $i, (i>1 ? OFS : ORS)\n}'
+			desc:     'Loops backwards from NF to 1, outputting columns in inverted sequence.'
 		},
 		OneLiner{
-			title: 'Print Line with Field Count (NF: $0)'
+			title:    'Print Line with Field Count (NF: $0)'
 			category: 'Columns & Fields'
-			fs: ', (Comma - CSV)'
-			script: '{ printf "[Fields: %2d] %s\\n", NF, $0 }'
-			desc: 'Prefixes each record with the number of delimited fields detected.'
+			fs:       ', (Comma - CSV)'
+			script:   '{ printf "[Fields: %2d] %s\\n", NF, $0 }'
+			desc:     'Prefixes each record with the number of delimited fields detected.'
 		},
 		OneLiner{
-			title: 'Filter Lines with exactly N fields (NF == 5)'
+			title:    'Filter Lines with exactly N fields (NF == 5)'
 			category: 'Columns & Fields'
-			fs: ', (Comma - CSV)'
-			script: 'NF == 5'
-			desc: 'Extracts only rows that have exactly 5 columns.'
+			fs:       ', (Comma - CSV)'
+			script:   'NF == 5'
+			desc:     'Extracts only rows that have exactly 5 columns.'
 		},
-
 		// 2. Line Numbering & Slicing
 		OneLiner{
-			title: 'Print Total Line Count (NR)'
+			title:    'Print Total Line Count (NR)'
 			category: 'Lines & Slicing'
-			fs: ', (Comma - CSV)'
-			script: 'END { print "Total Lines:", NR }'
-			desc: 'Counts total number of input records processed.'
+			fs:       ', (Comma - CSV)'
+			script:   'END { print "Total Lines:", NR }'
+			desc:     'Counts total number of input records processed.'
 		},
 		OneLiner{
-			title: 'Number Every Line (NR: line)'
+			title:    'Number Every Line (NR: line)'
 			category: 'Lines & Slicing'
-			fs: ', (Comma - CSV)'
-			script: '{ printf "%4d | %s\\n", NR, $0 }'
-			desc: 'Formats line numbers right-aligned with pipe delimiter.'
+			fs:       ', (Comma - CSV)'
+			script:   '{ printf "%4d | %s\\n", NR, $0 }'
+			desc:     'Formats line numbers right-aligned with pipe delimiter.'
 		},
 		OneLiner{
-			title: 'Number Non-Empty Lines Only'
+			title:    'Number Non-Empty Lines Only'
 			category: 'Lines & Slicing'
-			fs: ', (Comma - CSV)'
-			script: 'NF { $0 = sprintf("%4d | %s", ++c, $0) } 1'
-			desc: 'Numbers valid records while ignoring blank lines.'
+			fs:       ', (Comma - CSV)'
+			script:   'NF { $0 = sprintf("%4d | %s", ++c, $0) } 1'
+			desc:     'Numbers valid records while ignoring blank lines.'
 		},
 		OneLiner{
-			title: 'Head: Print First 10 Lines (NR <= 10)'
+			title:    'Head: Print First 10 Lines (NR <= 10)'
 			category: 'Lines & Slicing'
-			fs: ', (Comma - CSV)'
-			script: 'NR <= 10'
-			desc: 'Emulates head -n 10 efficiently.'
+			fs:       ', (Comma - CSV)'
+			script:   'NR <= 10'
+			desc:     'Emulates head -n 10 efficiently.'
 		},
 		OneLiner{
-			title: 'Slice Range: Lines 10 to 25'
+			title:    'Slice Range: Lines 10 to 25'
 			category: 'Lines & Slicing'
-			fs: ', (Comma - CSV)'
-			script: 'NR >= 10 && NR <= 25'
-			desc: 'Extracts a specific slice of lines by line number range.'
+			fs:       ', (Comma - CSV)'
+			script:   'NR >= 10 && NR <= 25'
+			desc:     'Extracts a specific slice of lines by line number range.'
 		},
 		OneLiner{
-			title: 'Tail: Print Last Line'
+			title:    'Tail: Print Last Line'
 			category: 'Lines & Slicing'
-			fs: ', (Comma - CSV)'
-			script: 'END { print $0 }'
-			desc: 'Outputs the final line of the input stream.'
+			fs:       ', (Comma - CSV)'
+			script:   'END { print $0 }'
+			desc:     'Outputs the final line of the input stream.'
 		},
 		OneLiner{
-			title: 'Print Every 2nd Line (Even Lines)'
+			title:    'Print Every 2nd Line (Even Lines)'
 			category: 'Lines & Slicing'
-			fs: ', (Comma - CSV)'
-			script: 'NR % 2 == 0'
-			desc: 'Filters only lines with even record numbers.'
+			fs:       ', (Comma - CSV)'
+			script:   'NR % 2 == 0'
+			desc:     'Filters only lines with even record numbers.'
 		},
 		OneLiner{
-			title: 'Delete All Blank / Empty Lines'
+			title:    'Delete All Blank / Empty Lines'
 			category: 'Lines & Slicing'
-			fs: ', (Comma - CSV)'
-			script: 'NF > 0'
-			desc: 'Removes all empty lines from text stream.'
+			fs:       ', (Comma - CSV)'
+			script:   'NF > 0'
+			desc:     'Removes all empty lines from text stream.'
 		},
 		OneLiner{
-			title: 'Double-Space Entire Text'
+			title:    'Double-Space Entire Text'
 			category: 'Lines & Slicing'
-			fs: ', (Comma - CSV)'
-			script: '{ print $0 "\\n" }'
-			desc: 'Inserts an extra blank newline after every line.'
+			fs:       ', (Comma - CSV)'
+			script:   '{ print $0 "\\n" }'
+			desc:     'Inserts an extra blank newline after every line.'
 		},
-
 		// 3. Filtering & Searching
 		OneLiner{
-			title: 'Case-Insensitive Match (tolower ~ /pattern/)'
+			title:    'Case-Insensitive Match (tolower ~ /pattern/)'
 			category: 'Filter & Search'
-			fs: ', (Comma - CSV)'
-			script: 'tolower($0) ~ /engineering/'
-			desc: 'Performs case-insensitive regex search across lines.'
+			fs:       ', (Comma - CSV)'
+			script:   'tolower($0) ~ /engineering/'
+			desc:     'Performs case-insensitive regex search across lines.'
 		},
 		OneLiner{
-			title: 'Exclude Lines Matching Pattern (!/pattern/)'
+			title:    'Exclude Lines Matching Pattern (!/pattern/)'
 			category: 'Filter & Search'
-			fs: ', (Comma - CSV)'
-			script: '!/Leave/'
-			desc: 'Inverse filter: prints only lines NOT matching pattern.'
+			fs:       ', (Comma - CSV)'
+			script:   '!/Leave/'
+			desc:     'Inverse filter: prints only lines NOT matching pattern.'
 		},
 		OneLiner{
-			title: 'Numeric Filter: Field 4 > 100000'
+			title:    'Numeric Filter: Field 4 > 100000'
 			category: 'Filter & Search'
-			fs: ', (Comma - CSV)'
-			script: 'NR > 1 && $4 > 100000'
-			desc: 'Extracts records where column 4 value exceeds 100,000.'
+			fs:       ', (Comma - CSV)'
+			script:   'NR > 1 && $4 > 100000'
+			desc:     'Extracts records where column 4 value exceeds 100,000.'
 		},
 		OneLiner{
-			title: 'Exact Field Match: Field 5 == "Active"'
+			title:    'Exact Field Match: Field 5 == "Active"'
 			category: 'Filter & Search'
-			fs: ', (Comma - CSV)'
-			script: 'NR == 1 || $5 == "Active"'
-			desc: 'Includes header row plus rows where column 5 equals "Active".'
+			fs:       ', (Comma - CSV)'
+			script:   'NR == 1 || $5 == "Active"'
+			desc:     'Includes header row plus rows where column 5 equals "Active".'
 		},
 		OneLiner{
-			title: 'Print Range Between Two Patterns'
+			title:    'Print Range Between Two Patterns'
 			category: 'Filter & Search'
-			fs: ', (Comma - CSV)'
-			script: '/Engineering/, /Finance/'
-			desc: 'Outputs all lines from first occurrence of pattern A until pattern B.'
+			fs:       ', (Comma - CSV)'
+			script:   '/Engineering/, /Finance/'
+			desc:     'Outputs all lines from first occurrence of pattern A until pattern B.'
 		},
 		OneLiner{
-			title: 'Filter Lines Longer Than 50 Chars'
+			title:    'Filter Lines Longer Than 50 Chars'
 			category: 'Filter & Search'
-			fs: ', (Comma - CSV)'
-			script: 'length($0) > 50'
-			desc: 'Finds long lines exceeding 50 characters in length.'
+			fs:       ', (Comma - CSV)'
+			script:   'length($0) > 50'
+			desc:     'Finds long lines exceeding 50 characters in length.'
 		},
-
 		// 4. Math & Statistics
 		OneLiner{
-			title: 'Sum Column Values ({ sum += $4 })'
+			title:    'Sum Column Values ({ sum += $4 })'
 			category: 'Math & Stats'
-			fs: ', (Comma - CSV)'
-			script: 'NR > 1 { sum += $4 }\nEND { print "TOTAL SUM:", sum }'
-			desc: 'Calculates the sum of all values in column 4.'
+			fs:       ', (Comma - CSV)'
+			script:   'NR > 1 { sum += $4 }\nEND { print "TOTAL SUM:", sum }'
+			desc:     'Calculates the sum of all values in column 4.'
 		},
 		OneLiner{
-			title: 'Calculate Column Average (Mean)'
+			title:    'Calculate Column Average (Mean)'
 			category: 'Math & Stats'
-			fs: ', (Comma - CSV)'
-			script: 'NR > 1 && $4 != "" {\n    sum += $4; count++\n}\nEND {\n    print "COUNT:  ", count\n    print "SUM:    ", sum\n    print "AVERAGE:", (count ? sum/count : 0)\n}'
-			desc: 'Computes count, total sum, and average mean for column.'
+			fs:       ', (Comma - CSV)'
+			script:   'NR > 1 && $4 != "" {\n    sum += $4; count++\n}\nEND {\n    print "COUNT:  ", count\n    print "SUM:    ", sum\n    print "AVERAGE:", (count ? sum/count : 0)\n}'
+			desc:     'Computes count, total sum, and average mean for column.'
 		},
 		OneLiner{
-			title: 'Find Maximum & Minimum in Column'
+			title:    'Find Maximum & Minimum in Column'
 			category: 'Math & Stats'
-			fs: ', (Comma - CSV)'
-			script: 'NR == 2 { max = min = $4 }\nNR > 2 && $4 != "" {\n    if ($4 > max) max = $4\n    if ($4 < min) min = $4\n}\nEND {\n    print "MAX:", max\n    print "MIN:", min\n}'
-			desc: 'Finds highest and lowest values across column 4.'
+			fs:       ', (Comma - CSV)'
+			script:   'NR == 2 { max = min = $4 }\nNR > 2 && $4 != "" {\n    if ($4 > max) max = $4\n    if ($4 < min) min = $4\n}\nEND {\n    print "MAX:", max\n    print "MIN:", min\n}'
+			desc:     'Finds highest and lowest values across column 4.'
 		},
 		OneLiner{
-			title: 'Group Sum by Department ({ total[$3] += $4 })'
+			title:    'Group Sum by Department ({ total[$3] += $4 })'
 			category: 'Math & Stats'
-			fs: ', (Comma - CSV)'
-			script: 'NR > 1 {\n    total[$3] += $4\n    count[$3]++\n}\nEND {\n    print "DEPARTMENT", "HEADCOUNT", "TOTAL_BUDGET", "AVG_SALARY"\n    print "----------------------------------------------------"\n    for (dept in total) {\n        avg = count[dept] ? total[dept]/count[dept] : 0\n        printf "%-15s %-10d $%-12.2f $%.2f\\n", dept, count[dept], total[dept], avg\n    }\n}'
-			desc: 'Aggregates totals, headcounts, and averages grouped by column 3.'
+			fs:       ', (Comma - CSV)'
+			script:   'NR > 1 {\n    total[$3] += $4\n    count[$3]++\n}\nEND {\n    print "DEPARTMENT", "HEADCOUNT", "TOTAL_BUDGET", "AVG_SALARY"\n    print "----------------------------------------------------"\n    for (dept in total) {\n        avg = count[dept] ? total[dept]/count[dept] : 0\n        printf "%-15s %-10d $%-12.2f $%.2f\\n", dept, count[dept], total[dept], avg\n    }\n}'
+			desc:     'Aggregates totals, headcounts, and averages grouped by column 3.'
 		},
 		OneLiner{
-			title: 'Count Total Lines, Words & Characters'
+			title:    'Count Total Lines, Words & Characters'
 			category: 'Math & Stats'
-			fs: ', (Comma - CSV)'
-			script: '{\n    words += NF\n    chars += length($0) + 1\n}\nEND {\n    print "Lines:     ", NR\n    print "Words:     ", words\n    print "Characters:", chars\n}'
-			desc: 'Complete text telemetry counting lines, words, and characters.'
+			fs:       ', (Comma - CSV)'
+			script:   '{\n    words += NF\n    chars += length($0) + 1\n}\nEND {\n    print "Lines:     ", NR\n    print "Words:     ", words\n    print "Characters:", chars\n}'
+			desc:     'Complete text telemetry counting lines, words, and characters.'
 		},
-
 		// 5. Deduplication & Sets
 		OneLiner{
-			title: 'Remove Duplicate Lines - Preserve Order (!seen[$0]++)'
+			title:    'Remove Duplicate Lines - Preserve Order (!seen[$0]++)'
 			category: 'Deduplication'
-			fs: ', (Comma - CSV)'
-			script: '!seen[$0]++'
-			desc: 'Removes duplicate lines while preserving original row order.'
+			fs:       ', (Comma - CSV)'
+			script:   '!seen[$0]++'
+			desc:     'Removes duplicate lines while preserving original row order.'
 		},
 		OneLiner{
-			title: 'Remove Duplicate Lines by Field ($2)'
+			title:    'Remove Duplicate Lines by Field ($2)'
 			category: 'Deduplication'
-			fs: ', (Comma - CSV)'
-			script: '!seen[$2]++'
-			desc: 'Ensures only the first occurrence of each value in field 2 is kept.'
+			fs:       ', (Comma - CSV)'
+			script:   '!seen[$2]++'
+			desc:     'Ensures only the first occurrence of each value in field 2 is kept.'
 		},
 		OneLiner{
-			title: 'Print Only Duplicate Lines (seen[$0]++ == 1)'
+			title:    'Print Only Duplicate Lines (seen[$0]++ == 1)'
 			category: 'Deduplication'
-			fs: ', (Comma - CSV)'
-			script: 'seen[$0]++ == 1'
-			desc: 'Finds and prints only duplicate entries in the data stream.'
+			fs:       ', (Comma - CSV)'
+			script:   'seen[$0]++ == 1'
+			desc:     'Finds and prints only duplicate entries in the data stream.'
 		},
 		OneLiner{
-			title: 'Histogram / Frequency Count of Values'
+			title:    'Histogram / Frequency Count of Values'
 			category: 'Deduplication'
-			fs: ', (Comma - CSV)'
-			script: 'NR > 1 { freq[$3]++ }\nEND {\n    print "CATEGORY", "OCCURRENCES"\n    print "------------------------"\n    for (item in freq) {\n        printf "%-15s %d\\n", item, freq[item]\n    }\n}'
-			desc: 'Generates frequency table of values in department column.'
+			fs:       ', (Comma - CSV)'
+			script:   'NR > 1 { freq[$3]++ }\nEND {\n    print "CATEGORY", "OCCURRENCES"\n    print "------------------------"\n    for (item in freq) {\n        printf "%-15s %d\\n", item, freq[item]\n    }\n}'
+			desc:     'Generates frequency table of values in department column.'
 		},
-
 		// 6. String Transformations
 		OneLiner{
-			title: 'Convert Entire Text to UPPERCASE'
+			title:    'Convert Entire Text to UPPERCASE'
 			category: 'Text Transforms'
-			fs: ', (Comma - CSV)'
-			script: '{ print toupper($0) }'
-			desc: 'Converts all letters across all records to uppercase.'
+			fs:       ', (Comma - CSV)'
+			script:   '{ print toupper($0) }'
+			desc:     'Converts all letters across all records to uppercase.'
 		},
 		OneLiner{
-			title: 'Convert Entire Text to lowercase'
+			title:    'Convert Entire Text to lowercase'
 			category: 'Text Transforms'
-			fs: ', (Comma - CSV)'
-			script: '{ print tolower($0) }'
-			desc: 'Converts all letters across all records to lowercase.'
+			fs:       ', (Comma - CSV)'
+			script:   '{ print tolower($0) }'
+			desc:     'Converts all letters across all records to lowercase.'
 		},
 		OneLiner{
-			title: 'Capitalize First Letter of Every Word'
+			title:    'Capitalize First Letter of Every Word'
 			category: 'Text Transforms'
-			fs: '[[:space:]]+ (Whitespace / Columns)'
-			script: '{\n    for (i=1; i<=NF; i++) {\n        $i = toupper(substr($i, 1, 1)) tolower(substr($i, 2))\n    }\n    print\n}'
-			desc: 'Converts text into Title Case capitalization.'
+			fs:       '[[:space:]]+ (Whitespace / Columns)'
+			script:   '{\n    for (i=1; i<=NF; i++) {\n        $i = toupper(substr($i, 1, 1)) tolower(substr($i, 2))\n    }\n    print\n}'
+			desc:     'Converts text into Title Case capitalization.'
 		},
 		OneLiner{
-			title: 'Trim Leading and Trailing Whitespace'
+			title:    'Trim Leading and Trailing Whitespace'
 			category: 'Text Transforms'
-			fs: ', (Comma - CSV)'
-			script: '{\n    gsub(/^[[:space:]]+|[[:space:]]+$/, "");\n    print\n}'
-			desc: 'Strips unwanted spaces and tabs from beginning and end of lines.'
+			fs:       ', (Comma - CSV)'
+			script:   '{\n    gsub(/^[[:space:]]+|[[:space:]]+$/, "");\n    print\n}'
+			desc:     'Strips unwanted spaces and tabs from beginning and end of lines.'
 		},
 		OneLiner{
-			title: 'Global Search and Replace (gsub)'
+			title:    'Global Search and Replace (gsub)'
 			category: 'Text Transforms'
-			fs: ', (Comma - CSV)'
-			script: '{\n    gsub(/Active/, "CONFIRMED");\n    print\n}'
-			desc: 'Replaces all occurrences of pattern with replacement string.'
+			fs:       ', (Comma - CSV)'
+			script:   '{\n    gsub(/Active/, "CONFIRMED");\n    print\n}'
+			desc:     'Replaces all occurrences of pattern with replacement string.'
 		},
 		OneLiner{
-			title: 'Reverse Characters in Every Line'
+			title:    'Reverse Characters in Every Line'
 			category: 'Text Transforms'
-			fs: ', (Comma - CSV)'
-			script: '{\n    for (i=length($0); i>0; i--) printf "%s", substr($0, i, 1)\n    print ""\n}'
-			desc: 'Reverses string character-by-character per line.'
+			fs:       ', (Comma - CSV)'
+			script:   '{\n    for (i=length($0); i>0; i--) printf "%s", substr($0, i, 1)\n    print ""\n}'
+			desc:     'Reverses string character-by-character per line.'
 		},
-
 		// 7. Format Conversions
 		OneLiner{
-			title: 'Convert CSV to TSV'
+			title:    'Convert CSV to TSV'
 			category: 'Format Conversions'
-			fs: ', (Comma - CSV)'
-			script: 'BEGIN { FS=","; OFS="\\t" }\n{\n    $1 = $1; print\n}'
-			desc: 'Rewrites CSV data into Tab-Separated Values format.'
+			fs:       ', (Comma - CSV)'
+			script:   'BEGIN { FS=","; OFS="\\t" }\n{\n    $1 = $1; print\n}'
+			desc:     'Rewrites CSV data into Tab-Separated Values format.'
 		},
 		OneLiner{
-			title: 'Convert TSV to CSV'
+			title:    'Convert TSV to CSV'
 			category: 'Format Conversions'
-			fs: '\\t (Tab - TSV)'
-			script: 'BEGIN { FS="\\t"; OFS="," }\n{\n    $1 = $1; print\n}'
-			desc: 'Rewrites TSV data into Comma-Separated Values format.'
+			fs:       '\\t (Tab - TSV)'
+			script:   'BEGIN { FS="\\t"; OFS="," }\n{\n    $1 = $1; print\n}'
+			desc:     'Rewrites TSV data into Comma-Separated Values format.'
 		},
 		OneLiner{
-			title: 'Convert CSV to Markdown Table'
+			title:    'Convert CSV to Markdown Table'
 			category: 'Format Conversions'
-			fs: ', (Comma - CSV)'
-			script: 'BEGIN { FS="," }\nNR == 1 {\n    printf "| %-15s | %-15s | %-12s |\\n", $2, $3, $4\n    printf "|-%-15s-|-%-15s-|-%-12s-|\\n", "---------------", "---------------", "------------"\n    next\n}\n{\n    printf "| %-15s | %-15s | %-12s |\\n", $2, $3, "$" $4\n}'
-			desc: 'Generates formatted Markdown table with column headers and dividers.'
+			fs:       ', (Comma - CSV)'
+			script:   'BEGIN { FS="," }\nNR == 1 {\n    printf "| %-15s | %-15s | %-12s |\\n", $2, $3, $4\n    printf "|-%-15s-|-%-15s-|-%-12s-|\\n", "---------------", "---------------", "------------"\n    next\n}\n{\n    printf "| %-15s | %-15s | %-12s |\\n", $2, $3, "$" $4\n}'
+			desc:     'Generates formatted Markdown table with column headers and dividers.'
 		},
 		OneLiner{
-			title: 'Convert CSV to JSON Objects Array'
+			title:    'Convert CSV to JSON Objects Array'
 			category: 'Format Conversions'
-			fs: ', (Comma - CSV)'
-			script: 'BEGIN { FS=","; print "[" }\nNR == 1 {\n    h1=$1; h2=$2; h3=$3; h4=$4; h5=$5; next\n}\n{\n    printf "  { \\"%s\\": %s, \\"%s\\": \\"%s\\", \\"%s\\": \\"%s\\", \\"%s\\": %s, \\"%s\\": \\"%s\\" }%s\\n",\n           h1, $1, h2, $2, h3, $3, h4, $4, h5, $5, (NR > 2 ? "," : "")\n}\nEND { print "]" }'
-			desc: 'Converts CSV rows into clean structured JSON array of objects.'
+			fs:       ', (Comma - CSV)'
+			script:   'BEGIN { FS=","; print "[" }\nNR == 1 {\n    h1=$1; h2=$2; h3=$3; h4=$4; h5=$5; next\n}\n{\n    printf "  { \\"%s\\": %s, \\"%s\\": \\"%s\\", \\"%s\\": \\"%s\\", \\"%s\\": %s, \\"%s\\": \\"%s\\" }%s\\n",\n           h1, $1, h2, $2, h3, $3, h4, $4, h5, $5, (NR > 2 ? "," : "")\n}\nEND { print "]" }'
+			desc:     'Converts CSV rows into clean structured JSON array of objects.'
 		},
 		OneLiner{
-			title: 'Format Lines as SQL IN (...) Clause'
+			title:    'Format Lines as SQL IN (...) Clause'
 			category: 'Format Conversions'
-			fs: ', (Comma - CSV)'
-			script: 'BEGIN { printf "(" }\nNR > 1 {\n    printf "%s\'%s\'", (NR > 2 ? ", " : ""), $2\n}\nEND { print ")" }'
-			desc: 'Packages column values into SQL IN (\'Val1\', \'Val2\') list.'
+			fs:       ', (Comma - CSV)'
+			script:   'BEGIN { printf "(" }\nNR > 1 {\n    printf "%s\'%s\'", (NR > 2 ? ", " : ""), $2\n}\nEND { print ")" }'
+			desc:     "Packages column values into SQL IN ('Val1', 'Val2') list."
 		},
-
 		// 8. Logs & Network Analytics
 		OneLiner{
-			title: 'Top IP Addresses in Web Log (count[$1]++)'
+			title:    'Top IP Addresses in Web Log (count[$1]++)'
 			category: 'Logs & Network'
-			fs: '[[:space:]]+ (Whitespace / Columns)'
-			script: '{\n    ip = $1\n    count[ip]++\n}\nEND {\n    print "HITS", "IP_ADDRESS"\n    print "------------------------"\n    for (i in count) {\n        printf "%-6d %s\\n", count[i], i\n    }\n}'
-			desc: 'Aggregates requests per client IP address in Nginx/Apache log.'
+			fs:       '[[:space:]]+ (Whitespace / Columns)'
+			script:   '{\n    ip = $1\n    count[ip]++\n}\nEND {\n    print "HITS", "IP_ADDRESS"\n    print "------------------------"\n    for (i in count) {\n        printf "%-6d %s\\n", count[i], i\n    }\n}'
+			desc:     'Aggregates requests per client IP address in Nginx/Apache log.'
 		},
 		OneLiner{
-			title: 'Count HTTP Status Codes in Web Log (count[$9]++)'
+			title:    'Count HTTP Status Codes in Web Log (count[$9]++)'
 			category: 'Logs & Network'
-			fs: '[[:space:]]+ (Whitespace / Columns)'
-			script: '{\n    code = $9\n    if (code != "") count[code]++\n}\nEND {\n    print "HTTP_CODE", "REQUEST_COUNT"\n    print "------------------------"\n    for (c in count) {\n        printf "HTTP %-5s %d hits\\n", c, count[c]\n    }\n}'
-			desc: 'Counts occurrences of HTTP response codes (200, 404, 500).'
+			fs:       '[[:space:]]+ (Whitespace / Columns)'
+			script:   '{\n    code = $9\n    if (code != "") count[code]++\n}\nEND {\n    print "HTTP_CODE", "REQUEST_COUNT"\n    print "------------------------"\n    for (c in count) {\n        printf "HTTP %-5s %d hits\\n", c, count[c]\n    }\n}'
+			desc:     'Counts occurrences of HTTP response codes (200, 404, 500).'
 		},
 		OneLiner{
-			title: 'Extract Usernames & Shells from /etc/passwd'
+			title:    'Extract Usernames & Shells from /etc/passwd'
 			category: 'Logs & Network'
-			fs: ': (Colon - Passwd / Config)'
-			script: 'BEGIN { FS=":"; OFS="\\t"; print "USERNAME", "UID", "SHELL" }\n$3 >= 0 {\n    print $1, $3, $7\n}'
-			desc: 'Parses system accounts from /etc/passwd table.'
+			fs:       ': (Colon - Passwd / Config)'
+			script:   'BEGIN { FS=":"; OFS="\\t"; print "USERNAME", "UID", "SHELL" }\n$3 >= 0 {\n    print $1, $3, $7\n}'
+			desc:     'Parses system accounts from /etc/passwd table.'
 		},
 		OneLiner{
-			title: 'Filter Human Users Only (UID >= 1000 in passwd)'
+			title:    'Filter Human Users Only (UID >= 1000 in passwd)'
 			category: 'Logs & Network'
-			fs: ': (Colon - Passwd / Config)'
-			script: 'BEGIN { FS=":"; OFS="\\t"; print "USER", "UID", "HOME_DIR" }\n$3 >= 1000 && $3 < 65534 {\n    print $1, $3, $6\n}'
-			desc: 'Filters real interactive user accounts on UNIX/macOS system.'
+			fs:       ': (Colon - Passwd / Config)'
+			script:   'BEGIN { FS=":"; OFS="\\t"; print "USER", "UID", "HOME_DIR" }\n$3 >= 1000 && $3 < 65534 {\n    print $1, $3, $6\n}'
+			desc:     'Filters real interactive user accounts on UNIX/macOS system.'
 		},
 		OneLiner{
-			title: 'Extract All URLs / Links from Text'
+			title:    'Extract All URLs / Links from Text'
 			category: 'Logs & Network'
-			fs: '[[:space:]]+ (Whitespace / Columns)'
-			script: '{\n    for (i=1; i<=NF; i++) {\n        if ($i ~ /^https?:\\/\\//) {\n            gsub(/[",]/, "", $i)\n            print $i\n        }\n    }\n}'
-			desc: 'Extracts all http:// and https:// URLs from document.'
+			fs:       '[[:space:]]+ (Whitespace / Columns)'
+			script:   '{\n    for (i=1; i<=NF; i++) {\n        if ($i ~ /^https?:\\/\\//) {\n            gsub(/[",]/, "", $i)\n            print $i\n        }\n    }\n}'
+			desc:     'Extracts all http:// and https:// URLs from document.'
 		},
 	]
 }
@@ -449,7 +442,8 @@ fn main() {
 		w.toast('Theme changed to ${selected}')
 	})
 	gawk_path := get_gawk_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${gawk_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker')
+	win.add_label('lbl_engine_info',
+		'Engine: ${gawk_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker')
 
 	all_recipes := get_all_one_liners()
 
@@ -457,7 +451,7 @@ fn main() {
 	// Input Data Source & Configuration Bar
 	// -------------------------------------------------------------
 	win.begin_group_box('grp_config', 'Input Source & Delimiter Settings')
-	
+
 	win.begin_row('row_delimiters')
 	win.add_label('lbl_fs', 'Field Separator (-F):')
 	win.add_dropdown('dd_fs', [
@@ -467,14 +461,15 @@ fn main() {
 		': (Colon - Passwd / Config)',
 		'| (Pipe Delimited)',
 		'; (Semicolon)',
-		'Custom Delimiter'
+		'Custom Delimiter',
 	], ', (Comma - CSV)')
 	win.add_label('lbl_custom_fs', 'Custom FS:')
 	win.add_input('txt_custom_fs', '')
 	win.set_control_width('txt_custom_fs', 60)
-	
+
 	win.add_label('lbl_ofs', 'Output Separator (OFS):')
-	win.add_dropdown('dd_ofs', [', (Comma)', '\\t (Tab)', ' | (Padded Pipe)', '  (Two Spaces)', 'Custom OFS'], '\\t (Tab)')
+	win.add_dropdown('dd_ofs', [', (Comma)', '\\t (Tab)', ' | (Padded Pipe)', '  (Two Spaces)',
+		'Custom OFS'], '\\t (Tab)')
 	win.end_row()
 
 	win.begin_row('row_sample_loader')
@@ -492,7 +487,8 @@ fn main() {
 	// -------------------------------------------------------------
 	// Dual Pane: Input Text & GAWK Script
 	// -------------------------------------------------------------
-	win.begin_group_box('grp_input_pane', 'Input Data Stream (Raw text, CSV, TSV, logs, or structured records)')
+	win.begin_group_box('grp_input_pane',
+		'Input Data Stream (Raw text, CSV, TSV, logs, or structured records)')
 	win.add_textarea('txt_input_data', get_sample_csv())
 	win.set_control_height('txt_input_data', 140)
 	win.end_group_box()
@@ -501,7 +497,7 @@ fn main() {
 	// Exhaustive AWK One-Liner Library & Recipe Selector
 	// -------------------------------------------------------------
 	win.begin_group_box('grp_presets', 'Ultimate AWK One-Liner Library (40+ Recipes by Category)')
-	
+
 	mut recipe_titles := ['-- Select a Classic AWK One-Liner --']
 	for r in all_recipes {
 		recipe_titles << '[${r.category}] ' + r.title
@@ -516,7 +512,8 @@ fn main() {
 	win.end_row()
 
 	win.begin_row('row_recipe_desc')
-	win.add_label('lbl_recipe_desc', 'Tip: Pick any one-liner above and click "Insert & Run" for instantaneous results.')
+	win.add_label('lbl_recipe_desc',
+		'Tip: Pick any one-liner above and click "Insert & Run" for instantaneous results.')
 	win.end_row()
 	win.end_group_box()
 
@@ -550,7 +547,8 @@ fn main() {
 
 	// Stats Row
 	win.begin_row('row_stats')
-	win.add_label('lbl_exec_stats', 'Stats: Ready  |  Lines: 0  |  Duration: 0 ms  |  Output Size: 0 bytes')
+	win.add_label('lbl_exec_stats',
+		'Stats: Ready  |  Lines: 0  |  Duration: 0 ms  |  Output Size: 0 bytes')
 	win.end_row()
 
 	// -------------------------------------------------------------
@@ -566,25 +564,32 @@ fn main() {
 		}
 
 		gawk := get_gawk_bin()
-		
+
 		fs_sel := win.get('dd_fs')
 		mut raw_fs := ''
-		if fs_sel.contains('Comma') { raw_fs = ',' }
-		else if fs_sel.contains('Tab') { raw_fs = '\t' }
-		else if fs_sel.contains('Colon') { raw_fs = ':' }
-		else if fs_sel.contains('Pipe') { raw_fs = '|' }
-		else if fs_sel.contains('Semicolon') { raw_fs = ';' }
-		else if win.get('txt_custom_fs') != '' { raw_fs = win.get('txt_custom_fs') }
+		if fs_sel.contains('Comma') {
+			raw_fs = ','
+		} else if fs_sel.contains('Tab') {
+			raw_fs = '\t'
+		} else if fs_sel.contains('Colon') {
+			raw_fs = ':'
+		} else if fs_sel.contains('Pipe') {
+			raw_fs = '|'
+		} else if fs_sel.contains('Semicolon') {
+			raw_fs = ';'
+		} else if win.get('txt_custom_fs') != '' {
+			raw_fs = win.get('txt_custom_fs')
+		}
 
 		win.set_status('Executing GAWK program in background...')
 		win.toast('Running GAWK...')
 
 		go fn [mut win, gawk, raw_fs, script, input_text] () {
 			t0 := time.ticks()
-			
+
 			tmp_in := os.join_path(os.temp_dir(), 'gawk_studio_in_${time.ticks()}.txt')
 			tmp_scr := os.join_path(os.temp_dir(), 'gawk_studio_scr_${time.ticks()}.awk')
-			
+
 			os.write_file(tmp_in, input_text) or {}
 			os.write_file(tmp_scr, script) or {}
 
@@ -607,12 +612,19 @@ fn main() {
 					win_main.set('txt_output_data', out_str)
 					lines := out_str.count('\n')
 					bytes := out_str.len
-					win_main.set('lbl_exec_stats', ' Stats: SUCCESS  |  Lines: ${lines}  |  Duration: ${elapsed_ms} ms  |  Output: ${bytes} bytes')
+					win_main.set('lbl_exec_stats',
+						' Stats: SUCCESS  |  Lines: ${lines}  |  Duration: ${elapsed_ms} ms  |  Output: ${bytes} bytes')
 					win_main.set_status('GAWK program executed successfully in ${elapsed_ms} ms.')
 				} else {
-					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'GAWK reported a syntax or runtime error.' }
-					win_main.set('txt_output_data', '// [GAWK EXECUTION ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
-					win_main.set('lbl_exec_stats', ' Stats: ERROR (Exit code ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
+					err_msg := if res.output.trim_space() != '' {
+						res.output.trim_space()
+					} else {
+						'GAWK reported a syntax or runtime error.'
+					}
+					win_main.set('txt_output_data',
+						'// [GAWK EXECUTION ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+					win_main.set('lbl_exec_stats',
+						' Stats: ERROR (Exit code ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('GAWK program failed.')
 					win_main.toast('GAWK execution error!')
 				}
@@ -635,7 +647,8 @@ fn main() {
 	win.on_click('btn_load_log', fn (mut w simplegui.SimpleWindow) {
 		w.set('txt_input_data', get_sample_nginx_log())
 		w.set_text('dd_fs', '[[:space:]]+ (Whitespace / Columns)')
-		w.set('txt_awk_script', '# Count HTTP Status Codes in Nginx Access Log\n{\n    status = $9\n    if (status != "") count[status]++\n}\nEND {\n    print "HTTP_CODE", "REQUEST_COUNT"\n    print "------------------------"\n    for (s in count) {\n        printf "%-10s %d\\n", s, count[s]\n    }\n}')
+		w.set('txt_awk_script',
+			'# Count HTTP Status Codes in Nginx Access Log\n{\n    status = $9\n    if (status != "") count[status]++\n}\nEND {\n    print "HTTP_CODE", "REQUEST_COUNT"\n    print "------------------------"\n    for (s in count) {\n        printf "%-10s %d\\n", s, count[s]\n    }\n}')
 		w.toast('Sample Nginx access log loaded with status-counting script.')
 	})
 
@@ -643,7 +656,8 @@ fn main() {
 	win.on_click('btn_load_passwd', fn (mut w simplegui.SimpleWindow) {
 		w.set('txt_input_data', get_sample_passwd())
 		w.set_text('dd_fs', ': (Colon - Passwd / Config)')
-		w.set('txt_awk_script', 'BEGIN { FS=":"; OFS="\\t"; print "USERNAME", "UID", "DEFAULT_SHELL" }\n$3 >= 0 {\n    print $1, $3, $7\n}\nEND {\n    print "Total accounts:", NR\n}')
+		w.set('txt_awk_script',
+			'BEGIN { FS=":"; OFS="\\t"; print "USERNAME", "UID", "DEFAULT_SHELL" }\n$3 >= 0 {\n    print $1, $3, $7\n}\nEND {\n    print "Total accounts:", NR\n}')
 		w.toast('Sample /etc/passwd loaded.')
 	})
 
@@ -783,12 +797,19 @@ fn main() {
 
 		fs_sel := w.get('dd_fs')
 		mut raw_fs := ''
-		if fs_sel.contains('Comma') { raw_fs = ',' }
-		else if fs_sel.contains('Tab') { raw_fs = '\t' }
-		else if fs_sel.contains('Colon') { raw_fs = ':' }
-		else if fs_sel.contains('Pipe') { raw_fs = '|' }
-		else if fs_sel.contains('Semicolon') { raw_fs = ';' }
-		else if w.get('txt_custom_fs') != '' { raw_fs = w.get('txt_custom_fs') }
+		if fs_sel.contains('Comma') {
+			raw_fs = ','
+		} else if fs_sel.contains('Tab') {
+			raw_fs = '\t'
+		} else if fs_sel.contains('Colon') {
+			raw_fs = ':'
+		} else if fs_sel.contains('Pipe') {
+			raw_fs = '|'
+		} else if fs_sel.contains('Semicolon') {
+			raw_fs = ';'
+		} else if w.get('txt_custom_fs') != '' {
+			raw_fs = w.get('txt_custom_fs')
+		}
 
 		mut cmd_parts := [simplegui.quote_arg(gawk)]
 		if raw_fs != '' {
@@ -818,7 +839,8 @@ fn main() {
 					mb := f64(out_sz) / (1024.0 * 1024.0)
 					win_main.set_status('File processed successfully in ${elapsed_ms} ms (${mb:.2f} MB).')
 					win_main.toast('File processed & saved: ${out_path} (${mb:.2f} MB)!')
-					win_main.set('lbl_exec_stats', ' Stats: Direct File Stream  |  In: ${os.file_name(in_path)}  |  Out: ${mb:.2f} MB  |  Time: ${elapsed_ms} ms')
+					win_main.set('lbl_exec_stats',
+						' Stats: Direct File Stream  |  In: ${os.file_name(in_path)}  |  Out: ${mb:.2f} MB  |  Time: ${elapsed_ms} ms')
 				} else {
 					win_main.alert('GAWK Error', 'Error processing file: ' + res.output)
 					win_main.set_status('Error processing file.')

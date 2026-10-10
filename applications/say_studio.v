@@ -31,15 +31,51 @@ fn get_installed_voices() []VoiceInfo {
 	if res.exit_code != 0 || res.output.trim_space() == '' {
 		// Fallback standard macOS voices if command fails
 		return [
-			VoiceInfo{ name: 'Samantha', lang: 'en_US', description: 'Hello! My name is Samantha.' },
-			VoiceInfo{ name: 'Alex', lang: 'en_US', description: 'Most people recognize me by my voice.' },
-			VoiceInfo{ name: 'Daniel', lang: 'en_GB', description: 'Hello! My name is Daniel.' },
-			VoiceInfo{ name: 'Karen', lang: 'en_AU', description: 'Hello! My name is Karen.' },
-			VoiceInfo{ name: 'Fred', lang: 'en_US', description: 'I sure like being inside this fancy computer.' },
-			VoiceInfo{ name: 'Victoria', lang: 'en_US', description: 'Isn\'t it nice to have a computer that will talk to you?' },
-			VoiceInfo{ name: 'Zarvox', lang: 'en_US', description: 'That is not a bug; it is an undocumented feature.' },
-			VoiceInfo{ name: 'Trinoids', lang: 'en_US', description: 'We cannot be defeated.' },
-			VoiceInfo{ name: 'Whisper', lang: 'en_US', description: 'Psssssst! I can speak in a whisper.' },
+			VoiceInfo{
+				name:        'Samantha'
+				lang:        'en_US'
+				description: 'Hello! My name is Samantha.'
+			},
+			VoiceInfo{
+				name:        'Alex'
+				lang:        'en_US'
+				description: 'Most people recognize me by my voice.'
+			},
+			VoiceInfo{
+				name:        'Daniel'
+				lang:        'en_GB'
+				description: 'Hello! My name is Daniel.'
+			},
+			VoiceInfo{
+				name:        'Karen'
+				lang:        'en_AU'
+				description: 'Hello! My name is Karen.'
+			},
+			VoiceInfo{
+				name:        'Fred'
+				lang:        'en_US'
+				description: 'I sure like being inside this fancy computer.'
+			},
+			VoiceInfo{
+				name:        'Victoria'
+				lang:        'en_US'
+				description: "Isn't it nice to have a computer that will talk to you?"
+			},
+			VoiceInfo{
+				name:        'Zarvox'
+				lang:        'en_US'
+				description: 'That is not a bug; it is an undocumented feature.'
+			},
+			VoiceInfo{
+				name:        'Trinoids'
+				lang:        'en_US'
+				description: 'We cannot be defeated.'
+			},
+			VoiceInfo{
+				name:        'Whisper'
+				lang:        'en_US'
+				description: 'Psssssst! I can speak in a whisper.'
+			},
 		]
 	}
 
@@ -47,12 +83,12 @@ fn get_installed_voices() []VoiceInfo {
 	lines := res.output.split_into_lines()
 	for l in lines {
 		trimmed := l.trim_space()
-		if trimmed == '' { continue }
-		
+		if trimmed == '' { continue
+		 }
 		// Format: "Name                lang_code    # Description"
 		parts := trimmed.split('#')
 		desc := if parts.len > 1 { parts[1].trim_space() } else { '' }
-		
+
 		left := parts[0].trim_space()
 		tokens := left.split(' ')
 		if tokens.len >= 2 {
@@ -64,8 +100,8 @@ fn get_installed_voices() []VoiceInfo {
 			}
 			if name != '' && lang != '' {
 				list << VoiceInfo{
-					name: name
-					lang: lang
+					name:        name
+					lang:        lang
 					description: desc
 				}
 			}
@@ -78,92 +114,93 @@ fn get_installed_voices() []VoiceInfo {
 fn get_speech_recipes() []SpeechRecipe {
 	return [
 		SpeechRecipe{
-			title: ' Professional Studio Narration'
-			category: 'Voiceover'
-			voice: 'Samantha'
-			rate: '175'
-			script: 'Welcome to the future of native desktop applications. SimpleGUI delivers fast, beginner-friendly Cocoa user interfaces with compiled performance.'
+			title:       ' Professional Studio Narration'
+			category:    'Voiceover'
+			voice:       'Samantha'
+			rate:        '175'
+			script:      'Welcome to the future of native desktop applications. SimpleGUI delivers fast, beginner-friendly Cocoa user interfaces with compiled performance.'
 			description: 'Clear, engaging, professional voiceover ideal for product walkthroughs and tutorials.'
 		},
 		SpeechRecipe{
-			title: ' Sci-Fi Cybernetic Robot'
-			category: 'Novelty'
-			voice: 'Zarvox'
-			rate: '160'
-			script: 'System diagnostic complete. Neural pathways operational. Quantum processing cores running at maximum efficiency. All systems nominal.'
+			title:       ' Sci-Fi Cybernetic Robot'
+			category:    'Novelty'
+			voice:       'Zarvox'
+			rate:        '160'
+			script:      'System diagnostic complete. Neural pathways operational. Quantum processing cores running at maximum efficiency. All systems nominal.'
 			description: 'Iconic mechanical synthesized robot cadence for games and sci-fi audio effects.'
 		},
 		SpeechRecipe{
-			title: ' Airport & Transit Station Announcement'
-			category: 'Broadcast'
-			voice: 'Daniel'
-			rate: '155'
-			script: 'Attention passengers on Flight 842 to London Heathrow. Immediate boarding is now commencing at Gate B22. Please have your boarding pass and passport ready.'
+			title:       ' Airport & Transit Station Announcement'
+			category:    'Broadcast'
+			voice:       'Daniel'
+			rate:        '155'
+			script:      'Attention passengers on Flight 842 to London Heathrow. Immediate boarding is now commencing at Gate B22. Please have your boarding pass and passport ready.'
 			description: 'Formal, deliberate public address announcement.'
 		},
 		SpeechRecipe{
-			title: ' Emergency Public Safety Alert'
-			category: 'Alert'
-			voice: 'Alex'
-			rate: '190'
-			script: 'Emergency alert. Severe weather warning issued for your immediate region. Seek shelter inside a sturdy building immediately. Do not stay near windows.'
+			title:       ' Emergency Public Safety Alert'
+			category:    'Alert'
+			voice:       'Alex'
+			rate:        '190'
+			script:      'Emergency alert. Severe weather warning issued for your immediate region. Seek shelter inside a sturdy building immediately. Do not stay near windows.'
 			description: 'High-priority emergency broadcast alert.'
 		},
 		SpeechRecipe{
-			title: ' Classic Audiobook Storyteller'
-			category: 'Narration'
-			voice: 'Karen'
-			rate: '165'
-			script: 'It was a bright cold day in April, and the clocks were striking thirteen. Winston Smith, his chin nuzzled into his breast in an effort to escape the vile wind, slipped quickly through the glass doors.'
+			title:       ' Classic Audiobook Storyteller'
+			category:    'Narration'
+			voice:       'Karen'
+			rate:        '165'
+			script:      'It was a bright cold day in April, and the clocks were striking thirteen. Winston Smith, his chin nuzzled into his breast in an effort to escape the vile wind, slipped quickly through the glass doors.'
 			description: 'Smooth, measured pacing tailored for literature and long-form storytelling.'
 		},
 		SpeechRecipe{
-			title: ' Podcast Episode Intro & Hook'
-			category: 'Media'
-			voice: 'Samantha'
-			rate: '185'
-			script: 'What is up, everyone! Welcome back to Episode 42 of The Developer Horizon. Today, we are tearing down modern desktop frameworks and building lightning fast GUI apps in V.'
+			title:       ' Podcast Episode Intro & Hook'
+			category:    'Media'
+			voice:       'Samantha'
+			rate:        '185'
+			script:      'What is up, everyone! Welcome back to Episode 42 of The Developer Horizon. Today, we are tearing down modern desktop frameworks and building lightning fast GUI apps in V.'
 			description: 'Dynamic, upbeat pacing for podcast openers and media content.'
 		},
 		SpeechRecipe{
-			title: ' Calm Whisper & Meditation'
-			category: 'Novelty'
-			voice: 'Whisper'
-			rate: '130'
-			script: 'Take a deep breath in... hold it for three seconds... and slowly exhale. Let go of all tension and relax your mind.'
+			title:       ' Calm Whisper & Meditation'
+			category:    'Novelty'
+			voice:       'Whisper'
+			rate:        '130'
+			script:      'Take a deep breath in... hold it for three seconds... and slowly exhale. Let go of all tension and relax your mind.'
 			description: 'Soft whisper voice ideal for ambient soundscapes and sleep guides.'
 		},
 		SpeechRecipe{
-			title: ' Rocket Launch Countdown (10 to 1)'
-			category: 'Broadcast'
-			voice: 'Alex'
-			rate: '140'
-			script: 'Ten... Nine... Eight... Seven... Six... Five... Four... Three... Two... One... Liftoff! We have liftoff!'
+			title:       ' Rocket Launch Countdown (10 to 1)'
+			category:    'Broadcast'
+			voice:       'Alex'
+			rate:        '140'
+			script:      'Ten... Nine... Eight... Seven... Six... Five... Four... Three... Two... One... Liftoff! We have liftoff!'
 			description: 'Dramatic second-by-second countdown.'
 		},
 		SpeechRecipe{
-			title: ' Terminal Build Finished Chime'
-			category: 'Developer'
-			voice: 'Victoria'
-			rate: '180'
-			script: 'Build succeeded! Zero errors, zero warnings. All test suites passed in 3.4 seconds.'
+			title:       ' Terminal Build Finished Chime'
+			category:    'Developer'
+			voice:       'Victoria'
+			rate:        '180'
+			script:      'Build succeeded! Zero errors, zero warnings. All test suites passed in 3.4 seconds.'
 			description: 'Quick developer workstation build chime notification.'
 		},
 		SpeechRecipe{
-			title: ' Retro Arcade Computer'
-			category: 'Novelty'
-			voice: 'Trinoids'
-			rate: '150'
-			script: 'Insert coin to continue. Player one ready. High score recorded in mainframe memory.'
+			title:       ' Retro Arcade Computer'
+			category:    'Novelty'
+			voice:       'Trinoids'
+			rate:        '150'
+			script:      'Insert coin to continue. Player one ready. High score recorded in mainframe memory.'
 			description: 'Nostalgic 80s arcade synthesized speech.'
-		}
+		},
 	]
 }
 
 fn main() {
 	println('Starting SimpleGUI - Say Studio Pro (macOS Native Speech Synthesizer)...')
 
-	mut win := simplegui.new_simple_window('Say Studio Pro -- macOS Native Speech Synthesizer', 980, 780)
+	mut win := simplegui.new_simple_window('Say Studio Pro -- macOS Native Speech Synthesizer',
+		980, 780)
 	win.set_fullscreen(true)
 	win.restore_saved_theme()
 	win.set_padding(18)
@@ -238,14 +275,16 @@ fn main() {
 	win.end_row()
 
 	win.begin_row('row_rec_desc')
-	win.add_label('lbl_recipe_desc', 'Tip: Select a recipe above to instantly test synthesized voices and narrative pacing.')
+	win.add_label('lbl_recipe_desc',
+		'Tip: Select a recipe above to instantly test synthesized voices and narrative pacing.')
 	win.end_row()
 	win.end_group_box()
 
 	// -------------------------------------------------------------
 	// Script Editor Pane
 	// -------------------------------------------------------------
-	win.begin_group_box('grp_script_editor', 'Speech Script & Text Editor (Direct Synthesizer Input)')
+	win.begin_group_box('grp_script_editor',
+		'Speech Script & Text Editor (Direct Synthesizer Input)')
 	default_script := 'Welcome to SimpleGUI Say Studio Pro! You can synthesize natural sounding voices, tune speech rates, and export voiceovers directly to high-quality audio files.'
 	win.add_textarea('txt_script', default_script)
 	win.set_control_height('txt_script', 140)
@@ -270,10 +309,12 @@ fn main() {
 	win.end_group_box()
 
 	win.begin_row('row_stats')
-	win.add_label('lbl_stats', 'Status: Ready  |  Words: 24  |  Characters: 153  |  Estimated Time: ~8.2s')
+	win.add_label('lbl_stats',
+		'Status: Ready  |  Words: 24  |  Characters: 153  |  Estimated Time: ~8.2s')
 	win.end_row()
 
-	win.append_console('say_console', ' Say Studio Pro initialized. Found ${all_voices.len} installed native macOS voices.\n', 1)
+	win.append_console('say_console',
+		' Say Studio Pro initialized. Found ${all_voices.len} installed native macOS voices.\n', 1)
 
 	// Helper to extract clean voice name
 	get_selected_voice := fn (win simplegui.SimpleWindow) string {
@@ -293,7 +334,8 @@ fn main() {
 		wpm := if rate_val > 50.0 { rate_val } else { 175.0 }
 		est_sec := (f64(words) / wpm) * 60.0
 
-		win.set('lbl_stats', ' Status: Ready  |  Words: ${words}  |  Characters: ${chars}  |  Estimated Time: ~${est_sec:.1f}s')
+		win.set('lbl_stats',
+			' Status: Ready  |  Words: ${words}  |  Characters: ${chars}  |  Estimated Time: ~${est_sec:.1f}s')
 	}
 
 	// -------------------------------------------------------------
@@ -355,7 +397,8 @@ fn main() {
 		if path != '' && os.exists(path) {
 			content := os.read_file(path) or { '' }
 			w.set('txt_script', content)
-			w.append_console('say_console', ' Loaded document from: ${path} (${content.len} bytes)\n', 1)
+			w.append_console('say_console',
+				' Loaded document from: ${path} (${content.len} bytes)\n', 1)
 			w.toast('Loaded ${os.file_name(path)}')
 			update_stats(mut w)
 		}
@@ -386,7 +429,7 @@ fn main() {
 				w.set('txt_script', r.script)
 				w.set('txt_rate', r.rate)
 				w.set('lbl_recipe_desc', 'Tip: ' + r.description)
-				
+
 				// Select voice in dropdown
 				for v in all_voices {
 					if v.name == r.voice {
@@ -414,7 +457,8 @@ fn main() {
 		voice := get_selected_voice(w)
 		rate := w.get('txt_rate').trim_space()
 
-		w.append_console('say_console', ' Starting speech synthesis with voice "${voice}" (${rate} WPM)...\n', 1)
+		w.append_console('say_console',
+			' Starting speech synthesis with voice "${voice}" (${rate} WPM)...\n', 1)
 		w.set_status('Speaking script aloud in background...')
 		w.toast('Synthesizing speech...')
 		update_stats(mut w)
@@ -439,11 +483,17 @@ fn main() {
 
 			w.run_on_main_thread(fn [res, elapsed_ms] (mut win_main simplegui.SimpleWindow) {
 				if res.exit_code == 0 {
-					win_main.append_console('say_console', ' Speech synthesis completed in ${elapsed_ms} ms.\n', 4)
+					win_main.append_console('say_console',
+						' Speech synthesis completed in ${elapsed_ms} ms.\n', 4)
 					win_main.set_status('Speech playback finished.')
 				} else {
-					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Speech synthesis command failed' }
-					win_main.append_console('say_console', ' Speech synthesis error:\n' + err_msg + '\n', 3)
+					err_msg := if res.output.trim_space() != '' {
+						res.output.trim_space()
+					} else {
+						'Speech synthesis command failed'
+					}
+					win_main.append_console('say_console', ' Speech synthesis error:\n' + err_msg +
+						'\n', 3)
 					win_main.set_status('Error during speech synthesis.')
 					win_main.toast('Speech synthesis error!')
 				}
@@ -459,7 +509,7 @@ fn main() {
 				w.set('txt_script', r.script)
 				w.set('txt_rate', r.rate)
 				w.set('lbl_recipe_desc', 'Tip: ' + r.description)
-				
+
 				for v in all_voices {
 					if v.name == r.voice {
 						desc := if v.description != '' { ' -- "${v.description}"' } else { '' }
@@ -473,7 +523,8 @@ fn main() {
 				rate := r.rate
 				script := r.script
 
-				w.append_console('say_console', ' Speaking recipe "${r.title}" (${voice}, ${rate} WPM)...\n', 1)
+				w.append_console('say_console',
+					' Speaking recipe "${r.title}" (${voice}, ${rate} WPM)...\n', 1)
 				w.set_status('Speaking recipe...')
 				w.toast('Synthesizing recipe...')
 
@@ -527,9 +578,13 @@ fn main() {
 		fmt_sel := w.get('dd_format')
 
 		mut ext := '.m4a'
-		if fmt_sel.contains('aiff') { ext = '.aiff' }
-		else if fmt_sel.contains('wav') { ext = '.wav' }
-		else if fmt_sel.contains('caf') { ext = '.caf' }
+		if fmt_sel.contains('aiff') {
+			ext = '.aiff'
+		} else if fmt_sel.contains('wav') {
+			ext = '.wav'
+		} else if fmt_sel.contains('caf') {
+			ext = '.caf'
+		}
 
 		mut final_out := out_path
 		if !final_out.ends_with(ext) {
@@ -561,12 +616,19 @@ fn main() {
 				if res.exit_code == 0 && os.exists(final_out) {
 					sz := os.file_size(final_out)
 					mb := f64(sz) / (1024.0 * 1024.0)
-					win_main.append_console('say_console', ' Audio file exported: ${final_out} (${mb:.2f} MB) in ${elapsed_ms} ms!\n', 4)
+					win_main.append_console('say_console',
+						' Audio file exported: ${final_out} (${mb:.2f} MB) in ${elapsed_ms} ms!\n',
+						4)
 					win_main.set_status('Audio file exported successfully.')
 					win_main.toast('Exported audio file (${mb:.2f} MB)!')
 				} else {
-					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'Audio export command failed' }
-					win_main.append_console('say_console', ' Audio export error:\n' + err_msg + '\n', 3)
+					err_msg := if res.output.trim_space() != '' {
+						res.output.trim_space()
+					} else {
+						'Audio export command failed'
+					}
+					win_main.append_console('say_console',
+						' Audio export error:\n' + err_msg + '\n', 3)
 					win_main.set_status('Error exporting audio.')
 					win_main.toast('Audio export failed!')
 				}

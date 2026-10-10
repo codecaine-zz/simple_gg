@@ -277,10 +277,8 @@ pub fn generate_totp(secret string, counter u64, digits int) !string {
 	}
 	digest := hmac.new(secret.bytes(), msg, vsha256.sum, vsha256.block_size)
 	offset := int(digest[digest.len - 1] & 0x0f)
-	bin_code := ((u32(digest[offset]) & 0x7f) << 24) |
-		((u32(digest[offset + 1]) & 0xff) << 16) |
-		((u32(digest[offset + 2]) & 0xff) << 8) |
-		(u32(digest[offset + 3]) & 0xff)
+	bin_code := ((u32(digest[offset]) & 0x7f) << 24) | ((u32(digest[offset + 1]) & 0xff) << 16) | ((u32(digest[
+		offset + 2]) & 0xff) << 8) | (u32(digest[offset + 3]) & 0xff)
 
 	mut mod := u64(1)
 	for _ in 0 .. digits {

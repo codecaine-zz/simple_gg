@@ -60,9 +60,7 @@ fn generate_icns_file(src_png string, out_icns_path string) (bool, string) {
 
 	temp_dir := os.join_path(os.temp_dir(), 'appbundler_${time.now().unix_milli()}')
 	iconset_dir := os.join_path(temp_dir, 'AppIcon.iconset')
-	os.mkdir_all(iconset_dir) or {
-		return false, 'Failed to create temp iconset directory: ${err}'
-	}
+	os.mkdir_all(iconset_dir) or { return false, 'Failed to create temp iconset directory: ${err}' }
 	defer {
 		os.rmdir_all(temp_dir) or {}
 	}
@@ -180,7 +178,7 @@ fn inspect_binary(bin_path string) string {
 	sb << 'Path         : ${bin_path}'
 	sz := os.file_size(bin_path)
 	sb << 'Size         : ${f64(sz) / 1024.0 / 1024.0:.2f} MB (${sz} bytes)'
-	
+
 	// File command check
 	file_res := os.execute('file ${os.quoted_path(bin_path)}')
 	if file_res.exit_code == 0 {
@@ -244,7 +242,8 @@ fn main() {
 	iconutil_ok := os.find_abs_path_of_executable('iconutil') or { '' } != ''
 	codesign_ok := os.find_abs_path_of_executable('codesign') or { '' } != ''
 
-	win.add_label('lbl_sys_status', 'Subsystems: sips [${sips_ok}] | iconutil [${iconutil_ok}] | codesign [${codesign_ok}]  |  Target: ${simplegui.get_platform_label()} Application (.app)')
+	win.add_label('lbl_sys_status',
+		'Subsystems: sips [${sips_ok}] | iconutil [${iconutil_ok}] | codesign [${codesign_ok}]  |  Target: ${simplegui.get_platform_label()} Application (.app)')
 
 	// 1. Source Binary Selection
 	win.begin_group_box('grp_binary_input', '1. Source Mach-O Executable / CLI Binary')
@@ -309,7 +308,8 @@ fn main() {
 	win.end_group_box()
 
 	// 3. Icon Selection & Assets
-	win.begin_group_box('grp_icon_settings', '3. Application Icon (.icns Generator & Preset Selector)')
+	win.begin_group_box('grp_icon_settings',
+		'3. Application Icon (.icns Generator & Preset Selector)')
 
 	win.begin_row('row_icon_preview_and_presets')
 	win.add_label('lbl_icon_preview_title', 'Icon Preview:')
@@ -360,7 +360,8 @@ fn main() {
 
 	// 5. Logs & Telemetry View
 	win.begin_group_box('grp_logs', '5. Bundler Activity & Diagnostic Console')
-	win.add_textarea('txt_bundler_log', 'Welcome to App Bundler Studio Pro!\n\n1. Select any Mach-O binary or CLI tool (e.g. from /usr/local/bin, /opt/homebrew/bin, or your project bin/ folder).\n2. Customize display name, bundle ID, icon, and categories.\n3. Click "Package macOS .app Bundle" to generate a fully compliant, self-contained macOS .app bundle with Retina iconset and Info.plist.\n')
+	win.add_textarea('txt_bundler_log',
+		'Welcome to App Bundler Studio Pro!\n\n1. Select any Mach-O binary or CLI tool (e.g. from /usr/local/bin, /opt/homebrew/bin, or your project bin/ folder).\n2. Customize display name, bundle ID, icon, and categories.\n3. Click "Package macOS .app Bundle" to generate a fully compliant, self-contained macOS .app bundle with Retina iconset and Info.plist.\n')
 	win.set_control_height('txt_bundler_log', 240)
 	win.end_group_box()
 
@@ -427,7 +428,8 @@ fn main() {
 	win.on_click('btn_inspect_bin', fn (mut w simplegui.SimpleWindow) {
 		bin_p := w.get_value('txt_bin_path').trim_space()
 		if bin_p == '' {
-			w.alert('No Binary Selected', 'Please enter or select a target Mach-O binary file first.')
+			w.alert('No Binary Selected',
+				'Please enter or select a target Mach-O binary file first.')
 			return
 		}
 		report := inspect_binary(bin_p)
@@ -503,8 +505,11 @@ fn main() {
 		high_dpi := w.get_checked('chk_high_dpi')
 		dark_mode := w.get_checked('chk_dark_mode')
 
-		plist := build_info_plist(app_name, exe_name, bundle_id, version, category, high_dpi, dark_mode)
-		w.set_value('txt_bundler_log', '======================================================================\nGenerated Info.plist Preview\n======================================================================\n' + plist)
+		plist := build_info_plist(app_name, exe_name, bundle_id, version, category, high_dpi,
+			dark_mode)
+		w.set_value('txt_bundler_log',
+			'======================================================================\nGenerated Info.plist Preview\n======================================================================\n' +
+			plist)
 		w.toast('Info.plist preview generated.')
 	})
 
@@ -518,7 +523,8 @@ fn main() {
 		high_dpi := w.get_checked('chk_high_dpi')
 		dark_mode := w.get_checked('chk_dark_mode')
 
-		plist := build_info_plist(app_name, exe_name, bundle_id, version, category, high_dpi, dark_mode)
+		plist := build_info_plist(app_name, exe_name, bundle_id, version, category, high_dpi,
+			dark_mode)
 		simplegui.clipboard_copy(plist)
 		w.toast('Info.plist copied to clipboard!')
 	})
@@ -547,7 +553,8 @@ fn main() {
 		ok, err_msg := generate_icns_file(resolved_icon, dest_icns)
 		if ok {
 			sz := os.file_size(dest_icns)
-			w.set_value('txt_bundler_log', '[SUCCESS] Successfully generated standalone .icns icon:\n   Path: ${dest_icns}\n   Size: ${f64(sz)/1024.0:.1f} KB\n')
+			w.set_value('txt_bundler_log',
+				'[SUCCESS] Successfully generated standalone .icns icon:\n   Path: ${dest_icns}\n   Size: ${f64(sz) / 1024.0:.1f} KB\n')
 			w.toast('ICNS icon generated!')
 		} else {
 			w.set_value('txt_bundler_log', '[ERROR] Failed to generate .icns icon:\n   ${err_msg}')
@@ -612,7 +619,8 @@ fn main() {
 		is_terminal_wrapper := w.get_checked('chk_terminal_wrapper')
 
 		if bin_path == '' {
-			w.alert('Validation Error', 'Please select or enter the path to the target Mach-O binary.')
+			w.alert('Validation Error',
+				'Please select or enter the path to the target Mach-O binary.')
 			return
 		}
 
@@ -630,7 +638,11 @@ fn main() {
 			exe_name = clean_alphanumeric(app_name)
 		}
 
-		resolved_out_dir := if os.is_abs_path(out_dir) { out_dir } else { os.join_path(os.getwd(), out_dir) }
+		resolved_out_dir := if os.is_abs_path(out_dir) {
+			out_dir
+		} else {
+			os.join_path(os.getwd(), out_dir)
+		}
 		os.mkdir_all(resolved_out_dir) or {
 			w.alert('Filesystem Error', 'Failed to create output directory: ${err}')
 			return
@@ -698,10 +710,10 @@ fn main() {
 			}
 			os.chmod(cli_bin, 0o755) or {}
 
-			wrapper_script := '#!/bin/bash
-DIR="$(cd "$(dirname "$0")/../Resources" && pwd)"
-osascript -e "tell application \\"Terminal\\" to do script \\"\'${cli_bin}\' ; exit\\""
-'
+			wrapper_script := "#!/bin/bash
+DIR=\"$(cd \"$(dirname \"$0\")/../Resources\" && pwd)\"
+osascript -e \"tell application \\\"Terminal\\\" to do script \\\"'${cli_bin}' ; exit\\\"\"
+"
 			os.write_file(target_bin, wrapper_script) or {
 				logs << '[ERROR] Failed to write wrapper script: ${err}'
 				w.set_value('txt_bundler_log', logs.join('\n'))
@@ -725,7 +737,8 @@ osascript -e "tell application \\"Terminal\\" to do script \\"\'${cli_bin}\' ; e
 		}
 
 		// 4. Generate Info.plist
-		plist_content := build_info_plist(app_name, exe_name, bundle_id, version, category, high_dpi, dark_mode)
+		plist_content := build_info_plist(app_name, exe_name, bundle_id, version, category,
+			high_dpi, dark_mode)
 		plist_path := os.join_path(contents_dir, 'Info.plist')
 		os.write_file(plist_path, plist_content) or {
 			logs << '[ERROR] Failed to write Info.plist: ${err}'
@@ -761,7 +774,7 @@ osascript -e "tell application \\"Terminal\\" to do script \\"\'${cli_bin}\' ; e
 				ok_icns, icns_err := generate_icns_file(icon_resolved, dest_icns)
 				if ok_icns {
 					icns_sz := os.file_size(dest_icns)
-					logs << '[SUCCESS] Compiled AppIcon.icns (${f64(icns_sz)/1024.0:.1f} KB)'
+					logs << '[SUCCESS] Compiled AppIcon.icns (${f64(icns_sz) / 1024.0:.1f} KB)'
 				} else {
 					logs << '[WARNING] Icon compilation warning: ${icns_err}'
 				}
@@ -795,7 +808,7 @@ osascript -e "tell application \\"Terminal\\" to do script \\"\'${cli_bin}\' ; e
 		logs << '----------------------------------------------------------------------'
 		logs << 'BUILD COMPLETE: ${app_name}.app'
 		logs << 'Total Time : ${elapsed.milliseconds()}ms (${elapsed.seconds():.2f}s)'
-		logs << 'Bundle Size: ${f64(total_size)/1024.0/1024.0:.2f} MB'
+		logs << 'Bundle Size: ${f64(total_size) / 1024.0 / 1024.0:.2f} MB'
 		logs << 'Location   : ${app_bundle}'
 		logs << '======================================================================'
 

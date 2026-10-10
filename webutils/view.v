@@ -517,7 +517,9 @@ pub fn compile(src string, opts CompileOptions) !&Template {
 	mut tp := TParser{
 		segs: segs
 	}
-	nodes, _ := tp.parse_block([], '', 0) or { return error('template "${opts.name}" ${err.msg()}') }
+	nodes, _ := tp.parse_block([], '', 0) or {
+		return error('template "${opts.name}" ${err.msg()}')
+	}
 	return &Template{
 		name:  opts.name
 		nodes: nodes
@@ -687,6 +689,7 @@ fn (mut r Renderer) eval(e Expr) !json2.Any {
 				}
 				else {}
 			}
+
 			a := r.eval(e.args[0])!
 			b := r.eval(e.args[1])!
 			return match e.name {
@@ -793,15 +796,18 @@ fn (mut r Renderer) render_nodes(nodes []TNode) ! {
 					string {
 						chars := iter.runes()
 						for i, ch in chars {
-							r.render_loop_item(n, json2.Any(i64(i)), json2.Any(ch.str()), i, chars.len)!
+							r.render_loop_item(n, json2.Any(i64(i)), json2.Any(ch.str()), i,
+								chars.len)!
 						}
 						count = chars.len
 					}
 					json2.Null {}
 					else {
-						return r.fail(n.line, 'cannot loop over ${type_label(iter)} (use range(n) for numbers)')
+						return r.fail(n.line,
+							'cannot loop over ${type_label(iter)} (use range(n) for numbers)')
 					}
 				}
+
 				if count == 0 {
 					r.render_nodes(n.else_body)!
 				}
@@ -832,7 +838,7 @@ pub struct ViewConfig {
 pub:
 	root        string = 'views' // directory holding templates; includes can never escape it
 	ext         string = '.html' // default extension (`render('index')` loads `index.html`)
-	cache       bool   = true  // cache compiled templates (disable during development for live reload)
+	cache       bool   = true    // cache compiled templates (disable during development for live reload)
 	strict      bool // error on undefined variables instead of rendering ''
 	trim_blocks bool = true             // drop lines that contain only a control tag
 	max_depth   int  = 32               // include nesting limit (stops recursive includes)

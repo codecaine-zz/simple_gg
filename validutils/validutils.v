@@ -65,8 +65,8 @@ fn validate_email_local_part(user string) bool {
 }
 
 fn is_domain_char(r rune) bool {
-	return (r >= `a` && r <= `z`) || (r >= `A` && r <= `Z`) || (r >= `0` && r <= `9`) || r == `.`
-		|| r == `-`
+	return (r >= `a` && r <= `z`) || (r >= `A` && r <= `Z`) || (r >= `0` && r <= `9`)
+		|| r == `.` || r == `-`
 }
 
 fn is_alnum_char(r rune) bool {
@@ -221,12 +221,10 @@ pub fn validate_json(s string) bool {
 	if trimmed.len == 0 {
 		return false
 	}
-	if !(trimmed.starts_with('{') && trimmed.ends_with('}'))
-		&& !(trimmed.starts_with('[') && trimmed.ends_with(']')) {
+	if !(trimmed.starts_with('{') && trimmed.ends_with('}')) && !(trimmed.starts_with('[')
+		&& trimmed.ends_with(']')) {
 		return false
 	}
-	_ = json2.decode[json2.Any](trimmed) or {
-		return false
-	}
+	_ = json2.decode[json2.Any](trimmed) or { return false }
 	return true
 }

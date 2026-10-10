@@ -42,11 +42,11 @@ fn main() {
 	}
 
 	app.print_kv({
-		'File Path': meta.path,
-		'File Size': '${meta.size_bytes} bytes',
-		'Total Lines': '${lines.len}',
-		'Word Count': '${words.len}',
-		'Permissions': if meta.is_readable { 'Readable' } else { 'Restricted' },
+		'File Path':   meta.path
+		'File Size':   '${meta.size_bytes} bytes'
+		'Total Lines': '${lines.len}'
+		'Word Count':  '${words.len}'
+		'Permissions': if meta.is_readable { 'Readable' } else { 'Restricted' }
 	})
 
 	if !app.get_flag_bool('stats') {

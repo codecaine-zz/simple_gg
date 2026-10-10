@@ -7,7 +7,8 @@ fn main() {
 	app.set_description('Subdomain Enumeration & Certificate Transparency Discovery CLI')
 
 	app.add_flag_string('domain', 'd', 'vlang.io', 'Target root domain for subdomain discovery')
-	app.add_flag_bool('probe', 'p', false, 'Probe active HTTP/HTTPS responsiveness on discovered subdomains')
+	app.add_flag_bool('probe', 'p', false,
+		'Probe active HTTP/HTTPS responsiveness on discovered subdomains')
 	app.add_flag_bool('interactive', 'x', false, 'Launch interactive subdomain finder')
 
 	app.parse_cli() or { return }
@@ -42,7 +43,8 @@ fn discover_subdomains(mut app simplecli.SimpleCli, domain string, probe_active 
 				entries := val.split('\\n')
 				for e in entries {
 					clean := e.trim_space()
-					if clean.ends_with(domain) && !subdomains.contains(clean) && !clean.contains('*') {
+					if clean.ends_with(domain) && !subdomains.contains(clean)
+						&& !clean.contains('*') {
 						subdomains << clean
 					}
 				}
@@ -68,7 +70,11 @@ fn discover_subdomains(mut app simplecli.SimpleCli, domain string, probe_active 
 		}
 		status := if probe_active {
 			is_up := app.ping_tcp_port(sub, 443, 800) || app.ping_tcp_port(sub, 80, 800)
-			if is_up { app.green('ONLINE') } else { app.dim('OFFLINE') }
+			if is_up {
+				app.green('ONLINE')
+			} else {
+				app.dim('OFFLINE')
+			}
 		} else {
 			app.cyan('DISCOVERED')
 		}
@@ -79,7 +85,8 @@ fn discover_subdomains(mut app simplecli.SimpleCli, domain string, probe_active 
 }
 
 fn run_interactive(mut app simplecli.SimpleCli) {
-	app.panel('Subdomain Discovery REPL', 'Find public subdomains via SSL/TLS Certificate Transparency logs.')
+	app.panel('Subdomain Discovery REPL',
+		'Find public subdomains via SSL/TLS Certificate Transparency logs.')
 	dom := app.prompt('Enter root domain name', 'github.com')
 	should_probe := app.confirm('Probe TCP HTTP/HTTPS responsiveness on discovered hosts?', true)
 	discover_subdomains(mut app, dom, should_probe)

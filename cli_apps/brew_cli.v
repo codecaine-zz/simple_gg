@@ -91,8 +91,8 @@ fn main() {
 	out, _ := app.exec_safe(brew_bin, ['list', '--formula'])
 	lines := out.split_into_lines().filter(it.len > 0)
 	app.print_kv({
-		'Homebrew Binary': brew_bin,
-		'Installed Formulae': '${lines.len} packages',
+		'Homebrew Binary':    brew_bin
+		'Installed Formulae': '${lines.len} packages'
 	})
 	app.println(app.dim('Tip: Use --search <name>, --info <pkg>, --outdated, or -x for interactive mode.'))
 }

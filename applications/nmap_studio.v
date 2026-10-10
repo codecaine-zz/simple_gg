@@ -47,11 +47,12 @@ fn main() {
 	})
 
 	nmap_path := get_nmap_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${nmap_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker')
+	win.add_label('lbl_engine_info',
+		'Engine: ${nmap_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker')
 
 	// Target & Scan Profile Scope
 	win.begin_group_box('grp_target', 'Target Specification & Scan Profiles')
-	
+
 	win.begin_row('row_target_input')
 	win.add_label('lbl_target', 'Target Host / CIDR:')
 	win.add_input('txt_target', 'scanme.nmap.org')
@@ -70,7 +71,7 @@ fn main() {
 		'5. Vulnerability Assessment (--script vuln)',
 		'6. SSL / TLS Certificate Check (--script ssl-cert)',
 		'7. Full 65,535 Ports Scan (-p-)',
-		'8. Fast SYN / TCP Connect Scan (-sT -T4)'
+		'8. Fast SYN / TCP Connect Scan (-sT -T4)',
 	], '2. Standard Service Version Scan (-sV)')
 	win.set_control_width('dd_scan_profile', 260)
 	win.end_row()
@@ -147,7 +148,8 @@ fn main() {
 	win.on_click('btn_start_scan', fn (mut w simplegui.SimpleWindow) {
 		target := w.get('txt_target').trim_space()
 		if target == '' {
-			w.alert('Target Required', 'Please enter a target host, IP, or network CIDR (e.g. scanme.nmap.org or 192.168.1.0/24).')
+			w.alert('Target Required',
+				'Please enter a target host, IP, or network CIDR (e.g. scanme.nmap.org or 192.168.1.0/24).')
 			return
 		}
 
@@ -196,7 +198,7 @@ fn main() {
 
 		args << target
 
-		w.append_console('nmap_console', ' Launching Nmap: nmap ${args.join(" ")}\n', 1)
+		w.append_console('nmap_console', ' Launching Nmap: nmap ${args.join(' ')}\n', 1)
 		w.set_status('Scanning target ${target} in background...')
 		w.toast('Port scan started...')
 
@@ -211,15 +213,25 @@ fn main() {
 
 				if res.exit_code == 0 {
 					win_main.set('txt_scan_results', out)
-					win_main.append_console('nmap_console', ' Scan completed for ${target} in ${elapsed_ms} ms.\n', 4)
-					win_main.set('lbl_stats', ' Stats: SUCCESS  |  Target: ${target}  |  Duration: ${elapsed_ms} ms')
+					win_main.append_console('nmap_console',
+						' Scan completed for ${target} in ${elapsed_ms} ms.\n', 4)
+					win_main.set('lbl_stats',
+						' Stats: SUCCESS  |  Target: ${target}  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Scan completed in ${elapsed_ms} ms.')
 					win_main.toast('Port scan finished successfully!')
 				} else {
-					err_msg := if out != '' { out } else { 'Nmap scan failed (Exit code ${res.exit_code}). Target unreachable or elevated privileges required.' }
-					win_main.set('txt_scan_results', '// [NMAP SCAN ERROR]\n// Target: ${target}\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
-					win_main.append_console('nmap_console', ' Nmap Error (Exit ${res.exit_code}):\n' + err_msg + '\n', 3)
-					win_main.set('lbl_stats', ' Stats: ERROR (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
+					err_msg := if out != '' {
+						out
+					} else {
+						'Nmap scan failed (Exit code ${res.exit_code}). Target unreachable or elevated privileges required.'
+					}
+					win_main.set('txt_scan_results',
+						'// [NMAP SCAN ERROR]\n// Target: ${target}\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+					win_main.append_console('nmap_console',
+
+						' Nmap Error (Exit ${res.exit_code}):\n' + err_msg + '\n', 3)
+					win_main.set('lbl_stats',
+						' Stats: ERROR (Exit ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('Nmap scan failed.')
 					win_main.toast('Nmap scan error!')
 				}

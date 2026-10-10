@@ -38,114 +38,114 @@ struct FdRecipe {
 fn get_all_fd_recipes() []FdRecipe {
 	return [
 		FdRecipe{
-			title: ' All Source Code Files (*.v, *.go, *.rs, *.py, *.js, *.ts)'
-			pattern: ''
-			ext: 'v,go,rs,py,js,ts,c,h'
-			file_type: 'f (Regular Files)'
+			title:       ' All Source Code Files (*.v, *.go, *.rs, *.py, *.js, *.ts)'
+			pattern:     ''
+			ext:         'v,go,rs,py,js,ts,c,h'
+			file_type:   'f (Regular Files)'
 			size_filter: ''
 			time_filter: ''
-			hidden: false
-			no_ignore: false
-			desc: 'Finds all programming source code files across project.'
+			hidden:      false
+			no_ignore:   false
+			desc:        'Finds all programming source code files across project.'
 		},
 		FdRecipe{
-			title: ' Large Files Exceeding 100MB (> 100M)'
-			pattern: ''
-			ext: ''
-			file_type: 'f (Regular Files)'
+			title:       ' Large Files Exceeding 100MB (> 100M)'
+			pattern:     ''
+			ext:         ''
+			file_type:   'f (Regular Files)'
 			size_filter: '+100M'
 			time_filter: ''
-			hidden: false
-			no_ignore: false
-			desc: 'Finds disk-heavy files larger than 100 Megabytes.'
+			hidden:      false
+			no_ignore:   false
+			desc:        'Finds disk-heavy files larger than 100 Megabytes.'
 		},
 		FdRecipe{
-			title: ' Modified in the Past 24 Hours (Recent Changes)'
-			pattern: ''
-			ext: ''
-			file_type: 'f (Regular Files)'
+			title:       ' Modified in the Past 24 Hours (Recent Changes)'
+			pattern:     ''
+			ext:         ''
+			file_type:   'f (Regular Files)'
 			size_filter: ''
 			time_filter: '1d'
-			hidden: false
-			no_ignore: false
-			desc: 'Finds any file modified within the last 24 hours.'
+			hidden:      false
+			no_ignore:   false
+			desc:        'Finds any file modified within the last 24 hours.'
 		},
 		FdRecipe{
-			title: ' Modified in the Past 7 Days (Recent Week)'
-			pattern: ''
-			ext: ''
-			file_type: 'f (Regular Files)'
+			title:       ' Modified in the Past 7 Days (Recent Week)'
+			pattern:     ''
+			ext:         ''
+			file_type:   'f (Regular Files)'
 			size_filter: ''
 			time_filter: '7d'
-			hidden: false
-			no_ignore: false
-			desc: 'Finds files modified in the past 7 days.'
+			hidden:      false
+			no_ignore:   false
+			desc:        'Finds files modified in the past 7 days.'
 		},
 		FdRecipe{
-			title: ' Empty Files & Folders (Size 0)'
-			pattern: ''
-			ext: ''
-			file_type: 'e (Empty Files/Dirs)'
+			title:       ' Empty Files & Folders (Size 0)'
+			pattern:     ''
+			ext:         ''
+			file_type:   'e (Empty Files/Dirs)'
 			size_filter: ''
 			time_filter: ''
-			hidden: false
-			no_ignore: false
-			desc: 'Finds zero-byte empty files and empty directories.'
+			hidden:      false
+			no_ignore:   false
+			desc:        'Finds zero-byte empty files and empty directories.'
 		},
 		FdRecipe{
-			title: ' Executable Binaries & Scripts (-t x)'
-			pattern: ''
-			ext: ''
-			file_type: 'x (Executables)'
+			title:       ' Executable Binaries & Scripts (-t x)'
+			pattern:     ''
+			ext:         ''
+			file_type:   'x (Executables)'
 			size_filter: ''
 			time_filter: ''
-			hidden: false
-			no_ignore: false
-			desc: 'Finds executable binaries and executable scripts.'
+			hidden:      false
+			no_ignore:   false
+			desc:        'Finds executable binaries and executable scripts.'
 		},
 		FdRecipe{
-			title: ' Media & Graphics Assets (PNG, JPG, WebP, MP4, GIF)'
-			pattern: ''
-			ext: 'png,jpg,jpeg,webp,gif,svg,mp4,mov,mkv'
-			file_type: 'f (Regular Files)'
+			title:       ' Media & Graphics Assets (PNG, JPG, WebP, MP4, GIF)'
+			pattern:     ''
+			ext:         'png,jpg,jpeg,webp,gif,svg,mp4,mov,mkv'
+			file_type:   'f (Regular Files)'
 			size_filter: ''
 			time_filter: ''
-			hidden: false
-			no_ignore: false
-			desc: 'Finds images, graphics, and video files.'
+			hidden:      false
+			no_ignore:   false
+			desc:        'Finds images, graphics, and video files.'
 		},
 		FdRecipe{
-			title: ' All Directories / Folders (-t d)'
-			pattern: ''
-			ext: ''
-			file_type: 'd (Directories Only)'
+			title:       ' All Directories / Folders (-t d)'
+			pattern:     ''
+			ext:         ''
+			file_type:   'd (Directories Only)'
 			size_filter: ''
 			time_filter: ''
-			hidden: false
-			no_ignore: false
-			desc: 'Finds only directory paths.'
+			hidden:      false
+			no_ignore:   false
+			desc:        'Finds only directory paths.'
 		},
 		FdRecipe{
-			title: ' Symbolic Links (-t l)'
-			pattern: ''
-			ext: ''
-			file_type: 'l (Symlinks)'
+			title:       ' Symbolic Links (-t l)'
+			pattern:     ''
+			ext:         ''
+			file_type:   'l (Symlinks)'
 			size_filter: ''
 			time_filter: ''
-			hidden: true
-			no_ignore: false
-			desc: 'Finds symbolic links across the filesystem.'
+			hidden:      true
+			no_ignore:   false
+			desc:        'Finds symbolic links across the filesystem.'
 		},
 		FdRecipe{
-			title: ' Temporary, Backup & Log Files (*.log, *.tmp, *.bak)'
-			pattern: ''
-			ext: 'log,tmp,bak,swp'
-			file_type: 'f (Regular Files)'
+			title:       ' Temporary, Backup & Log Files (*.log, *.tmp, *.bak)'
+			pattern:     ''
+			ext:         'log,tmp,bak,swp'
+			file_type:   'f (Regular Files)'
 			size_filter: ''
 			time_filter: ''
-			hidden: true
-			no_ignore: true
-			desc: 'Finds clutter, cache, and backup files including hidden.'
+			hidden:      true
+			no_ignore:   true
+			desc:        'Finds clutter, cache, and backup files including hidden.'
 		},
 	]
 }
@@ -174,7 +174,8 @@ fn main() {
 		w.toast('Theme changed to ${selected}')
 	})
 	fd_path := get_fd_bin()
-	win.add_label('lbl_engine_info', 'Engine: ${fd_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker (Zero UI Freezes)')
+	win.add_label('lbl_engine_info',
+		'Engine: ${fd_path}  |  Platform: ${simplegui.get_platform_label()}  |  Mode: Async Worker (Zero UI Freezes)')
 
 	all_recipes := get_all_fd_recipes()
 
@@ -182,7 +183,7 @@ fn main() {
 	// Search Target Path & Pattern
 	// -------------------------------------------------------------
 	win.begin_group_box('grp_search_scope', 'Search Scope & Target Criteria')
-	
+
 	win.begin_row('row_scope_1')
 	win.add_label('lbl_pattern', 'Search Pattern (Regex / Glob):')
 	win.add_input('txt_pattern', '')
@@ -199,7 +200,7 @@ fn main() {
 		'd (Directories Only)',
 		'l (Symlinks)',
 		'x (Executables)',
-		'e (Empty Files/Dirs)'
+		'e (Empty Files/Dirs)',
 	], 'f (Regular Files)')
 	win.set_control_width('dd_type', 160)
 	win.end_row()
@@ -219,7 +220,7 @@ fn main() {
 	// Filters & Preset Recipes
 	// -------------------------------------------------------------
 	win.begin_group_box('grp_filters', 'Advanced Filters & Search Recipes')
-	
+
 	mut recipe_titles := ['-- Select a Fast Search Recipe --']
 	for r in all_recipes {
 		recipe_titles << r.title
@@ -322,11 +323,17 @@ fn main() {
 			if is_follow { raw_args << '-L' }
 			if is_case_s { raw_args << '-s' }
 
-			if type_sel.starts_with('f') { raw_args << ['-t', 'f'] }
-			else if type_sel.starts_with('d') { raw_args << ['-t', 'd'] }
-			else if type_sel.starts_with('l') { raw_args << ['-t', 'l'] }
-			else if type_sel.starts_with('x') { raw_args << ['-t', 'x'] }
-			else if type_sel.starts_with('e') { raw_args << ['-t', 'e'] }
+			if type_sel.starts_with('f') {
+				raw_args << ['-t', 'f']
+			} else if type_sel.starts_with('d') {
+				raw_args << ['-t', 'd']
+			} else if type_sel.starts_with('l') {
+				raw_args << ['-t', 'l']
+			} else if type_sel.starts_with('x') {
+				raw_args << ['-t', 'x']
+			} else if type_sel.starts_with('e') {
+				raw_args << ['-t', 'e']
+			}
 
 			if ext_val != '' {
 				exts := ext_val.split(',')
@@ -370,19 +377,28 @@ fn main() {
 					count := if out_str != '' { out_str.split_into_lines().len } else { 0 }
 					if count > 0 {
 						win_main.set('txt_results', out_str)
-						win_main.set('lbl_stats', ' Stats: SUCCESS  |  Files Found: ${count}  |  Duration: ${elapsed_ms} ms')
+						win_main.set('lbl_stats',
+							' Stats: SUCCESS  |  Files Found: ${count}  |  Duration: ${elapsed_ms} ms')
 						win_main.set_status('Found ${count} matching files in ${elapsed_ms} ms.')
 						win_main.toast('Found ${count} files in ${elapsed_ms} ms!')
 					} else {
-						win_main.set('txt_results', '// No files matching the criteria were found in this directory.')
-						win_main.set('lbl_stats', ' Stats: NO MATCHES  |  Files Found: 0  |  Duration: ${elapsed_ms} ms')
+						win_main.set('txt_results',
+							'// No files matching the criteria were found in this directory.')
+						win_main.set('lbl_stats',
+							' Stats: NO MATCHES  |  Files Found: 0  |  Duration: ${elapsed_ms} ms')
 						win_main.set_status('No matching files found.')
 						win_main.toast('No files found.')
 					}
 				} else {
-					err_msg := if res.output.trim_space() != '' { res.output.trim_space() } else { 'fd command failed with exit code ${res.exit_code}. Check pattern or directory permissions.' }
-					win_main.set('txt_results', '// [FD SEARCH ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
-					win_main.set('lbl_stats', ' Stats: ERROR (Exit code ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
+					err_msg := if res.output.trim_space() != '' {
+						res.output.trim_space()
+					} else {
+						'fd command failed with exit code ${res.exit_code}. Check pattern or directory permissions.'
+					}
+					win_main.set('txt_results',
+						'// [FD SEARCH ERROR]\n// Exit Code: ${res.exit_code}\n\n${err_msg}\n')
+					win_main.set('lbl_stats',
+						' Stats: ERROR (Exit code ${res.exit_code})  |  Duration: ${elapsed_ms} ms')
 					win_main.set_status('FD search returned an error.')
 					win_main.toast('FD search error!')
 				}

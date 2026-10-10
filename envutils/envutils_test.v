@@ -135,9 +135,7 @@ fn test_advanced_features() {
 		'SERVER_HOST': '0.0.0.0'
 		'SERVER_PORT': '8080'
 		'APP_SECRET':  'secret #value with spaces'
-	}) or {
-		assert false
-	}
+	}) or { assert false }
 	loaded := parse_dotenv_content(os.read_file(tmp_path) or { '' })
 	assert loaded['SERVER_HOST'] == '0.0.0.0'
 	assert loaded['SERVER_PORT'] == '8080'

@@ -39,7 +39,7 @@ fn main() {
 
 fn run_interactive(mut app simplecli.SimpleCli) {
 	app.panel('Cut Column Extractor', 'Extract specified fields from delimited datasets.')
-	sample := "root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nuser:x:1000:1000:User:/home/user:/bin/zsh"
+	sample := 'root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nuser:x:1000:1000:User:/home/user:/bin/zsh'
 	app.info('Sample Data (delimiter: ":"):\n${sample}')
 	field := app.prompt('Enter field number to extract (1=username, 6=homedir, 7=shell)', '1')
 
