@@ -9,7 +9,7 @@ import crypto.md5 as vmd5
 import crypto.rand as crand
 import crypto.sha256 as vsha256
 import crypto.sha512 as vsha512
-import crypto.internal.subtle
+import crypto.subtle
 import encoding.base64
 import encoding.hex
 import hash.crc32
@@ -277,8 +277,7 @@ pub fn generate_totp(secret string, counter u64, digits int) !string {
 	}
 	digest := hmac.new(secret.bytes(), msg, vsha256.sum, vsha256.block_size)
 	offset := int(digest[digest.len - 1] & 0x0f)
-	bin_code := ((u32(digest[offset]) & 0x7f) << 24) | ((u32(digest[offset + 1]) & 0xff) << 16) | ((u32(digest[
-		offset + 2]) & 0xff) << 8) | (u32(digest[offset + 3]) & 0xff)
+	bin_code := ((u32(digest[offset]) & 0x7f) << 24) | ((u32(digest[offset + 1]) & 0xff) << 16) | ((u32(digest[offset + 2]) & 0xff) << 8) | (u32(digest[offset + 3]) & 0xff)
 
 	mut mod := u64(1)
 	for _ in 0 .. digits {

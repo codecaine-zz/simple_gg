@@ -33,3 +33,6 @@ modules/
 # Demo output directories
 .*_demo/
 
+# Temporary compiler cache directories
+.*.v3cc.*
+

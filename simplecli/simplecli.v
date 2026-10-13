@@ -521,8 +521,8 @@ pub fn (cli &SimpleCli) println(msg string) &SimpleCli {
 pub fn (cli &SimpleCli) trace(msg string) &SimpleCli {
 	cli.write_log('TRACE', msg)
 	if int(cli.log_level) <= int(LogLevel.trace) && !cli.silent_mode {
-		badge := cli.dim('[TRACE]')
-		println('${badge} ${msg}')
+		log_badge := cli.dim('[TRACE]')
+		println('${log_badge} ${msg}')
 	}
 	return cli
 }
@@ -531,8 +531,8 @@ pub fn (cli &SimpleCli) trace(msg string) &SimpleCli {
 pub fn (cli &SimpleCli) debug(msg string) &SimpleCli {
 	cli.write_log('DEBUG', msg)
 	if (cli.debug_mode || int(cli.log_level) <= int(LogLevel.debug)) && !cli.silent_mode {
-		badge := cli.magenta('[DEBUG]')
-		println('${badge} ${msg}')
+		log_badge := cli.magenta('[DEBUG]')
+		println('${log_badge} ${msg}')
 	}
 	return cli
 }
@@ -541,8 +541,8 @@ pub fn (cli &SimpleCli) debug(msg string) &SimpleCli {
 pub fn (cli &SimpleCli) info(msg string) &SimpleCli {
 	cli.write_log('INFO', msg)
 	if int(cli.log_level) <= int(LogLevel.info) && !cli.silent_mode {
-		badge := cli.cyan('[INFO]')
-		println('${badge} ${msg}')
+		log_badge := cli.cyan('[INFO]')
+		println('${log_badge} ${msg}')
 	}
 	return cli
 }
@@ -551,8 +551,8 @@ pub fn (cli &SimpleCli) info(msg string) &SimpleCli {
 pub fn (cli &SimpleCli) success(msg string) &SimpleCli {
 	cli.write_log('SUCCESS', msg)
 	if !cli.silent_mode {
-		badge := cli.green('[SUCCESS]')
-		println('${badge} ${msg}')
+		log_badge := cli.green('[SUCCESS]')
+		println('${log_badge} ${msg}')
 	}
 	return cli
 }
@@ -561,8 +561,8 @@ pub fn (cli &SimpleCli) success(msg string) &SimpleCli {
 pub fn (cli &SimpleCli) warn(msg string) &SimpleCli {
 	cli.write_log('WARN', msg)
 	if int(cli.log_level) <= int(LogLevel.warn) && !cli.silent_mode {
-		badge := cli.yellow('[WARNING]')
-		println('${badge} ${msg}')
+		log_badge := cli.yellow('[WARNING]')
+		println('${log_badge} ${msg}')
 	}
 	return cli
 }
@@ -570,8 +570,8 @@ pub fn (cli &SimpleCli) warn(msg string) &SimpleCli {
 // error logs an error message with a red badge to stderr (level: error).
 pub fn (cli &SimpleCli) error(msg string) &SimpleCli {
 	cli.write_log('ERROR', msg)
-	badge := cli.red('[ERROR]')
-	eprintln('${badge} ${msg}')
+	log_badge := cli.red('[ERROR]')
+	eprintln('${log_badge} ${msg}')
 	return cli
 }
 
@@ -584,8 +584,8 @@ pub fn (cli &SimpleCli) fatal(msg string) {
 // step prints a numbered or bulleted workflow step.
 pub fn (cli &SimpleCli) step(num int, title string) &SimpleCli {
 	if !cli.silent_mode {
-		badge := cli.cyan('[Step ${num}]')
-		println('\n${badge} ${cli.bold(title)}')
+		log_badge := cli.cyan('[Step ${num}]')
+		println('\n${log_badge} ${cli.bold(title)}')
 	}
 	return cli
 }
@@ -965,8 +965,7 @@ pub fn (cli &SimpleCli) diff_text(old_text string, new_text string) string {
 			b.write_string('  ${cli.green(line_num + pad + ' +')} ${cli.green(new_lines[i])}\n')
 		}
 	}
-	summary := '  ${cli.dim('───')} ${cli.green('+' + additions.str() + ' additions')}, ${cli.red(
-		'-' + deletions.str() + ' deletions')} ${cli.dim('───')}\n'
+	summary := '  ${cli.dim('───')} ${cli.green('+' + additions.str() + ' additions')}, ${cli.red('-' + deletions.str() + ' deletions')} ${cli.dim('───')}\n'
 	b.write_string(summary)
 	return b.str()
 }
@@ -1523,11 +1522,9 @@ pub fn (mut p Pipeline) run() bool {
 		step_dur := time.since(step_start).milliseconds()
 
 		if ok {
-			print('\r  ${p.cli.green('✓')} [${i + 1}/${p.steps.len}] ${step.name} ${p.cli.dim(
-				'(' + step_dur.str() + ' ms)')}\n')
+			print('\r  ${p.cli.green('✓')} [${i + 1}/${p.steps.len}] ${step.name} ${p.cli.dim('(' + step_dur.str() + ' ms)')}\n')
 		} else {
-			print('\r  ${p.cli.red('✖')} [${i + 1}/${p.steps.len}] ${step.name} ${p.cli.red('[FAILED]')} ${p.cli.dim(
-				'(' + step_dur.str() + ' ms)')}\n')
+			print('\r  ${p.cli.red('✖')} [${i + 1}/${p.steps.len}] ${step.name} ${p.cli.red('[FAILED]')} ${p.cli.dim('(' + step_dur.str() + ' ms)')}\n')
 			all_ok = false
 			break
 		}

@@ -23,8 +23,8 @@ fn test_rfc6901_examples() {
 	assert jc(pointer_get(d, '/c%d')!) == '2'
 	assert jc(pointer_get(d, '/e^f')!) == '3'
 	assert jc(pointer_get(d, '/g|h')!) == '4'
-	assert jc(pointer_get(d, '/i\\\\j')!) == '5'
-	assert jc(pointer_get(d, '/k\\"l')!) == '6'
+	assert jc(pointer_get(d, '/i\\j')!) == '5'
+	assert jc(pointer_get(d, '/k"l')!) == '6'
 	assert jc(pointer_get(d, '/ ')!) == '7'
 	assert jc(pointer_get(d, '/m~0n')!) == '8'
 	if _ := pointer_get(d, '/foo/2') {

@@ -81,7 +81,7 @@ This directory contains standalone, production-ready console applications, clien
 | **Numbat Units CLI** | [`numbat_cli.v`](numbat_cli.v) | Physical units & dimensional analysis solver | `v run cli_apps/numbat_cli.v --interactive` |
 | **Kalker Math CLI** | [`kalker_cli.v`](kalker_cli.v) | High-precision scientific math expression evaluator | `v run cli_apps/kalker_cli.v --interactive` |
 | **Qalc Studio CLI** | [`qalc_cli.v`](qalc_cli.v) | Qalculate! power calculator & unit converter | `v run cli_apps/qalc_cli.v --interactive` |
-| **Programmer Calc CLI**| [`calc_cli.v`](calc_cli.v) | HEX/DEC/OCT/BIN bitwise operations & endian | `v run cli_apps/calc_cli.v --interactive` |
+| **Programmer Calc CLI**| [`calc_cli.v`](calc_cli.v) | HEX/DEC/OCT/BIN conversions, bitwise engine, and telemetry | `v run cli_apps/calc_cli.v -n 255` |
 | **Statistics Studio CLI**| [`statistics_cli.v`](statistics_cli.v) | Central tendency, dispersion, RMS, std dev | `v run cli_apps/statistics_cli.v --interactive` |
 | **Graph Studio CLI** | [`graph_cli.v`](graph_cli.v) | Terminal ASCII bar & distribution visualizer | `v run cli_apps/graph_cli.v --interactive` |
 

@@ -4,7 +4,7 @@ import os
 import strconv
 import toml
 import tomlutils
-import json
+import json2
 
 fn toml_any_to_str(a toml.Any) string {
 	return match a {
@@ -89,7 +89,7 @@ pub fn (mut s ConfigStore) load_file(path string) ! {
 			s.sources[k] = 'file'
 		}
 	} else if path.ends_with('.json') {
-		raw_map := json.decode(map[string]string, content) or {
+		raw_map := json2.decode[map[string]string](content) or {
 			return error('failed to parse json config: ${err}')
 		}
 		for k, v in raw_map {

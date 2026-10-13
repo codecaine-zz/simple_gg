@@ -326,7 +326,7 @@ pub fn sanitize_filename(name string) string {
 	stem := (res.all_before('.')).to_upper()
 	if stem in ['CON', 'PRN', 'AUX', 'NUL']
 		|| (stem.len == 4 && (stem.starts_with('COM') || stem.starts_with('LPT')) && stem[3] >= `1`
-		&& stem[3] <= `9`) {
+			&& stem[3] <= `9`) {
 		res = '_' + res
 	}
 	if res.len > 255 {
@@ -375,9 +375,16 @@ pub fn exec_timeout(cmd string, timeout_ms int) ExecTimeoutResult {
 	mut out := strings.new_builder(256)
 	mut timed_out := false
 	for p.is_alive() {
+		mut got := false
 		if p.is_pending(.stdout) {
 			out.write_string(p.stdout_read())
-		} else {
+			got = true
+		}
+		if p.is_pending(.stderr) {
+			out.write_string(p.stderr_read())
+			got = true
+		}
+		if !got {
 			time.sleep(2 * time.millisecond)
 		}
 		if time.now() > deadline {
@@ -394,8 +401,16 @@ pub fn exec_timeout(cmd string, timeout_ms int) ExecTimeoutResult {
 			}
 			out.write_string(chunk)
 		}
+		for p.is_pending(.stderr) {
+			chunk := p.stderr_read()
+			if chunk.len == 0 {
+				break
+			}
+			out.write_string(chunk)
+		}
 	} else {
 		out.write_string(p.stdout_slurp())
+		out.write_string(p.stderr_slurp())
 	}
 	p.wait()
 	code := if timed_out { 124 } else { p.code }
